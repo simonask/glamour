@@ -1,0 +1,53 @@
+[package]
+name = "glamour"
+version = "0.1.0"
+edition = "2021"
+description = "Strongly typed linear algebra with glam"
+authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/simonask/glamour"
+keywords = ["gamedev", "math", "matrix", "vector", "quaternion"]
+categories = ["game-development", "mathematics", "graphics", "no-std"]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+glam = { version = "^0.20.3", default-features = false, features = ["bytemuck", "approx"] }
+bytemuck = { version = "^1.8", default-features = false }
+num-traits = {version = "^0.2", default-features = false }
+approx = "^0.5"
+
+[dependencies.serde]
+version = "^1.0"
+package = "serde"
+features = ["derive"]
+optional = true
+
+[dependencies.mint_crate]
+version = "^0.5"
+package = "mint"
+optional = true
+
+[features]
+default = ["std"]
+std = ["glam/std", "num-traits/std"]
+
+# Enable conversions to `mint` types
+mint = ["mint_crate", "glam/mint"]
+
+# Required for compiling without `std`.
+libm = ["glam/libm", "num-traits/libm"]
+
+[dev-dependencies]
+euclid = "^0.22"
+derive_more = "^0.99"
+bytemuck = { version = "^1.8", features = ["derive"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+criterion = { version = "^0.3", features = ["html_reports"] }
+
+[[bench]]
+name = "mat"
+harness = false
