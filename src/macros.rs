@@ -459,7 +459,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn cmpeq(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
-                self.to_raw().cmpeq(other.to_raw())
+                self.to_raw().cmpeq(other.to_raw()).into()
             }
 
             #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
@@ -467,7 +467,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn cmpne(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
-                self.to_raw().cmpne(other.to_raw())
+                self.to_raw().cmpne(other.to_raw()).into()
             }
 
             #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
@@ -475,7 +475,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn cmpge(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
-                self.to_raw().cmpge(other.to_raw())
+                self.to_raw().cmpge(other.to_raw()).into()
             }
 
             #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
@@ -483,7 +483,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn cmpgt(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
-                self.to_raw().cmpgt(other.to_raw())
+                self.to_raw().cmpgt(other.to_raw()).into()
             }
 
             #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
@@ -491,7 +491,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn cmple(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
-                self.to_raw().cmple(other.to_raw())
+                self.to_raw().cmple(other.to_raw()).into()
             }
 
             #[doc = "Return a mask with the result of a component-wise less-than comparison."]
@@ -499,7 +499,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn cmplt(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
-                self.to_raw().cmplt(other.to_raw())
+                self.to_raw().cmplt(other.to_raw()).into()
             }
 
             #[doc = "Minimum by component."]
@@ -539,7 +539,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn select(mask: $mask_ty, if_true: Self, if_false: Self) -> Self {
                 use crate::traits::SimdVec;
-                Self::from_raw(T::$vec_ty::select(mask, if_true.to_raw(), if_false.to_raw()))
+                Self::from_raw(T::$vec_ty::select(mask.into(), if_true.to_raw(), if_false.to_raw()))
             }
         }
 
@@ -574,7 +574,7 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn is_nan_mask(&self) -> $mask_ty {
                 use crate::traits::SimdVecFloat;
-                self.as_raw().is_nan_mask()
+                self.as_raw().is_nan_mask().into()
             }
 
             #[doc = "Round all components up."]

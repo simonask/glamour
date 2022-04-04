@@ -71,9 +71,9 @@ pub trait UnitTypes: Unit<Scalar = Self::UnitScalar> {
     /// Fundamental 2D vector type.
     type Vec2: SimdVec<2, Scalar = Self::Primitive, Mask = glam::BVec2>;
     /// Fundamental 2D vector type.
-    type Vec3: SimdVec<3, Scalar = Self::Primitive, Mask = glam::BVec3>;
+    type Vec3: SimdVec<3, Scalar = Self::Primitive, Mask = glam::BVec3A>;
     /// Fundamental 2D vector type.
-    type Vec4: SimdVec<4, Scalar = Self::Primitive, Mask = glam::BVec4>;
+    type Vec4: SimdVec<4, Scalar = Self::Primitive, Mask = glam::BVec4A>;
 }
 
 impl<T> UnitTypes for T

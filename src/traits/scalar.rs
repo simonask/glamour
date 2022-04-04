@@ -170,9 +170,9 @@ pub trait Primitive:
     /// 2D vector type
     type Vec2: SimdVec<2, Scalar = Self, Mask = glam::BVec2>;
     /// 3D vector type
-    type Vec3: SimdVec<3, Scalar = Self, Mask = glam::BVec3>;
+    type Vec3: SimdVec<3, Scalar = Self, Mask = glam::BVec3A>;
     /// 4D vector type
-    type Vec4: SimdVec<4, Scalar = Self, Mask = glam::BVec4>;
+    type Vec4: SimdVec<4, Scalar = Self, Mask = glam::BVec4A>;
 }
 
 impl Scalar for f32 {
@@ -253,9 +253,9 @@ pub trait ScalarVectors: Scalar {
     /// Fundamental 2D vector type.
     type Vec2: SimdVec<2, Scalar = Self::Primitive, Mask = glam::BVec2>;
     /// Fundamental 3D vector type.
-    type Vec3: SimdVec<3, Scalar = Self::Primitive, Mask = glam::BVec3>;
+    type Vec3: SimdVec<3, Scalar = Self::Primitive, Mask = glam::BVec3A>;
     /// Fundamental 4D vector type.
-    type Vec4: SimdVec<4, Scalar = Self::Primitive, Mask = glam::BVec4>;
+    type Vec4: SimdVec<4, Scalar = Self::Primitive, Mask = glam::BVec4A>;
 }
 
 impl<T> ScalarVectors for T

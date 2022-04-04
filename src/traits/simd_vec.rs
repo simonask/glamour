@@ -105,7 +105,7 @@ macro_rules! impl_base {
             [3]
             => $glam_ty
             { $x, $y, $z }
-            glam::BVec3
+            glam::BVec3A
         );
     };
     ($scalar:ty => $glam_ty:ty { $x:ident, $y:ident, $z:ident, $w:ident }) => {
@@ -115,7 +115,7 @@ macro_rules! impl_base {
             [4]
             => $glam_ty
             { $x, $y, $z, $w }
-            glam::BVec4
+            glam::BVec4A
         );
     };
     (@impl $scalar:ty [$dimensions:tt] => $glam_ty:ty { $($fields:ident),* } $mask:ty) => {
@@ -152,22 +152,22 @@ macro_rules! impl_base {
             }
 
             fn cmpeq(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpeq(self, other)
+                <$glam_ty>::cmpeq(self, other).into()
             }
             fn cmpne(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpne(self, other)
+                <$glam_ty>::cmpne(self, other).into()
             }
             fn cmpge(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpge(self, other)
+                <$glam_ty>::cmpge(self, other).into()
             }
             fn cmpgt(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpgt(self, other)
+                <$glam_ty>::cmpgt(self, other).into()
             }
             fn cmple(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmple(self, other)
+                <$glam_ty>::cmple(self, other).into()
             }
             fn cmplt(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmplt(self, other)
+                <$glam_ty>::cmplt(self, other).into()
             }
             fn clamp(self, min: Self, max: Self) -> Self {
                 <$glam_ty>::clamp(self, min, max)
@@ -239,7 +239,7 @@ macro_rules! impl_base_float {
                 <$glam_ty>::is_nan(self)
             }
             fn is_nan_mask(self) -> Self::Mask {
-                <$glam_ty>::is_nan_mask(self)
+                <$glam_ty>::is_nan_mask(self).into()
             }
             fn ceil(self) -> Self {
                 <$glam_ty>::ceil(self)
