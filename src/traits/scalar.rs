@@ -1,4 +1,4 @@
-use super::marker::ValueSemantics;
+use super::marker::{Serializable, ValueSemantics};
 use super::{SimdMatrix2, SimdMatrix3, SimdMatrix4, SimdVec, Unit};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
@@ -33,6 +33,7 @@ pub trait Scalar:
     // `Pod` as well.
     ValueSemantics
     + PartialOrd
+    + Serializable
 {
     /// The underlying primitive type of this scalar (`f32`, `f64`, `i32`, or
     /// `u32`).

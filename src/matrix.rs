@@ -24,6 +24,7 @@ use bytemuck::{cast, cast_mut, cast_ref, Pod, Zeroable};
 #[repr(C, align(16))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[allow(missing_docs)]
+#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix2<T> {
     pub m11: T,
     pub m12: T,
@@ -42,6 +43,7 @@ unsafe impl<T: Pod> Pod for Matrix2<T> {}
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[allow(missing_docs)]
+#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix3<T> {
     pub m11: T,
     pub m12: T,
@@ -65,6 +67,7 @@ unsafe impl<T: Pod> Pod for Matrix3<T> {}
 #[repr(C, align(16))]
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[allow(missing_docs)]
+#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix4<T> {
     pub m11: T,
     pub m12: T,

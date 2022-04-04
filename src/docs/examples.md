@@ -55,9 +55,19 @@ assert_eq!(world_vector, (100.0, 0.0, 0.0));
 ```rust
 use glamour::prelude::*;
 use derive_more::*;
+use serde::{Serialize, Deserialize};
 
 // Derive everything for our custom scalar to make it act as a primitive `f32`.
-#[derive(Debug, Copy, Clone, Default, bytemuck::Zeroable, bytemuck::Pod, PartialEq, PartialOrd, Add, AddAssign, Sub, SubAssign, Div, DivAssign, Mul, MulAssign)]
+#[derive(
+    // Must be bitwise compatible with `f32`.
+    bytemuck::Zeroable, bytemuck::Pod,
+    // Must act as a primitive value.
+    Debug, Copy, Clone, Default, PartialEq, PartialOrd,
+    // Must be serializable when "serde" is enabled.
+    Serialize, Deserialize,
+    // Should support arithmetic to be useful.
+    Add, AddAssign, Sub, SubAssign, Div, DivAssign, Mul, MulAssign
+)]
 #[repr(transparent)] // needed for bytemuck
 struct Degrees {
     pub degrees: f32,

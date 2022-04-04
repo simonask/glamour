@@ -22,7 +22,6 @@ approx = "^0.5"
 
 [dependencies.serde]
 version = "^1.0"
-package = "serde"
 features = ["derive"]
 optional = true
 
@@ -45,6 +44,7 @@ libm = ["glam/libm", "num-traits/libm"]
 euclid = "^0.22"
 derive_more = "^0.99"
 bytemuck = { version = "^1.8", features = ["derive"] }
+serde = { version = "^1.0", features = ["derive"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 criterion = { version = "^0.3", features = ["html_reports"] }
