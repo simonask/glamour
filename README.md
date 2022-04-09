@@ -154,3 +154,14 @@ This crate should be expected to incur an overhead of about a factor 2 compared
 to `glam` in debug builds. This may be alleviated in the future, but it seems
 that even `glam` itself does not go out of its way to perform well in debug
 builds.
+
+[Build Status]: https://github.com/simonask/glamour/actions/workflows/ci.yml/badge.svg
+[github-ci]: https://github.com/simonask/glamour/actions/workflows/ci.yml
+[Coverage Status]: https://coveralls.io/repos/github/simonask/glamour/badge.svg?branch=main
+[coveralls.io]: https://coveralls.io/github/simonask/glamour?branch=main
+[Latest Version]: https://img.shields.io/crates/v/glamour.svg
+[crates.io]: https://crates.io/crates/glamour/
+[docs]: https://docs.rs/glamour/badge.svg
+[docs.rs]: https://docs.rs/glamour/
+[Minimum Supported Rust Version]: https://img.shields.io/badge/Rust-1.56.1-blue?color=fc8d62&logo=rust
+[Rust 1.56]: https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1561-2021-11-01
