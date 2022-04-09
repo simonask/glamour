@@ -161,3 +161,51 @@ impl<T: crate::traits::UnitTypes> Size3<T> {
         T::Scalar::from_raw(self.width.to_raw() * self.height.to_raw() * self.depth.to_raw())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn area() {
+        let a: Size2<f32> = Size2 {
+            width: 2.0,
+            height: 3.0,
+        };
+        let b: Size2<i32> = Size2 {
+            width: 5,
+            height: 6,
+        };
+        let c: Size2<f64> = Size2 {
+            width: 100.0,
+            height: 300.0,
+        };
+
+        assert_eq!(a.area(), 6.0);
+        assert_eq!(b.area(), 30);
+        assert_eq!(c.area(), 30000.0);
+    }
+
+    #[test]
+    fn volume() {
+        let a: Size3<f32> = Size3 {
+            width: 2.0,
+            height: 3.0,
+            depth: 2.0,
+        };
+        let b: Size3<i32> = Size3 {
+            width: 5,
+            height: 6,
+            depth: 2,
+        };
+        let c: Size3<f64> = Size3 {
+            width: 100.0,
+            height: 300.0,
+            depth: 2.0,
+        };
+
+        assert_eq!(a.volume(), 12.0);
+        assert_eq!(b.volume(), 60);
+        assert_eq!(c.volume(), 60000.0);
+    }
+}
