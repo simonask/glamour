@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: rustup update --no-self-update ${{ matrix.toolchain }}
       - run: rustup default ${{ matrix.toolchain }}
-      - run: ./build_and_test_features.sh
+      - run: sh ./build_and_test_features.sh
         shell: bash
 
   test-wasm:
@@ -47,5 +47,5 @@ jobs:
       - name: Install
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      - run: ./build_and_test_wasm32_firefox.sh
-      - run: ./build_and_test_wasm32_chrome.sh
+      - run: sh ./build_and_test_wasm32_firefox.sh
+      - run: sh ./build_and_test_wasm32_chrome.sh
