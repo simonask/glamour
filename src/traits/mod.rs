@@ -82,14 +82,17 @@ pub trait Lerp<T> {
     ///
     /// `self` will be interpolated towards `other`, with progress indicated by
     /// `t`, where `t == 0.0` returns `self` and `t == 1.0` returns `other`.
+    #[must_use]
     fn lerp(self, other: Self, t: T) -> Self;
 }
 
 /// Computes the absolute value of `Self`.
 pub trait Abs {
     /// Computes the absolute value of `Self`.
+    #[must_use]
     fn abs(self) -> Self;
 
     /// Returns a vector with elements representing the sign of `self`.
+    #[must_use]
     fn signum(self) -> Self;
 }

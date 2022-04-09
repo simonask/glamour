@@ -79,6 +79,8 @@ macro_rules! forward_to_float_as_angle {
         $(#[$attr:meta])?
         fn $f:ident(self $(, $args:ident: $args_ty:ty)*) -> Angle<Self>) => {
         $(#[$attr])?
+        #[must_use]
+        #[inline]
         fn $f(self, $($args: $args_ty),*) -> Angle<Self> {
             Angle::from_radians(<Self as num_traits::Float>::$f(self $($args),*))
         }
@@ -177,6 +179,8 @@ macro_rules! forward_to_unit {
         $(#[$attr:meta])?
         fn $f:ident(self $(, $args:ident: $args_ty:ty)*) -> $ret:ty) => {
         $(#[$attr])*
+        #[must_use]
+        #[inline]
         pub fn $f(self, $($args: $args_ty),*) -> $ret {
             self.radians.$f($($args),*)
         }
@@ -188,6 +192,8 @@ macro_rules! forward_to_unit_as_self {
         $(#[$attr:meta])?
         fn $f:ident(self $(, $args:ident: $args_ty:ty)*) -> Self) => {
         $(#[$attr])*
+        #[must_use]
+        #[inline]
         pub fn $f(self,  $($args: $args_ty),*) -> Angle<T> {
             Angle::from_radians(self.radians.$f($($args.radians),*))
         }
@@ -196,6 +202,8 @@ macro_rules! forward_to_unit_as_self {
 
 impl<T: Float> Angle<T> {
     /// Angle from radians.
+    #[inline]
+    #[must_use]
     pub fn from_radians(radians: T) -> Self {
         Angle { radians }
     }
@@ -203,11 +211,15 @@ impl<T: Float> Angle<T> {
     /// Angle from degrees.
     ///
     /// Will be converted to radians internally.
+    #[inline]
+    #[must_use]
     pub fn from_degrees(degrees: T) -> Self {
         Self::from_radians(degrees.to_radians())
     }
 
     /// Get this angle in radians.
+    #[inline]
+    #[must_use]
     pub fn to_radians(self) -> T {
         self.radians
     }

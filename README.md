@@ -1,5 +1,9 @@
 # Strongly typed vector math with `glam`
 
+[![Build Status]][github-ci] [![Coverage Status]][coveralls.io]
+[![Latest Version]][crates.io] [![docs]][docs.rs]
+[![Minimum Supported Rust Version]][Rust 1.56]
+
 This crate uses [bytemuck][] to implement a zero-cost[^zero_cost] strongly typed
 interface on top of [glam][].
 

@@ -25,42 +25,52 @@ pub trait SimdMatrix:
     type Scalar: PrimitiveMatrices + Primitive + Float;
 
     /// Matrix with all elements set to zero.
+    #[must_use]
     fn zero() -> Self;
 
     /// Identity matrix.
+    #[must_use]
     fn identity() -> Self;
 
     /// Matrix with all NaNs.
+    #[must_use]
     fn nan() -> Self;
 
     /// True if any element is NaN.
+    #[must_use]
     fn is_nan(&self) -> bool;
 
     /// True if all elements are finite and non NaN.
+    #[must_use]
     fn is_finite(&self) -> bool;
 
     /// Transpose the matrix.
+    #[must_use]
     fn transpose(&self) -> Self;
 
     /// Invert the matrix.
     ///
     /// Note: If the matrix is not invertible, this returns an invalid matrix.
     /// See [`SimdMatrix::inverse_checked()`].
+    #[must_use]
     fn inverse(&self) -> Self;
 
     /// Matrix determinant.
     ///
     /// If the determinant is non-zero, the matrix is invertible.
+    #[must_use]
     fn determinant(&self) -> Self::Scalar;
 
     /// Check if the matrix is invertible. Default implementation returns
     /// `self.determinant() != 0.0`.
+    #[must_use]
     fn is_invertible(&self) -> bool {
         !self.determinant().is_zero()
     }
 
     /// If the matrix is invertible, return the inverted matrix, otherwise
     /// return `None`.
+    #[must_use]
     fn inverse_checked(&self) -> Option<Self> {
         if self.is_invertible() {
             Some(self.inverse())
