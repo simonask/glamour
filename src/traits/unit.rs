@@ -77,7 +77,7 @@ impl Unit for u32 {
 pub trait UnitTypes: Unit<Scalar = Self::UnitScalar> {
     /// `Self::Scalar` needed to define trait bounds on the associated type.
     type UnitScalar: Scalar<Primitive = Self::Primitive>;
-    /// Shorthand for `<Self::Scalar as Scalar::Primitive`.
+    /// Shorthand for `<Self::Scalar as Scalar>::Primitive`.
     type Primitive: Primitive;
 
     /// Fundamental 2D vector type.
