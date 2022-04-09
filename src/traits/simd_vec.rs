@@ -33,9 +33,13 @@ pub trait SimdVec<const D: usize>:
     /// Always one of [`glam::BVec2`], [`glam::BVec3`], or [`glam::BVec4`].
     type Mask;
 
+    #[must_use]
     fn zero() -> Self;
+    #[must_use]
     fn one() -> Self;
+    #[must_use]
     fn splat(scalar: Self::Scalar) -> Self;
+    #[must_use]
     fn get(&self, index: usize) -> Self::Scalar {
         self.as_ref()[index]
     }
@@ -43,6 +47,7 @@ pub trait SimdVec<const D: usize>:
         self.as_mut()[index] = value;
     }
     #[inline]
+    #[must_use]
     fn const_get<const N: usize>(&self) -> Self::Scalar {
         self.get(N)
     }
@@ -51,39 +56,64 @@ pub trait SimdVec<const D: usize>:
         self.set(N, value);
     }
 
+    #[must_use]
     fn cmpeq(self, other: Self) -> Self::Mask;
+    #[must_use]
     fn cmpne(self, other: Self) -> Self::Mask;
+    #[must_use]
     fn cmpge(self, other: Self) -> Self::Mask;
+    #[must_use]
     fn cmpgt(self, other: Self) -> Self::Mask;
+    #[must_use]
     fn cmple(self, other: Self) -> Self::Mask;
+    #[must_use]
     fn cmplt(self, other: Self) -> Self::Mask;
+    #[must_use]
     fn clamp(self, min: Self, max: Self) -> Self;
+    #[must_use]
     fn min(self, other: Self) -> Self;
+    #[must_use]
     fn max(self, other: Self) -> Self;
+    #[must_use]
     fn min_element(self) -> Self::Scalar;
+    #[must_use]
     fn max_element(self) -> Self::Scalar;
 
     #[must_use]
     fn select(mask: Self::Mask, if_true: Self, if_false: Self) -> Self;
 
+    #[must_use]
     fn dot(self, other: Self) -> Self::Scalar;
 }
 
 /// Implemented for `glam` vectors with floating-point scalars.
 #[allow(missing_docs)]
 pub trait SimdVecFloat<const D: usize>: SimdVec<D> {
+    #[must_use]
     fn nan() -> Self;
+    #[must_use]
     fn is_finite(self) -> bool;
+    #[must_use]
     fn is_nan(self) -> bool;
+    #[must_use]
     fn is_nan_mask(self) -> Self::Mask;
+    #[must_use]
     fn ceil(self) -> Self;
+    #[must_use]
     fn floor(self) -> Self;
+    #[must_use]
     fn round(self) -> Self;
+    #[must_use]
     fn normalize(self) -> Self;
+    #[must_use]
     fn length(self) -> Self::Scalar;
+    #[must_use]
     fn exp(self) -> Self;
+    #[must_use]
     fn powf(self, n: Self::Scalar) -> Self;
+    #[must_use]
     fn recip(self) -> Self;
+    #[must_use]
     fn mul_add(self, a: Self, b: Self) -> Self;
 }
 
