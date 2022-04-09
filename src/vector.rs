@@ -809,4 +809,68 @@ mod tests {
             assert_eq!(b, (0, 1, 1, 2));
         }
     }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn debug_type_name() {
+        extern crate alloc;
+
+        let untyped_i32: Vector2<i32> = Vector2 { x: 123, y: 456 };
+        assert_eq!(
+            alloc::format!("{:?}", untyped_i32),
+            "Vector2<i32> { x: 123, y: 456 }"
+        );
+        assert_eq!(
+            alloc::format!("{:#?}", untyped_i32),
+            r#"
+Vector2<i32> {
+    x: 123,
+    y: 456,
+}"#
+            .trim()
+        );
+
+        enum UnnamedUnit {}
+        impl Unit for UnnamedUnit {
+            type Scalar = i32;
+        }
+
+        let unnamed: Vector2<UnnamedUnit> = Vector2 { x: 123, y: 456 };
+        assert_eq!(
+            alloc::format!("{:?}", unnamed),
+            "Vector2 { x: 123, y: 456 }"
+        );
+        assert_eq!(
+            alloc::format!("{:#?}", unnamed),
+            r#"
+Vector2 {
+    x: 123,
+    y: 456,
+}"#
+            .trim()
+        );
+
+        enum CustomName {}
+        impl Unit for CustomName {
+            type Scalar = i32;
+            fn name() -> Option<&'static str> {
+                Some("Custom")
+            }
+        }
+
+        let custom: Vector2<CustomName> = Vector2 { x: 123, y: 456 };
+        assert_eq!(
+            alloc::format!("{:?}", custom),
+            "Vector2<Custom> { x: 123, y: 456 }"
+        );
+        assert_eq!(
+            alloc::format!("{:#?}", custom),
+            r#"
+Vector2<Custom> {
+    x: 123,
+    y: 456,
+}"#
+            .trim()
+        );
+    }
 }

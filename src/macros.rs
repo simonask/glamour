@@ -107,7 +107,14 @@ macro_rules! impl_common {
 
         impl<T: Unit> core::fmt::Debug for $base_type_name<T> {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                let mut d = f.debug_struct(stringify!($base_type_name));
+                f.write_str(stringify!($base_type_name))?;
+                if let Some(unit_name) = T::name() {
+                    use core::fmt::Write;
+                    f.write_char('<')?;
+                    f.write_str(unit_name)?;
+                    f.write_char('>')?
+                }
+                let mut d = f.debug_struct("");
                 $(
                     d.field(stringify!($fields), &self.$fields);
                 )*

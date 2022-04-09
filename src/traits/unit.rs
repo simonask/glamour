@@ -46,18 +46,30 @@ pub trait Unit: 'static {
 
 impl Unit for f32 {
     type Scalar = f32;
+    fn name() -> Option<&'static str> {
+        Some("f32")
+    }
 }
 
 impl Unit for f64 {
     type Scalar = f64;
+    fn name() -> Option<&'static str> {
+        Some("f64")
+    }
 }
 
 impl Unit for i32 {
     type Scalar = i32;
+    fn name() -> Option<&'static str> {
+        Some("i32")
+    }
 }
 
 impl Unit for u32 {
     type Scalar = u32;
+    fn name() -> Option<&'static str> {
+        Some("u32")
+    }
 }
 
 /// Shorthand to go from a `Unit` type to its associated primitives (through the
