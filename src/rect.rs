@@ -180,18 +180,20 @@ impl<T: UnitTypes> Rect<T> {
     #[inline]
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        !(self.size.width > T::Scalar::zero() && self.size.height > T::Scalar::zero())
-            || !self.origin.x.is_finite()
-            || !self.origin.y.is_finite()
+        !(self.size.width > T::Scalar::zero()
+            && self.size.height > T::Scalar::zero()
+            && self.origin.x.is_finite()
+            && self.origin.y.is_finite())
     }
 
     /// True if size is negative or NaN, or origin is NaN or infinity.
     #[inline]
     #[must_use]
     pub fn is_negative(&self) -> bool {
-        !(self.size.width >= T::Scalar::zero() && self.size.height >= T::Scalar::zero())
-            || !self.origin.x.is_finite()
-            || !self.origin.y.is_finite()
+        !(self.size.width >= T::Scalar::zero()
+            && self.size.height >= T::Scalar::zero()
+            && self.origin.x.is_finite()
+            && self.origin.y.is_finite())
     }
 
     /// True if the rect only contains finite and non-NaN coordinates.
@@ -278,7 +280,15 @@ impl<T: UnitTypes> Rect<T> {
         }
     }
 
-    #[doc = "Instantiate from tuple."]
+    /// Instantiate from tuple.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let r = Rect::<i32>::from_tuple((10, 10), (20, 20));
+    /// assert_eq!(r.origin, (10, 10));
+    /// assert_eq!(r.size, (20, 20));
+    /// ```
     #[inline]
     #[must_use]
     pub fn from_tuple<O, S>(tuple: (O, S)) -> Self
@@ -289,7 +299,23 @@ impl<T: UnitTypes> Rect<T> {
         Rect::from(tuple)
     }
 
-    #[doc = "Convert to tuple."]
+    /// Convert to tuple.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let r = Rect::<i32>::new(Point2 {
+    ///         x: 10,
+    ///         y: 10,
+    ///     },
+    ///     Size2 {
+    ///         width: 20,
+    ///         height: 20,
+    ///     });
+    /// let (origin, size) = r.to_tuple();
+    /// assert_eq!(origin, (10, 10));
+    /// assert_eq!(size, (20, 20));
+    /// ```
     #[inline]
     #[must_use]
     pub fn to_tuple(self) -> (Point2<T>, Size2<T>) {
