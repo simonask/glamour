@@ -139,6 +139,15 @@ pub trait Scalar:
         let primitive: T2::Primitive = num_traits::NumCast::from(primitive)?;
         Some(T2::from_raw(primitive))
     }
+
+    /// True if the value is finite (not infinity and not NaN).
+    /// 
+    /// This is always true for integers.
+    #[inline]
+    #[must_use]
+    fn is_finite(self) -> bool {
+        Primitive::is_finite(self.to_raw())
+    }
 }
 
 /// Mapping from primitive scalar type to `glam` vector types.
@@ -174,6 +183,12 @@ pub trait Primitive:
     type Vec3: SimdVec<3, Scalar = Self, Mask = glam::BVec3A>;
     /// 4D vector type
     type Vec4: SimdVec<4, Scalar = Self, Mask = glam::BVec4A>;
+
+    /// True if the value is finite (not infinity, not NaN).
+    ///
+    /// This is always true for integers.
+    #[must_use]
+    fn is_finite(self) -> bool;
 }
 
 impl Scalar for f32 {
@@ -183,6 +198,10 @@ impl Primitive for f32 {
     type Vec2 = glam::Vec2;
     type Vec3 = glam::Vec3;
     type Vec4 = glam::Vec4;
+
+    fn is_finite(self) -> bool {
+        <f32>::is_finite(self)
+    }
 }
 
 impl Scalar for f64 {
@@ -192,6 +211,10 @@ impl Primitive for f64 {
     type Vec2 = glam::DVec2;
     type Vec3 = glam::DVec3;
     type Vec4 = glam::DVec4;
+
+    fn is_finite(self) -> bool {
+        <f64>::is_finite(self)
+    }
 }
 
 impl Scalar for i32 {
@@ -201,6 +224,10 @@ impl Primitive for i32 {
     type Vec2 = glam::IVec2;
     type Vec3 = glam::IVec3;
     type Vec4 = glam::IVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
 }
 
 impl Scalar for u32 {
@@ -210,6 +237,10 @@ impl Primitive for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
 }
 
 /// Mapping from primitive scalar type to `glam` matrix types.

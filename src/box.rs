@@ -175,7 +175,7 @@ impl<T: Unit> Box2<T> {
         [self.min, top_right, self.max, bottom_left]
     }
 
-    /// True if the box is negative (i.e., any `min` coordinate is >= any `max`
+    /// True if the box is zero or negative (i.e., any `min` coordinate is >= any `max`
     /// coordinate).
     #[inline]
     #[must_use]
@@ -183,7 +183,7 @@ impl<T: Unit> Box2<T> {
         !(self.max.x > self.min.x && self.max.y > self.min.y)
     }
 
-    /// Returns true when `max.x < min.x || max.y < min.y`.
+    /// True when `max.x < min.x || max.y < min.y`.
     #[inline]
     #[must_use]
     pub fn is_negative(&self) -> bool {
@@ -323,7 +323,7 @@ impl<T: Unit> Intersection<Box2<T>> for Box2<T> {
     /// Boxes are considered to be intersecting when a corner is entirely inside
     /// the other box. Note that this is different from the implementation of
     /// `Contains`, which returns `true` for a point that is exactly on one of
-    /// the `min` coordinates.
+    /// the `max` coordinates.
     fn intersects(&self, other: &Box2<T>) -> bool {
         // If any of the corners is contained in the other box, there is an
         // intersection.
