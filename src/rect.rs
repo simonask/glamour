@@ -285,7 +285,7 @@ impl<T: UnitTypes> Rect<T> {
     /// #### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let r = Rect::<i32>::from_tuple((10, 10), (20, 20));
+    /// let r = Rect::<i32>::from_tuple(((10, 10), (20, 20)));
     /// assert_eq!(r.origin, (10, 10));
     /// assert_eq!(r.size, (20, 20));
     /// ```
