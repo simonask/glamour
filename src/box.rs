@@ -217,6 +217,7 @@ impl<T: Unit> Box2<T> {
 
     /// Translate `min` and `max` by vector.
     #[inline]
+    #[must_use]
     pub fn translate(self, by: Vector2<T>) -> Self {
         self + by
     }
