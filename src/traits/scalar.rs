@@ -166,6 +166,8 @@ pub trait Scalar:
 pub trait Primitive:
     Scalar<Primitive = Self>
     + Unit<Scalar = Self>
+    + core::fmt::Debug
+    + core::fmt::Display
     + Add<Self, Output = Self>
     + Sub<Self, Output = Self>
     + Mul<Self, Output = Self>
@@ -176,6 +178,10 @@ pub trait Primitive:
     + MulAssign<Self>
     + DivAssign<Self>
     + RemAssign<Self>
+    + Sized
+    + Send
+    + Sync
+    + 'static
 {
     /// 2D vector type
     type Vec2: SimdVec<2, Scalar = Self, Mask = glam::BVec2>;

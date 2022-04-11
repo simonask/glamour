@@ -9,10 +9,11 @@ use core::ops::Mul;
 
 use approx::AbsDiffEq;
 use bytemuck::{cast, Pod, Zeroable};
+use num_traits::Float;
 
 use crate::{
     traits::{PrimitiveMatrices, UnitTypes},
-    Angle, Matrix3, Matrix4, Point2, Point3, Scalar, Unit, Vector2, Vector3,
+    Angle, AngleConsts, Matrix3, Matrix4, Point2, Point3, Scalar, Unit, Vector2, Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
@@ -175,7 +176,7 @@ impl<Src, Dst> Transform2<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     /// Identity matrix.
     #[inline]
@@ -346,7 +347,7 @@ impl<Src, Dst> Transform2<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     /// Perform matrix multiplication such that `other`'s transformation applies
     /// after `self`.
@@ -408,7 +409,7 @@ where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar>,
     Dst2: UnitTypes<UnitScalar = Src::UnitScalar>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Transform2<Src, Dst2>;
 
@@ -424,7 +425,7 @@ where
     Src: Unit,
     Dst: Unit<Scalar = Src::Scalar>,
     Dst2: Unit<Scalar = Src::Scalar>,
-    <Src::Scalar as Scalar>::Primitive: PrimitiveMatrices,
+    <Src::Scalar as Scalar>::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Transform3<Src, Dst2>;
 
@@ -439,7 +440,7 @@ impl<Src, Dst> Transform3<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     /// Identity matrix.
     #[inline]
@@ -667,7 +668,7 @@ impl<Src, Dst> TransformMap<Point3<Src>> for Transform3<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Point3<Dst>;
 
@@ -681,7 +682,7 @@ impl<Src, Dst> TransformMap<Vector3<Src>> for Transform3<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Vector3<Dst>;
 
