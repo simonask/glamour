@@ -590,6 +590,15 @@ impl<T: Unit> Vector4<T> {
         }
     }
 
+    /// Horizontal maximum, taking `w` into account as well.
+    ///
+    /// See [`Vector4::max_element()`].
+    #[inline]
+    #[must_use]
+    pub fn max_element_w(self) -> T::Scalar {
+        self.x.max(self.y.max(self.z.max(self.w)))
+    }
+
     /// Select components of this vector and return a new vector containing
     /// those components.
     #[inline]
@@ -782,6 +791,35 @@ mod tests {
     }
 
     #[test]
+    fn nan() {
+        let v2 = Vec2::new(1.0, core::f32::NAN);
+        assert!(v2.is_nan());
+        assert!(!v2.is_finite());
+        assert_eq!(v2.is_nan_mask(), glam::BVec2::new(false, true));
+
+        let v3 = Vec3::new(1.0, core::f32::NAN, 3.0);
+        assert!(v3.is_nan());
+        assert!(!v3.is_finite());
+        assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
+
+        let v4 = Vec4::new(1.0, 2.0, core::f32::NAN, 4.0);
+        assert!(v4.is_nan());
+        assert!(!v4.is_finite());
+        assert_eq!(
+            v4.is_nan_mask(),
+            glam::BVec4::new(false, false, true, false)
+        );
+
+        assert!(Vec2::nan().is_nan());
+        assert!(Vec3::nan().is_nan());
+        assert!(Vec4::nan().is_nan());
+
+        // Replace NaNs with zeroes.
+        let v = Vec4::select(v4.is_nan_mask(), Vec4::zero(), v4);
+        assert_eq!(v, (1.0, 2.0, 0.0, 4.0));
+    }
+
+    #[test]
     fn swizzle2() {
         assert_eq!(Vec2::unit_x().swizzle::<1, 0>(), (0.0, 1.0));
         assert_eq!(
@@ -883,6 +921,97 @@ mod tests {
             assert_eq!(a, (2, 4, 6, 8));
             assert_eq!(b, (0, 1, 1, 2));
         }
+    }
+
+    #[test]
+    fn cmp() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = Vec4::new(4.0, 2.0, 1.0, 3.0);
+
+        let eq = a.cmpeq(b);
+        let ne = a.cmpne(b);
+        let lt = a.cmplt(b);
+        let le = a.cmple(b);
+        let gt = a.cmpgt(b);
+        let ge = a.cmpge(b);
+
+        assert_eq!(eq.as_ref(), &[false, true, false, false]);
+        assert_eq!(ne.as_ref(), &[true, false, true, true]);
+        assert_eq!(lt.as_ref(), &[true, false, false, false]);
+        assert_eq!(le.as_ref(), &[true, true, false, false]);
+        assert_eq!(gt.as_ref(), &[false, false, true, true]);
+        assert_eq!(ge.as_ref(), &[false, true, true, true]);
+
+        assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
+        assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
+        assert_eq!(a.min_element(), 1.0);
+        assert_eq!(a.max_element(), 3.0);
+        assert_eq!(a.max_element_w(), 4.0);
+    }
+
+    #[test]
+    fn clamp() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        assert_eq!(
+            a.clamp(Vec4::splat(2.0), Vec4::splat(3.5)),
+            Vec4::new(2.0, 2.0, 3.0, 3.5)
+        );
+
+        let b = IVec4::new(1, 2, 3, 5);
+        assert_eq!(b.clamp(IVec4::splat(2), IVec4::splat(4)), (2, 2, 3, 4));
+    }
+
+    #[test]
+    fn dot() {
+        let a = Vec3::new(1.0, 2.0, 3.0);
+        let b = Vec3::new(2.0, 3.0, 4.0);
+        assert_abs_diff_eq!(a.dot(b), 20.0);
+    }
+
+    #[test]
+    fn normalize() {
+        let a = Vec3::new(1.0, 1.0, 2.0);
+        let d = a.dot(a).sqrt();
+        let b = a / Vec3::splat(d);
+        assert_abs_diff_eq!(a.normalize(), b);
+    }
+
+    #[test]
+    fn exp() {
+        let a = Vec3::splat(1.0);
+        assert_eq!(a.exp(), Vec3::splat(1.0f32.exp()));
+    }
+
+    #[test]
+    fn powf() {
+        let a = Vec3::splat(2.0);
+        assert_eq!(a.powf(2.0), Vec3::splat(4.0));
+    }
+
+    #[test]
+    fn recip() {
+        let a = Vec3::splat(2.0);
+        assert_eq!(a.recip(), Vec3::splat(0.5));
+    }
+
+    #[test]
+    fn mul_add() {
+        let a = Vec3::new(1.0, 2.0, 3.0);
+        let b = Vec3::new(2.0, 3.0, 4.0);
+        let c = Vec3::new(3.0, 4.0, 5.0);
+        assert_eq!(a.mul_add(b, c), a * b + c);
+    }
+
+    #[test]
+    fn abs() {
+        let a = Vec3::new(1.0, -2.0, -3.0);
+        assert_eq!(a.abs(), (1.0, 2.0, 3.0));
+    }
+
+    #[test]
+    fn signum() {
+        let a = Vec3::new(1.0, -2.0, -3.0);
+        assert_eq!(a.signum(), (1.0, -1.0, -1.0));
     }
 
     #[cfg(feature = "std")]

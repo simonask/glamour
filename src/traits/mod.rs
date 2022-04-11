@@ -59,10 +59,10 @@ pub trait Contains<T> {
 /// Coordinates exactly on the upper bound are _not_ considered to be
 /// intersecting.
 ///
-/// For example, each adjacent tile of a grid of [`Rect`]s or [`Box2`]s will not
-/// be considered intersecting, while [`Contains::contains()`] returns true for
-/// both tiles with coordinates that fall exactly on the upper bound of one
-/// tile.
+/// For example, each adjacent tile of a grid of [`crate::Rect`]s or
+/// [`crate::Box2`]s will not be considered intersecting, while
+/// [`Contains::contains()`] returns true for both tiles with coordinates that
+/// fall exactly on the upper bound of one tile.
 ///
 /// See also: [`Contains`], which is different in this regard.
 pub trait Intersection<T = Self> {

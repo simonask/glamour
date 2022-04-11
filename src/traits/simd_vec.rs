@@ -353,3 +353,68 @@ impl_abs!(glam::DVec4);
 impl_abs!(glam::IVec2);
 impl_abs!(glam::IVec3);
 impl_abs!(glam::IVec4);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_set() {
+        let v = glam::Vec4::new(0.0, 1.0, 2.0, 3.0);
+        assert_eq!(v.get(0), 0.0);
+        assert_eq!(v.get(1), 1.0);
+        assert_eq!(v.get(2), 2.0);
+        assert_eq!(v.get(3), 3.0);
+
+        let mut v = v;
+        v.set(0, 3.0);
+        v.set(1, 2.0);
+        v.set(2, 1.0);
+        v.set(3, 0.0);
+        assert_eq!(v.get(0), 3.0);
+        assert_eq!(v.get(1), 2.0);
+        assert_eq!(v.get(2), 1.0);
+        assert_eq!(v.get(3), 0.0);
+    }
+
+    #[test]
+    fn const_get_set() {
+        let v = glam::Vec4::new(0.0, 1.0, 2.0, 3.0);
+        assert_eq!(v.const_get::<0>(), 0.0);
+        assert_eq!(v.const_get::<1>(), 1.0);
+        assert_eq!(v.const_get::<2>(), 2.0);
+        assert_eq!(v.const_get::<3>(), 3.0);
+
+        let mut v = v;
+        v.const_set::<0>(3.0);
+        v.const_set::<1>(2.0);
+        v.const_set::<2>(1.0);
+        v.const_set::<3>(0.0);
+        assert_eq!(v.const_get::<0>(), 3.0);
+        assert_eq!(v.const_get::<1>(), 2.0);
+        assert_eq!(v.const_get::<2>(), 1.0);
+        assert_eq!(v.const_get::<3>(), 0.0);
+    }
+
+    #[test]
+    fn nan() {
+        let a = glam::Vec4::nan();
+        let b = glam::Vec4::NAN;
+
+        assert!(SimdVecFloat::is_nan(a));
+        assert!(SimdVecFloat::is_nan(b));
+
+        let a: glam::UVec4 = bytemuck::cast(a);
+        let b: glam::UVec4 = bytemuck::cast(b);
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn is_finite() {
+        let a = glam::Vec4::NAN;
+        assert!(!SimdVecFloat::<4>::is_finite(a));
+
+        let a = glam::DVec4::NAN;
+        assert!(!SimdVecFloat::<4>::is_finite(a));
+    }
+}

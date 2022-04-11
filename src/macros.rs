@@ -421,10 +421,8 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn splat(scalar: T::Scalar) -> Self {
-                $(
-                    let $fields = scalar;
-                )*
-                Self { $($fields),* }
+                use crate::traits::SimdVec;
+                Self::from_raw(T::$vec_ty::splat(scalar.to_raw()))
             }
 
             #[doc = "Component-wise clamp."]
@@ -534,6 +532,8 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Horizontal maximum (largest component)."]
+            #[doc = ""]
+            #[doc = "*NOTE:* For 4-dimensional vector types, this is `max(x, y, min(z, w))`."]
             #[inline]
             #[must_use]
             pub fn max_element(self) -> T::Scalar {
@@ -618,6 +618,14 @@ macro_rules! impl_simd_common {
             pub fn abs(self) -> Self {
                 use crate::traits::Abs;
                 Self::from_raw(self.to_raw().abs())
+            }
+
+            #[doc = "Return a copy where each component is either -1 or 1, depending on the sign."]
+            #[inline]
+            #[must_use]
+            pub fn signum(self) -> Self {
+                use crate::traits::Abs;
+                Self::from_raw(self.to_raw().signum())
             }
         }
 

@@ -327,3 +327,69 @@ where
     type Mat3 = <T::Primitive as PrimitiveMatrices>::Mat3;
     type Mat4 = <T::Primitive as PrimitiveMatrices>::Mat4;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_finite() {
+        assert!(Scalar::is_finite(1i32));
+        assert!(Scalar::is_finite(1u32));
+        assert!(Scalar::is_finite(1.0f32));
+        assert!(Scalar::is_finite(1.0f64));
+        assert!(!Scalar::is_finite(core::f32::NAN));
+        assert!(!Scalar::is_finite(core::f32::INFINITY));
+        assert!(!Scalar::is_finite(core::f32::NEG_INFINITY));
+        assert!(!Scalar::is_finite(core::f64::NAN));
+        assert!(!Scalar::is_finite(core::f64::INFINITY));
+        assert!(!Scalar::is_finite(core::f64::NEG_INFINITY));
+    }
+
+    #[test]
+    fn try_cast() {
+        assert_eq!(core::f32::NAN.try_cast::<i32>(), None);
+        assert_eq!(core::f32::INFINITY.try_cast::<i32>(), None);
+        assert_eq!(core::f32::NEG_INFINITY.try_cast::<i32>(), None);
+        assert_eq!(1.0f32.try_cast::<i32>(), Some(1));
+
+        assert_eq!(core::f32::NAN.try_cast::<u32>(), None);
+        assert_eq!(core::f32::INFINITY.try_cast::<u32>(), None);
+        assert_eq!(core::f32::NEG_INFINITY.try_cast::<u32>(), None);
+        assert_eq!(1.0f32.try_cast::<u32>(), Some(1));
+        assert_eq!((-1.0f32).try_cast::<u32>(), None);
+
+        assert_eq!(core::f64::NAN.try_cast::<i32>(), None);
+        assert_eq!(core::f64::INFINITY.try_cast::<i32>(), None);
+        assert_eq!(core::f64::NEG_INFINITY.try_cast::<i32>(), None);
+        assert_eq!(1.0f64.try_cast::<i32>(), Some(1));
+
+        assert_eq!(core::f64::NAN.try_cast::<u32>(), None);
+        assert_eq!(core::f64::INFINITY.try_cast::<u32>(), None);
+        assert_eq!(core::f64::NEG_INFINITY.try_cast::<u32>(), None);
+        assert_eq!(1.0f64.try_cast::<u32>(), Some(1));
+
+        assert!(core::f64::NAN.try_cast::<f32>().unwrap().is_nan());
+
+        assert_eq!(core::f64::INFINITY.try_cast(), Some(core::f32::INFINITY));
+        assert_eq!(
+            core::f64::NEG_INFINITY.try_cast(),
+            Some(core::f32::NEG_INFINITY)
+        );
+        assert_eq!(1.0f64.try_cast::<f32>(), Some(1.0));
+    }
+
+    #[test]
+    fn minmax() {
+        assert_eq!(Scalar::min(1.0, 2.0), 1.0);
+        assert_eq!(Scalar::max(1.0, 2.0), 2.0);
+    }
+
+    #[test]
+    fn two() {
+        assert_eq!(f32::two(), 2.0f32);
+        assert_eq!(f64::two(), 2.0f64);
+        assert_eq!(i32::two(), 2i32);
+        assert_eq!(u32::two(), 2u32);
+    }
+}

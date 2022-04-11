@@ -51,7 +51,7 @@ pub trait SimdMatrix:
     /// Invert the matrix.
     ///
     /// Note: If the matrix is not invertible, this returns an invalid matrix.
-    /// See [`SimdMatrix::inverse_checked()`].
+    /// See [`SimdMatrix::inverse()`].
     #[must_use]
     fn inverse_unchecked(&self) -> Self;
 
