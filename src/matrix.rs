@@ -179,6 +179,13 @@ macro_rules! impl_matrix {
                 $axis_vector_ty::from_raw(self.as_raw().col(index))
             }
 
+            #[doc = "Get mutable reference to column vector at `index`."]
+            #[inline]
+            #[must_use]
+            pub fn col_mut(&mut self, index: usize) -> &mut $axis_vector_ty<T> {
+                &mut self.as_cols_mut()[index]
+            }
+
             #[doc = "Get row vector at `index`."]
             #[inline]
             #[must_use]
@@ -198,6 +205,20 @@ macro_rules! impl_matrix {
             #[must_use]
             pub fn to_rows(&self) -> [$axis_vector_ty<T>; $dimensions] {
                 bytemuck::cast(self.as_raw().to_rows())
+            }
+
+            #[doc = "Get column vectors as slice."]
+            #[inline]
+            #[must_use]
+            pub fn as_cols(&self) -> &[$axis_vector_ty<T>; $dimensions] {
+                bytemuck::cast_ref(self)
+            }
+
+            #[doc = "Get column vectors as slice."]
+            #[inline]
+            #[must_use]
+            pub fn as_cols_mut(&mut self) -> &mut [$axis_vector_ty<T>; $dimensions] {
+                bytemuck::cast_mut(self)
             }
 
             #[doc = "Matrix determinant."]
@@ -1305,6 +1326,37 @@ mod tests {
     }
 
     #[test]
+    fn col_mut() {
+        let mut m2 = Mat2::identity();
+        let mut m3 = Mat3::identity();
+        let mut m4 = Mat4::identity();
+        let mut dm2 = DMat2::identity();
+        let mut dm3 = DMat3::identity();
+        let mut dm4 = DMat4::identity();
+
+        let _: &[Vec2; 2] = m2.as_cols();
+        let _: &[Vec3; 3] = m3.as_cols();
+        let _: &[Vec4; 4] = m4.as_cols();
+        let _: &[DVec2; 2] = dm2.as_cols();
+        let _: &[DVec3; 3] = dm3.as_cols();
+        let _: &[DVec4; 4] = dm4.as_cols();
+
+        m2.col_mut(0).set(1, 2.0);
+        m3.col_mut(0).set(1, 2.0);
+        m4.col_mut(0).set(1, 2.0);
+        dm2.col_mut(0).set(1, 2.0);
+        dm3.col_mut(0).set(1, 2.0);
+        dm4.col_mut(0).set(1, 2.0);
+
+        assert_eq!(m2.col(0), (1.0, 2.0));
+        assert_eq!(m3.col(0), (1.0, 2.0, 0.0));
+        assert_eq!(m4.col(0), (1.0, 2.0, 0.0, 0.0));
+        assert_eq!(dm2.col(0), (1.0, 2.0));
+        assert_eq!(dm3.col(0), (1.0, 2.0, 0.0));
+        assert_eq!(dm4.col(0), (1.0, 2.0, 0.0, 0.0));
+    }
+
+    #[test]
     fn equality() {
         let m2 = Mat2::identity();
         assert_eq!(m2, m2);
@@ -1386,6 +1438,16 @@ mod tests {
     }
 
     #[test]
+    fn determinant() {
+        assert_eq!(Mat2::identity().determinant(), 1.0);
+        assert_eq!(Mat3::identity().determinant(), 1.0);
+        assert_eq!(Mat4::identity().determinant(), 1.0);
+        assert_eq!(DMat2::identity().determinant(), 1.0);
+        assert_eq!(DMat3::identity().determinant(), 1.0);
+        assert_eq!(DMat4::identity().determinant(), 1.0);
+    }
+
+    #[test]
     fn nan() {
         let m2 = Mat2::nan();
         assert!(m2.col(0).is_nan());
@@ -1416,6 +1478,47 @@ mod tests {
         assert!(m4.col(1).is_nan());
         assert!(m4.col(2).is_nan());
         assert!(m4.col(3).is_nan());
+    }
+
+    #[test]
+    fn is_finite() {
+        assert!(Mat2::identity().is_finite());
+        assert!(Mat3::identity().is_finite());
+        assert!(Mat4::identity().is_finite());
+        assert!(DMat2::identity().is_finite());
+        assert!(DMat3::identity().is_finite());
+        assert!(DMat4::identity().is_finite());
+
+        assert!(!Mat2::nan().is_finite());
+        assert!(!Mat3::nan().is_finite());
+        assert!(!Mat4::nan().is_finite());
+        assert!(!DMat2::nan().is_finite());
+        assert!(!DMat3::nan().is_finite());
+        assert!(!DMat4::nan().is_finite());
+
+        assert!(!DMat4::with_rows([
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, f64::NAN),
+        ])
+        .is_finite());
+
+        assert!(!DMat4::with_rows([
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, f64::INFINITY),
+        ])
+        .is_finite());
+
+        assert!(!DMat4::with_rows([
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, f64::NEG_INFINITY),
+        ])
+        .is_finite());
     }
 
     #[test]

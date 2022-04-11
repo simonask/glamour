@@ -104,8 +104,6 @@ pub trait SimdMatrix2:
 
     /// Get column at `index`.
     fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec2;
-    /// Get a mutable reference to column at `index`.
-    fn col_mut(&mut self, index: usize) -> &mut <Self::Scalar as Primitive>::Vec2;
     /// Get row at `index`.
     fn row(&self, index: usize) -> <Self::Scalar as Primitive>::Vec2;
 
@@ -142,8 +140,6 @@ pub trait SimdMatrix3:
 
     /// Get column at `index`.
     fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec3;
-    /// Get a mutable reference to column at `index`.
-    fn col_mut(&mut self, index: usize) -> &mut <Self::Scalar as Primitive>::Vec3;
     /// Get row at `index`.
     fn row(&self, index: usize) -> <Self::Scalar as Primitive>::Vec3;
 
@@ -217,8 +213,7 @@ pub trait SimdMatrix4:
 
     /// Get column at `index`.
     fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec4;
-    /// Get a mutable reference to column at `index`.
-    fn col_mut(&mut self, index: usize) -> &mut <Self::Scalar as Primitive>::Vec4;
+
     /// Get row at `index`.
     fn row(&self, index: usize) -> <Self::Scalar as Primitive>::Vec4;
 
@@ -337,11 +332,6 @@ impl SimdMatrix2 for glam::Mat2 {
     }
 
     #[inline]
-    fn col_mut(&mut self, index: usize) -> &mut glam::Vec2 {
-        <glam::Mat2>::col_mut(self, index)
-    }
-
-    #[inline]
     fn row(&self, index: usize) -> glam::Vec2 {
         <glam::Mat2>::row(self, index)
     }
@@ -389,11 +379,6 @@ impl SimdMatrix2 for glam::DMat2 {
     }
 
     #[inline]
-    fn col_mut(&mut self, index: usize) -> &mut glam::DVec2 {
-        <glam::DMat2>::col_mut(self, index)
-    }
-
-    #[inline]
     fn row(&self, index: usize) -> glam::DVec2 {
         <glam::DMat2>::row(self, index)
     }
@@ -433,11 +418,6 @@ impl SimdMatrix3 for glam::Mat3 {
     #[inline]
     fn col(&self, index: usize) -> glam::Vec3 {
         <glam::Mat3>::col(self, index)
-    }
-
-    #[inline]
-    fn col_mut(&mut self, index: usize) -> &mut glam::Vec3 {
-        <glam::Mat3>::col_mut(self, index)
     }
 
     #[inline]
@@ -499,11 +479,6 @@ impl SimdMatrix3 for glam::DMat3 {
     #[inline]
     fn col(&self, index: usize) -> glam::DVec3 {
         <glam::DMat3>::col(self, index)
-    }
-
-    #[inline]
-    fn col_mut(&mut self, index: usize) -> &mut glam::DVec3 {
-        <glam::DMat3>::col_mut(self, index)
     }
 
     #[inline]
@@ -578,11 +553,6 @@ impl SimdMatrix4 for glam::Mat4 {
     }
 
     #[inline]
-    fn col_mut(&mut self, index: usize) -> &mut glam::Vec4 {
-        <glam::Mat4>::col_mut(self, index)
-    }
-
-    #[inline]
     fn row(&self, index: usize) -> glam::Vec4 {
         <glam::Mat4>::row(self, index)
     }
@@ -647,11 +617,6 @@ impl SimdMatrix4 for glam::DMat4 {
     #[inline]
     fn col(&self, index: usize) -> glam::DVec4 {
         <glam::DMat4>::col(self, index)
-    }
-
-    #[inline]
-    fn col_mut(&mut self, index: usize) -> &mut glam::DVec4 {
-        <glam::DMat4>::col_mut(self, index)
     }
 
     #[inline]
