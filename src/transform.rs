@@ -907,8 +907,8 @@ mod tests {
         let t2 = Transform2::<TestSrc, TestDst>::identity();
         let t3 = Transform3::<TestSrc, TestDst>::identity();
 
-        let s2 = alloc::format!("{t2:?}");
-        let s3 = alloc::format!("{t3:?}");
+        let s2 = alloc::format!("{:?}", t2);
+        let s3 = alloc::format!("{:?}", t3);
         assert_eq!(
             s2,
             alloc::format!("Transform2 {{ matrix: {:?} }}", t2.matrix)
