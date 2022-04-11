@@ -1179,6 +1179,67 @@ mod tests {
     }
 
     #[test]
+    fn from_scale_angle_translation() {
+        {
+            let scale = Vec2::new(2.0, 3.0);
+            let angle = Angle::from_degrees(90.0);
+            let translation = Vec2::new(4.0, 5.0);
+
+            assert_abs_diff_eq!(
+                Mat3::from_scale_angle_translation(scale, angle, translation),
+                Mat3::from_translation(translation)
+                    * Mat3::from_angle(angle)
+                    * Mat3::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+
+        {
+            let scale = DVec2::new(2.0, 3.0);
+            let angle = Angle::from_degrees(90.0);
+            let translation = DVec2::new(4.0, 5.0);
+
+            assert_abs_diff_eq!(
+                DMat3::from_scale_angle_translation(scale, angle, translation),
+                DMat3::from_translation(translation)
+                    * DMat3::from_angle(angle)
+                    * DMat3::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+
+        {
+            let scale = Vec3::new(2.0, 3.0, 4.0);
+            let axis = Vec3::unit_z();
+            let angle = Angle::from_degrees(90.0);
+            let translation = Vec3::new(5.0, 6.0, 7.0);
+
+            assert_abs_diff_eq!(
+                Mat4::from_scale_rotation_translation(scale, axis, angle, translation),
+                Mat4::from_translation(translation)
+                    * Mat4::from_axis_angle(axis, angle)
+                    * Mat4::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+
+        {
+            let scale = DVec3::new(2.0, 3.0, 4.0);
+            let axis = DVec3::unit_z();
+            let angle = Angle::from_degrees(90.0);
+            let translation = DVec3::new(5.0, 6.0, 7.0);
+
+            assert_abs_diff_eq!(
+                DMat4::from_scale_rotation_translation(scale, axis, angle, translation),
+                DMat4::from_translation(translation)
+                    * DMat4::from_axis_angle(axis, angle)
+                    * DMat4::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+    }
+
+    #[test]
     fn to_cols() {
         assert_eq!(Mat2::identity().to_cols(), [(1.0, 0.0), (0.0, 1.0)]);
         assert_eq!(
