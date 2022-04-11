@@ -13,7 +13,7 @@ use crate::{
     traits::{PrimitiveMatrices, SimdMatrix, SimdMatrix2, SimdMatrix3, SimdMatrix4},
     Angle, Point2, Point3, Point4, Vector2, Vector3, Vector4,
 };
-use approx::{AbsDiffEq, RelativeEq};
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, cast_mut, cast_ref, Pod, Zeroable};
 
 /// 2x2 column-major matrix.
@@ -96,6 +96,13 @@ macro_rules! impl_matrix {
         where
             T: PrimitiveMatrices,
         {
+            #[doc = "Create zero matrix."]
+            #[inline]
+            #[must_use]
+            pub fn zero() -> Self {
+                Self::from_raw(T::$mat_name::zero())
+            }
+
             #[doc = "Create from column vectors."]
             #[inline]
             #[must_use]
@@ -739,9 +746,10 @@ impl_matrix!(Matrix2 <2> => Mat2 [Vector2, Vector2]);
 impl_matrix!(Matrix3 <3> => Mat3 [Vector3, Vector2]);
 impl_matrix!(Matrix4 <4> => Mat4 [Vector4, Vector3]);
 
-impl<T: AbsDiffEq> AbsDiffEq for Matrix2<T>
+impl<T> AbsDiffEq for Matrix2<T>
 where
-    T::Epsilon: Copy,
+    T: PrimitiveMatrices + AbsDiffEq,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -750,23 +758,18 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.m11.abs_diff_eq(&other.m11, epsilon)
-            && self.m12.abs_diff_eq(&other.m12, epsilon)
-            && self.m21.abs_diff_eq(&other.m21, epsilon)
-            && self.m22.abs_diff_eq(&other.m22, epsilon)
+        self.cols().abs_diff_eq(&other.cols(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.m11.abs_diff_ne(&other.m11, epsilon)
-            || self.m12.abs_diff_ne(&other.m12, epsilon)
-            || self.m21.abs_diff_ne(&other.m21, epsilon)
-            || self.m22.abs_diff_ne(&other.m22, epsilon)
+        self.cols().abs_diff_ne(&other.cols(), epsilon)
     }
 }
 
-impl<T: RelativeEq> RelativeEq for Matrix2<T>
+impl<T> RelativeEq for Matrix2<T>
 where
-    T::Epsilon: Copy,
+    T: PrimitiveMatrices + RelativeEq,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -778,10 +781,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.m11.relative_eq(&other.m11, epsilon, max_relative)
-            && self.m12.relative_eq(&other.m12, epsilon, max_relative)
-            && self.m21.relative_eq(&other.m21, epsilon, max_relative)
-            && self.m22.relative_eq(&other.m22, epsilon, max_relative)
+        self.cols()
+            .relative_eq(&other.cols(), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -790,16 +791,33 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.m11.relative_ne(&other.m11, epsilon, max_relative)
-            || self.m12.relative_ne(&other.m12, epsilon, max_relative)
-            || self.m21.relative_ne(&other.m21, epsilon, max_relative)
-            || self.m22.relative_ne(&other.m22, epsilon, max_relative)
+        self.cols()
+            .relative_ne(&other.cols(), epsilon, max_relative)
     }
 }
 
-impl<T: AbsDiffEq> AbsDiffEq for Matrix3<T>
+impl<T> UlpsEq for Matrix2<T>
 where
-    T::Epsilon: Copy,
+    T: PrimitiveMatrices + UlpsEq,
+    T::Epsilon: Clone,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.cols().ulps_eq(&other.cols(), epsilon, max_ulps)
+    }
+
+    fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.cols().ulps_ne(&other.cols(), epsilon, max_ulps)
+    }
+}
+
+impl<T> AbsDiffEq for Matrix3<T>
+where
+    T: PrimitiveMatrices + AbsDiffEq,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -808,33 +826,18 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.m11.abs_diff_eq(&other.m11, epsilon)
-            && self.m12.abs_diff_eq(&other.m12, epsilon)
-            && self.m13.abs_diff_eq(&other.m13, epsilon)
-            && self.m21.abs_diff_eq(&other.m21, epsilon)
-            && self.m22.abs_diff_eq(&other.m22, epsilon)
-            && self.m23.abs_diff_eq(&other.m23, epsilon)
-            && self.m31.abs_diff_eq(&other.m31, epsilon)
-            && self.m32.abs_diff_eq(&other.m32, epsilon)
-            && self.m33.abs_diff_eq(&other.m33, epsilon)
+        self.cols().abs_diff_eq(&other.cols(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.m11.abs_diff_ne(&other.m11, epsilon)
-            || self.m12.abs_diff_ne(&other.m12, epsilon)
-            || self.m13.abs_diff_ne(&other.m13, epsilon)
-            || self.m21.abs_diff_ne(&other.m21, epsilon)
-            || self.m22.abs_diff_ne(&other.m22, epsilon)
-            || self.m23.abs_diff_ne(&other.m23, epsilon)
-            || self.m31.abs_diff_ne(&other.m31, epsilon)
-            || self.m32.abs_diff_ne(&other.m32, epsilon)
-            || self.m33.abs_diff_ne(&other.m33, epsilon)
+        self.cols().abs_diff_ne(&other.cols(), epsilon)
     }
 }
 
-impl<T: RelativeEq> RelativeEq for Matrix3<T>
+impl<T> RelativeEq for Matrix3<T>
 where
-    T::Epsilon: Copy,
+    T: PrimitiveMatrices + RelativeEq,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -846,15 +849,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.m11.relative_eq(&other.m11, epsilon, max_relative)
-            && self.m12.relative_eq(&other.m12, epsilon, max_relative)
-            && self.m13.relative_eq(&other.m13, epsilon, max_relative)
-            && self.m21.relative_eq(&other.m21, epsilon, max_relative)
-            && self.m22.relative_eq(&other.m22, epsilon, max_relative)
-            && self.m23.relative_eq(&other.m23, epsilon, max_relative)
-            && self.m31.relative_eq(&other.m31, epsilon, max_relative)
-            && self.m32.relative_eq(&other.m32, epsilon, max_relative)
-            && self.m33.relative_eq(&other.m33, epsilon, max_relative)
+        self.cols()
+            .relative_eq(&other.cols(), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -863,21 +859,33 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.m11.relative_ne(&other.m11, epsilon, max_relative)
-            || self.m12.relative_ne(&other.m12, epsilon, max_relative)
-            || self.m13.relative_ne(&other.m13, epsilon, max_relative)
-            || self.m21.relative_ne(&other.m21, epsilon, max_relative)
-            || self.m22.relative_ne(&other.m22, epsilon, max_relative)
-            || self.m23.relative_ne(&other.m23, epsilon, max_relative)
-            || self.m31.relative_ne(&other.m31, epsilon, max_relative)
-            || self.m32.relative_ne(&other.m32, epsilon, max_relative)
-            || self.m33.relative_ne(&other.m33, epsilon, max_relative)
+        self.cols()
+            .relative_ne(&other.cols(), epsilon, max_relative)
     }
 }
 
-impl<T: AbsDiffEq> AbsDiffEq for Matrix4<T>
+impl<T> UlpsEq for Matrix3<T>
 where
-    T::Epsilon: Copy,
+    T: PrimitiveMatrices + UlpsEq,
+    T::Epsilon: Clone,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.cols().ulps_eq(&other.cols(), epsilon, max_ulps)
+    }
+
+    fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.cols().ulps_ne(&other.cols(), epsilon, max_ulps)
+    }
+}
+
+impl<T> AbsDiffEq for Matrix4<T>
+where
+    T: AbsDiffEq + PrimitiveMatrices,
+    T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
 
@@ -886,47 +894,18 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.m11.abs_diff_eq(&other.m11, epsilon)
-            && self.m12.abs_diff_eq(&other.m12, epsilon)
-            && self.m13.abs_diff_eq(&other.m13, epsilon)
-            && self.m14.abs_diff_eq(&other.m14, epsilon)
-            && self.m21.abs_diff_eq(&other.m21, epsilon)
-            && self.m22.abs_diff_eq(&other.m22, epsilon)
-            && self.m23.abs_diff_eq(&other.m23, epsilon)
-            && self.m24.abs_diff_eq(&other.m24, epsilon)
-            && self.m31.abs_diff_eq(&other.m31, epsilon)
-            && self.m32.abs_diff_eq(&other.m32, epsilon)
-            && self.m33.abs_diff_eq(&other.m33, epsilon)
-            && self.m34.abs_diff_eq(&other.m34, epsilon)
-            && self.m41.abs_diff_eq(&other.m41, epsilon)
-            && self.m42.abs_diff_eq(&other.m42, epsilon)
-            && self.m43.abs_diff_eq(&other.m43, epsilon)
-            && self.m44.abs_diff_eq(&other.m44, epsilon)
+        self.cols().abs_diff_eq(&other.cols(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.m11.abs_diff_ne(&other.m11, epsilon)
-            || self.m12.abs_diff_ne(&other.m12, epsilon)
-            || self.m13.abs_diff_ne(&other.m13, epsilon)
-            || self.m14.abs_diff_ne(&other.m14, epsilon)
-            || self.m21.abs_diff_ne(&other.m21, epsilon)
-            || self.m22.abs_diff_ne(&other.m22, epsilon)
-            || self.m23.abs_diff_ne(&other.m23, epsilon)
-            || self.m24.abs_diff_ne(&other.m24, epsilon)
-            || self.m31.abs_diff_ne(&other.m31, epsilon)
-            || self.m32.abs_diff_ne(&other.m32, epsilon)
-            || self.m33.abs_diff_ne(&other.m33, epsilon)
-            || self.m34.abs_diff_ne(&other.m34, epsilon)
-            || self.m41.abs_diff_ne(&other.m41, epsilon)
-            || self.m42.abs_diff_ne(&other.m42, epsilon)
-            || self.m43.abs_diff_ne(&other.m43, epsilon)
-            || self.m44.abs_diff_ne(&other.m44, epsilon)
+        self.cols().abs_diff_ne(&other.cols(), epsilon)
     }
 }
 
-impl<T: RelativeEq> RelativeEq for Matrix4<T>
+impl<T> RelativeEq for Matrix4<T>
 where
-    T::Epsilon: Copy,
+    T: RelativeEq + PrimitiveMatrices,
+    T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -938,22 +917,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.m11.relative_eq(&other.m11, epsilon, max_relative)
-            && self.m12.relative_eq(&other.m12, epsilon, max_relative)
-            && self.m13.relative_eq(&other.m13, epsilon, max_relative)
-            && self.m14.relative_eq(&other.m14, epsilon, max_relative)
-            && self.m21.relative_eq(&other.m21, epsilon, max_relative)
-            && self.m22.relative_eq(&other.m22, epsilon, max_relative)
-            && self.m23.relative_eq(&other.m23, epsilon, max_relative)
-            && self.m24.relative_eq(&other.m24, epsilon, max_relative)
-            && self.m31.relative_eq(&other.m31, epsilon, max_relative)
-            && self.m32.relative_eq(&other.m32, epsilon, max_relative)
-            && self.m33.relative_eq(&other.m33, epsilon, max_relative)
-            && self.m34.relative_eq(&other.m34, epsilon, max_relative)
-            && self.m41.relative_eq(&other.m41, epsilon, max_relative)
-            && self.m42.relative_eq(&other.m42, epsilon, max_relative)
-            && self.m43.relative_eq(&other.m43, epsilon, max_relative)
-            && self.m44.relative_eq(&other.m44, epsilon, max_relative)
+        self.cols()
+            .relative_eq(&other.cols(), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -962,22 +927,26 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.m11.relative_ne(&other.m11, epsilon, max_relative)
-            || self.m12.relative_ne(&other.m12, epsilon, max_relative)
-            || self.m13.relative_ne(&other.m13, epsilon, max_relative)
-            || self.m14.relative_ne(&other.m14, epsilon, max_relative)
-            || self.m21.relative_ne(&other.m21, epsilon, max_relative)
-            || self.m22.relative_ne(&other.m22, epsilon, max_relative)
-            || self.m23.relative_ne(&other.m23, epsilon, max_relative)
-            || self.m24.relative_ne(&other.m24, epsilon, max_relative)
-            || self.m31.relative_ne(&other.m31, epsilon, max_relative)
-            || self.m32.relative_ne(&other.m32, epsilon, max_relative)
-            || self.m33.relative_ne(&other.m33, epsilon, max_relative)
-            || self.m34.relative_ne(&other.m34, epsilon, max_relative)
-            || self.m41.relative_ne(&other.m41, epsilon, max_relative)
-            || self.m42.relative_ne(&other.m42, epsilon, max_relative)
-            || self.m43.relative_ne(&other.m43, epsilon, max_relative)
-            || self.m44.relative_ne(&other.m44, epsilon, max_relative)
+        self.cols()
+            .relative_ne(&other.cols(), epsilon, max_relative)
+    }
+}
+
+impl<T> UlpsEq for Matrix4<T>
+where
+    T: PrimitiveMatrices + UlpsEq,
+    T::Epsilon: Clone,
+{
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.cols().ulps_eq(&other.cols(), epsilon, max_ulps)
+    }
+
+    fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.cols().ulps_ne(&other.cols(), epsilon, max_ulps)
     }
 }
 

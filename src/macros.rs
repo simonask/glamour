@@ -144,7 +144,7 @@ macro_rules! impl_common {
         impl<T: Unit> approx::AbsDiffEq<Self> for $base_type_name<T>
         where
             T::Scalar: approx::AbsDiffEq,
-            <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy
+            <T::Scalar as approx::AbsDiffEq>::Epsilon: Clone
         {
             type Epsilon = <T::Scalar as approx::AbsDiffEq>::Epsilon;
 
@@ -155,19 +155,19 @@ macro_rules! impl_common {
 
             #[must_use]
             fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-                $(self.$fields.abs_diff_eq(&other.$fields, epsilon) && )* true
+                $(self.$fields.abs_diff_eq(&other.$fields, epsilon.clone()) && )* true
             }
 
             #[must_use]
             fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-                $(self.$fields.abs_diff_ne(&other.$fields, epsilon) || )* false
+                $(self.$fields.abs_diff_ne(&other.$fields, epsilon.clone()) || )* false
             }
         }
 
         impl<T: Unit> approx::RelativeEq<Self> for $base_type_name<T>
         where
             T::Scalar: approx::RelativeEq,
-            <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy
+            <T::Scalar as approx::AbsDiffEq>::Epsilon: Clone
         {
             #[must_use]
             fn default_max_relative() -> Self::Epsilon {
@@ -176,19 +176,19 @@ macro_rules! impl_common {
 
             #[must_use]
             fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-                $(self.$fields.relative_eq(&other.$fields, epsilon, max_relative) && )* true
+                $(self.$fields.relative_eq(&other.$fields, epsilon.clone(), max_relative.clone()) && )* true
             }
 
             #[must_use]
             fn relative_ne(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-                $(self.$fields.relative_ne(&other.$fields, epsilon, max_relative) || )* false
+                $(self.$fields.relative_ne(&other.$fields, epsilon.clone(), max_relative.clone()) || )* false
             }
         }
 
         impl<T: Unit> approx::UlpsEq<Self> for $base_type_name<T>
         where
             T::Scalar: approx::UlpsEq,
-            <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy
+            <T::Scalar as approx::AbsDiffEq>::Epsilon: Clone
         {
             #[must_use]
             fn default_max_ulps() -> u32 {
@@ -197,12 +197,12 @@ macro_rules! impl_common {
 
             #[must_use]
             fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                $(self.$fields.ulps_eq(&other.$fields, epsilon, max_ulps) && )* true
+                $(self.$fields.ulps_eq(&other.$fields, epsilon.clone(), max_ulps) && )* true
             }
 
             #[must_use]
             fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                $(self.$fields.ulps_ne(&other.$fields, epsilon, max_ulps) || )* false
+                $(self.$fields.ulps_ne(&other.$fields, epsilon.clone(), max_ulps) || )* false
             }
         }
     };
