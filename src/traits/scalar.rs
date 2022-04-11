@@ -1,3 +1,5 @@
+use approx::AbsDiffEq;
+
 use super::marker::{Serializable, ValueSemantics};
 use super::{SimdMatrix2, SimdMatrix3, SimdMatrix4, SimdVec, Unit};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
@@ -48,21 +50,21 @@ pub trait Scalar:
 
 
     /// Bitwise cast from `Primitive` to `Self`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn from_raw(raw: Self::Primitive) -> Self {
         bytemuck::cast(raw)
     }
 
     /// Bitwise cast from `Self` to `Primitive`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn to_raw(self) -> Self::Primitive {
         bytemuck::cast(self)
     }
 
     /// Reinterpret a reference to `Self` as a reference to `Primitive`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn as_raw(&self) -> &Self::Primitive {
         bytemuck::cast_ref(self)
@@ -70,7 +72,7 @@ pub trait Scalar:
 
     /// Reinterpret a mutable reference to `Self` as a mutable reference to
     /// `Primitive`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn as_raw_mut(&mut self) -> &mut Self::Primitive {
         bytemuck::cast_mut(self)
@@ -79,7 +81,7 @@ pub trait Scalar:
     /// Get the minimum of two scalar values through `PartialOrd`. If the values
     /// are not meaningfully comparable (such as NaN), either one may be
     /// returned.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn min(self, other: Self) -> Self {
         if self < other {
@@ -92,7 +94,7 @@ pub trait Scalar:
     /// Get the maximum of two scalar values through `PartialOrd`. If the values
     /// are not meaningfully comparable (such as NaN), either one may be
     /// returned.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn max(self, other: Self) -> Self {
         if self > other {
@@ -103,14 +105,14 @@ pub trait Scalar:
     }
 
     /// "Zero" from the `Primitive` type's implementation of `num_traits::Zero`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn zero() -> Self {
         Self::from_raw(<Self::Primitive as num_traits::Zero>::zero())
     }
 
     /// "One" from the `Primitive` type's implementation of `num_traits::One`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn one() -> Self {
         Self::from_raw(<Self::Primitive as num_traits::One>::one())
@@ -118,7 +120,7 @@ pub trait Scalar:
 
     /// Convenience method for `Self::from_raw(Self::Primitive::one() +
     /// Self::Primitive::one())`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn two() -> Self {
         let one = <Self::Primitive as num_traits::One>::one();
@@ -139,6 +141,15 @@ pub trait Scalar:
         let primitive: T2::Primitive = num_traits::NumCast::from(primitive)?;
         Some(T2::from_raw(primitive))
     }
+
+    /// True if the value is finite (not infinity and not NaN).
+    /// 
+    /// This is always true for integers.
+    #[inline]
+    #[must_use]
+    fn is_finite(self) -> bool {
+        Primitive::is_finite(self.to_raw())
+    }
 }
 
 /// Mapping from primitive scalar type to `glam` vector types.
@@ -157,6 +168,8 @@ pub trait Scalar:
 pub trait Primitive:
     Scalar<Primitive = Self>
     + Unit<Scalar = Self>
+    + core::fmt::Debug
+    + core::fmt::Display
     + Add<Self, Output = Self>
     + Sub<Self, Output = Self>
     + Mul<Self, Output = Self>
@@ -167,6 +180,10 @@ pub trait Primitive:
     + MulAssign<Self>
     + DivAssign<Self>
     + RemAssign<Self>
+    + Sized
+    + Send
+    + Sync
+    + 'static
 {
     /// 2D vector type
     type Vec2: SimdVec<2, Scalar = Self, Mask = glam::BVec2>;
@@ -174,6 +191,12 @@ pub trait Primitive:
     type Vec3: SimdVec<3, Scalar = Self, Mask = glam::BVec3A>;
     /// 4D vector type
     type Vec4: SimdVec<4, Scalar = Self, Mask = glam::BVec4A>;
+
+    /// True if the value is finite (not infinity, not NaN).
+    ///
+    /// This is always true for integers.
+    #[must_use]
+    fn is_finite(self) -> bool;
 }
 
 impl Scalar for f32 {
@@ -183,6 +206,10 @@ impl Primitive for f32 {
     type Vec2 = glam::Vec2;
     type Vec3 = glam::Vec3;
     type Vec4 = glam::Vec4;
+
+    fn is_finite(self) -> bool {
+        <f32>::is_finite(self)
+    }
 }
 
 impl Scalar for f64 {
@@ -192,6 +219,10 @@ impl Primitive for f64 {
     type Vec2 = glam::DVec2;
     type Vec3 = glam::DVec3;
     type Vec4 = glam::DVec4;
+
+    fn is_finite(self) -> bool {
+        <f64>::is_finite(self)
+    }
 }
 
 impl Scalar for i32 {
@@ -201,6 +232,10 @@ impl Primitive for i32 {
     type Vec2 = glam::IVec2;
     type Vec3 = glam::IVec3;
     type Vec4 = glam::IVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
 }
 
 impl Scalar for u32 {
@@ -210,6 +245,10 @@ impl Primitive for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
 }
 
 /// Mapping from primitive scalar type to `glam` matrix types.
@@ -225,7 +264,7 @@ impl Primitive for u32 {
 /// Note that `glam` does not support integer matrices.
 ///
 /// See also [the documentation module](crate::docs#how).
-pub trait PrimitiveMatrices: Primitive {
+pub trait PrimitiveMatrices: Primitive + AbsDiffEq {
     /// [`glam::Mat2`] or [`glam::DMat2`].
     type Mat2: SimdMatrix2<Scalar = Self>;
     /// [`glam::Mat3`] or [`glam::DMat3`].
@@ -268,25 +307,68 @@ where
     type Vec4 = <T::Primitive as Primitive>::Vec4;
 }
 
-/// Convenience trait to go from a (potentially non-primitive) scalar to its
-/// corresponding underlying matrix type.
-///
-/// See [`PrimitiveMatrices`].
-pub trait ScalarMatrices: Scalar {
-    /// [`glam::Mat2`] or [`glam::DMat2`].
-    type Mat2: SimdMatrix2<Scalar = Self::Primitive>;
-    /// [`glam::Mat3`] or [`glam::DMat3`].
-    type Mat3: SimdMatrix3<Scalar = Self::Primitive>;
-    /// [`glam::Mat4`] or [`glam::DMat4`].
-    type Mat4: SimdMatrix4<Scalar = Self::Primitive>;
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-impl<T> ScalarMatrices for T
-where
-    T: Scalar,
-    T::Primitive: PrimitiveMatrices,
-{
-    type Mat2 = <T::Primitive as PrimitiveMatrices>::Mat2;
-    type Mat3 = <T::Primitive as PrimitiveMatrices>::Mat3;
-    type Mat4 = <T::Primitive as PrimitiveMatrices>::Mat4;
+    #[test]
+    fn is_finite() {
+        assert!(Scalar::is_finite(1i32));
+        assert!(Scalar::is_finite(1u32));
+        assert!(Scalar::is_finite(1.0f32));
+        assert!(Scalar::is_finite(1.0f64));
+        assert!(!Scalar::is_finite(core::f32::NAN));
+        assert!(!Scalar::is_finite(core::f32::INFINITY));
+        assert!(!Scalar::is_finite(core::f32::NEG_INFINITY));
+        assert!(!Scalar::is_finite(core::f64::NAN));
+        assert!(!Scalar::is_finite(core::f64::INFINITY));
+        assert!(!Scalar::is_finite(core::f64::NEG_INFINITY));
+    }
+
+    #[test]
+    fn try_cast() {
+        assert_eq!(core::f32::NAN.try_cast::<i32>(), None);
+        assert_eq!(core::f32::INFINITY.try_cast::<i32>(), None);
+        assert_eq!(core::f32::NEG_INFINITY.try_cast::<i32>(), None);
+        assert_eq!(1.0f32.try_cast::<i32>(), Some(1));
+
+        assert_eq!(core::f32::NAN.try_cast::<u32>(), None);
+        assert_eq!(core::f32::INFINITY.try_cast::<u32>(), None);
+        assert_eq!(core::f32::NEG_INFINITY.try_cast::<u32>(), None);
+        assert_eq!(1.0f32.try_cast::<u32>(), Some(1));
+        assert_eq!((-1.0f32).try_cast::<u32>(), None);
+
+        assert_eq!(core::f64::NAN.try_cast::<i32>(), None);
+        assert_eq!(core::f64::INFINITY.try_cast::<i32>(), None);
+        assert_eq!(core::f64::NEG_INFINITY.try_cast::<i32>(), None);
+        assert_eq!(1.0f64.try_cast::<i32>(), Some(1));
+
+        assert_eq!(core::f64::NAN.try_cast::<u32>(), None);
+        assert_eq!(core::f64::INFINITY.try_cast::<u32>(), None);
+        assert_eq!(core::f64::NEG_INFINITY.try_cast::<u32>(), None);
+        assert_eq!(1.0f64.try_cast::<u32>(), Some(1));
+
+        assert!(core::f64::NAN.try_cast::<f32>().unwrap().is_nan());
+
+        assert_eq!(core::f64::INFINITY.try_cast(), Some(core::f32::INFINITY));
+        assert_eq!(
+            core::f64::NEG_INFINITY.try_cast(),
+            Some(core::f32::NEG_INFINITY)
+        );
+        assert_eq!(1.0f64.try_cast::<f32>(), Some(1.0));
+    }
+
+    #[test]
+    fn minmax() {
+        assert_eq!(Scalar::min(1.0, 2.0), 1.0);
+        assert_eq!(Scalar::max(1.0, 2.0), 2.0);
+    }
+
+    #[test]
+    fn two() {
+        assert_eq!(f32::two(), 2.0f32);
+        assert_eq!(f64::two(), 2.0f64);
+        assert_eq!(i32::two(), 2i32);
+        assert_eq!(u32::two(), 2u32);
+    }
 }

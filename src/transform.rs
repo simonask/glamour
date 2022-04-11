@@ -7,12 +7,13 @@
 use core::marker::PhantomData;
 use core::ops::Mul;
 
-use approx::AbsDiffEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, Pod, Zeroable};
+use num_traits::Float;
 
 use crate::{
     traits::{PrimitiveMatrices, UnitTypes},
-    Angle, Matrix3, Matrix4, Point2, Point3, Scalar, Unit, Vector2, Vector3,
+    Angle, AngleConsts, Matrix3, Matrix4, Point2, Point3, Scalar, Unit, Vector2, Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
@@ -80,7 +81,7 @@ where
     Dst: Unit,
     Src::Primitive: PrimitiveMatrices,
 {
-    #[inline(always)]
+    #[inline]
     fn default() -> Self {
         Self {
             matrix: Matrix3::default(),
@@ -95,7 +96,7 @@ where
     Dst: Unit,
     Src::Primitive: PrimitiveMatrices,
 {
-    #[inline(always)]
+    #[inline]
     fn default() -> Self {
         Self {
             matrix: Matrix4::default(),
@@ -128,17 +129,48 @@ impl<Src: Unit, Dst: Unit> PartialEq for Transform2<Src, Dst> {
 
 impl<Src: Unit, Dst: Unit> AbsDiffEq for Transform2<Src, Dst>
 where
-    <Src::Scalar as Scalar>::Primitive: AbsDiffEq,
-    <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon: Copy,
+    Matrix3<<Src::Scalar as Scalar>::Primitive>: AbsDiffEq,
 {
-    type Epsilon = <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon;
+    type Epsilon = <Matrix3<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
-        <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::default_epsilon()
+        <Matrix3<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::default_epsilon()
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.matrix.abs_diff_eq(&other.matrix, epsilon)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> RelativeEq for Transform2<Src, Dst>
+where
+    Matrix3<<Src::Scalar as Scalar>::Primitive>: RelativeEq,
+{
+    fn default_max_relative() -> Self::Epsilon {
+        <Matrix3<<Src::Scalar as Scalar>::Primitive> as RelativeEq>::default_max_relative()
+    }
+
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.matrix
+            .relative_eq(&other.matrix, epsilon, max_relative)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> UlpsEq for Transform2<Src, Dst>
+where
+    Matrix3<<Src::Scalar as Scalar>::Primitive>: UlpsEq,
+{
+    fn default_max_ulps() -> u32 {
+        <Matrix3<<Src::Scalar as Scalar>::Primitive> as UlpsEq>::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.matrix.ulps_eq(&other.matrix, epsilon, max_ulps)
     }
 }
 
@@ -150,17 +182,48 @@ impl<Src: Unit, Dst: Unit> PartialEq for Transform3<Src, Dst> {
 
 impl<Src: Unit, Dst: Unit> AbsDiffEq for Transform3<Src, Dst>
 where
-    <Src::Scalar as Scalar>::Primitive: AbsDiffEq,
-    <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon: Copy,
+    Matrix4<<Src::Scalar as Scalar>::Primitive>: AbsDiffEq,
 {
-    type Epsilon = <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon;
+    type Epsilon = <Matrix4<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
-        <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::default_epsilon()
+        <Matrix4<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::default_epsilon()
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.matrix.abs_diff_eq(&other.matrix, epsilon)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> RelativeEq for Transform3<Src, Dst>
+where
+    Matrix4<<Src::Scalar as Scalar>::Primitive>: RelativeEq,
+{
+    fn default_max_relative() -> Self::Epsilon {
+        <Matrix4<<Src::Scalar as Scalar>::Primitive> as RelativeEq>::default_max_relative()
+    }
+
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.matrix
+            .relative_eq(&other.matrix, epsilon, max_relative)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> UlpsEq for Transform3<Src, Dst>
+where
+    Matrix4<<Src::Scalar as Scalar>::Primitive>: UlpsEq,
+{
+    fn default_max_ulps() -> u32 {
+        <Matrix4<<Src::Scalar as Scalar>::Primitive> as UlpsEq>::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.matrix.ulps_eq(&other.matrix, epsilon, max_ulps)
     }
 }
 
@@ -175,22 +238,33 @@ impl<Src, Dst> Transform2<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     /// Identity matrix.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn identity() -> Self {
-        Self::from_matrix(Matrix3::identity())
+        Self::from_matrix_unchecked(Matrix3::identity())
     }
 
     /// Create from matrix.
-    #[inline(always)]
+    #[inline]
     #[must_use]
-    pub fn from_matrix(matrix: Matrix3<Src::Primitive>) -> Self {
+    pub fn from_matrix_unchecked(matrix: Matrix3<Src::Primitive>) -> Self {
         Transform2 {
             matrix,
             _marker: PhantomData,
+        }
+    }
+
+    /// Create from matrix, checking if the matrix is invertible.
+    #[inline]
+    #[must_use]
+    pub fn from_matrix(matrix: Matrix3<Src::Primitive>) -> Option<Self> {
+        if matrix.is_invertible() {
+            Some(Self::from_matrix_unchecked(matrix))
+        } else {
+            None
         }
     }
 
@@ -212,10 +286,10 @@ where
     /// let b: Vector2<B> = translate.map(a);
     /// assert_abs_diff_eq!(b, (-20.0, 10.0), epsilon = 0.000001);
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_angle(angle: Angle<Src::Primitive>) -> Self {
-        Self::from_matrix(Matrix3::from_angle(Angle {
+        Self::from_matrix_unchecked(Matrix3::from_angle(Angle {
             radians: angle.to_raw(),
         }))
     }
@@ -238,10 +312,10 @@ where
     /// let b: Vector2<B> = translate.map(a);
     /// assert_abs_diff_eq!(b, (20.0, 60.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector2<Src>) -> Self {
-        Self::from_matrix(Matrix3::from_scale(scale.to_untyped()))
+        Self::from_matrix_unchecked(Matrix3::from_scale(scale.to_untyped()))
     }
 
     /// Create translation transform.
@@ -262,10 +336,10 @@ where
     /// let b: Point2<B> = translate.map(a);
     /// assert_abs_diff_eq!(b, (11.0, 22.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_translation(translation: Vector2<Src>) -> Self {
-        Self::from_matrix(Matrix3::from_translation(translation.to_untyped()))
+        Self::from_matrix_unchecked(Matrix3::from_translation(translation.to_untyped()))
     }
 
     /// Create scaling, rotation, and translation matrix.
@@ -295,7 +369,7 @@ where
         angle: Angle<Src::Primitive>,
         translation: Vector2<Src>,
     ) -> Self {
-        Self::from_matrix(Matrix3::from_scale_angle_translation(
+        Self::from_matrix_unchecked(Matrix3::from_scale_angle_translation(
             scale.to_untyped(),
             angle,
             translation.to_untyped(),
@@ -335,7 +409,7 @@ impl<Src, Dst> Transform2<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     /// Perform matrix multiplication such that `other`'s transformation applies
     /// after `self`.
@@ -346,19 +420,19 @@ where
     /// This operation is equivalent to `other.matrix * self.matrix` - that is,
     /// the multiplication order is the reverse of the order of the effects of
     /// the transformation.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn then<Dst2: Unit<Scalar = Dst::Scalar>>(
         self,
         other: Transform2<Dst, Dst2>,
     ) -> Transform2<Src, Dst2> {
-        Transform2::from_matrix(other.matrix * self.matrix)
+        Transform2::from_matrix_unchecked(other.matrix * self.matrix)
     }
 
     /// Shorthand for `.then(Transform2::from_angle(angle))`.
     ///
     /// This does not change the target coordinate space.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn then_rotate(self, angle: Angle<Dst::Primitive>) -> Self {
         self.then(Transform2::from_angle(angle))
@@ -367,7 +441,17 @@ where
     /// Shorthand for `.then(Transform2::from_scale(scale))`.
     ///
     /// This does not change the target coordinate space.
-    #[inline(always)]
+    ///
+    /// #### Example
+    ///
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let a = Transform2::<f32, f32>::identity()
+    ///     .then_scale((2.0, 3.0).into());
+    /// let b = Transform2::<f32, f32>::from_scale((2.0, 3.0).into());
+    /// assert_eq!(a, b);
+    /// ```
+    #[inline]
     #[must_use]
     pub fn then_scale(self, scale: Vector2<Dst>) -> Self {
         self.then(Transform2::from_scale(scale))
@@ -376,7 +460,7 @@ where
     /// Shorthand for `.then(Transform2::from_scale(scale))`.
     ///
     /// This does not change the target coordinate space.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn then_translate(self, translation: Vector2<Dst>) -> Self {
         self.then(Transform2::from_translation(translation))
@@ -385,10 +469,10 @@ where
     /// Invert the matrix.
     ///
     /// See [`glam::Mat3::inverse()`] and [`glam::DMat3::inverse()`].
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn inverse(&self) -> Transform2<Dst, Src> {
-        Transform2::from_matrix(self.matrix.inverse())
+        Transform2::from_matrix_unchecked(self.matrix.inverse_unchecked())
     }
 }
 
@@ -397,14 +481,14 @@ where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar>,
     Dst2: UnitTypes<UnitScalar = Src::UnitScalar>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Transform2<Src, Dst2>;
 
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn mul(self, rhs: Transform2<Dst, Dst2>) -> Self::Output {
-        Transform2::from_matrix(rhs.matrix * self.matrix)
+        Transform2::from_matrix_unchecked(rhs.matrix * self.matrix)
     }
 }
 
@@ -413,14 +497,14 @@ where
     Src: Unit,
     Dst: Unit<Scalar = Src::Scalar>,
     Dst2: Unit<Scalar = Src::Scalar>,
-    <Src::Scalar as Scalar>::Primitive: PrimitiveMatrices,
+    <Src::Scalar as Scalar>::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Transform3<Src, Dst2>;
 
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn mul(self, rhs: Transform3<Dst, Dst2>) -> Self::Output {
-        Transform3::from_matrix(rhs.matrix * self.matrix)
+        Transform3::from_matrix_unchecked(rhs.matrix * self.matrix)
     }
 }
 
@@ -428,22 +512,33 @@ impl<Src, Dst> Transform3<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     /// Identity matrix.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn identity() -> Self {
-        Self::from_matrix(Matrix4::identity())
+        Self::from_matrix_unchecked(Matrix4::identity())
     }
 
     /// Create from matrix.
-    #[inline(always)]
+    #[inline]
     #[must_use]
-    pub fn from_matrix(matrix: Matrix4<<Src::Scalar as Scalar>::Primitive>) -> Self {
+    pub fn from_matrix_unchecked(matrix: Matrix4<<Src::Scalar as Scalar>::Primitive>) -> Self {
         Transform3 {
             matrix,
             _marker: PhantomData,
+        }
+    }
+
+    /// Create from matrix, checking if the matrix is invertible.
+    #[inline]
+    #[must_use]
+    pub fn from_matrix(matrix: Matrix4<<Src::Scalar as Scalar>::Primitive>) -> Option<Self> {
+        if matrix.is_invertible() {
+            Some(Self::from_matrix_unchecked(matrix))
+        } else {
+            None
         }
     }
 
@@ -456,19 +551,19 @@ where
     /// This operation is equivalent to `other.matrix * self.matrix` - that is,
     /// the multiplication order is the reverse of the order of the effects of
     /// the transformation.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn then<Dst2: Unit<Scalar = Dst::Scalar>>(
         self,
         other: Transform3<Dst, Dst2>,
     ) -> Transform3<Src, Dst2> {
-        Transform3::from_matrix(other.matrix * self.matrix)
+        Transform3::from_matrix_unchecked(other.matrix * self.matrix)
     }
 
     /// Shorthand for `.then(Transform3::from_angle(angle))`.
     ///
     /// This does not change the target coordinate space.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn then_rotate(self, axis: Vector3<Dst>, angle: Angle<Dst::Primitive>) -> Self {
         self.then(Transform3::from_axis_angle(axis, angle))
@@ -477,7 +572,17 @@ where
     /// Shorthand for `.then(Transform3::from_scale(scale))`.
     ///
     /// This does not change the target coordinate space.
-    #[inline(always)]
+    ///
+    /// #### Example
+    ///
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let a = Transform3::<f32, f32>::identity()
+    ///     .then_scale((2.0, 3.0, 4.0).into());
+    /// let b = Transform3::<f32, f32>::from_scale((2.0, 3.0, 4.0).into());
+    /// assert_eq!(a, b);
+    /// ```
+    #[inline]
     #[must_use]
     pub fn then_scale(self, scale: Vector3<Dst>) -> Self {
         self.then(Transform3::from_scale(scale))
@@ -486,7 +591,7 @@ where
     /// Shorthand for `.then(Transform3::from_scale(scale))`.
     ///
     /// This does not change the target coordinate space.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn then_translate(self, translation: Vector3<Dst>) -> Self {
         self.then(Transform3::from_translation(translation))
@@ -510,10 +615,10 @@ where
     /// let b: Vector3<B> = translate.map(a);
     /// assert_abs_diff_eq!(b, (-20.0, 10.0, 30.0), epsilon = 0.000001);
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_axis_angle(axis: Vector3<Src>, angle: Angle<Src::Primitive>) -> Self {
-        Self::from_matrix(Matrix4::from_axis_angle(
+        Self::from_matrix_unchecked(Matrix4::from_axis_angle(
             axis.to_untyped(),
             Angle {
                 radians: angle.to_raw(),
@@ -539,10 +644,10 @@ where
     /// let b: Vector3<B> = scale.map(a);
     /// assert_abs_diff_eq!(b, (20.0, 60.0, 30.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector3<Src>) -> Self {
-        Self::from_matrix(Matrix4::from_scale(scale.to_untyped()))
+        Self::from_matrix_unchecked(Matrix4::from_scale(scale.to_untyped()))
     }
 
     /// Create translation transform.
@@ -563,10 +668,10 @@ where
     /// let b: Point3<B> = translate.map(a);
     /// assert_abs_diff_eq!(b, (11.0, 22.0, 60.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_translation(translation: Vector3<Src>) -> Self {
-        Self::from_matrix(Matrix4::from_translation(translation.to_untyped()))
+        Self::from_matrix_unchecked(Matrix4::from_translation(translation.to_untyped()))
     }
 
     /// Create scaling, rotation, and translation matrix.
@@ -603,7 +708,7 @@ where
         angle: Angle<Src::Primitive>,
         translation: Vector3<Src>,
     ) -> Self {
-        Self::from_matrix(Matrix4::from_scale_rotation_translation(
+        Self::from_matrix_unchecked(Matrix4::from_scale_rotation_translation(
             scale.to_untyped(),
             axis.to_untyped(),
             angle,
@@ -615,7 +720,7 @@ where
     ///
     /// See [`glam::Mat4::transform_vector3()`] and
     /// [`glam::DMat4::transform_vector3()`].
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn map_vector(&self, vector: Vector3<Src>) -> Vector3<Dst> {
         cast(self.matrix.transform_vector(vector.to_untyped()))
@@ -625,7 +730,7 @@ where
     ///
     /// See [`glam::Mat4::project_point3()`] and
     /// [`glam::DMat4::project_point3()`].
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn map_point(&self, point: Point3<Src>) -> Point3<Dst> {
         cast(self.matrix.project_point(cast(point)))
@@ -634,10 +739,10 @@ where
     /// Invert the matrix.
     ///
     /// See [`glam::Mat4::inverse()`] and [`glam::DMat4::inverse()`].
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn inverse(&self) -> Transform3<Dst, Src> {
-        Transform3::from_matrix(self.matrix.inverse())
+        Transform3::from_matrix_unchecked(self.matrix.inverse_unchecked())
     }
 }
 
@@ -645,7 +750,7 @@ impl<Src, Dst> TransformMap<Point3<Src>> for Transform3<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Point3<Dst>;
 
@@ -659,7 +764,7 @@ impl<Src, Dst> TransformMap<Vector3<Src>> for Transform3<Src, Dst>
 where
     Src: UnitTypes,
     Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
 {
     type Output = Vector3<Dst>;
 
@@ -684,34 +789,74 @@ mod tests {
         type Scalar = f32;
     }
 
+    struct TestDst2;
+    impl Unit for TestDst2 {
+        type Scalar = f32;
+    }
+
     macro_rules! check_2d_and_3d {
         { $($test:tt)* } => {{
             {
                 type Transform = Transform2<TestSrc, TestDst>;
+                type Mat = Matrix3<f32>;
                 type TransformInverse = Transform2<TestDst, TestSrc>;
                 type VectorSrc = Vector2<TestSrc>;
                 type VectorDst = Vector2<TestDst>;
                 type PointSrc = Point2<TestSrc>;
                 type PointDst = Point2<TestDst>;
-                let _ = core::mem::size_of::<(Transform, TransformInverse, VectorSrc, VectorDst, PointSrc, PointDst)>();
+                let _ = core::mem::size_of::<(Transform, Mat, TransformInverse, VectorSrc, VectorDst, PointSrc, PointDst)>();
                 $($test)*
             }
             {
                 type Transform = Transform3<TestSrc, TestDst>;
+                type Mat = Matrix4<f32>;
                 type TransformInverse = Transform3<TestDst, TestSrc>;
                 type VectorSrc = Vector3<TestSrc>;
                 type VectorDst = Vector3<TestDst>;
                 type PointSrc = Point3<TestSrc>;
                 type PointDst = Point3<TestDst>;
-                let _ = core::mem::size_of::<(Transform, TransformInverse, VectorSrc, VectorDst, PointSrc, PointDst)>();
+                let _ = core::mem::size_of::<(Transform, Mat, TransformInverse, VectorSrc, VectorDst, PointSrc, PointDst)>();
                 $($test)*
             }
         }};
     }
 
     #[test]
+    fn basic() {
+        check_2d_and_3d! {
+            let a = Transform::identity();
+            let b = a.clone();
+            assert_eq!(a, b);
+            assert_abs_diff_eq!(a, b);
+            assert_relative_eq!(a, b);
+            assert_ulps_eq!(a, b);
+
+            let c = a.then_scale(VectorDst::splat(2.0));
+            assert_ne!(a, c);
+            assert_abs_diff_ne!(a, c);
+            assert_relative_ne!(a, c);
+            assert_ulps_ne!(a, c);
+        };
+
+        check_2d_and_3d! {
+            let a = Transform::identity();
+            assert_eq!(a, Transform::default());
+        };
+    }
+
+    #[test]
+    fn from_matrix() {
+        check_2d_and_3d! {
+            assert!(Transform::from_matrix(Mat::zero()).is_none());
+            assert_eq!(Transform::from_matrix(Mat::identity()), Some(Transform::identity()));
+        };
+    }
+
+    #[test]
     fn inverse() {
         check_2d_and_3d! {
+            assert!(Transform::from_matrix(Mat::zeroed()).is_none());
+
             let transform = Transform::from_translation(VectorSrc::splat(1.0));
             let point = PointSrc::splat(2.0);
             let point_dst: PointDst = transform.map(point);
@@ -721,5 +866,30 @@ mod tests {
             let point_src = inverse.map(point_dst);
             assert_abs_diff_eq!(point_src, point);
         };
+    }
+
+    #[test]
+    fn concatenation() {
+        {
+            let a = Transform2::<TestSrc, TestDst>::from_scale((2.0, 2.0).into());
+            let b = Transform2::<TestDst, TestDst2>::from_translation((1.0, 1.0).into());
+            let c: Transform2<TestSrc, TestDst2> = a * b;
+            assert_eq!(
+                c,
+                Transform2::<TestSrc, TestDst2>::from_scale((2.0, 2.0).into())
+                    .then_translate((1.0, 1.0).into())
+            );
+        }
+
+        {
+            let a = Transform3::<TestSrc, TestDst>::from_scale((2.0, 2.0, 2.0).into());
+            let b = Transform3::<TestDst, TestDst2>::from_translation((1.0, 1.0, 1.0).into());
+            let c: Transform3<TestSrc, TestDst2> = a * b;
+            assert_eq!(
+                c,
+                Transform3::<TestSrc, TestDst2>::from_scale((2.0, 2.0, 2.0).into())
+                    .then_translate((1.0, 1.0, 1.0).into())
+            );
+        }
     }
 }

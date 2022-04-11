@@ -45,12 +45,26 @@ pub use simd_vec::*;
 pub use unit::*;
 
 /// General trait for the `contains()` method.
+///
+/// Coordinates exactly on the upper bound are considered to be contained.
+///
+/// See also: [`Intersection`], which is different in this regard.
 pub trait Contains<T> {
     /// Returns `true` if `thing` is inside `self`.
     fn contains(&self, thing: &T) -> bool;
 }
 
 /// The `intersection()` method.
+///
+/// Coordinates exactly on the upper bound are _not_ considered to be
+/// intersecting.
+///
+/// For example, each adjacent tile of a grid of [`crate::Rect`]s or
+/// [`crate::Box2`]s will not be considered intersecting, while
+/// [`Contains::contains()`] returns true for both tiles with coordinates that
+/// fall exactly on the upper bound of one tile.
+///
+/// See also: [`Contains`], which is different in this regard.
 pub trait Intersection<T = Self> {
     /// The type of intersection.
     ///

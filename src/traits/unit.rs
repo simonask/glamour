@@ -46,18 +46,30 @@ pub trait Unit: 'static {
 
 impl Unit for f32 {
     type Scalar = f32;
+    fn name() -> Option<&'static str> {
+        Some("f32")
+    }
 }
 
 impl Unit for f64 {
     type Scalar = f64;
+    fn name() -> Option<&'static str> {
+        Some("f64")
+    }
 }
 
 impl Unit for i32 {
     type Scalar = i32;
+    fn name() -> Option<&'static str> {
+        Some("i32")
+    }
 }
 
 impl Unit for u32 {
     type Scalar = u32;
+    fn name() -> Option<&'static str> {
+        Some("u32")
+    }
 }
 
 /// Shorthand to go from a `Unit` type to its associated primitives (through the
@@ -65,7 +77,7 @@ impl Unit for u32 {
 pub trait UnitTypes: Unit<Scalar = Self::UnitScalar> {
     /// `Self::Scalar` needed to define trait bounds on the associated type.
     type UnitScalar: Scalar<Primitive = Self::Primitive>;
-    /// Shorthand for `<Self::Scalar as Scalar::Primitive`.
+    /// Shorthand for `<Self::Scalar as Scalar>::Primitive`.
     type Primitive: Primitive;
 
     /// Fundamental 2D vector type.

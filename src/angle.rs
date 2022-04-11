@@ -1,18 +1,21 @@
 //! Generic angles.
 
-use approx::{AbsDiffEq, RelativeEq};
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{Pod, Zeroable};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 use num_traits::{Float, NumAssignOps};
 
-use crate::{traits::marker::ValueSemantics, Scalar, Unit, Vector2, Vector3, Vector4};
+use crate::{
+    traits::{marker::ValueSemantics, Primitive},
+    Scalar, Unit, Vector2, Vector3, Vector4,
+};
 
 /// Angle in radians.
 ///
 /// Note that Angle implements both [Scalar] and [Unit], so it is compatible
 /// with vector types: `Vector2<Angle<f32>>` is a vector containing two angles.
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Default, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Angle<T = f32> {
     /// Angle in radians.
@@ -105,19 +108,49 @@ pub trait FloatAngleExt: num_traits::Float + AngleConsts + ValueSemantics {
 impl FloatAngleExt for f32 {}
 impl FloatAngleExt for f64 {}
 
+impl<T: Primitive + AngleConsts> core::fmt::Debug for Angle<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        use core::fmt::Write;
+        f.write_str("Angle(")?;
+        let r = self.radians;
+        if r == T::PI {
+            f.write_char('π')?;
+        } else if r == T::TAU {
+            f.write_str("2π")?;
+        } else if r == T::FRAG_1_PI {
+            f.write_str("1/π")?;
+        } else if r == T::FRAG_2_PI {
+            f.write_str("2/π")?;
+        } else if r == T::FRAG_PI_2 {
+            f.write_str("π/2")?;
+        } else if r == T::FRAG_PI_3 {
+            f.write_str("π/3")?;
+        } else if r == T::FRAG_PI_4 {
+            f.write_str("π/4")?;
+        } else if r == T::FRAG_PI_6 {
+            f.write_str("π/6")?;
+        } else if r == T::FRAG_PI_8 {
+            f.write_str("π/8")?;
+        } else {
+            write!(f, "{:0.5}", r)?;
+        }
+        f.write_char(')')
+    }
+}
+
 unsafe impl<T: Zeroable> Zeroable for Angle<T> {}
 unsafe impl<T: Pod> Pod for Angle<T> {}
 
 impl<T> Scalar for Angle<T>
 where
-    T: Scalar,
+    T: Primitive + AngleConsts + Float,
 {
-    type Primitive = T::Primitive;
+    type Primitive = T;
 }
 
 impl<T> Unit for Angle<T>
 where
-    T: Scalar + Unit<Scalar = T> + Float,
+    T: Primitive + AngleConsts + Float,
 {
     type Scalar = Angle<T>;
 
@@ -132,16 +165,39 @@ where
 {
     type Epsilon = T::Epsilon;
 
+    #[inline]
     fn default_epsilon() -> Self::Epsilon {
         T::default_epsilon()
     }
 
+    #[inline]
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.radians.abs_diff_eq(&other.radians, epsilon)
     }
 
+    #[inline]
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.radians.abs_diff_ne(&other.radians, epsilon)
+    }
+}
+
+impl<T> UlpsEq for Angle<T>
+where
+    T: UlpsEq,
+{
+    #[inline]
+    fn default_max_ulps() -> u32 {
+        T::default_max_ulps()
+    }
+
+    #[inline]
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.radians.ulps_eq(&other.radians, epsilon, max_ulps)
+    }
+
+    #[inline]
+    fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.radians.ulps_ne(&other.radians, epsilon, max_ulps)
     }
 }
 
@@ -149,10 +205,12 @@ impl<T> RelativeEq for Angle<T>
 where
     T: RelativeEq,
 {
+    #[inline]
     fn default_max_relative() -> Self::Epsilon {
-        todo!()
+        T::default_max_relative()
     }
 
+    #[inline]
     fn relative_eq(
         &self,
         other: &Self,
@@ -163,6 +221,7 @@ where
             .relative_eq(&other.radians, epsilon, max_relative)
     }
 
+    #[inline]
     fn relative_ne(
         &self,
         other: &Self,
@@ -171,6 +230,12 @@ where
     ) -> bool {
         self.radians
             .relative_ne(&other.radians, epsilon, max_relative)
+    }
+}
+
+impl<T: Primitive + Float> PartialEq<T> for Angle<T> {
+    fn eq(&self, other: &T) -> bool {
+        self.radians == *other
     }
 }
 
@@ -283,9 +348,7 @@ macro_rules! forward_op_scalar {
 
 macro_rules! forward_op_scalar_vector {
     ($trait_name:ident, $op:ident, $vector:ident) => {
-        impl<T: Float + Scalar + Unit<Scalar = T> + AngleConsts> $trait_name<$vector<T>>
-            for $vector<Angle<T>>
-        {
+        impl<T: Float + Primitive + AngleConsts> $trait_name<$vector<T>> for $vector<Angle<T>> {
             type Output = $vector<Angle<T>>;
 
             fn $op(self, rhs: $vector<T>) -> Self {
@@ -311,9 +374,7 @@ macro_rules! forward_op_scalar_assign {
 
 macro_rules! forward_op_scalar_assign_vector {
     ($trait_name:ident, $op:ident, $vector:ident) => {
-        impl<T: Float + Scalar + Unit<Scalar = T> + AngleConsts> $trait_name<$vector<T>>
-            for $vector<Angle<T>>
-        {
+        impl<T: Float + Primitive + AngleConsts> $trait_name<$vector<T>> for $vector<Angle<T>> {
             fn $op(&mut self, rhs: $vector<T>) {
                 self.as_raw_mut().$op(rhs.to_raw());
             }
@@ -359,21 +420,11 @@ forward_op_self_assign!(AddAssign, add_assign);
 forward_op_self_assign!(SubAssign, sub_assign);
 forward_op_self_assign!(RemAssign, rem_assign);
 
-#[doc(hidden)]
-impl<T: Float> Div for Angle<T> {
-    type Output = Self;
+impl<T: Primitive + Div> Div<Angle<T>> for Angle<T> {
+    type Output = T;
 
-    fn div(self, rhs: Self) -> Self::Output {
-        Angle::from_radians(self.radians / rhs.radians)
-    }
-}
-
-#[doc(hidden)]
-impl<T: Float> Mul for Angle<T> {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        Angle::from_radians(self.radians * rhs.radians)
+    fn div(self, rhs: Angle<T>) -> Self::Output {
+        self.radians / rhs.radians
     }
 }
 
@@ -406,11 +457,60 @@ impl<T: AngleConsts> AngleConsts for Angle<T> {
 
 #[cfg(test)]
 mod tests {
+    use approx::{assert_abs_diff_eq, assert_relative_eq, assert_ulps_eq};
+
     use super::*;
 
     type Angle = super::Angle<f32>;
     type AngleVec = Vector4<Angle>;
     type Vec4 = Vector4<f32>;
+
+    #[test]
+    fn forward_to_float() {
+        use super::FloatAngleExt;
+        let s: Angle = FloatAngleExt::asin(1.0);
+        let c: Angle = FloatAngleExt::acos(1.0);
+        let t: Angle = FloatAngleExt::atan(1.0);
+        assert_eq!(s.radians, f32::asin(1.0));
+        assert_eq!(c.radians, f32::acos(1.0));
+        assert_eq!(t.radians, f32::atan(1.0));
+    }
+
+    #[test]
+    fn angle_arithmetic() {
+        let a = Angle::from_radians(1.0);
+        let b = Angle::from_radians(-0.5);
+        assert_abs_diff_eq!(a + b, Angle::from_radians(0.5));
+        let x: Angle = a * 2.0f32;
+        assert_abs_diff_eq!(x, Angle::from_radians(2.0));
+        let y: Angle = a / 2.0f32;
+        assert_abs_diff_eq!(y, Angle::from_radians(0.5));
+        let z: f32 = a / b;
+        assert_abs_diff_eq!(z, -2.0);
+    }
+
+    #[test]
+    fn angle_degrees() {
+        let circle = Angle::CIRCLE;
+        assert_abs_diff_eq!(circle, Angle::from_degrees(360.0));
+        assert_ulps_eq!(circle, Angle::from_degrees(360.0));
+        assert_relative_eq!(circle, Angle::from_degrees(360.0));
+
+        let quarter_circle = Angle::FRAG_PI_2;
+        assert_abs_diff_eq!(quarter_circle, Angle::from_degrees(90.0));
+        assert_ulps_eq!(quarter_circle, Angle::from_degrees(90.0));
+        assert_relative_eq!(quarter_circle, Angle::from_degrees(90.0));
+    }
+
+    #[test]
+    fn angle_cast() {
+        let mut a = Angle::CIRCLE;
+        let _: &f32 = a.as_raw();
+        let _: &mut f32 = a.as_raw_mut();
+        let _: f32 = a.to_raw();
+        let _: f32 = a.to_radians();
+        let _: Angle = 1.0.into();
+    }
 
     #[test]
     fn angle_vec() {
@@ -439,5 +539,86 @@ mod tests {
         let _: AngleVec = vec * 2.0;
 
         assert_eq!(vec[0], Angle::PI);
+    }
+
+    struct BufWriter<'a> {
+        buffer: &'a mut [u8],
+        pos: usize,
+    }
+
+    impl<'a> core::fmt::Write for BufWriter<'a> {
+        fn write_str(&mut self, s: &str) -> core::fmt::Result {
+            let bytes = s.as_bytes();
+            if self.buffer.len() < bytes.len() + self.pos {
+                Err(core::fmt::Error)
+            } else {
+                (&mut self.buffer[self.pos..self.pos + bytes.len()]).copy_from_slice(bytes);
+                self.pos += bytes.len();
+                Ok(())
+            }
+        }
+    }
+
+    fn write_buf<'a>(buffer: &'a mut [u8], fmt: core::fmt::Arguments) -> &'a str {
+        use core::fmt::Write;
+        let mut writer = BufWriter { buffer, pos: 0 };
+        writer.write_fmt(fmt).unwrap();
+        core::str::from_utf8(&writer.buffer[0..writer.pos]).unwrap()
+    }
+
+    #[test]
+    fn angle_debug_print() {
+        let mut buffer = [0; 128];
+
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::HALF_CIRCLE)),
+            "Angle(π)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::CIRCLE)),
+            "Angle(2π)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::PI)),
+            "Angle(π)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::TAU)),
+            "Angle(2π)"
+        );
+
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_1_PI)),
+            "Angle(1/π)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_2_PI)),
+            "Angle(2/π)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_2)),
+            "Angle(π/2)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_3)),
+            "Angle(π/3)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_4)),
+            "Angle(π/4)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_6)),
+            "Angle(π/6)"
+        );
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_8)),
+            "Angle(π/8)"
+        );
+
+        assert_eq!(
+            write_buf(&mut buffer, format_args!("{:?}", Angle::from_radians(1.0))),
+            "Angle(1.00000)"
+        );
     }
 }

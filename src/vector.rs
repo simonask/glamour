@@ -117,7 +117,7 @@ macro_rules! impl_vector {
             #[doc = "Instantiate vector with all components set to 2."]
             #[doc = ""]
             #[doc = "This is a shorthand for `Self::one() + Self::one()`."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn two() -> Self {
                 Self::one() + Self::one()
@@ -130,56 +130,56 @@ macro_rules! impl_vector {
             #[doc = "Unit<Scalar = f32>` etc.)."]
             #[doc = ""]
             #[doc = "This is equivalent to `self * Self::splat(scalar)`."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn mul_scalar(self, scalar: T::Scalar) -> Self {
                 self * Self::splat(scalar)
             }
 
             #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except division."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn div_scalar(self, scalar: T::Scalar) -> Self {
                 self / Self::splat(scalar)
             }
 
             #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except remainder."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn rem_scalar(self, scalar: T::Scalar) -> Self {
                 self % Self::splat(scalar)
             }
 
             #[doc = "Dot product."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn dot(self, other: Self) -> T::Scalar {
                 T::Scalar::from_raw(self.to_raw().dot(other.to_raw()))
             }
 
             #[doc = "Instantiate from point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_point(point: $point_ty<T>) -> Self {
                 bytemuck::cast(point)
             }
 
             #[doc = "Convert to point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn to_point(self) -> $point_ty<T> {
                 bytemuck::cast(self)
             }
 
             #[doc = "Reinterpret as point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_point(&self) -> &$point_ty<T> {
                 bytemuck::cast_ref(self)
             }
 
             #[doc = "Reinterpret as point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_point_mut(&mut self) -> &mut $point_ty<T> {
                 bytemuck::cast_mut(self)
@@ -187,28 +187,28 @@ macro_rules! impl_vector {
 
             $(
                 #[doc = "Instantiate from size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn from_size(size: $size_ty<T>) -> Self {
                     bytemuck::cast(size)
                 }
 
                 #[doc = "Convert to size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn to_size(self) -> $size_ty<T> {
                     bytemuck::cast(self)
                 }
 
                 #[doc = "Reinterpret as size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn as_size(&self) -> &$size_ty<T> {
                     bytemuck::cast_ref(self)
                 }
 
                 #[doc = "Reinterpret as size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn as_size_mut(&mut self) -> &mut $size_ty<T> {
                     bytemuck::cast_mut(self)
@@ -217,7 +217,7 @@ macro_rules! impl_vector {
 
             #[doc = "Select two components from this vector and return a 2D vector made from"]
             #[doc = "those components."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
                 [self.const_get::<X>(), self.const_get::<Y>()].into()
@@ -225,7 +225,7 @@ macro_rules! impl_vector {
 
             #[doc = "Select three components from this vector and return a 3D vector made from"]
             #[doc = "those components."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
                 [
@@ -238,7 +238,7 @@ macro_rules! impl_vector {
 
             #[doc = "Select four components from this vector and return a 4D vector made from"]
             #[doc = "those components."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
                 &self,
@@ -362,7 +362,7 @@ macro_rules! impl_vector {
         impl<T: Unit> Rem for $base_type_name<T> {
             type Output = Self;
 
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn rem(self, rhs: Self) -> Self::Output {
                 Self::from_raw(self.to_raw() % rhs.to_raw())
@@ -370,7 +370,7 @@ macro_rules! impl_vector {
         }
 
         impl<T: Unit> RemAssign for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             fn rem_assign(&mut self, rhs: Self) {
                 *self.as_raw_mut() %= rhs.to_raw();
             }
@@ -388,7 +388,7 @@ macro_rules! impl_vector {
             T: crate::traits::UnitTypes,
             T::$vec_ty: Lerp<T::Primitive>,
         {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn lerp(self, end: Self, t: T::Primitive) -> Self {
                 Self::from_raw(self.to_raw().lerp(end.to_raw(), t.to_raw()))
@@ -403,7 +403,7 @@ impl_vector!(Vector4 [4] => Vec4, Point4);
 
 impl<T: Unit> Vector2<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
@@ -413,7 +413,7 @@ impl<T: Unit> Vector2<T> {
     }
 
     /// Unit vector in the direction of the Y axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
@@ -424,7 +424,7 @@ impl<T: Unit> Vector2<T> {
 
     /// Select components of this vector and return a new vector containing
     /// those components.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn swizzle<const X: usize, const Y: usize>(&self) -> Self {
         self.swizzle2::<X, Y>()
@@ -443,7 +443,7 @@ impl<T: Unit> Vector2<T> {
 
 impl<T: Unit> Vector3<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
@@ -454,7 +454,7 @@ impl<T: Unit> Vector3<T> {
     }
 
     /// Unit vector in the direction of the Y axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
@@ -465,7 +465,7 @@ impl<T: Unit> Vector3<T> {
     }
 
     /// Unit vector in the direction of the Z axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_z() -> Self {
         Self {
@@ -477,7 +477,7 @@ impl<T: Unit> Vector3<T> {
 
     /// Select components of this vector and return a new vector containing
     /// those components.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize>(&self) -> Self {
         self.swizzle3::<X, Y, Z>()
@@ -543,7 +543,7 @@ where
 
 impl<T: Unit> Vector4<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
@@ -555,7 +555,7 @@ impl<T: Unit> Vector4<T> {
     }
 
     /// Unit vector in the direction of the Y axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
@@ -567,7 +567,7 @@ impl<T: Unit> Vector4<T> {
     }
 
     /// Unit vector in the direction of the Z axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_z() -> Self {
         Self {
@@ -579,7 +579,7 @@ impl<T: Unit> Vector4<T> {
     }
 
     /// Unit vector in the direction of the W axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_w() -> Self {
         Self {
@@ -590,9 +590,18 @@ impl<T: Unit> Vector4<T> {
         }
     }
 
+    /// Horizontal maximum, taking `w` into account as well.
+    ///
+    /// Workaround for [https://github.com/bitshifter/glam-rs/issues/283](https://github.com/bitshifter/glam-rs/issues/283).
+    #[inline]
+    #[must_use]
+    pub fn max_element_w(self) -> T::Scalar {
+        self.x.max(self.y.max(self.z.max(self.w)))
+    }
+
     /// Select components of this vector and return a new vector containing
     /// those components.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize, const W: usize>(&self) -> Self {
         self.swizzle4::<X, Y, Z, W>()
@@ -605,6 +614,8 @@ crate::impl_mint!(Vector4, 4, Vector4);
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
+
     use super::*;
 
     struct F32;
@@ -767,6 +778,108 @@ mod tests {
     }
 
     #[test]
+    fn units() {
+        assert_abs_diff_eq!(Vec2::unit_x(), (1.0, 0.0));
+        assert_abs_diff_eq!(Vec2::unit_y(), (0.0, 1.0));
+        assert_abs_diff_eq!(Vec3::unit_x(), (1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec3::unit_y(), (0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec3::unit_z(), (0.0, 0.0, 1.0));
+        assert_abs_diff_eq!(Vec4::unit_x(), (1.0, 0.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_y(), (0.0, 1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_z(), (0.0, 0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_w(), (0.0, 0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn nan() {
+        let v2 = Vec2::new(1.0, core::f32::NAN);
+        assert!(v2.is_nan());
+        assert!(!v2.is_finite());
+        assert_eq!(v2.is_nan_mask(), glam::BVec2::new(false, true));
+
+        let v3 = Vec3::new(1.0, core::f32::NAN, 3.0);
+        assert!(v3.is_nan());
+        assert!(!v3.is_finite());
+        assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
+
+        let v4 = Vec4::new(1.0, 2.0, core::f32::NAN, 4.0);
+        assert!(v4.is_nan());
+        assert!(!v4.is_finite());
+        assert_eq!(
+            v4.is_nan_mask(),
+            glam::BVec4::new(false, false, true, false)
+        );
+
+        assert!(Vec2::nan().is_nan());
+        assert!(Vec3::nan().is_nan());
+        assert!(Vec4::nan().is_nan());
+
+        // Replace NaNs with zeroes.
+        let v = Vec4::select(v4.is_nan_mask(), Vec4::zero(), v4);
+        assert_eq!(v, (1.0, 2.0, 0.0, 4.0));
+    }
+
+    #[test]
+    fn swizzle2() {
+        assert_eq!(Vec2::unit_x().swizzle::<1, 0>(), (0.0, 1.0));
+        assert_eq!(
+            Vec3::new(1.0, 2.0, 3.0).swizzle2::<1, 0>(),
+            Vec2::new(2.0, 1.0)
+        );
+    }
+
+    #[test]
+    fn swizzle3() {
+        assert_eq!(
+            Vec3::new(1.0, 2.0, 3.0).swizzle::<2, 1, 0>(),
+            (3.0, 2.0, 1.0)
+        );
+        assert_eq!(
+            Vec2::unit_x().swizzle3::<1, 0, 1>(),
+            Vec3::new(0.0, 1.0, 0.0)
+        );
+        assert_eq!(
+            Vec4::new(1.0, 2.0, 3.0, 4.0).swizzle3::<3, 2, 1>(),
+            Vec3::new(4.0, 3.0, 2.0)
+        );
+    }
+
+    #[test]
+    fn swizzle4() {
+        assert_eq!(
+            Vec4::new(0.0, 1.0, 2.0, 3.0).swizzle::<3, 2, 1, 0>(),
+            (3.0, 2.0, 1.0, 0.0)
+        );
+
+        assert_eq!(
+            Vec2::unit_x().swizzle4::<1, 0, 1, 0>(),
+            Vec4::new(0.0, 1.0, 0.0, 1.0)
+        );
+        assert_eq!(
+            Vec3::new(0.0, 1.0, 2.0).swizzle4::<2, 1, 0, 2>(),
+            Vec4::new(2.0, 1.0, 0.0, 2.0)
+        );
+    }
+
+    #[test]
+    fn to_3d() {
+        assert_eq!(Vec2::unit_x().to_3d(2.0), Vec3::new(1.0, 0.0, 2.0));
+    }
+
+    #[test]
+    fn to_4d() {
+        assert_eq!(Vec3::unit_z().to_4d(2.0), Vec4::new(0.0, 0.0, 1.0, 2.0));
+    }
+
+    #[test]
+    fn vec3a() {
+        let a: glam::Vec3A = Vec3::new(0.0, 1.0, 2.0).to_vec3a();
+        assert_eq!(a, glam::Vec3A::new(0.0, 1.0, 2.0));
+        let b = Vec3::from_vec3a(a);
+        assert_eq!(b, Vec3::new(0.0, 1.0, 2.0));
+    }
+
+    #[test]
     fn scaling_by_scalar() {
         // Test that vector types can be multiplied/divided by their
         // (unsplatted) scalar. This doesn't work in generic code, but it should
@@ -808,5 +921,178 @@ mod tests {
             assert_eq!(a, (2, 4, 6, 8));
             assert_eq!(b, (0, 1, 1, 2));
         }
+    }
+
+    #[test]
+    fn cmp() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = Vec4::new(4.0, 2.0, 1.0, 3.0);
+
+        let eq = a.cmpeq(b);
+        let ne = a.cmpne(b);
+        let lt = a.cmplt(b);
+        let le = a.cmple(b);
+        let gt = a.cmpgt(b);
+        let ge = a.cmpge(b);
+
+        assert_eq!(eq.as_ref(), &[false, true, false, false]);
+        assert_eq!(ne.as_ref(), &[true, false, true, true]);
+        assert_eq!(lt.as_ref(), &[true, false, false, false]);
+        assert_eq!(le.as_ref(), &[true, true, false, false]);
+        assert_eq!(gt.as_ref(), &[false, false, true, true]);
+        assert_eq!(ge.as_ref(), &[false, true, true, true]);
+
+        assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
+        assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
+        assert_eq!(a.min_element(), 1.0);
+        // See https://github.com/bitshifter/glam-rs/issues/283
+        // assert_eq!(a.max_element(), 3.0);
+        assert_eq!(a.max_element_w(), 4.0);
+    }
+
+    #[test]
+    fn clamp() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        assert_eq!(
+            a.clamp(Vec4::splat(2.0), Vec4::splat(3.5)),
+            Vec4::new(2.0, 2.0, 3.0, 3.5)
+        );
+
+        let b = IVec4::new(1, 2, 3, 5);
+        assert_eq!(b.clamp(IVec4::splat(2), IVec4::splat(4)), (2, 2, 3, 4));
+    }
+
+    #[test]
+    fn dot() {
+        let a = Vec3::new(1.0, 2.0, 3.0);
+        let b = Vec3::new(2.0, 3.0, 4.0);
+        assert_abs_diff_eq!(a.dot(b), 20.0);
+    }
+
+    #[test]
+    fn normalize() {
+        let a = Vec3::new(1.0, 1.0, 2.0);
+        let d = a.dot(a).sqrt();
+        let b = a / Vec3::splat(d);
+        assert_abs_diff_eq!(a.normalize(), b);
+    }
+
+    #[test]
+    fn exp() {
+        let a = Vec3::splat(1.0);
+        assert_eq!(a.exp(), Vec3::splat(1.0f32.exp()));
+    }
+
+    #[test]
+    fn powf() {
+        let a = Vec3::splat(2.0);
+        assert_eq!(a.powf(2.0), Vec3::splat(4.0));
+    }
+
+    #[test]
+    fn recip() {
+        let a = Vec3::splat(2.0);
+        assert_eq!(a.recip(), Vec3::splat(0.5));
+    }
+
+    #[test]
+    fn mul_add() {
+        let a = Vec3::new(1.0, 2.0, 3.0);
+        let b = Vec3::new(2.0, 3.0, 4.0);
+        let c = Vec3::new(3.0, 4.0, 5.0);
+        assert_eq!(a.mul_add(b, c), a * b + c);
+    }
+
+    #[test]
+    fn abs() {
+        let a = Vec3::new(1.0, -2.0, -3.0);
+        assert_eq!(a.abs(), (1.0, 2.0, 3.0));
+    }
+
+    #[test]
+    fn signum() {
+        let a = Vec3::new(1.0, -2.0, -3.0);
+        assert_eq!(a.signum(), (1.0, -1.0, -1.0));
+    }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn debug_type_name() {
+        extern crate alloc;
+
+        let untyped_f32: Vector2<f32> = Vector2 { x: 123.0, y: 456.0 };
+        let untyped_f64: Vector2<f64> = Vector2 { x: 123.0, y: 456.0 };
+        let untyped_u32: Vector2<u32> = Vector2 { x: 123, y: 456 };
+
+        assert_eq!(
+            alloc::format!("{:?}", untyped_f32),
+            "Vector2<f32> { x: 123.0, y: 456.0 }"
+        );
+        assert_eq!(
+            alloc::format!("{:?}", untyped_f64),
+            "Vector2<f64> { x: 123.0, y: 456.0 }"
+        );
+        assert_eq!(
+            alloc::format!("{:?}", untyped_u32),
+            "Vector2<u32> { x: 123, y: 456 }"
+        );
+
+        let untyped_i32: Vector2<i32> = Vector2 { x: 123, y: 456 };
+        assert_eq!(
+            alloc::format!("{:?}", untyped_i32),
+            "Vector2<i32> { x: 123, y: 456 }"
+        );
+        assert_eq!(
+            alloc::format!("{:#?}", untyped_i32),
+            r#"
+Vector2<i32> {
+    x: 123,
+    y: 456,
+}"#
+            .trim()
+        );
+
+        enum UnnamedUnit {}
+        impl Unit for UnnamedUnit {
+            type Scalar = i32;
+        }
+
+        let unnamed: Vector2<UnnamedUnit> = Vector2 { x: 123, y: 456 };
+        assert_eq!(
+            alloc::format!("{:?}", unnamed),
+            "Vector2 { x: 123, y: 456 }"
+        );
+        assert_eq!(
+            alloc::format!("{:#?}", unnamed),
+            r#"
+Vector2 {
+    x: 123,
+    y: 456,
+}"#
+            .trim()
+        );
+
+        enum CustomName {}
+        impl Unit for CustomName {
+            type Scalar = i32;
+            fn name() -> Option<&'static str> {
+                Some("Custom")
+            }
+        }
+
+        let custom: Vector2<CustomName> = Vector2 { x: 123, y: 456 };
+        assert_eq!(
+            alloc::format!("{:?}", custom),
+            "Vector2<Custom> { x: 123, y: 456 }"
+        );
+        assert_eq!(
+            alloc::format!("{:#?}", custom),
+            r#"
+Vector2<Custom> {
+    x: 123,
+    y: 456,
+}"#
+            .trim()
+        );
     }
 }
