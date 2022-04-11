@@ -103,6 +103,13 @@ macro_rules! impl_matrix {
                 Self::from_raw(T::$mat_name::zero())
             }
 
+            #[doc = "Create a matrix with all NaNs."]
+            #[inline]
+            #[must_use]
+            pub fn nan() -> Self {
+                Self::from_raw(T::$mat_name::nan())
+            }
+
             #[doc = "Create from column vectors."]
             #[inline]
             #[must_use]
@@ -182,7 +189,7 @@ macro_rules! impl_matrix {
 
             #[doc = "True if matrix is invertible."]
             #[doc = ""]
-            #[doc = "This is equivalent to checking if the determinant is non-zero."]
+            #[doc = "This is equivalent to checking if the determinant is finite and non-zero."]
             #[inline]
             #[must_use]
             pub fn is_invertible(&self) -> bool {
@@ -207,6 +214,20 @@ macro_rules! impl_matrix {
             #[must_use]
             pub fn inverse(&self) -> Option<Self> {
                 self.as_raw().inverse().map(Self::from_raw)
+            }
+
+            #[doc = "True if any element in the matrix is NaN."]
+            #[inline]
+            #[must_use]
+            pub fn is_nan(&self) -> bool {
+                self.as_raw().is_nan()
+            }
+
+            #[doc = "True if all elements in the matrix are finite (non-infinite, non-NaN)."]
+            #[inline]
+            #[must_use]
+            pub fn is_finite(&self) -> bool {
+                self.as_raw().is_finite()
             }
         }
 
@@ -1029,7 +1050,38 @@ mod tests {
     }
 
     #[test]
+    fn nan() {
+        let m2 = Mat2::nan();
+        assert!(m2.col(0).is_nan());
+        assert!(m2.col(1).is_nan());
+
+        let m3 = Mat3::nan();
+        assert!(m3.col(0).is_nan());
+        assert!(m3.col(1).is_nan());
+        assert!(m3.col(2).is_nan());
+
+        let m4 = Mat4::nan();
+        assert!(m4.col(0).is_nan());
+        assert!(m4.col(1).is_nan());
+        assert!(m4.col(2).is_nan());
+        assert!(m4.col(3).is_nan());
+    }
+
+    #[test]
     fn is_invertible() {
+        assert!(Mat2::identity().is_invertible());
+        assert!(Mat3::identity().is_invertible());
+        assert!(Mat4::identity().is_invertible());
+        assert!(!Mat2::zero().is_invertible());
+        assert!(!Mat3::zero().is_invertible());
+        assert!(!Mat4::zero().is_invertible());
+        assert!(!Mat2::nan().is_invertible());
+        assert!(!Mat3::nan().is_invertible());
+        assert!(!Mat4::nan().is_invertible());
+        assert_eq!(Mat2::identity().inverse(), Some(Mat2::identity()));
+        assert_eq!(Mat3::identity().inverse(), Some(Mat3::identity()));
+        assert_eq!(Mat4::identity().inverse(), Some(Mat4::identity()));
+
         {
             assert!(!Mat2::zeroed().is_invertible());
             assert!(!Mat2::from_cols([Vec2::zero(), Vec2::one()]).is_invertible());

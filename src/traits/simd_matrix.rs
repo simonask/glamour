@@ -64,9 +64,7 @@ pub trait SimdMatrix:
     /// Check if the matrix is invertible. Default implementation returns
     /// `self.determinant() != 0.0`.
     #[must_use]
-    fn is_invertible(&self) -> bool {
-        !self.determinant().is_zero()
-    }
+    fn is_invertible(&self) -> bool;
 
     /// If the matrix is invertible, return the inverted matrix, otherwise
     /// return `None`.
@@ -288,6 +286,12 @@ macro_rules! impl_matrix {
             #[inline]
             fn determinant(&self) -> $scalar {
                 <$glam_ty>::determinant(self)
+            }
+
+            #[inline]
+            fn is_invertible(&self) -> bool {
+                let d = <$glam_ty>::determinant(self);
+                d.is_finite() && d != 0.0
             }
 
             #[inline]
