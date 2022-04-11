@@ -109,7 +109,7 @@ macro_rules! impl_point {
         impl<T: Unit> Sub for $base_type_name<T> {
             type Output = $vector_type<T>;
 
-            #[inline(always)]
+            #[inline]
             fn sub(self, other: Self) -> Self::Output {
                 $vector_type::<T>::from_raw(self.to_raw() - other.to_raw())
             }
@@ -118,7 +118,7 @@ macro_rules! impl_point {
         impl<T: Unit> Add<$vector_type<T>> for $base_type_name<T> {
             type Output = Self;
 
-            #[inline(always)]
+            #[inline]
             fn add(self, other: $vector_type<T>) -> Self {
                 Self::from_raw(self.to_raw() + other.to_raw())
             }
@@ -127,35 +127,35 @@ macro_rules! impl_point {
         impl<T: Unit> Sub<$vector_type<T>> for $base_type_name<T> {
             type Output = Self;
 
-            #[inline(always)]
+            #[inline]
             fn sub(self, other: $vector_type<T>) -> Self {
                 Self::from_raw(self.to_raw() - other.to_raw())
             }
         }
 
         impl<T: Unit> AddAssign<$vector_type<T>> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             fn add_assign(&mut self, vector: $vector_type<T>) {
                 *self.as_raw_mut() += vector.to_raw();
             }
         }
 
         impl<T: Unit> SubAssign<$vector_type<T>> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             fn sub_assign(&mut self, vector: $vector_type<T>) {
                 *self.as_raw_mut() -= vector.to_raw();
             }
         }
 
         impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             fn from(vec: $vector_type<T>) -> Self {
                 Self::from_raw(vec.to_raw())
             }
         }
 
         impl<T: Unit> From<$base_type_name<T>> for $vector_type<T> {
-            #[inline(always)]
+            #[inline]
             fn from(point: $base_type_name<T>) -> Self {
                 Self::from_raw(point.to_raw())
             }
@@ -163,25 +163,25 @@ macro_rules! impl_point {
 
         impl<T: Unit> $base_type_name<T> {
             /// Convert a vector to a point as-is.
-            #[inline(always)]
+            #[inline]
             pub fn from_vector(vec: $vector_type<T>) -> Self {
                 vec.into()
             }
 
             /// Cast this point as-is to a vector.
-            #[inline(always)]
+            #[inline]
             pub fn to_vector(self) -> $vector_type<T> {
                 self.into()
             }
 
             #[doc = "Reinterpret as vector."]
-            #[inline(always)]
+            #[inline]
             pub fn as_vector(&self) -> &$vector_type<T> {
                 bytemuck::cast_ref(self)
             }
 
             #[doc = "Reinterpret as vector."]
-            #[inline(always)]
+            #[inline]
             pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
                 bytemuck::cast_mut(self)
             }
@@ -189,7 +189,7 @@ macro_rules! impl_point {
             /// Translate this point by vector.
             ///
             /// Equivalent to `self + by`.
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn translate(self, by: $vector_type<T>) -> Self {
                 self + by
@@ -201,7 +201,7 @@ macro_rules! impl_point {
             T: crate::traits::UnitTypes,
             T::$vec_ty: Lerp<T::Primitive>,
         {
-            #[inline(always)]
+            #[inline]
             fn lerp(self, end: Self, t: T::Primitive) -> Self {
                 Self::from_raw(self.to_raw().lerp(end.to_raw(), t))
             }

@@ -53,7 +53,7 @@ pub trait SimdMatrix:
     /// Note: If the matrix is not invertible, this returns an invalid matrix.
     /// See [`SimdMatrix::inverse_checked()`].
     #[must_use]
-    fn inverse(&self) -> Self;
+    fn inverse_unchecked(&self) -> Self;
 
     /// Matrix determinant.
     ///
@@ -71,9 +71,9 @@ pub trait SimdMatrix:
     /// If the matrix is invertible, return the inverted matrix, otherwise
     /// return `None`.
     #[must_use]
-    fn inverse_checked(&self) -> Option<Self> {
+    fn inverse(&self) -> Option<Self> {
         if self.is_invertible() {
-            Some(self.inverse())
+            Some(self.inverse_unchecked())
         } else {
             None
         }
@@ -260,42 +260,42 @@ macro_rules! impl_matrix {
         impl SimdMatrix for $glam_ty {
             type Scalar = $scalar;
 
-            #[inline(always)]
+            #[inline]
             fn zero() -> Self {
                 <$glam_ty>::ZERO
             }
 
-            #[inline(always)]
+            #[inline]
             fn identity() -> Self {
                 <$glam_ty>::IDENTITY
             }
 
-            #[inline(always)]
+            #[inline]
             fn nan() -> Self {
                 <$glam_ty>::NAN
             }
 
-            #[inline(always)]
+            #[inline]
             fn is_nan(&self) -> bool {
                 <$glam_ty>::is_nan(self)
             }
 
-            #[inline(always)]
+            #[inline]
             fn is_finite(&self) -> bool {
                 <$glam_ty>::is_finite(self)
             }
 
-            #[inline(always)]
+            #[inline]
             fn determinant(&self) -> $scalar {
                 <$glam_ty>::determinant(self)
             }
 
-            #[inline(always)]
+            #[inline]
             fn transpose(&self) -> Self {
                 <$glam_ty>::transpose(self)
             }
 
-            fn inverse(&self) -> Self {
+            fn inverse_unchecked(&self) -> Self {
                 <$glam_ty>::inverse(self)
             }
         }
@@ -310,166 +310,166 @@ impl_matrix!(f64, 3, glam::DMat3 { x, y, z });
 impl_matrix!(f64, 4, glam::DMat4 { x, y, z, w });
 
 impl SimdMatrix2 for glam::Mat2 {
-    #[inline(always)]
+    #[inline]
     fn transform_point(&self, point: glam::Vec2) -> glam::Vec2 {
         self.mul_vec2(point)
     }
 
-    #[inline(always)]
+    #[inline]
     fn transform_vector(&self, vector: glam::Vec2) -> glam::Vec2 {
         self.mul_vec2(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_cols([x_axis, y_axis]: [glam::Vec2; 2]) -> Self {
         <glam::Mat2>::from_cols(x_axis, y_axis)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_cols(self) -> [glam::Vec2; 2] {
         bytemuck::cast(self)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_rows(self) -> [glam::Vec2; 2] {
         [self.row(0), self.row(1)]
     }
 
-    #[inline(always)]
+    #[inline]
     fn col(&self, index: usize) -> glam::Vec2 {
         <glam::Mat2>::col(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn col_mut(&mut self, index: usize) -> &mut glam::Vec2 {
         <glam::Mat2>::col_mut(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn row(&self, index: usize) -> glam::Vec2 {
         <glam::Mat2>::row(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale(vector: glam::Vec2) -> Self {
         <glam::Mat2>::from_scale_angle(vector, 0.0)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_angle(angle: Angle<f32>) -> Self {
         <glam::Mat2>::from_angle(angle.radians)
     }
 }
 
 impl SimdMatrix2 for glam::DMat2 {
-    #[inline(always)]
+    #[inline]
     fn transform_point(&self, point: glam::DVec2) -> glam::DVec2 {
         self.mul_vec2(point)
     }
 
-    #[inline(always)]
+    #[inline]
     fn transform_vector(&self, vector: glam::DVec2) -> glam::DVec2 {
         self.mul_vec2(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_cols([x_axis, y_axis]: [glam::DVec2; 2]) -> Self {
         <glam::DMat2>::from_cols(x_axis, y_axis)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_cols(self) -> [glam::DVec2; 2] {
         bytemuck::cast(self)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_rows(self) -> [glam::DVec2; 2] {
         [self.row(0), self.row(1)]
     }
 
-    #[inline(always)]
+    #[inline]
     fn col(&self, index: usize) -> glam::DVec2 {
         <glam::DMat2>::col(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn col_mut(&mut self, index: usize) -> &mut glam::DVec2 {
         <glam::DMat2>::col_mut(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn row(&self, index: usize) -> glam::DVec2 {
         <glam::DMat2>::row(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale(vector: glam::DVec2) -> Self {
         <glam::DMat2>::from_scale_angle(vector, 0.0)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_angle(angle: Angle<f64>) -> Self {
         <glam::DMat2>::from_angle(angle.radians)
     }
 }
 
 impl SimdMatrix3 for glam::Mat3 {
-    #[inline(always)]
+    #[inline]
     fn transform_point(&self, point: glam::Vec2) -> glam::Vec2 {
         self.transform_point2(point)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_cols([x_axis, y_axis, z_axis]: [glam::Vec3; 3]) -> Self {
         <glam::Mat3>::from_cols(x_axis, y_axis, z_axis)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_cols(self) -> [glam::Vec3; 3] {
         bytemuck::cast(self)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_rows(self) -> [glam::Vec3; 3] {
         [self.row(0), self.row(1), self.row(2)]
     }
 
-    #[inline(always)]
+    #[inline]
     fn col(&self, index: usize) -> glam::Vec3 {
         <glam::Mat3>::col(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn col_mut(&mut self, index: usize) -> &mut glam::Vec3 {
         <glam::Mat3>::col_mut(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn row(&self, index: usize) -> glam::Vec3 {
         <glam::Mat3>::row(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn transform_vector(&self, vector: glam::Vec2) -> glam::Vec2 {
         self.transform_vector2(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale(vector: glam::Vec2) -> Self {
         <glam::Mat3>::from_scale(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_angle(angle: Angle<f32>) -> Self {
         <glam::Mat3>::from_angle(angle.radians)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_translation(translation: glam::Vec2) -> Self {
         <glam::Mat3>::from_translation(translation)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale_angle_translation(
         scale: glam::Vec2,
         angle: Angle<f32>,
@@ -480,62 +480,62 @@ impl SimdMatrix3 for glam::Mat3 {
 }
 
 impl SimdMatrix3 for glam::DMat3 {
-    #[inline(always)]
+    #[inline]
     fn transform_point(&self, point: glam::DVec2) -> glam::DVec2 {
         self.transform_point2(point)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_cols([x_axis, y_axis, z_axis]: [glam::DVec3; 3]) -> Self {
         <glam::DMat3>::from_cols(x_axis, y_axis, z_axis)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_cols(self) -> [glam::DVec3; 3] {
         bytemuck::cast(self)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_rows(self) -> [glam::DVec3; 3] {
         [self.row(0), self.row(1), self.row(2)]
     }
 
-    #[inline(always)]
+    #[inline]
     fn col(&self, index: usize) -> glam::DVec3 {
         <glam::DMat3>::col(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn col_mut(&mut self, index: usize) -> &mut glam::DVec3 {
         <glam::DMat3>::col_mut(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn row(&self, index: usize) -> glam::DVec3 {
         <glam::DMat3>::row(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn transform_vector(&self, vector: glam::DVec2) -> glam::DVec2 {
         self.transform_vector2(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale(vector: glam::DVec2) -> Self {
         <glam::DMat3>::from_scale(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_angle(angle: Angle<f64>) -> Self {
         <glam::DMat3>::from_angle(angle.radians)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_translation(translation: glam::DVec2) -> Self {
         <glam::DMat3>::from_translation(translation)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale_angle_translation(
         scale: glam::DVec2,
         angle: Angle<f64>,
@@ -546,62 +546,62 @@ impl SimdMatrix3 for glam::DMat3 {
 }
 
 impl SimdMatrix4 for glam::Mat4 {
-    #[inline(always)]
+    #[inline]
     fn transform_point(&self, point: glam::Vec3) -> glam::Vec3 {
         self.transform_point3(point)
     }
 
-    #[inline(always)]
+    #[inline]
     fn transform_vector(&self, vector: glam::Vec3) -> glam::Vec3 {
         self.transform_vector3(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn project_point(&self, vector: glam::Vec3) -> glam::Vec3 {
         <glam::Mat4>::project_point3(self, vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_cols([x_axis, y_axis, z_axis, w_axis]: [glam::Vec4; 4]) -> Self {
         <glam::Mat4>::from_cols(x_axis, y_axis, z_axis, w_axis)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_cols(self) -> [glam::Vec4; 4] {
         bytemuck::cast(self)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_rows(self) -> [glam::Vec4; 4] {
         [self.row(0), self.row(1), self.row(2), self.row(3)]
     }
 
-    #[inline(always)]
+    #[inline]
     fn col(&self, index: usize) -> glam::Vec4 {
         <glam::Mat4>::col(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn col_mut(&mut self, index: usize) -> &mut glam::Vec4 {
         <glam::Mat4>::col_mut(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn row(&self, index: usize) -> glam::Vec4 {
         <glam::Mat4>::row(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale(vector: glam::Vec3) -> Self {
         <glam::Mat4>::from_scale(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_axis_angle(axis: glam::Vec3, angle: Angle<f32>) -> Self {
         glam::Mat4::from_axis_angle(axis, angle.radians)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_translation(translation: glam::Vec3) -> Self {
         <glam::Mat4>::from_translation(translation)
     }
@@ -618,62 +618,62 @@ impl SimdMatrix4 for glam::Mat4 {
 }
 
 impl SimdMatrix4 for glam::DMat4 {
-    #[inline(always)]
+    #[inline]
     fn transform_point(&self, point: glam::DVec3) -> glam::DVec3 {
         self.transform_point3(point)
     }
 
-    #[inline(always)]
+    #[inline]
     fn transform_vector(&self, vector: glam::DVec3) -> glam::DVec3 {
         self.transform_vector3(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn project_point(&self, vector: glam::DVec3) -> glam::DVec3 {
         <glam::DMat4>::project_point3(self, vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_cols([x_axis, y_axis, z_axis, w_axis]: [glam::DVec4; 4]) -> Self {
         <glam::DMat4>::from_cols(x_axis, y_axis, z_axis, w_axis)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_cols(self) -> [glam::DVec4; 4] {
         bytemuck::cast(self)
     }
 
-    #[inline(always)]
+    #[inline]
     fn to_rows(self) -> [glam::DVec4; 4] {
         [self.row(0), self.row(1), self.row(2), self.row(3)]
     }
 
-    #[inline(always)]
+    #[inline]
     fn col(&self, index: usize) -> glam::DVec4 {
         <glam::DMat4>::col(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn col_mut(&mut self, index: usize) -> &mut glam::DVec4 {
         <glam::DMat4>::col_mut(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn row(&self, index: usize) -> glam::DVec4 {
         <glam::DMat4>::row(self, index)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_scale(vector: glam::DVec3) -> Self {
         <glam::DMat4>::from_scale(vector)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_axis_angle(axis: glam::DVec3, angle: Angle<f64>) -> Self {
         <glam::DMat4>::from_axis_angle(axis, angle.radians)
     }
 
-    #[inline(always)]
+    #[inline]
     fn from_translation(translation: glam::DVec3) -> Self {
         <glam::DMat4>::from_translation(translation)
     }

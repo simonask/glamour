@@ -48,21 +48,21 @@ pub trait Scalar:
 
 
     /// Bitwise cast from `Primitive` to `Self`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn from_raw(raw: Self::Primitive) -> Self {
         bytemuck::cast(raw)
     }
 
     /// Bitwise cast from `Self` to `Primitive`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn to_raw(self) -> Self::Primitive {
         bytemuck::cast(self)
     }
 
     /// Reinterpret a reference to `Self` as a reference to `Primitive`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn as_raw(&self) -> &Self::Primitive {
         bytemuck::cast_ref(self)
@@ -70,7 +70,7 @@ pub trait Scalar:
 
     /// Reinterpret a mutable reference to `Self` as a mutable reference to
     /// `Primitive`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn as_raw_mut(&mut self) -> &mut Self::Primitive {
         bytemuck::cast_mut(self)
@@ -79,7 +79,7 @@ pub trait Scalar:
     /// Get the minimum of two scalar values through `PartialOrd`. If the values
     /// are not meaningfully comparable (such as NaN), either one may be
     /// returned.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn min(self, other: Self) -> Self {
         if self < other {
@@ -92,7 +92,7 @@ pub trait Scalar:
     /// Get the maximum of two scalar values through `PartialOrd`. If the values
     /// are not meaningfully comparable (such as NaN), either one may be
     /// returned.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn max(self, other: Self) -> Self {
         if self > other {
@@ -103,14 +103,14 @@ pub trait Scalar:
     }
 
     /// "Zero" from the `Primitive` type's implementation of `num_traits::Zero`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn zero() -> Self {
         Self::from_raw(<Self::Primitive as num_traits::Zero>::zero())
     }
 
     /// "One" from the `Primitive` type's implementation of `num_traits::One`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn one() -> Self {
         Self::from_raw(<Self::Primitive as num_traits::One>::one())
@@ -118,7 +118,7 @@ pub trait Scalar:
 
     /// Convenience method for `Self::from_raw(Self::Primitive::one() +
     /// Self::Primitive::one())`.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn two() -> Self {
         let one = <Self::Primitive as num_traits::One>::one();

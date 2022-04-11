@@ -93,14 +93,14 @@ macro_rules! impl_size {
         }
 
         impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             fn from(vec: $vector_type<T>) -> Self {
                 Self::from_raw(vec.to_raw())
             }
         }
 
         impl<T: Unit> From<$base_type_name<T>> for $vector_type<T> {
-            #[inline(always)]
+            #[inline]
             fn from(point: $base_type_name<T>) -> Self {
                 Self::from_raw(point.to_raw())
             }
@@ -108,25 +108,25 @@ macro_rules! impl_size {
 
         impl<T: Unit> $base_type_name<T> {
             #[doc = "Interpret `vec` as size."]
-            #[inline(always)]
+            #[inline]
             pub fn from_vector(vec: $vector_type<T>) -> Self {
                 vec.into()
             }
 
             #[doc = "Convert to vector."]
-            #[inline(always)]
+            #[inline]
             pub fn to_vector(self) -> $vector_type<T> {
                 self.into()
             }
 
             #[doc = "Reinterpret as vector."]
-            #[inline(always)]
+            #[inline]
             pub fn as_vector(&self) -> &$vector_type<T> {
                 bytemuck::cast_ref(self)
             }
 
             #[doc = "Reinterpret as vector."]
-            #[inline(always)]
+            #[inline]
             pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
                 bytemuck::cast_mut(self)
             }
@@ -137,7 +137,7 @@ macro_rules! impl_size {
             T: crate::traits::UnitTypes,
             T::$vec_ty: Lerp<T::Primitive>,
         {
-            #[inline(always)]
+            #[inline]
             fn lerp(self, end: Self, t: T::Primitive) -> Self {
                 Self::from_raw(self.to_raw().lerp(end.to_raw(), t))
             }

@@ -6,7 +6,7 @@ macro_rules! impl_common {
     }) => {
         impl<T: crate::traits::UnitTypes> $base_type_name<T> {
             #[doc = "Instantiate with field values."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn new($($fields: $fields_ty),*) -> $base_type_name<T> {
                 $base_type_name {
@@ -15,35 +15,35 @@ macro_rules! impl_common {
             }
 
             #[doc = "Bitcast an untyped instance to self."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_untyped(untyped: $base_type_name<T::Primitive>) -> $base_type_name<T> {
                 untyped.cast()
             }
 
             #[doc = "Bitcast self to an untyped instance."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn to_untyped(self) -> $base_type_name<T::Primitive> {
                 self.cast()
             }
 
             #[doc = "Reinterpret cast self as the untyped variant."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_untyped(&self) -> &$base_type_name<T::Primitive> {
                 self.cast_ref()
             }
 
             #[doc = "Reinterpret cast self as the untyped variant."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_untyped_mut(&mut self) -> &mut $base_type_name<T::Primitive> {
                 self.cast_mut()
             }
 
             #[doc = "Cast to a different coordinate space with the same underlying scalar type."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cast<T2>(self) -> $base_type_name<T2>
             where
@@ -53,7 +53,7 @@ macro_rules! impl_common {
             }
 
             #[doc = "Cast to a different coordinate space with the same underlying scalar type."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cast_ref<T2>(&self) -> &$base_type_name<T2>
             where
@@ -63,7 +63,7 @@ macro_rules! impl_common {
             }
 
             #[doc = "Cast to a different coordinate space with the same underlying scalar type."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cast_mut<T2>(&mut self) -> &mut $base_type_name<T2>
             where
@@ -86,7 +86,7 @@ macro_rules! impl_common {
         }
 
         impl<T: Unit> Clone for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn clone(&self) -> Self {
                 *self
@@ -96,7 +96,7 @@ macro_rules! impl_common {
         impl<T: Unit> Copy for $base_type_name<T> {}
 
         impl<T: Unit> Default for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn default() -> Self {
                 $base_type_name {
@@ -128,7 +128,7 @@ macro_rules! impl_common {
         unsafe impl<T: crate::traits::Unit> bytemuck::Pod for $base_type_name<T> where $($fields_ty: bytemuck::Pod),* {}
 
         impl<T: Unit> PartialEq for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn eq(&self, other: &Self) -> bool {
                 ($(self.$fields),*) == ($(other.$fields),*)
@@ -252,7 +252,7 @@ macro_rules! impl_as_tuple {
         }
 
         impl<T: Unit> PartialEq<($($fields_ty),*)> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn eq(&self, ($($fields),*): &($($fields_ty),*)) -> bool {
                 Self {
@@ -340,14 +340,14 @@ macro_rules! impl_simd_common {
     }) => {
         impl<T: crate::traits::UnitTypes> $base_type_name<T> {
             #[doc = "Get the underlying `glam` vector."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn to_raw(self) -> T::$vec_ty {
                 bytemuck::cast(self)
             }
 
             #[doc = "Create new instance from `glam` vector."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_raw(raw: T::$vec_ty) -> Self {
                 bytemuck::cast(raw)
@@ -359,28 +359,28 @@ macro_rules! impl_simd_common {
             #[doc = "because some `glam` vector types have smaller alignment than"]
             #[doc = "these vector types, so the cast may fail. If you are sure this"]
             #[doc = "isn't the case, you can use [`bytemuck::cast_ref()`] directly."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_raw(&self) -> &T::$vec_ty {
                 bytemuck::cast_ref(self)
             }
 
             #[doc = "Reinterpret as the underlying `glam` vector."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_raw_mut(&mut self) -> &mut T::$vec_ty {
                 bytemuck::cast_mut(self)
             }
 
             #[doc = "Instantiate from array."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_array([$($fields),*]: [T::Scalar; $dimensions]) -> Self {
                 Self { $($fields),* }
             }
 
             #[doc = "Convert to array."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn to_array(self) -> [T::Scalar; $dimensions] {
                 let Self { $($fields),* } = self;
@@ -388,21 +388,21 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Reinterpret as array."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_array(&self) -> &[T::Scalar; $dimensions] {
                 bytemuck::cast_ref(self)
             }
 
             #[doc = "Reinterpret as mutable array."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_array_mut(&mut self) -> &mut [T::Scalar; $dimensions] {
                 bytemuck::cast_mut(self)
             }
 
             #[doc = "Instance with all zeroes."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn zero() -> Self {
                 use crate::traits::SimdVec;
@@ -410,7 +410,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Instance with all ones."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn one() -> Self {
                 use crate::traits::SimdVec;
@@ -449,20 +449,20 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Get component at index `N`."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn const_get<const N: usize>(&self) -> T::Scalar {
                 self.as_array()[N]
             }
 
             #[doc = "Set component at index `N`."]
-            #[inline(always)]
+            #[inline]
             pub fn const_set<const N: usize>(&mut self, value: T::Scalar) {
                 self.as_array_mut()[N] = value;
             }
 
             #[doc = "Return a mask with the result of a component-wise equals comparison."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cmpeq(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
@@ -470,7 +470,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cmpne(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
@@ -478,7 +478,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cmpge(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
@@ -486,7 +486,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cmpgt(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
@@ -494,7 +494,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cmple(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
@@ -502,7 +502,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Return a mask with the result of a component-wise less-than comparison."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn cmplt(self, other: Self) -> $mask_ty {
                 use crate::traits::SimdVec;
@@ -510,7 +510,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Minimum by component."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn min(self, other: Self) -> Self {
                 use crate::traits::SimdVec;
@@ -518,7 +518,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Maximum by component."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn max(self, other: Self) -> Self {
                 use crate::traits::SimdVec;
@@ -542,7 +542,7 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Select components from two instances based on a mask."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn select(mask: $mask_ty, if_true: Self, if_false: Self) -> Self {
                 use crate::traits::SimdVec;
@@ -556,28 +556,28 @@ macro_rules! impl_simd_common {
             T::$vec_ty: crate::traits::SimdVecFloat<$dimensions>,
         {
             #[doc = "Return an instance where all components are NaN."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn nan() -> Self {
                 use crate::traits::SimdVecFloat;
                 Self::from_raw(T::$vec_ty::nan())
             }
             #[doc = "True if all components are non-infinity and non-NaN."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn is_finite(&self) -> bool {
                 use crate::traits::SimdVecFloat;
                 self.as_raw().is_finite()
             }
             #[doc = "True if any component is NaN."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn is_nan(&self) -> bool {
                 use crate::traits::SimdVecFloat;
                 self.as_raw().is_nan()
             }
             #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn is_nan_mask(&self) -> $mask_ty {
                 use crate::traits::SimdVecFloat;
@@ -585,21 +585,21 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Round all components up."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn ceil(self) -> Self {
                 use crate::traits::SimdVecFloat;
                 Self::from_raw(self.to_raw().ceil())
             }
             #[doc = "Round all components down."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn floor(self) -> Self {
                 use crate::traits::SimdVecFloat;
                 Self::from_raw(self.to_raw().floor())
             }
             #[doc = "Round all components."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn round(self) -> Self {
                 use crate::traits::SimdVecFloat;
@@ -624,7 +624,7 @@ macro_rules! impl_simd_common {
         impl<T: Unit> core::ops::Index<usize> for $base_type_name<T> {
             type Output = T::Scalar;
 
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn index(&self, index: usize) -> &Self::Output {
                 &self.as_array()[index]
@@ -632,7 +632,7 @@ macro_rules! impl_simd_common {
         }
 
         impl<T: Unit> core::ops::IndexMut<usize> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn index_mut(&mut self, index: usize) -> &mut Self::Output {
                 &mut self.as_array_mut()[index]
@@ -641,7 +641,7 @@ macro_rules! impl_simd_common {
 
         impl<T: Unit> AsRef<[T::Scalar; $dimensions]> for $base_type_name<T>
         {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn as_ref(&self) -> &[T::Scalar; $dimensions] {
                 bytemuck::cast_ref(self)
@@ -649,7 +649,7 @@ macro_rules! impl_simd_common {
         }
 
         impl<T: Unit> From<[T::Scalar; $dimensions]> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn from(arr: [T::Scalar; $dimensions]) -> Self {
                 Self::from_array(arr)
@@ -657,7 +657,7 @@ macro_rules! impl_simd_common {
         }
 
         impl<T: Unit> From<$base_type_name<T>> for [T::Scalar; $dimensions] {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn from(v: $base_type_name<T>) -> Self {
                 v.to_array()
@@ -668,7 +668,7 @@ macro_rules! impl_simd_common {
         where
             T::Scalar: bytemuck::Pod
         {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn as_mut(&mut self) -> &mut [T::Scalar; $dimensions] {
                 bytemuck::cast_mut(self)
@@ -679,7 +679,7 @@ macro_rules! impl_simd_common {
         where
             T::Scalar: bytemuck::Pod
         {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn as_ref(&self) -> &[T::Scalar] {
                 AsRef::<[T::Scalar; $dimensions]>::as_ref(self)
@@ -690,7 +690,7 @@ macro_rules! impl_simd_common {
         where
             T::Scalar: bytemuck::Pod
         {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn as_mut(&mut self) -> &mut [T::Scalar] {
                 AsMut::<[T::Scalar; $dimensions]>::as_mut(self)
@@ -698,7 +698,7 @@ macro_rules! impl_simd_common {
         }
 
         impl<T: Unit> PartialEq<[T::Scalar; $dimensions]> for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn eq(&self, other: &[T::Scalar; $dimensions]) -> bool {
                 self.to_array() == *other
@@ -722,7 +722,7 @@ macro_rules! impl_simd_common {
         {
             type Output = Self;
 
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn neg(self) -> Self::Output {
                 Self::from_raw(-self.to_raw())
@@ -745,7 +745,7 @@ macro_rules! impl_glam_conversion {
                 T: Unit,
                 T::Scalar: crate::Scalar<Primitive = $scalar>
             {
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 fn from(vec: $base_type_name<T>) -> Self {
                     vec.to_raw()
@@ -757,7 +757,7 @@ macro_rules! impl_glam_conversion {
                 T: Unit,
                 T::Scalar: crate::Scalar<Primitive = $scalar>
             {
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 fn from(vec: $glam_type) -> Self {
                     Self::from_raw(vec)
@@ -769,7 +769,7 @@ macro_rules! impl_glam_conversion {
                 T: Unit,
                 T::Scalar: crate::Scalar<Primitive = $scalar>
             {
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 fn as_ref(&self) -> &$glam_type {
                     bytemuck::cast_ref(self)
@@ -781,7 +781,7 @@ macro_rules! impl_glam_conversion {
                 T: Unit,
                 T::Scalar: crate::Scalar<Primitive = $scalar>
             {
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 fn as_mut(&mut self) -> &mut $glam_type {
                     bytemuck::cast_mut(self)
@@ -807,7 +807,7 @@ macro_rules! impl_scaling {
             {
                 type Output = Self;
 
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 fn mul(self, rhs: $scalar) -> Self::Output {
                     Self::from_raw(self.to_raw() * rhs)
@@ -819,7 +819,7 @@ macro_rules! impl_scaling {
                 T: Unit,
                 T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::MulAssign<$scalar>
             {
-                #[inline(always)]
+                #[inline]
                 fn mul_assign(&mut self, rhs: $scalar) {
                     *self.as_raw_mut() *= rhs;
                 }
@@ -832,7 +832,7 @@ macro_rules! impl_scaling {
             {
                 type Output = Self;
 
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 fn div(self, rhs: $scalar) -> Self::Output {
                     Self::from_raw(self.to_raw() / rhs)
@@ -844,7 +844,7 @@ macro_rules! impl_scaling {
                 T: Unit,
                 T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::DivAssign<$scalar>
             {
-                #[inline(always)]
+                #[inline]
                 fn div_assign(&mut self, rhs: $scalar) {
                     *self.as_raw_mut() /= rhs;
                 }
@@ -857,7 +857,7 @@ macro_rules! impl_scaling {
             {
                 type Output = Self;
 
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 fn rem(self, rhs: $scalar) -> Self::Output {
                     Self::from_raw(self.to_raw() % rhs)
@@ -869,7 +869,7 @@ macro_rules! impl_scaling {
                 T: Unit,
                 T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::RemAssign<$scalar>
             {
-                #[inline(always)]
+                #[inline]
                 fn rem_assign(&mut self, rhs: $scalar) {
                     *self.as_raw_mut() %= rhs;
                 }

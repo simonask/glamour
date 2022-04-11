@@ -96,29 +96,43 @@ macro_rules! impl_matrix {
         where
             T: PrimitiveMatrices,
         {
+            #[doc = "Create from column vectors."]
+            #[inline]
+            #[must_use]
+            pub fn from_cols(cols: [$axis_vector_ty<T>; $dimensions]) -> Self {
+                Self::from_raw(T::$mat_name::from_cols(bytemuck::cast(cols)))
+            }
+
+            #[doc = "Create from row vectors."]
+            #[inline]
+            #[must_use]
+            pub fn from_rows(cols: [$axis_vector_ty<T>; $dimensions]) -> Self {
+                Self::from_raw(T::$mat_name::from_cols(bytemuck::cast(cols)).transpose())
+            }
+
             #[doc = "Get the underlying `glam` matrix."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn to_raw(self) -> T::$mat_name {
                 cast(self)
             }
 
             #[doc = "Create from underlying `glam` matrix."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_raw(raw: T::$mat_name) -> Self {
                 cast(raw)
             }
 
             #[doc = "Cast to `glam` matrix."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_raw(&self) -> &T::$mat_name {
                 cast_ref(self)
             }
 
             #[doc = "Cast to `glam` matrix."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_raw_mut(&mut self) -> &mut T::$mat_name {
                 cast_mut(self)
@@ -151,13 +165,49 @@ macro_rules! impl_matrix {
             pub fn rows(&self) -> [$axis_vector_ty<T>; $dimensions] {
                 bytemuck::cast(self.as_raw().to_rows())
             }
+
+            #[doc = "Matrix determinant."]
+            #[inline]
+            #[must_use]
+            pub fn determinant(&self) -> T {
+                self.as_raw().determinant()
+            }
+
+            #[doc = "True if matrix is invertible."]
+            #[doc = ""]
+            #[doc = "This is equivalent to checking if the determinant is non-zero."]
+            #[inline]
+            #[must_use]
+            pub fn is_invertible(&self) -> bool {
+                self.as_raw().is_invertible()
+            }
+
+            #[doc = "Return the inverse matrix."]
+            #[doc = ""]
+            #[doc = "If the matrix is not invertible, this returns an invalid matrix."]
+            #[doc = ""]
+            #[doc = "See (e.g.) [`glam::Mat3::inverse()`]."]
+            #[inline]
+            #[must_use]
+            pub fn inverse_unchecked(&self) -> Self {
+                Self::from_raw(self.as_raw().inverse_unchecked())
+            }
+
+            #[doc = "Return the inverse matrix, if invertible."]
+            #[doc = ""]
+            #[doc = "If the matrix is not invertible, this returns `None`."]
+            #[inline]
+            #[must_use]
+            pub fn inverse(&self) -> Option<Self> {
+                self.as_raw().inverse().map(Self::from_raw)
+            }
         }
 
         impl<T> Default for $base_type_name<T>
         where
             T: PrimitiveMatrices,
         {
-            #[inline(always)]
+            #[inline]
             fn default() -> Self {
                 Self::identity()
             }
@@ -178,7 +228,7 @@ where
     /// assert_eq!(matrix.row(0), (1.0, 0.0));
     /// assert_eq!(matrix.row(1), (0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn identity() -> Self {
         Self::from_raw(T::Mat2::identity())
@@ -193,7 +243,7 @@ where
     /// assert_eq!(matrix.row(0), (2.0, 0.0));
     /// assert_eq!(matrix.row(1), (0.0, 3.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector2<T>) -> Self {
         Self::from_raw(T::Mat2::from_scale(scale.to_raw()))
@@ -210,7 +260,7 @@ where
     /// assert_abs_diff_eq!(matrix.row(0), (0.0, -1.0));
     /// assert_abs_diff_eq!(matrix.row(1), (1.0,  0.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_angle(angle: Angle<T>) -> Self {
         Self::from_raw(T::Mat2::from_angle(angle))
@@ -218,8 +268,8 @@ where
 
     /// Transform 2D point.
     ///
-    /// See [`glam::Mat3::transform_point2()`] or
-    /// [`glam::DMat3::transform_point2()`] (depending on the scalar).
+    /// See [`glam::Mat2::mul_vec2()`] or
+    /// [`glam::DMat2::mul_vec2()`] (depending on the scalar).
     ///
     /// #### Example
     ///
@@ -230,26 +280,29 @@ where
     /// let rotated = matrix.transform_point(point);
     /// approx::assert_abs_diff_eq!(rotated, (0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn transform_point(&self, point: Point2<T>) -> Point2<T> {
         Point2::from_raw(self.as_raw().transform_point(point.to_raw()))
     }
 
     /// Transform 2D vector.
-    #[inline(always)]
+    ///
+    /// See [`glam::Mat2::mul_vec2()`] or
+    /// [`glam::DMat2::mul_vec2()`] (depending on the scalar).
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let matrix = Matrix2::<f32>::from_angle(Angle::<f32>::from_degrees(90.0));
+    /// let vector = Vector2::<f32> { x: 1.0, y: 0.0 };
+    /// let rotated = matrix.transform_vector(vector);
+    /// approx::assert_abs_diff_eq!(rotated, (0.0, 1.0));
+    /// ```
+    #[inline]
     #[must_use]
     pub fn transform_vector(&self, vector: Vector2<T>) -> Vector2<T> {
         Vector2::from_raw(self.as_raw().transform_vector(vector.to_raw()))
-    }
-
-    /// Invert the matrix.
-    ///
-    /// See [`glam::Mat2::inverse()`] and [`glam::DMat2::inverse()`].
-    #[inline(always)]
-    #[must_use]
-    pub fn inverse(&self) -> Self {
-        Self::from_raw(self.as_raw().inverse())
     }
 }
 
@@ -267,7 +320,7 @@ where
     /// assert_eq!(matrix.row(1), (0.0, 1.0, 0.0));
     /// assert_eq!(matrix.row(2), (0.0, 0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn identity() -> Self {
         Self::from_raw(T::Mat3::identity())
@@ -283,7 +336,7 @@ where
     /// assert_eq!(matrix.row(1), (0.0, 3.0, 0.0));
     /// assert_eq!(matrix.row(2), (0.0, 0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector2<T>) -> Self {
         Self::from_raw(T::Mat3::from_scale(scale.to_raw()))
@@ -301,7 +354,7 @@ where
     /// assert_abs_diff_eq!(matrix.row(1), (1.0,  0.0, 0.0));
     /// assert_abs_diff_eq!(matrix.row(2), (0.0,  0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_angle(angle: Angle<T>) -> Self {
         Self::from_raw(T::Mat3::from_angle(angle))
@@ -318,7 +371,7 @@ where
     /// assert_abs_diff_eq!(matrix.row(1), (0.0, 1.0, 20.0));
     /// assert_abs_diff_eq!(matrix.row(2), (0.0, 0.0,  1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_translation(translation: Vector2<T>) -> Self {
         Self::from_raw(T::Mat3::from_translation(translation.to_raw()))
@@ -367,7 +420,7 @@ where
     /// let rotated = matrix.transform_point(point);
     /// approx::assert_abs_diff_eq!(rotated, (0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn transform_point(&self, point: Point2<T>) -> Point2<T> {
         Point2::from_raw(self.as_raw().transform_point(point.to_raw()))
@@ -377,19 +430,10 @@ where
     ///
     /// See [`glam::Mat3::transform_vector2()`] or
     /// [`glam::DMat3::transform_vector2()`] (depending on the scalar).
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn transform_vector(&self, vector: Vector2<T>) -> Vector2<T> {
         Vector2::from_raw(self.as_raw().transform_vector(vector.to_raw()))
-    }
-
-    /// Invert the matrix.
-    ///
-    /// See [`glam::Mat3::inverse()`] and [`glam::DMat3::inverse()`].
-    #[inline(always)]
-    #[must_use]
-    pub fn inverse(&self) -> Self {
-        Self::from_raw(self.as_raw().inverse())
     }
 }
 
@@ -436,7 +480,7 @@ where
 {
     type Output = Matrix3<T>;
 
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn mul(self, rhs: Self) -> Self::Output {
         Matrix3::from_raw(self.to_raw() * rhs.to_raw())
@@ -562,7 +606,7 @@ where
     /// assert_eq!(matrix.row(2), (0.0, 0.0, 1.0, 0.0));
     /// assert_eq!(matrix.row(3), (0.0, 0.0, 0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn identity() -> Self {
         Self::from_raw(T::Mat4::identity())
@@ -579,7 +623,7 @@ where
     /// assert_eq!(matrix.row(2), (0.0, 0.0, 4.0, 0.0));
     /// assert_eq!(matrix.row(3), (0.0, 0.0, 0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector3<T>) -> Self {
         Self::from_raw(T::Mat4::from_scale(scale.to_raw()))
@@ -598,7 +642,7 @@ where
     /// assert_abs_diff_eq!(matrix.row(2), (0.0,  0.0, 1.0, 0.0));
     /// assert_abs_diff_eq!(matrix.row(3), (0.0,  0.0, 0.0, 1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_axis_angle(axis: Vector3<T>, angle: Angle<T>) -> Self {
         Self::from_raw(T::Mat4::from_axis_angle(axis.to_raw(), angle))
@@ -616,7 +660,7 @@ where
     /// assert_abs_diff_eq!(matrix.row(2), (0.0, 0.0, 1.0, 30.0));
     /// assert_abs_diff_eq!(matrix.row(3), (0.0, 0.0, 0.0,  1.0));
     /// ```
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn from_translation(translation: Vector3<T>) -> Self {
         Self::from_raw(T::Mat4::from_translation(translation.to_raw()))
@@ -649,7 +693,7 @@ where
     ///
     /// See [`glam::Mat4::transform_point3()`] or
     /// [`glam::DMat4::transform_point3()`] (depending on the scalar).
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn transform_point(&self, point: Point3<T>) -> Point3<T> {
         Point3::from_raw(self.as_raw().transform_point(point.to_raw()))
@@ -659,7 +703,7 @@ where
     ///
     /// See [`glam::Mat4::transform_vector3()`] or
     /// [`glam::DMat4::transform_vector3()`] (depending on the scalar).
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn transform_vector(&self, vector: Vector3<T>) -> Vector3<T> {
         Vector3::from_raw(self.as_raw().transform_vector(vector.to_raw()))
@@ -671,19 +715,10 @@ where
     ///
     /// See [`glam::Mat4::project_point3()`] or
     /// [`glam::DMat4::project_point3()`] (depending on the scalar).
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn project_point(&self, point: Point3<T>) -> Point3<T> {
         Point3::from_raw(self.as_raw().project_point(point.to_raw()))
-    }
-
-    /// Invert the matrix.
-    ///
-    /// See [`glam::Mat4::inverse()`] and [`glam::DMat4::inverse()`].
-    #[inline(always)]
-    #[must_use]
-    pub fn inverse(&self) -> Self {
-        Self::from_raw(self.as_raw().inverse())
     }
 }
 
@@ -693,7 +728,7 @@ where
 {
     type Output = Matrix4<T>;
 
-    #[inline(always)]
+    #[inline]
     #[must_use]
     fn mul(self, rhs: Self) -> Self::Output {
         Matrix4::from_raw(self.to_raw() * rhs.to_raw())
@@ -943,5 +978,76 @@ where
             || self.m42.relative_ne(&other.m42, epsilon, max_relative)
             || self.m43.relative_ne(&other.m43, epsilon, max_relative)
             || self.m44.relative_ne(&other.m44, epsilon, max_relative)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    type Mat2 = Matrix2<f32>;
+    type Mat3 = Matrix3<f32>;
+    type Mat4 = Matrix4<f32>;
+
+    type Vec2 = Vector2<f32>;
+    type Vec3 = Vector3<f32>;
+    type Vec4 = Vector4<f32>;
+
+    #[test]
+    fn is_invertible() {
+        {
+            assert!(!Mat2::zeroed().is_invertible());
+            assert!(!Mat2::from_cols([Vec2::zero(), Vec2::one()]).is_invertible());
+            assert!(!Mat2::from_cols([Vec2::one(), Vec2::zero()]).is_invertible());
+            assert!(!Mat2::from_rows([Vec2::zero(), Vec2::one()]).is_invertible());
+            assert!(!Mat2::from_rows([Vec2::one(), Vec2::zero()]).is_invertible());
+            assert!(Mat2::identity().is_invertible());
+        }
+        {
+            assert!(!Mat3::zeroed().is_invertible());
+            assert!(!Mat3::from_cols([Vec3::zero(), Vec3::one(), Vec3::one()]).is_invertible());
+            assert!(!Mat3::from_cols([Vec3::one(), Vec3::zero(), Vec3::one()]).is_invertible());
+            assert!(!Mat3::from_cols([Vec3::one(), Vec3::one(), Vec3::zero()]).is_invertible());
+            assert!(!Mat3::from_rows([Vec3::zero(), Vec3::one(), Vec3::one()]).is_invertible());
+            assert!(!Mat3::from_rows([Vec3::one(), Vec3::zero(), Vec3::one()]).is_invertible());
+            assert!(!Mat3::from_rows([Vec3::one(), Vec3::one(), Vec3::zero()]).is_invertible());
+            assert!(Mat3::identity().is_invertible());
+        }
+        {
+            assert!(!Mat4::zeroed().is_invertible());
+            assert!(
+                !Mat4::from_cols([Vec4::zero(), Vec4::one(), Vec4::one(), Vec4::one()])
+                    .is_invertible()
+            );
+            assert!(
+                !Mat4::from_cols([Vec4::one(), Vec4::zero(), Vec4::one(), Vec4::one()])
+                    .is_invertible()
+            );
+            assert!(
+                !Mat4::from_cols([Vec4::one(), Vec4::one(), Vec4::zero(), Vec4::one()])
+                    .is_invertible()
+            );
+            assert!(
+                !Mat4::from_cols([Vec4::one(), Vec4::one(), Vec4::one(), Vec4::zero()])
+                    .is_invertible()
+            );
+            assert!(
+                !Mat4::from_rows([Vec4::zero(), Vec4::one(), Vec4::one(), Vec4::one()])
+                    .is_invertible()
+            );
+            assert!(
+                !Mat4::from_rows([Vec4::one(), Vec4::zero(), Vec4::one(), Vec4::one()])
+                    .is_invertible()
+            );
+            assert!(
+                !Mat4::from_rows([Vec4::one(), Vec4::one(), Vec4::zero(), Vec4::one()])
+                    .is_invertible()
+            );
+            assert!(
+                !Mat4::from_rows([Vec4::one(), Vec4::one(), Vec4::one(), Vec4::zero()])
+                    .is_invertible()
+            );
+            assert!(Mat4::identity().is_invertible());
+        }
     }
 }

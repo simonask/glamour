@@ -127,7 +127,7 @@ impl<T: UnitTypes> Rect<T> {
     }
 
     /// Get the point at the center of the rect.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn center(&self) -> Point2<T> {
         self.origin + self.size.to_vector() / Vector2::two()

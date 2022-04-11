@@ -117,7 +117,7 @@ macro_rules! impl_vector {
             #[doc = "Instantiate vector with all components set to 2."]
             #[doc = ""]
             #[doc = "This is a shorthand for `Self::one() + Self::one()`."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn two() -> Self {
                 Self::one() + Self::one()
@@ -130,56 +130,56 @@ macro_rules! impl_vector {
             #[doc = "Unit<Scalar = f32>` etc.)."]
             #[doc = ""]
             #[doc = "This is equivalent to `self * Self::splat(scalar)`."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn mul_scalar(self, scalar: T::Scalar) -> Self {
                 self * Self::splat(scalar)
             }
 
             #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except division."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn div_scalar(self, scalar: T::Scalar) -> Self {
                 self / Self::splat(scalar)
             }
 
             #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except remainder."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn rem_scalar(self, scalar: T::Scalar) -> Self {
                 self % Self::splat(scalar)
             }
 
             #[doc = "Dot product."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn dot(self, other: Self) -> T::Scalar {
                 T::Scalar::from_raw(self.to_raw().dot(other.to_raw()))
             }
 
             #[doc = "Instantiate from point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn from_point(point: $point_ty<T>) -> Self {
                 bytemuck::cast(point)
             }
 
             #[doc = "Convert to point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn to_point(self) -> $point_ty<T> {
                 bytemuck::cast(self)
             }
 
             #[doc = "Reinterpret as point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_point(&self) -> &$point_ty<T> {
                 bytemuck::cast_ref(self)
             }
 
             #[doc = "Reinterpret as point."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn as_point_mut(&mut self) -> &mut $point_ty<T> {
                 bytemuck::cast_mut(self)
@@ -187,28 +187,28 @@ macro_rules! impl_vector {
 
             $(
                 #[doc = "Instantiate from size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn from_size(size: $size_ty<T>) -> Self {
                     bytemuck::cast(size)
                 }
 
                 #[doc = "Convert to size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn to_size(self) -> $size_ty<T> {
                     bytemuck::cast(self)
                 }
 
                 #[doc = "Reinterpret as size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn as_size(&self) -> &$size_ty<T> {
                     bytemuck::cast_ref(self)
                 }
 
                 #[doc = "Reinterpret as size."]
-                #[inline(always)]
+                #[inline]
                 #[must_use]
                 pub fn as_size_mut(&mut self) -> &mut $size_ty<T> {
                     bytemuck::cast_mut(self)
@@ -217,7 +217,7 @@ macro_rules! impl_vector {
 
             #[doc = "Select two components from this vector and return a 2D vector made from"]
             #[doc = "those components."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
                 [self.const_get::<X>(), self.const_get::<Y>()].into()
@@ -225,7 +225,7 @@ macro_rules! impl_vector {
 
             #[doc = "Select three components from this vector and return a 3D vector made from"]
             #[doc = "those components."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
                 [
@@ -238,7 +238,7 @@ macro_rules! impl_vector {
 
             #[doc = "Select four components from this vector and return a 4D vector made from"]
             #[doc = "those components."]
-            #[inline(always)]
+            #[inline]
             #[must_use]
             pub fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
                 &self,
@@ -362,7 +362,7 @@ macro_rules! impl_vector {
         impl<T: Unit> Rem for $base_type_name<T> {
             type Output = Self;
 
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn rem(self, rhs: Self) -> Self::Output {
                 Self::from_raw(self.to_raw() % rhs.to_raw())
@@ -370,7 +370,7 @@ macro_rules! impl_vector {
         }
 
         impl<T: Unit> RemAssign for $base_type_name<T> {
-            #[inline(always)]
+            #[inline]
             fn rem_assign(&mut self, rhs: Self) {
                 *self.as_raw_mut() %= rhs.to_raw();
             }
@@ -388,7 +388,7 @@ macro_rules! impl_vector {
             T: crate::traits::UnitTypes,
             T::$vec_ty: Lerp<T::Primitive>,
         {
-            #[inline(always)]
+            #[inline]
             #[must_use]
             fn lerp(self, end: Self, t: T::Primitive) -> Self {
                 Self::from_raw(self.to_raw().lerp(end.to_raw(), t.to_raw()))
@@ -403,7 +403,7 @@ impl_vector!(Vector4 [4] => Vec4, Point4);
 
 impl<T: Unit> Vector2<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
@@ -413,7 +413,7 @@ impl<T: Unit> Vector2<T> {
     }
 
     /// Unit vector in the direction of the Y axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
@@ -424,7 +424,7 @@ impl<T: Unit> Vector2<T> {
 
     /// Select components of this vector and return a new vector containing
     /// those components.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn swizzle<const X: usize, const Y: usize>(&self) -> Self {
         self.swizzle2::<X, Y>()
@@ -443,7 +443,7 @@ impl<T: Unit> Vector2<T> {
 
 impl<T: Unit> Vector3<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
@@ -454,7 +454,7 @@ impl<T: Unit> Vector3<T> {
     }
 
     /// Unit vector in the direction of the Y axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
@@ -465,7 +465,7 @@ impl<T: Unit> Vector3<T> {
     }
 
     /// Unit vector in the direction of the Z axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_z() -> Self {
         Self {
@@ -477,7 +477,7 @@ impl<T: Unit> Vector3<T> {
 
     /// Select components of this vector and return a new vector containing
     /// those components.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize>(&self) -> Self {
         self.swizzle3::<X, Y, Z>()
@@ -543,7 +543,7 @@ where
 
 impl<T: Unit> Vector4<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
@@ -555,7 +555,7 @@ impl<T: Unit> Vector4<T> {
     }
 
     /// Unit vector in the direction of the Y axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
@@ -567,7 +567,7 @@ impl<T: Unit> Vector4<T> {
     }
 
     /// Unit vector in the direction of the Z axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_z() -> Self {
         Self {
@@ -579,7 +579,7 @@ impl<T: Unit> Vector4<T> {
     }
 
     /// Unit vector in the direction of the W axis.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn unit_w() -> Self {
         Self {
@@ -592,7 +592,7 @@ impl<T: Unit> Vector4<T> {
 
     /// Select components of this vector and return a new vector containing
     /// those components.
-    #[inline(always)]
+    #[inline]
     #[must_use]
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize, const W: usize>(&self) -> Self {
         self.swizzle4::<X, Y, Z, W>()
