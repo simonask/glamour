@@ -952,6 +952,11 @@ where
 
 #[cfg(test)]
 mod tests {
+    use approx::{
+        assert_abs_diff_eq, assert_abs_diff_ne, assert_relative_eq, assert_relative_ne,
+        assert_ulps_eq, assert_ulps_ne,
+    };
+
     use super::*;
 
     type Mat2 = Matrix2<f32>;
@@ -965,6 +970,39 @@ mod tests {
     type Point2 = super::Point2<f32>;
     type Point3 = super::Point3<f32>;
     type Point4 = super::Point4<f32>;
+
+    #[test]
+    fn equality() {
+        let m2 = Mat2::identity();
+        assert_eq!(m2, m2);
+        assert_abs_diff_eq!(m2, m2);
+        assert_relative_eq!(m2, m2);
+        assert_ulps_eq!(m2, m2);
+        assert_ne!(m2, Mat2::zero());
+        assert_abs_diff_ne!(m2, Mat2::zero());
+        assert_relative_ne!(m2, Mat2::zero());
+        assert_ulps_ne!(m2, Mat2::zero());
+
+        let m3 = Mat3::identity();
+        assert_eq!(m3, m3);
+        assert_abs_diff_eq!(m3, m3);
+        assert_relative_eq!(m3, m3);
+        assert_ulps_eq!(m3, m3);
+        assert_ne!(m3, Mat3::zero());
+        assert_abs_diff_ne!(m3, Mat3::zero());
+        assert_relative_ne!(m3, Mat3::zero());
+        assert_ulps_ne!(m3, Mat3::zero());
+
+        let m4 = Mat4::identity();
+        assert_eq!(m4, m4);
+        assert_abs_diff_eq!(m4, m4);
+        assert_relative_eq!(m4, m4);
+        assert_ulps_eq!(m4, m4);
+        assert_ne!(m4, Mat4::zero());
+        assert_abs_diff_ne!(m4, Mat4::zero());
+        assert_relative_ne!(m4, Mat4::zero());
+        assert_ulps_ne!(m4, Mat4::zero());
+    }
 
     #[test]
     fn transform() {
