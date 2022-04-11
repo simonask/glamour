@@ -826,9 +826,16 @@ mod tests {
         check_2d_and_3d! {
             let a = Transform::identity();
             let b = a.clone();
+            assert_eq!(a, b);
             assert_abs_diff_eq!(a, b);
             assert_relative_eq!(a, b);
             assert_ulps_eq!(a, b);
+
+            let c = a.then_scale(VectorDst::splat(2.0));
+            assert_ne!(a, c);
+            assert_abs_diff_ne!(a, c);
+            assert_relative_ne!(a, c);
+            assert_ulps_ne!(a, c);
         };
 
         check_2d_and_3d! {
