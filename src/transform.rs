@@ -105,7 +105,10 @@ where
     }
 }
 
-impl<Src: Unit, Dst: Unit> core::fmt::Debug for Transform2<Src, Dst> {
+impl<Src: UnitTypes, Dst: Unit> core::fmt::Debug for Transform2<Src, Dst>
+where
+    Src::Primitive: PrimitiveMatrices,
+{
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Transform2")
             .field("matrix", &self.matrix)
@@ -113,9 +116,12 @@ impl<Src: Unit, Dst: Unit> core::fmt::Debug for Transform2<Src, Dst> {
     }
 }
 
-impl<Src: Unit, Dst: Unit> core::fmt::Debug for Transform3<Src, Dst> {
+impl<Src: UnitTypes, Dst: Unit> core::fmt::Debug for Transform3<Src, Dst>
+where
+    Src::Primitive: PrimitiveMatrices,
+{
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Transform2")
+        f.debug_struct("Transform3")
             .field("matrix", &self.matrix)
             .finish()
     }
@@ -891,5 +897,25 @@ mod tests {
                     .then_translate((1.0, 1.0, 1.0).into())
             );
         }
+    }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn debug_print() {
+        extern crate alloc;
+
+        let t2 = Transform2::<TestSrc, TestDst>::identity();
+        let t3 = Transform3::<TestSrc, TestDst>::identity();
+
+        let s2 = alloc::format!("{:?}", t2);
+        let s3 = alloc::format!("{:?}", t3);
+        assert_eq!(
+            s2,
+            alloc::format!("Transform2 {{ matrix: {:?} }}", t2.matrix)
+        );
+        assert_eq!(
+            s3,
+            alloc::format!("Transform3 {{ matrix: {:?} }}", t3.matrix)
+        );
     }
 }

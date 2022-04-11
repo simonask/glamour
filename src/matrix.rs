@@ -22,7 +22,7 @@ use bytemuck::{cast, cast_mut, cast_ref, Pod, Zeroable};
 ///
 /// Alignment: Always 16-byte aligned.
 #[repr(C, align(16))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix2<T> {
@@ -41,7 +41,7 @@ unsafe impl<T: Pod> Pod for Matrix2<T> {}
 ///
 /// Alignment: Same as `T`.
 #[repr(C)]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix3<T> {
@@ -65,7 +65,7 @@ unsafe impl<T: Pod> Pod for Matrix3<T> {}
 ///
 /// Alignment: Always 16-byte aligned.
 #[repr(C, align(16))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix4<T> {
@@ -179,6 +179,13 @@ macro_rules! impl_matrix {
                 $axis_vector_ty::from_raw(self.as_raw().col(index))
             }
 
+            #[doc = "Get mutable reference to column vector at `index`."]
+            #[inline]
+            #[must_use]
+            pub fn col_mut(&mut self, index: usize) -> &mut $axis_vector_ty<T> {
+                &mut self.as_cols_mut()[index]
+            }
+
             #[doc = "Get row vector at `index`."]
             #[inline]
             #[must_use]
@@ -198,6 +205,20 @@ macro_rules! impl_matrix {
             #[must_use]
             pub fn to_rows(&self) -> [$axis_vector_ty<T>; $dimensions] {
                 bytemuck::cast(self.as_raw().to_rows())
+            }
+
+            #[doc = "Get column vectors as slice."]
+            #[inline]
+            #[must_use]
+            pub fn as_cols(&self) -> &[$axis_vector_ty<T>; $dimensions] {
+                bytemuck::cast_ref(self)
+            }
+
+            #[doc = "Get column vectors as slice."]
+            #[inline]
+            #[must_use]
+            pub fn as_cols_mut(&mut self) -> &mut [$axis_vector_ty<T>; $dimensions] {
+                bytemuck::cast_mut(self)
             }
 
             #[doc = "Matrix determinant."]
@@ -224,7 +245,7 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn inverse_unchecked(&self) -> Self {
-                Self::from_raw(self.as_raw().inverse_unchecked())
+                Self::from_raw(self.as_raw().inverse())
             }
 
             #[doc = "Return the inverse matrix, if invertible."]
@@ -233,7 +254,11 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn inverse(&self) -> Option<Self> {
-                self.as_raw().inverse().map(Self::from_raw)
+                if self.is_invertible() {
+                    Some(self.inverse_unchecked())
+                } else {
+                    None
+                }
             }
 
             #[doc = "True if any element in the matrix is NaN."]
@@ -258,6 +283,19 @@ macro_rules! impl_matrix {
             #[inline]
             fn default() -> Self {
                 Self::identity()
+            }
+        }
+
+        impl<T> core::fmt::Debug for $base_type_name<T>
+        where
+            T: PrimitiveMatrices,
+        {
+            fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::fmt::Result {
+                let mut list = fmt.debug_list();
+                for i in 0..$dimensions {
+                    list.entry(&self.row(i).to_tuple());
+                }
+                list.finish()
             }
         }
     };
@@ -1141,6 +1179,67 @@ mod tests {
     }
 
     #[test]
+    fn from_scale_angle_translation() {
+        {
+            let scale = Vec2::new(2.0, 3.0);
+            let angle = Angle::from_degrees(90.0);
+            let translation = Vec2::new(4.0, 5.0);
+
+            assert_abs_diff_eq!(
+                Mat3::from_scale_angle_translation(scale, angle, translation),
+                Mat3::from_translation(translation)
+                    * Mat3::from_angle(angle)
+                    * Mat3::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+
+        {
+            let scale = DVec2::new(2.0, 3.0);
+            let angle = Angle::from_degrees(90.0);
+            let translation = DVec2::new(4.0, 5.0);
+
+            assert_abs_diff_eq!(
+                DMat3::from_scale_angle_translation(scale, angle, translation),
+                DMat3::from_translation(translation)
+                    * DMat3::from_angle(angle)
+                    * DMat3::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+
+        {
+            let scale = Vec3::new(2.0, 3.0, 4.0);
+            let axis = Vec3::unit_z();
+            let angle = Angle::from_degrees(90.0);
+            let translation = Vec3::new(5.0, 6.0, 7.0);
+
+            assert_abs_diff_eq!(
+                Mat4::from_scale_rotation_translation(scale, axis, angle, translation),
+                Mat4::from_translation(translation)
+                    * Mat4::from_axis_angle(axis, angle)
+                    * Mat4::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+
+        {
+            let scale = DVec3::new(2.0, 3.0, 4.0);
+            let axis = DVec3::unit_z();
+            let angle = Angle::from_degrees(90.0);
+            let translation = DVec3::new(5.0, 6.0, 7.0);
+
+            assert_abs_diff_eq!(
+                DMat4::from_scale_rotation_translation(scale, axis, angle, translation),
+                DMat4::from_translation(translation)
+                    * DMat4::from_axis_angle(axis, angle)
+                    * DMat4::from_scale(scale),
+                epsilon = 0.0001
+            );
+        }
+    }
+
+    #[test]
     fn to_cols() {
         assert_eq!(Mat2::identity().to_cols(), [(1.0, 0.0), (0.0, 1.0)]);
         assert_eq!(
@@ -1301,6 +1400,37 @@ mod tests {
     }
 
     #[test]
+    fn col_mut() {
+        let mut m2 = Mat2::identity();
+        let mut m3 = Mat3::identity();
+        let mut m4 = Mat4::identity();
+        let mut dm2 = DMat2::identity();
+        let mut dm3 = DMat3::identity();
+        let mut dm4 = DMat4::identity();
+
+        let _: &[Vec2; 2] = m2.as_cols();
+        let _: &[Vec3; 3] = m3.as_cols();
+        let _: &[Vec4; 4] = m4.as_cols();
+        let _: &[DVec2; 2] = dm2.as_cols();
+        let _: &[DVec3; 3] = dm3.as_cols();
+        let _: &[DVec4; 4] = dm4.as_cols();
+
+        m2.col_mut(0).set(1, 2.0);
+        m3.col_mut(0).set(1, 2.0);
+        m4.col_mut(0).set(1, 2.0);
+        dm2.col_mut(0).set(1, 2.0);
+        dm3.col_mut(0).set(1, 2.0);
+        dm4.col_mut(0).set(1, 2.0);
+
+        assert_eq!(m2.col(0), (1.0, 2.0));
+        assert_eq!(m3.col(0), (1.0, 2.0, 0.0));
+        assert_eq!(m4.col(0), (1.0, 2.0, 0.0, 0.0));
+        assert_eq!(dm2.col(0), (1.0, 2.0));
+        assert_eq!(dm3.col(0), (1.0, 2.0, 0.0));
+        assert_eq!(dm4.col(0), (1.0, 2.0, 0.0, 0.0));
+    }
+
+    #[test]
     fn equality() {
         let m2 = Mat2::identity();
         assert_eq!(m2, m2);
@@ -1382,6 +1512,16 @@ mod tests {
     }
 
     #[test]
+    fn determinant() {
+        assert_eq!(Mat2::identity().determinant(), 1.0);
+        assert_eq!(Mat3::identity().determinant(), 1.0);
+        assert_eq!(Mat4::identity().determinant(), 1.0);
+        assert_eq!(DMat2::identity().determinant(), 1.0);
+        assert_eq!(DMat3::identity().determinant(), 1.0);
+        assert_eq!(DMat4::identity().determinant(), 1.0);
+    }
+
+    #[test]
     fn nan() {
         let m2 = Mat2::nan();
         assert!(m2.col(0).is_nan());
@@ -1412,6 +1552,47 @@ mod tests {
         assert!(m4.col(1).is_nan());
         assert!(m4.col(2).is_nan());
         assert!(m4.col(3).is_nan());
+    }
+
+    #[test]
+    fn is_finite() {
+        assert!(Mat2::identity().is_finite());
+        assert!(Mat3::identity().is_finite());
+        assert!(Mat4::identity().is_finite());
+        assert!(DMat2::identity().is_finite());
+        assert!(DMat3::identity().is_finite());
+        assert!(DMat4::identity().is_finite());
+
+        assert!(!Mat2::nan().is_finite());
+        assert!(!Mat3::nan().is_finite());
+        assert!(!Mat4::nan().is_finite());
+        assert!(!DMat2::nan().is_finite());
+        assert!(!DMat3::nan().is_finite());
+        assert!(!DMat4::nan().is_finite());
+
+        assert!(!DMat4::with_rows([
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, f64::NAN),
+        ])
+        .is_finite());
+
+        assert!(!DMat4::with_rows([
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, f64::INFINITY),
+        ])
+        .is_finite());
+
+        assert!(!DMat4::with_rows([
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, 1.0),
+            (1.0, 1.0, 1.0, f64::NEG_INFINITY),
+        ])
+        .is_finite());
     }
 
     #[test]
@@ -1496,5 +1677,16 @@ mod tests {
             );
             assert!(Mat4::identity().is_invertible());
         }
+    }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn debug_print() {
+        extern crate alloc;
+
+        let m4 = Mat4::identity();
+
+        let s = alloc::format!("{:?}", m4);
+        assert_eq!(s, "[(1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)]");
     }
 }
