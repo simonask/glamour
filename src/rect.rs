@@ -569,6 +569,8 @@ mod tests {
         assert_eq!(from_size.max(), (100, 200));
         assert_eq!(from_size.width(), 100);
         assert_eq!(from_size.height(), 200);
+
+        let (_origin, _size) = from_size.into();
     }
 
     #[test]
