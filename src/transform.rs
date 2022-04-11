@@ -7,7 +7,7 @@
 use core::marker::PhantomData;
 use core::ops::Mul;
 
-use approx::AbsDiffEq;
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, Pod, Zeroable};
 use num_traits::Float;
 
@@ -129,17 +129,48 @@ impl<Src: Unit, Dst: Unit> PartialEq for Transform2<Src, Dst> {
 
 impl<Src: Unit, Dst: Unit> AbsDiffEq for Transform2<Src, Dst>
 where
-    <Src::Scalar as Scalar>::Primitive: AbsDiffEq,
-    <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon: Copy,
+    Matrix3<<Src::Scalar as Scalar>::Primitive>: AbsDiffEq,
 {
-    type Epsilon = <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon;
+    type Epsilon = <Matrix3<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
-        <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::default_epsilon()
+        <Matrix3<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::default_epsilon()
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.matrix.abs_diff_eq(&other.matrix, epsilon)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> RelativeEq for Transform2<Src, Dst>
+where
+    Matrix3<<Src::Scalar as Scalar>::Primitive>: RelativeEq,
+{
+    fn default_max_relative() -> Self::Epsilon {
+        <Matrix3<<Src::Scalar as Scalar>::Primitive> as RelativeEq>::default_max_relative()
+    }
+
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.matrix
+            .relative_eq(&other.matrix, epsilon, max_relative)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> UlpsEq for Transform2<Src, Dst>
+where
+    Matrix3<<Src::Scalar as Scalar>::Primitive>: UlpsEq,
+{
+    fn default_max_ulps() -> u32 {
+        <Matrix3<<Src::Scalar as Scalar>::Primitive> as UlpsEq>::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.matrix.ulps_eq(&other.matrix, epsilon, max_ulps)
     }
 }
 
@@ -151,17 +182,48 @@ impl<Src: Unit, Dst: Unit> PartialEq for Transform3<Src, Dst> {
 
 impl<Src: Unit, Dst: Unit> AbsDiffEq for Transform3<Src, Dst>
 where
-    <Src::Scalar as Scalar>::Primitive: AbsDiffEq,
-    <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon: Copy,
+    Matrix4<<Src::Scalar as Scalar>::Primitive>: AbsDiffEq,
 {
-    type Epsilon = <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::Epsilon;
+    type Epsilon = <Matrix4<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
-        <<Src::Scalar as Scalar>::Primitive as AbsDiffEq>::default_epsilon()
+        <Matrix4<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::default_epsilon()
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.matrix.abs_diff_eq(&other.matrix, epsilon)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> RelativeEq for Transform3<Src, Dst>
+where
+    Matrix4<<Src::Scalar as Scalar>::Primitive>: RelativeEq,
+{
+    fn default_max_relative() -> Self::Epsilon {
+        <Matrix4<<Src::Scalar as Scalar>::Primitive> as RelativeEq>::default_max_relative()
+    }
+
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.matrix
+            .relative_eq(&other.matrix, epsilon, max_relative)
+    }
+}
+
+impl<Src: Unit, Dst: Unit> UlpsEq for Transform3<Src, Dst>
+where
+    Matrix4<<Src::Scalar as Scalar>::Primitive>: UlpsEq,
+{
+    fn default_max_ulps() -> u32 {
+        <Matrix4<<Src::Scalar as Scalar>::Primitive> as UlpsEq>::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.matrix.ulps_eq(&other.matrix, epsilon, max_ulps)
     }
 }
 
@@ -379,6 +441,16 @@ where
     /// Shorthand for `.then(Transform2::from_scale(scale))`.
     ///
     /// This does not change the target coordinate space.
+    ///
+    /// #### Example
+    ///
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let a = Transform2::<f32, f32>::identity()
+    ///     .then_scale((2.0, 3.0).into());
+    /// let b = Transform2::<f32, f32>::from_scale((2.0, 3.0).into());
+    /// assert_eq!(a, b);
+    /// ```
     #[inline]
     #[must_use]
     pub fn then_scale(self, scale: Vector2<Dst>) -> Self {
@@ -500,6 +572,16 @@ where
     /// Shorthand for `.then(Transform3::from_scale(scale))`.
     ///
     /// This does not change the target coordinate space.
+    ///
+    /// #### Example
+    ///
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let a = Transform3::<f32, f32>::identity()
+    ///     .then_scale((2.0, 3.0, 4.0).into());
+    /// let b = Transform3::<f32, f32>::from_scale((2.0, 3.0, 4.0).into());
+    /// assert_eq!(a, b);
+    /// ```
     #[inline]
     #[must_use]
     pub fn then_scale(self, scale: Vector3<Dst>) -> Self {
@@ -707,6 +789,11 @@ mod tests {
         type Scalar = f32;
     }
 
+    struct TestDst2;
+    impl Unit for TestDst2 {
+        type Scalar = f32;
+    }
+
     macro_rules! check_2d_and_3d {
         { $($test:tt)* } => {{
             {
@@ -717,7 +804,7 @@ mod tests {
                 type VectorDst = Vector2<TestDst>;
                 type PointSrc = Point2<TestSrc>;
                 type PointDst = Point2<TestDst>;
-                let _ = core::mem::size_of::<(Transform, TransformInverse, VectorSrc, VectorDst, PointSrc, PointDst)>();
+                let _ = core::mem::size_of::<(Transform, Mat, TransformInverse, VectorSrc, VectorDst, PointSrc, PointDst)>();
                 $($test)*
             }
             {
@@ -735,6 +822,30 @@ mod tests {
     }
 
     #[test]
+    fn basic() {
+        check_2d_and_3d! {
+            let a = Transform::identity();
+            let b = a.clone();
+            assert_abs_diff_eq!(a, b);
+            assert_relative_eq!(a, b);
+            assert_ulps_eq!(a, b);
+        };
+
+        check_2d_and_3d! {
+            let a = Transform::identity();
+            assert_eq!(a, Transform::default());
+        };
+    }
+
+    #[test]
+    fn from_matrix() {
+        check_2d_and_3d! {
+            assert!(Transform::from_matrix(Mat::zero()).is_none());
+            assert_eq!(Transform::from_matrix(Mat::identity()), Some(Transform::identity()));
+        };
+    }
+
+    #[test]
     fn inverse() {
         check_2d_and_3d! {
             assert!(Transform::from_matrix(Mat::zeroed()).is_none());
@@ -748,5 +859,30 @@ mod tests {
             let point_src = inverse.map(point_dst);
             assert_abs_diff_eq!(point_src, point);
         };
+    }
+
+    #[test]
+    fn concatenation() {
+        {
+            let a = Transform2::<TestSrc, TestDst>::from_scale((2.0, 2.0).into());
+            let b = Transform2::<TestDst, TestDst2>::from_translation((1.0, 1.0).into());
+            let c: Transform2<TestSrc, TestDst2> = a * b;
+            assert_eq!(
+                c,
+                Transform2::<TestSrc, TestDst2>::from_scale((2.0, 2.0).into())
+                    .then_translate((1.0, 1.0).into())
+            );
+        }
+
+        {
+            let a = Transform3::<TestSrc, TestDst>::from_scale((2.0, 2.0, 2.0).into());
+            let b = Transform3::<TestDst, TestDst2>::from_translation((1.0, 1.0, 1.0).into());
+            let c: Transform3<TestSrc, TestDst2> = a * b;
+            assert_eq!(
+                c,
+                Transform3::<TestSrc, TestDst2>::from_scale((2.0, 2.0, 2.0).into())
+                    .then_translate((1.0, 1.0, 1.0).into())
+            );
+        }
     }
 }
