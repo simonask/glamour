@@ -22,7 +22,7 @@ use bytemuck::{cast, cast_mut, cast_ref, Pod, Zeroable};
 ///
 /// Alignment: Always 16-byte aligned.
 #[repr(C, align(16))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix2<T> {
@@ -41,7 +41,7 @@ unsafe impl<T: Pod> Pod for Matrix2<T> {}
 ///
 /// Alignment: Same as `T`.
 #[repr(C)]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix3<T> {
@@ -65,7 +65,7 @@ unsafe impl<T: Pod> Pod for Matrix3<T> {}
 ///
 /// Alignment: Always 16-byte aligned.
 #[repr(C, align(16))]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix4<T> {
@@ -283,6 +283,19 @@ macro_rules! impl_matrix {
             #[inline]
             fn default() -> Self {
                 Self::identity()
+            }
+        }
+
+        impl<T> core::fmt::Debug for $base_type_name<T>
+        where
+            T: PrimitiveMatrices,
+        {
+            fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::fmt::Result {
+                let mut list = fmt.debug_list();
+                for i in 0..$dimensions {
+                    list.entry(&self.row(i).to_tuple());
+                }
+                list.finish()
             }
         }
     };
@@ -1603,5 +1616,16 @@ mod tests {
             );
             assert!(Mat4::identity().is_invertible());
         }
+    }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn debug_print() {
+        extern crate alloc;
+
+        let m4 = Mat4::identity();
+
+        let s = alloc::format!("{:?}", m4);
+        assert_eq!(s, "[(1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)]");
     }
 }
