@@ -93,8 +93,6 @@ trait bounds, a number of traits exist as shorthands for convenience:
 
 - [`ScalarVectors`](crate::traits::ScalarVectors) - shorthands for `<<T as
   Scalar>::Primitive as Primitive>::VecN`.
-- [`ScalarMatrices`](crate::traits::ScalarMatrices) - shorthands for `<<T as
-  Scalar>::Primitive as PrimitiveMatrices>::MatN`.
 - [`UnitTypes`](crate::traits::UnitTypes) - shorthands for `<T::Scalar as
   Scalar>::Primitive` and `<<T::Scalar as Scalar>::Primitive as
   Primitive>::VecN`.
