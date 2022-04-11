@@ -546,6 +546,11 @@ where
 
 #[cfg(test)]
 mod tests {
+    use approx::{
+        assert_abs_diff_eq, assert_abs_diff_ne, assert_relative_eq, assert_relative_ne,
+        assert_ulps_eq, assert_ulps_ne,
+    };
+
     type Rect = super::Rect<i32>;
     type RectF = super::Rect<f32>;
     type Size = super::Size2<i32>;
@@ -571,6 +576,27 @@ mod tests {
         assert_eq!(from_size.height(), 200);
 
         let (_origin, _size) = from_size.into();
+    }
+
+    #[test]
+    fn equality() {
+        use crate::{Point2, Size2};
+        let a = RectF::new(Point2::new(0.0, 0.0), Size2::new(1.0, 1.0));
+        let b = a.translate((1.0, 1.0).into());
+
+        assert_abs_diff_eq!(a, a);
+        assert_relative_eq!(a, a);
+        assert_ulps_eq!(a, a);
+        assert_abs_diff_ne!(a, b);
+        assert_relative_ne!(a, b);
+        assert_ulps_ne!(a, b);
+
+        assert_abs_diff_eq!(a, a.to_tuple());
+        assert_relative_eq!(a, a.to_tuple());
+        assert_ulps_eq!(a, a.to_tuple());
+        assert_abs_diff_ne!(a, b.to_tuple());
+        assert_relative_ne!(a, b.to_tuple());
+        assert_ulps_ne!(a, b.to_tuple());
     }
 
     #[test]
@@ -646,6 +672,14 @@ mod tests {
     }
 
     #[test]
+    fn translate() {
+        let r = Rect::from(((10, 20), (11, 12)));
+        let r = r.translate(crate::Vector2::new(2, 3));
+        assert_eq!(r.origin, (12, 23));
+        assert_eq!(r.size, (11, 12));
+    }
+
+    #[test]
     fn negative_empty() {
         let r = Rect::from_size((-1, -1).into());
         assert!(r.is_empty());
@@ -701,6 +735,14 @@ mod tests {
         assert!(!r.intersects(&PointF::new(10.0, 9.999999)));
         assert!(!r.intersects(&PointF::new(9.999999, 10.0)));
 
+        assert_eq!(
+            r.intersection(&PointF::new(10.0, 10.0)),
+            Some(PointF::new(10.0, 10.0))
+        );
+        assert_eq!(r.intersection(&PointF::new(20.0, 20.0)), None);
+        assert_eq!(r.intersection(&PointF::new(10.0, 9.999999)), None);
+        assert_eq!(r.intersection(&PointF::new(9.999999, 10.0)), None);
+
         // r2 covers all of r.
         let r2: RectF = ((5.0, 5.0), (15.0, 15.0)).into();
         assert!(r2.intersects(&r));
@@ -729,6 +771,9 @@ mod tests {
         use super::Union;
 
         let r: RectF = ((10.0, 10.0), (10.0, 10.0)).into();
+
+        assert_eq!(r.union(RectF::zero()), r);
+        assert_eq!(RectF::zero().union(r), r);
 
         assert_eq!(r.union(r), r);
         assert_eq!(
@@ -766,5 +811,24 @@ mod tests {
                 size: (1.5, 1.5).into(),
             }
         )
+    }
+
+    #[test]
+    fn area() {
+        let r: RectF = ((-1.0, -1.0), (10.0, 10.0)).into();
+        assert_eq!(r.area(), 100.0);
+        assert_eq!(r.size.area(), r.area());
+    }
+
+    #[test]
+    fn is_finite() {
+        assert!(RectF::zero().is_finite());
+        assert!(RectF::new(super::Point2::zero(), super::Size2::one()).is_finite());
+
+        let r: RectF = ((-1.0, -1.0), (10.0, f32::NAN)).into();
+        assert!(!r.is_finite());
+
+        let r: RectF = ((-1.0, f32::NAN), (10.0, 10.0)).into();
+        assert!(!r.is_finite());
     }
 }
