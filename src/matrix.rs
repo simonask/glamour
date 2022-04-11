@@ -96,6 +96,26 @@ macro_rules! impl_matrix {
         where
             T: PrimitiveMatrices,
         {
+            #[doc = "Create from rows with implicit conversion."]
+            #[inline]
+            #[must_use]
+            pub fn with_rows<U>(rows: [U; $dimensions]) -> Self
+            where
+                U: Into<$axis_vector_ty<T>>,
+            {
+                Self::from_rows(rows.map(Into::into))
+            }
+
+            #[doc = "Create from columns with implicit conversion."]
+            #[inline]
+            #[must_use]
+            pub fn with_cols<U>(rows: [U; $dimensions]) -> Self
+            where
+                U: Into<$axis_vector_ty<T>>,
+            {
+                Self::from_cols(rows.map(Into::into))
+            }
+
             #[doc = "Create zero matrix."]
             #[inline]
             #[must_use]
@@ -169,14 +189,14 @@ macro_rules! impl_matrix {
             #[doc = "Get column vectors."]
             #[inline]
             #[must_use]
-            pub fn cols(&self) -> [$axis_vector_ty<T>; $dimensions] {
+            pub fn to_cols(&self) -> [$axis_vector_ty<T>; $dimensions] {
                 bytemuck::cast(self.as_raw().to_cols())
             }
 
             #[doc = "Get row vectors."]
             #[inline]
             #[must_use]
-            pub fn rows(&self) -> [$axis_vector_ty<T>; $dimensions] {
+            pub fn to_rows(&self) -> [$axis_vector_ty<T>; $dimensions] {
                 bytemuck::cast(self.as_raw().to_rows())
             }
 
@@ -779,11 +799,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.cols().abs_diff_eq(&other.cols(), epsilon)
+        self.to_cols().abs_diff_eq(&other.to_cols(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.cols().abs_diff_ne(&other.cols(), epsilon)
+        self.to_cols().abs_diff_ne(&other.to_cols(), epsilon)
     }
 }
 
@@ -802,8 +822,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.cols()
-            .relative_eq(&other.cols(), epsilon, max_relative)
+        self.to_cols()
+            .relative_eq(&other.to_cols(), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -812,8 +832,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.cols()
-            .relative_ne(&other.cols(), epsilon, max_relative)
+        self.to_cols()
+            .relative_ne(&other.to_cols(), epsilon, max_relative)
     }
 }
 
@@ -827,11 +847,11 @@ where
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.cols().ulps_eq(&other.cols(), epsilon, max_ulps)
+        self.to_cols().ulps_eq(&other.to_cols(), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.cols().ulps_ne(&other.cols(), epsilon, max_ulps)
+        self.to_cols().ulps_ne(&other.to_cols(), epsilon, max_ulps)
     }
 }
 
@@ -847,11 +867,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.cols().abs_diff_eq(&other.cols(), epsilon)
+        self.to_cols().abs_diff_eq(&other.to_cols(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.cols().abs_diff_ne(&other.cols(), epsilon)
+        self.to_cols().abs_diff_ne(&other.to_cols(), epsilon)
     }
 }
 
@@ -870,8 +890,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.cols()
-            .relative_eq(&other.cols(), epsilon, max_relative)
+        self.to_cols()
+            .relative_eq(&other.to_cols(), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -880,8 +900,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.cols()
-            .relative_ne(&other.cols(), epsilon, max_relative)
+        self.to_cols()
+            .relative_ne(&other.to_cols(), epsilon, max_relative)
     }
 }
 
@@ -895,11 +915,11 @@ where
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.cols().ulps_eq(&other.cols(), epsilon, max_ulps)
+        self.to_cols().ulps_eq(&other.to_cols(), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.cols().ulps_ne(&other.cols(), epsilon, max_ulps)
+        self.to_cols().ulps_ne(&other.to_cols(), epsilon, max_ulps)
     }
 }
 
@@ -915,11 +935,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.cols().abs_diff_eq(&other.cols(), epsilon)
+        self.to_cols().abs_diff_eq(&other.to_cols(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.cols().abs_diff_ne(&other.cols(), epsilon)
+        self.to_cols().abs_diff_ne(&other.to_cols(), epsilon)
     }
 }
 
@@ -938,8 +958,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.cols()
-            .relative_eq(&other.cols(), epsilon, max_relative)
+        self.to_cols()
+            .relative_eq(&other.to_cols(), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -948,8 +968,8 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.cols()
-            .relative_ne(&other.cols(), epsilon, max_relative)
+        self.to_cols()
+            .relative_ne(&other.to_cols(), epsilon, max_relative)
     }
 }
 
@@ -963,11 +983,11 @@ where
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.cols().ulps_eq(&other.cols(), epsilon, max_ulps)
+        self.to_cols().ulps_eq(&other.to_cols(), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.cols().ulps_ne(&other.cols(), epsilon, max_ulps)
+        self.to_cols().ulps_ne(&other.to_cols(), epsilon, max_ulps)
     }
 }
 
@@ -983,14 +1003,302 @@ mod tests {
     type Mat2 = Matrix2<f32>;
     type Mat3 = Matrix3<f32>;
     type Mat4 = Matrix4<f32>;
+    type DMat2 = Matrix2<f64>;
+    type DMat3 = Matrix3<f64>;
+    type DMat4 = Matrix4<f64>;
 
     type Vec2 = Vector2<f32>;
     type Vec3 = Vector3<f32>;
     type Vec4 = Vector4<f32>;
+    type DVec2 = Vector2<f64>;
+    type DVec3 = Vector3<f64>;
+    type DVec4 = Vector4<f64>;
 
     type Point2 = super::Point2<f32>;
     type Point3 = super::Point3<f32>;
     type Point4 = super::Point4<f32>;
+    type DPoint2 = super::Point2<f64>;
+    type DPoint3 = super::Point3<f64>;
+    type DPoint4 = super::Point4<f64>;
+
+    #[test]
+    fn from_scale() {
+        let m2 = Mat2::from_scale(Vec2::new(2.0, 3.0));
+        let m3 = Mat3::from_scale(Vec2::new(2.0, 3.0));
+        let m4 = Mat4::from_scale(Vec3::new(2.0, 3.0, 4.0));
+
+        assert_eq!(m2, Mat2::with_rows([(2.0, 0.0), (0.0, 3.0)]));
+        assert_eq!(
+            m3,
+            Mat3::with_rows([(2.0, 0.0, 0.0), (0.0, 3.0, 0.0), (0.0, 0.0, 1.0)])
+        );
+        assert_eq!(
+            m4,
+            Mat4::with_rows([
+                (2.0, 0.0, 0.0, 0.0),
+                (0.0, 3.0, 0.0, 0.0),
+                (0.0, 0.0, 4.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ])
+        );
+
+        let m2 = DMat2::from_scale(DVec2::new(2.0, 3.0));
+        let m3 = DMat3::from_scale(DVec2::new(2.0, 3.0));
+        let m4 = DMat4::from_scale(DVec3::new(2.0, 3.0, 4.0));
+
+        assert_eq!(m2, DMat2::with_rows([(2.0, 0.0), (0.0, 3.0)]));
+        assert_eq!(
+            m3,
+            DMat3::with_rows([(2.0, 0.0, 0.0), (0.0, 3.0, 0.0), (0.0, 0.0, 1.0)])
+        );
+        assert_eq!(
+            m4,
+            DMat4::with_rows([
+                (2.0, 0.0, 0.0, 0.0),
+                (0.0, 3.0, 0.0, 0.0),
+                (0.0, 0.0, 4.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ])
+        );
+    }
+
+    #[test]
+    fn from_angle() {
+        let m2 = Mat2::from_angle(Angle::from_degrees(90.0));
+        let m3 = Mat3::from_angle(Angle::from_degrees(90.0));
+        let m4 = Mat4::from_axis_angle(Vec3::unit_z(), Angle::from_degrees(90.0));
+
+        assert_abs_diff_eq!(m2, Mat2::with_rows([(0.0, -1.0), (1.0, 0.0)]));
+        assert_abs_diff_eq!(
+            m3,
+            Mat3::with_rows([(0.0, -1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)])
+        );
+        assert_abs_diff_eq!(
+            m4,
+            Mat4::with_rows([
+                (0.0, -1.0, 0.0, 0.0),
+                (1.0, 0.0, 0.0, 0.0),
+                (0.0, 0.0, 1.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ])
+        );
+
+        let m2 = DMat2::from_angle(Angle::from_degrees(90.0));
+        let m3 = DMat3::from_angle(Angle::from_degrees(90.0));
+        let m4 = DMat4::from_axis_angle(Vector3::unit_z(), Angle::from_degrees(90.0));
+
+        assert_abs_diff_eq!(m2, DMat2::with_rows([(0.0, -1.0), (1.0, 0.0)]));
+        assert_abs_diff_eq!(
+            m3,
+            DMat3::with_rows([(0.0, -1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)])
+        );
+        assert_abs_diff_eq!(
+            m4,
+            DMat4::with_rows([
+                (0.0, -1.0, 0.0, 0.0),
+                (1.0, 0.0, 0.0, 0.0),
+                (0.0, 0.0, 1.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ])
+        );
+    }
+
+    #[test]
+    fn from_translation() {
+        let m3 = Mat3::from_translation(Vector2::new(2.0, 3.0));
+        let m4 = Mat4::from_translation(Vector3::new(2.0, 3.0, 4.0));
+
+        assert_eq!(
+            m3,
+            Mat3::with_rows([(1.0, 0.0, 2.0), (0.0, 1.0, 3.0), (0.0, 0.0, 1.0),])
+        );
+        assert_eq!(
+            m4,
+            Mat4::with_rows([
+                (1.0, 0.0, 0.0, 2.0),
+                (0.0, 1.0, 0.0, 3.0),
+                (0.0, 0.0, 1.0, 4.0),
+                (0.0, 0.0, 0.0, 1.0),
+            ])
+        );
+
+        let m3 = DMat3::from_translation(Vector2::new(2.0, 3.0));
+        let m4 = DMat4::from_translation(Vector3::new(2.0, 3.0, 4.0));
+
+        assert_eq!(
+            m3,
+            DMat3::with_rows([(1.0, 0.0, 2.0), (0.0, 1.0, 3.0), (0.0, 0.0, 1.0),])
+        );
+        assert_eq!(
+            m4,
+            DMat4::with_rows([
+                (1.0, 0.0, 0.0, 2.0),
+                (0.0, 1.0, 0.0, 3.0),
+                (0.0, 0.0, 1.0, 4.0),
+                (0.0, 0.0, 0.0, 1.0),
+            ])
+        );
+    }
+
+    #[test]
+    fn to_cols() {
+        assert_eq!(Mat2::identity().to_cols(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(
+            Mat3::identity().to_cols(),
+            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+        );
+        assert_eq!(
+            Mat4::identity().to_cols(),
+            [
+                (1.0, 0.0, 0.0, 0.0),
+                (0.0, 1.0, 0.0, 0.0),
+                (0.0, 0.0, 1.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ]
+        );
+
+        assert_eq!(DMat2::identity().to_cols(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(
+            DMat3::identity().to_cols(),
+            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+        );
+        assert_eq!(
+            DMat4::identity().to_cols(),
+            [
+                (1.0, 0.0, 0.0, 0.0),
+                (0.0, 1.0, 0.0, 0.0),
+                (0.0, 0.0, 1.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ]
+        );
+    }
+
+    #[test]
+    fn to_rows() {
+        assert_eq!(Mat2::identity().to_rows(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(
+            Mat3::identity().to_rows(),
+            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+        );
+        assert_eq!(
+            Mat4::identity().to_rows(),
+            [
+                (1.0, 0.0, 0.0, 0.0),
+                (0.0, 1.0, 0.0, 0.0),
+                (0.0, 0.0, 1.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ]
+        );
+
+        assert_eq!(DMat2::identity().to_rows(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(
+            DMat3::identity().to_rows(),
+            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+        );
+        assert_eq!(
+            DMat4::identity().to_rows(),
+            [
+                (1.0, 0.0, 0.0, 0.0),
+                (0.0, 1.0, 0.0, 0.0),
+                (0.0, 0.0, 1.0, 0.0),
+                (0.0, 0.0, 0.0, 1.0)
+            ]
+        );
+    }
+
+    #[test]
+    fn from_cols() {
+        assert_eq!(
+            Mat2::from_cols([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            Mat2::identity()
+        );
+        assert_eq!(
+            Mat3::from_cols([
+                (1.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            ]),
+            Mat3::identity()
+        );
+        assert_eq!(
+            Mat4::from_cols([
+                (1.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            ]),
+            Mat4::identity()
+        );
+
+        assert_eq!(
+            DMat2::from_cols([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            DMat2::identity()
+        );
+        assert_eq!(
+            DMat3::from_cols([
+                (1.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            ]),
+            DMat3::identity()
+        );
+        assert_eq!(
+            DMat4::from_cols([
+                (1.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            ]),
+            DMat4::identity()
+        );
+    }
+
+    #[test]
+    fn from_rows() {
+        assert_eq!(
+            Mat2::from_rows([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            Mat2::identity()
+        );
+        assert_eq!(
+            Mat3::from_rows([
+                (1.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            ]),
+            Mat3::identity()
+        );
+        assert_eq!(
+            Mat4::from_rows([
+                (1.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            ]),
+            Mat4::identity()
+        );
+
+        assert_eq!(
+            DMat2::from_rows([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            DMat2::identity()
+        );
+        assert_eq!(
+            DMat3::from_rows([
+                (1.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            ]),
+            DMat3::identity()
+        );
+        assert_eq!(
+            DMat4::from_rows([
+                (1.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 1.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            ]),
+            DMat4::identity()
+        );
+    }
 
     #[test]
     fn equality() {
@@ -1050,6 +1358,30 @@ mod tests {
     }
 
     #[test]
+    fn transform_f64() {
+        let v2 = DVec2::new(1.0, 2.0);
+        let v3 = DVec3::new(1.0, 2.0, 3.0);
+        let v4 = DVec4::new(1.0, 2.0, 3.0, 4.0);
+        let p2 = DPoint2::new(1.0, 2.0);
+        let p3 = DPoint3::new(1.0, 2.0, 3.0);
+        let p4 = DPoint4::new(1.0, 2.0, 3.0, 4.0);
+
+        let mat2 = DMat2::from_scale((2.0, 2.0).into());
+        let mat3 = DMat3::from_scale((2.0, 2.0).into());
+        let mat4 = DMat4::from_scale((2.0, 2.0, 2.0).into());
+
+        assert_eq!(mat2 * v2, mat2.transform_vector(v2));
+        assert_eq!(mat3 * v2, mat3.transform_vector(v2));
+        assert_eq!(mat4 * v3, mat4.transform_vector(v3));
+        assert_eq!(mat4 * v4, DVec4::new(2.0, 4.0, 6.0, 4.0));
+
+        assert_eq!(mat2 * p2, mat2.transform_point(p2));
+        assert_eq!(mat3 * p2, mat3.transform_point(p2));
+        assert_eq!(mat4 * p3, mat4.transform_point(p3));
+        assert_eq!(mat4 * p4, DPoint4::new(2.0, 4.0, 6.0, 4.0));
+    }
+
+    #[test]
     fn nan() {
         let m2 = Mat2::nan();
         assert!(m2.col(0).is_nan());
@@ -1061,6 +1393,21 @@ mod tests {
         assert!(m3.col(2).is_nan());
 
         let m4 = Mat4::nan();
+        assert!(m4.col(0).is_nan());
+        assert!(m4.col(1).is_nan());
+        assert!(m4.col(2).is_nan());
+        assert!(m4.col(3).is_nan());
+
+        let m2 = DMat2::nan();
+        assert!(m2.col(0).is_nan());
+        assert!(m2.col(1).is_nan());
+
+        let m3 = DMat3::nan();
+        assert!(m3.col(0).is_nan());
+        assert!(m3.col(1).is_nan());
+        assert!(m3.col(2).is_nan());
+
+        let m4 = DMat4::nan();
         assert!(m4.col(0).is_nan());
         assert!(m4.col(1).is_nan());
         assert!(m4.col(2).is_nan());
@@ -1081,6 +1428,19 @@ mod tests {
         assert_eq!(Mat2::identity().inverse(), Some(Mat2::identity()));
         assert_eq!(Mat3::identity().inverse(), Some(Mat3::identity()));
         assert_eq!(Mat4::identity().inverse(), Some(Mat4::identity()));
+
+        assert!(DMat2::identity().is_invertible());
+        assert!(DMat3::identity().is_invertible());
+        assert!(DMat4::identity().is_invertible());
+        assert!(!DMat2::zero().is_invertible());
+        assert!(!DMat3::zero().is_invertible());
+        assert!(!DMat4::zero().is_invertible());
+        assert!(!DMat2::nan().is_invertible());
+        assert!(!DMat3::nan().is_invertible());
+        assert!(!DMat4::nan().is_invertible());
+        assert_eq!(DMat2::identity().inverse(), Some(DMat2::identity()));
+        assert_eq!(DMat3::identity().inverse(), Some(DMat3::identity()));
+        assert_eq!(DMat4::identity().inverse(), Some(DMat4::identity()));
 
         {
             assert!(!Mat2::zeroed().is_invertible());
