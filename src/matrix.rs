@@ -799,11 +799,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.to_cols().abs_diff_eq(&other.to_cols(), epsilon)
+        self.as_raw().abs_diff_eq(other.as_raw(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.to_cols().abs_diff_ne(&other.to_cols(), epsilon)
+        self.as_raw().abs_diff_ne(other.as_raw(), epsilon)
     }
 }
 
@@ -867,11 +867,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.to_cols().abs_diff_eq(&other.to_cols(), epsilon)
+        self.as_raw().abs_diff_eq(other.as_raw(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.to_cols().abs_diff_ne(&other.to_cols(), epsilon)
+        self.as_raw().abs_diff_ne(other.as_raw(), epsilon)
     }
 }
 
@@ -935,11 +935,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.to_cols().abs_diff_eq(&other.to_cols(), epsilon)
+        self.as_raw().abs_diff_eq(other.as_raw(), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.to_cols().abs_diff_ne(&other.to_cols(), epsilon)
+        self.as_raw().abs_diff_ne(other.as_raw(), epsilon)
     }
 }
 

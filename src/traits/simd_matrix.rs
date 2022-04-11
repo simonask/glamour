@@ -1,3 +1,4 @@
+use approx::AbsDiffEq;
 use num_traits::Float;
 
 use crate::angle::Angle;
@@ -20,9 +21,10 @@ pub trait SimdMatrix:
     + Mul<Self::Scalar, Output = Self>
     + MulAssign<Self::Scalar>
     + Neg<Output = Self>
+    + AbsDiffEq<Epsilon = <Self::Scalar as AbsDiffEq>::Epsilon>
 {
     /// The component type of the `glam` matrix. Either `f32` or `f64`.
-    type Scalar: PrimitiveMatrices + Primitive + Float;
+    type Scalar: PrimitiveMatrices + Primitive + Float + AbsDiffEq;
 
     /// Matrix with all elements set to zero.
     #[must_use]

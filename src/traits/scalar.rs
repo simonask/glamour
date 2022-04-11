@@ -1,3 +1,5 @@
+use approx::AbsDiffEq;
+
 use super::marker::{Serializable, ValueSemantics};
 use super::{SimdMatrix2, SimdMatrix3, SimdMatrix4, SimdVec, Unit};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
@@ -262,7 +264,7 @@ impl Primitive for u32 {
 /// Note that `glam` does not support integer matrices.
 ///
 /// See also [the documentation module](crate::docs#how).
-pub trait PrimitiveMatrices: Primitive {
+pub trait PrimitiveMatrices: Primitive + AbsDiffEq {
     /// [`glam::Mat2`] or [`glam::DMat2`].
     type Mat2: SimdMatrix2<Scalar = Self>;
     /// [`glam::Mat3`] or [`glam::DMat3`].
@@ -303,29 +305,6 @@ where
     type Vec2 = <T::Primitive as Primitive>::Vec2;
     type Vec3 = <T::Primitive as Primitive>::Vec3;
     type Vec4 = <T::Primitive as Primitive>::Vec4;
-}
-
-/// Convenience trait to go from a (potentially non-primitive) scalar to its
-/// corresponding underlying matrix type.
-///
-/// See [`PrimitiveMatrices`].
-pub trait ScalarMatrices: Scalar {
-    /// [`glam::Mat2`] or [`glam::DMat2`].
-    type Mat2: SimdMatrix2<Scalar = Self::Primitive>;
-    /// [`glam::Mat3`] or [`glam::DMat3`].
-    type Mat3: SimdMatrix3<Scalar = Self::Primitive>;
-    /// [`glam::Mat4`] or [`glam::DMat4`].
-    type Mat4: SimdMatrix4<Scalar = Self::Primitive>;
-}
-
-impl<T> ScalarMatrices for T
-where
-    T: Scalar,
-    T::Primitive: PrimitiveMatrices,
-{
-    type Mat2 = <T::Primitive as PrimitiveMatrices>::Mat2;
-    type Mat3 = <T::Primitive as PrimitiveMatrices>::Mat3;
-    type Mat4 = <T::Primitive as PrimitiveMatrices>::Mat4;
 }
 
 #[cfg(test)]
