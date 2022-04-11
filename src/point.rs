@@ -285,4 +285,12 @@ mod tests {
 
         let _ = p;
     }
+
+    #[test]
+    fn vec3a() {
+        let a: glam::Vec3A = Point3::new(0.0, 1.0, 2.0).to_vec3a();
+        assert_eq!(a, glam::Vec3A::new(0.0, 1.0, 2.0));
+        let b = Point3::from_vec3a(a);
+        assert_eq!(b, Point3::new(0.0, 1.0, 2.0));
+    }
 }
