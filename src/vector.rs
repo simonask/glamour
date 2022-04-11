@@ -605,6 +605,8 @@ crate::impl_mint!(Vector4, 4, Vector4);
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
+
     use super::*;
 
     struct F32;
@@ -764,6 +766,79 @@ mod tests {
 
         assert_eq!(CONST_VEC, (1.0, 2.0));
         assert_eq!(STATIC_VEC, (2.0, 3.0));
+    }
+
+    #[test]
+    fn units() {
+        assert_abs_diff_eq!(Vec2::unit_x(), (1.0, 0.0));
+        assert_abs_diff_eq!(Vec2::unit_y(), (0.0, 1.0));
+        assert_abs_diff_eq!(Vec3::unit_x(), (1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec3::unit_y(), (0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec3::unit_z(), (0.0, 0.0, 1.0));
+        assert_abs_diff_eq!(Vec4::unit_x(), (1.0, 0.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_y(), (0.0, 1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_z(), (0.0, 0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_w(), (0.0, 0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn swizzle2() {
+        assert_eq!(Vec2::unit_x().swizzle::<1, 0>(), (0.0, 1.0));
+        assert_eq!(
+            Vec3::new(1.0, 2.0, 3.0).swizzle2::<1, 0>(),
+            Vec2::new(2.0, 1.0)
+        );
+    }
+
+    #[test]
+    fn swizzle3() {
+        assert_eq!(
+            Vec3::new(1.0, 2.0, 3.0).swizzle::<2, 1, 0>(),
+            (3.0, 2.0, 1.0)
+        );
+        assert_eq!(
+            Vec2::unit_x().swizzle3::<1, 0, 1>(),
+            Vec3::new(0.0, 1.0, 0.0)
+        );
+        assert_eq!(
+            Vec4::new(1.0, 2.0, 3.0, 4.0).swizzle3::<3, 2, 1>(),
+            Vec3::new(4.0, 3.0, 2.0)
+        );
+    }
+
+    #[test]
+    fn swizzle4() {
+        assert_eq!(
+            Vec4::new(0.0, 1.0, 2.0, 3.0).swizzle::<3, 2, 1, 0>(),
+            (3.0, 2.0, 1.0, 0.0)
+        );
+
+        assert_eq!(
+            Vec2::unit_x().swizzle4::<1, 0, 1, 0>(),
+            Vec4::new(0.0, 1.0, 0.0, 1.0)
+        );
+        assert_eq!(
+            Vec3::new(0.0, 1.0, 2.0).swizzle4::<2, 1, 0, 2>(),
+            Vec4::new(2.0, 1.0, 0.0, 2.0)
+        );
+    }
+
+    #[test]
+    fn to_3d() {
+        assert_eq!(Vec2::unit_x().to_3d(2.0), Vec3::new(1.0, 0.0, 2.0));
+    }
+
+    #[test]
+    fn to_4d() {
+        assert_eq!(Vec3::unit_z().to_4d(2.0), Vec4::new(0.0, 0.0, 1.0, 2.0));
+    }
+
+    #[test]
+    fn vec3a() {
+        let a: glam::Vec3A = Vec3::new(0.0, 1.0, 2.0).to_vec3a();
+        assert_eq!(a, glam::Vec3A::new(0.0, 1.0, 2.0));
+        let b = Vec3::from_vec3a(a);
+        assert_eq!(b, Vec3::new(0.0, 1.0, 2.0));
     }
 
     #[test]
