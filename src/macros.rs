@@ -532,8 +532,6 @@ macro_rules! impl_simd_common {
             }
 
             #[doc = "Horizontal maximum (largest component)."]
-            #[doc = ""]
-            #[doc = "*NOTE:* For 4-dimensional vector types, this is `max(x, y, min(z, w))`."]
             #[inline]
             #[must_use]
             pub fn max_element(self) -> T::Scalar {
