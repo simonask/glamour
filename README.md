@@ -1,6 +1,6 @@
 # Strongly typed vector math with `glam`
 
-[![Build Status]][github-ci] [![Coverage Status]][coveralls.io]
+[![Build Status]][github-ci] [![codecov-badge]][codecov]
 [![Latest Version]][crates.io] [![docs]][docs.rs]
 [![Minimum Supported Rust Version]][Rust 1.56]
 
@@ -157,8 +157,8 @@ builds.
 
 [Build Status]: https://github.com/simonask/glamour/actions/workflows/ci.yml/badge.svg
 [github-ci]: https://github.com/simonask/glamour/actions/workflows/ci.yml
-[Coverage Status]: https://coveralls.io/repos/github/simonask/glamour/badge.svg?branch=main
-[coveralls.io]: https://coveralls.io/github/simonask/glamour?branch=main
+[codecov-badge]: https://codecov.io/gh/simonask/glamour/branch/main/graph/badge.svg?token=VKK61NGSAJ
+[codecov]: https://codecov.io/gh/simonask/glamour
 [Latest Version]: https://img.shields.io/crates/v/glamour.svg
 [crates.io]: https://crates.io/crates/glamour/
 [docs]: https://docs.rs/glamour/badge.svg
