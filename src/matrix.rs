@@ -962,6 +962,34 @@ mod tests {
     type Vec3 = Vector3<f32>;
     type Vec4 = Vector4<f32>;
 
+    type Point2 = super::Point2<f32>;
+    type Point3 = super::Point3<f32>;
+    type Point4 = super::Point4<f32>;
+
+    #[test]
+    fn transform() {
+        let v2 = Vec2::new(1.0, 2.0);
+        let v3 = Vec3::new(1.0, 2.0, 3.0);
+        let v4 = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let p2 = Point2::new(1.0, 2.0);
+        let p3 = Point3::new(1.0, 2.0, 3.0);
+        let p4 = Point4::new(1.0, 2.0, 3.0, 4.0);
+
+        let mat2 = Mat2::from_scale((2.0, 2.0).into());
+        let mat3 = Mat3::from_scale((2.0, 2.0).into());
+        let mat4 = Mat4::from_scale((2.0, 2.0, 2.0).into());
+
+        assert_eq!(mat2 * v2, mat2.transform_vector(v2));
+        assert_eq!(mat3 * v2, mat3.transform_vector(v2));
+        assert_eq!(mat4 * v3, mat4.transform_vector(v3));
+        assert_eq!(mat4 * v4, Vec4::new(2.0, 4.0, 6.0, 4.0));
+
+        assert_eq!(mat2 * p2, mat2.transform_point(p2));
+        assert_eq!(mat3 * p2, mat3.transform_point(p2));
+        assert_eq!(mat4 * p3, mat4.transform_point(p3));
+        assert_eq!(mat4 * p4, Point4::new(2.0, 4.0, 6.0, 4.0));
+    }
+
     #[test]
     fn is_invertible() {
         {
