@@ -53,9 +53,9 @@ pub trait SimdMatrix:
     /// Invert the matrix.
     ///
     /// Note: If the matrix is not invertible, this returns an invalid matrix.
-    /// See [`SimdMatrix::inverse()`].
+    /// See (e.g.) [`glam::Mat4::inverse()`].
     #[must_use]
-    fn inverse_unchecked(&self) -> Self;
+    fn inverse(&self) -> Self;
 
     /// Matrix determinant.
     ///
@@ -67,17 +67,6 @@ pub trait SimdMatrix:
     /// `self.determinant() != 0.0`.
     #[must_use]
     fn is_invertible(&self) -> bool;
-
-    /// If the matrix is invertible, return the inverted matrix, otherwise
-    /// return `None`.
-    #[must_use]
-    fn inverse(&self) -> Option<Self> {
-        if self.is_invertible() {
-            Some(self.inverse_unchecked())
-        } else {
-            None
-        }
-    }
 }
 
 /// Primitive 2x2 matrix.
@@ -301,7 +290,8 @@ macro_rules! impl_matrix {
                 <$glam_ty>::transpose(self)
             }
 
-            fn inverse_unchecked(&self) -> Self {
+            #[inline]
+            fn inverse(&self) -> Self {
                 <$glam_ty>::inverse(self)
             }
         }

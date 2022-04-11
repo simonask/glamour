@@ -224,7 +224,7 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn inverse_unchecked(&self) -> Self {
-                Self::from_raw(self.as_raw().inverse_unchecked())
+                Self::from_raw(self.as_raw().inverse())
             }
 
             #[doc = "Return the inverse matrix, if invertible."]
@@ -233,7 +233,11 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn inverse(&self) -> Option<Self> {
-                self.as_raw().inverse().map(Self::from_raw)
+                if self.is_invertible() {
+                    Some(self.inverse_unchecked())
+                } else {
+                    None
+                }
             }
 
             #[doc = "True if any element in the matrix is NaN."]
