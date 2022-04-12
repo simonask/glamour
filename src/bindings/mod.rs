@@ -2,6 +2,9 @@
 //!
 //! These traits generalize the glam types such that they can be used by generic
 //! code.
+//!
+//! **CAUTION:** Everything in this module should be considered effectively
+//! private.
 
 use core::fmt::{Debug, Display};
 use core::ops::{
