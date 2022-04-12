@@ -11,6 +11,7 @@
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
+use crate::traits::UnitTypes;
 use crate::{
     traits::{Lerp, SimdVec, SimdVecFloat},
     Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
@@ -612,6 +613,22 @@ crate::impl_mint!(Vector2, 2, Vector2);
 crate::impl_mint!(Vector3, 3, Vector3);
 crate::impl_mint!(Vector4, 4, Vector4);
 
+impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Vector3<T>> for glam::Quat {
+    type Output = Vector3<T>;
+
+    fn mul(self, rhs: Vector3<T>) -> Self::Output {
+        Vector3::from_raw(self * rhs.to_raw())
+    }
+}
+
+impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Vector3<T>> for glam::DQuat {
+    type Output = Vector3<T>;
+
+    fn mul(self, rhs: Vector3<T>) -> Self::Output {
+        Vector3::from_raw(self * rhs.to_raw())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
@@ -1013,6 +1030,20 @@ mod tests {
     fn signum() {
         let a = Vec3::new(1.0, -2.0, -3.0);
         assert_eq!(a.signum(), (1.0, -1.0, -1.0));
+    }
+
+    #[test]
+    fn rotate() {
+        use crate::Angle;
+        use approx::assert_abs_diff_eq;
+
+        let v = Vector3::<f32>::unit_x();
+        let quat = Angle::from_degrees(180.0f32).to_rotation(Vector3::unit_z());
+        assert_abs_diff_eq!(quat * v, -v);
+
+        let v = Vector3::<f64>::unit_x();
+        let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::unit_z());
+        assert_abs_diff_eq!(quat * v, -v);
     }
 
     #[cfg(feature = "std")]

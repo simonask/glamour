@@ -6,7 +6,7 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, 
 use num_traits::{Float, NumAssignOps};
 
 use crate::{
-    traits::{marker::ValueSemantics, Primitive},
+    traits::{marker::ValueSemantics, Primitive, PrimitiveMatrices},
     Scalar, Unit, Vector2, Vector3, Vector4,
 };
 
@@ -455,6 +455,19 @@ impl<T: AngleConsts> AngleConsts for Angle<T> {
     };
 }
 
+impl<T> Angle<T>
+where
+    T: PrimitiveMatrices,
+{
+    /// Create quaternion from this angle and an axis vector.
+    #[inline]
+    #[must_use]
+    pub fn to_rotation(self, axis: Vector3<T>) -> T::Quat {
+        use crate::traits::SimdQuat;
+        <T::Quat as SimdQuat>::from_axis_angle(axis.to_raw(), self.radians)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use approx::{assert_abs_diff_eq, assert_relative_eq, assert_ulps_eq};
@@ -539,6 +552,15 @@ mod tests {
         let _: AngleVec = vec * 2.0;
 
         assert_eq!(vec[0], Angle::PI);
+    }
+
+    #[test]
+    fn to_rotation() {
+        let angle = Angle::HALF_CIRCLE;
+        let quat = angle.to_rotation(Vector3::unit_z());
+        assert_abs_diff_eq!(quat, glam::Quat::from_axis_angle(glam::Vec3::Z, f32::PI));
+        let v = quat * Vector3::<f32>::unit_x();
+        assert_abs_diff_eq!(v, -Vector3::unit_x());
     }
 
     struct BufWriter<'a> {
