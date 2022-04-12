@@ -1032,6 +1032,20 @@ mod tests {
         assert_eq!(a.signum(), (1.0, -1.0, -1.0));
     }
 
+    #[test]
+    fn rotate() {
+        use crate::Angle;
+        use approx::assert_abs_diff_eq;
+
+        let v = Vector3::<f32>::unit_x();
+        let quat = Angle::from_degrees(180.0f32).to_rotation(Vector3::unit_z());
+        assert_abs_diff_eq!(quat * v, -v);
+
+        let v = Vector3::<f64>::unit_x();
+        let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::unit_z());
+        assert_abs_diff_eq!(quat * v, -v);
+    }
+
     #[cfg(feature = "std")]
     #[test]
     fn debug_type_name() {

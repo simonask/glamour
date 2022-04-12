@@ -282,19 +282,19 @@ impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Point3<T>> for glam::DQuat {
 mod tests {
     use super::*;
 
-    type Point3 = super::Point3<f32>;
+    type Point = super::Point3<f32>;
 
     #[test]
     fn subtraction_yields_vector() {
-        let p = Point3::one();
-        let q = Point3::one();
+        let p = Point::one();
+        let q = Point::one();
         let v: Vector3<f32> = q - p;
         assert_eq!(v, Vector3::zero());
     }
 
     #[test]
     fn not_scalable() {
-        let p = Point3::default();
+        let p = Point::default();
 
         // This should not compile:
         // let q = p * 2.0;
@@ -304,9 +304,23 @@ mod tests {
 
     #[test]
     fn vec3a() {
-        let a: glam::Vec3A = Point3::new(0.0, 1.0, 2.0).to_vec3a();
+        let a: glam::Vec3A = Point::new(0.0, 1.0, 2.0).to_vec3a();
         assert_eq!(a, glam::Vec3A::new(0.0, 1.0, 2.0));
-        let b = Point3::from_vec3a(a);
-        assert_eq!(b, Point3::new(0.0, 1.0, 2.0));
+        let b = Point::from_vec3a(a);
+        assert_eq!(b, Point::new(0.0, 1.0, 2.0));
+    }
+
+    #[test]
+    fn rotate() {
+        use crate::Angle;
+        use approx::assert_abs_diff_eq;
+
+        let v = Point3::<f32>::new(1.0, 0.0, 0.0);
+        let quat = Angle::from_degrees(180.0f32).to_rotation(Vector3::unit_z());
+        assert_abs_diff_eq!(quat * v, -v);
+
+        let v = Point3::<f64>::new(1.0, 0.0, 0.0);
+        let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::unit_z());
+        assert_abs_diff_eq!(quat * v, -v);
     }
 }
