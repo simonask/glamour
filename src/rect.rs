@@ -3,7 +3,7 @@
 use approx::AbsDiffEq;
 
 use crate::{
-    bindings::SimdVecFloat,
+    bindings::VectorFloat,
     traits::{Contains, Intersection, Lerp, Union, UnitTypes},
     Box2, Point2, Scalar, Size2, Unit, Vector2,
 };
@@ -202,7 +202,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn is_finite(&self) -> bool
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         self.origin.is_finite() && self.size.is_finite()
     }
@@ -223,7 +223,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn round(self) -> Self
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         Rect {
             origin: self.origin.round(),
@@ -249,7 +249,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn round_in(self) -> Self
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         Rect {
             origin: self.origin.ceil(),
@@ -273,7 +273,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn round_out(self) -> Self
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         Rect {
             origin: self.origin.floor(),

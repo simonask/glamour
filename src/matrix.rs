@@ -10,7 +10,7 @@
 use core::ops::Mul;
 
 use crate::{
-    bindings::{PrimitiveMatrices, SimdMatrix, SimdMatrix2, SimdMatrix3, SimdMatrix4},
+    bindings::{Matrix, PrimitiveMatrices, SimdMatrix2, SimdMatrix3, SimdMatrix4},
     Angle, Point2, Point3, Point4, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};

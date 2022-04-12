@@ -35,11 +35,11 @@ pub trait Primitive:
     + 'static
 {
     /// 2D vector type
-    type Vec2: SimdVec<2, Scalar = Self, Mask = glam::BVec2>;
+    type Vec2: Vector<2, Scalar = Self, Mask = glam::BVec2>;
     /// 3D vector type
-    type Vec3: SimdVec<3, Scalar = Self, Mask = glam::BVec3A>;
+    type Vec3: Vector<3, Scalar = Self, Mask = glam::BVec3A>;
     /// 4D vector type
-    type Vec4: SimdVec<4, Scalar = Self, Mask = glam::BVec4A>;
+    type Vec4: Vector<4, Scalar = Self, Mask = glam::BVec4A>;
 
     /// True if the value is finite (not infinity, not NaN).
     ///
@@ -109,7 +109,7 @@ pub trait PrimitiveMatrices: Primitive + AbsDiffEq {
     /// [`glam::Mat4`] or [`glam::DMat4`].
     type Mat4: SimdMatrix4<Scalar = Self>;
     /// [`glam::Quat`] or [`glam::DQuat`].
-    type Quat: SimdQuat<Scalar = Self, Vec3 = Self::Vec3>;
+    type Quat: Quat<Scalar = Self, Vec3 = Self::Vec3>;
 }
 
 impl PrimitiveMatrices for f32 {

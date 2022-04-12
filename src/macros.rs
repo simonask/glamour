@@ -399,7 +399,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn zero() -> Self {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::zero())
             }
 
@@ -407,7 +407,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn one() -> Self {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::one())
             }
 
@@ -415,7 +415,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn splat(scalar: T::Scalar) -> Self {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::splat(scalar.to_raw()))
             }
 
@@ -423,7 +423,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn clamp(self, min: Self, max: Self) -> Self {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(self.to_raw().clamp(min.to_raw(), max.to_raw()))
             }
 
@@ -457,7 +457,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpeq(self, other: Self) -> $mask_ty {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpeq(other.to_raw()).into()
             }
 
@@ -465,7 +465,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpne(self, other: Self) -> $mask_ty {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpne(other.to_raw()).into()
             }
 
@@ -473,7 +473,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpge(self, other: Self) -> $mask_ty {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpge(other.to_raw()).into()
             }
 
@@ -481,7 +481,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpgt(self, other: Self) -> $mask_ty {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpgt(other.to_raw()).into()
             }
 
@@ -489,7 +489,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmple(self, other: Self) -> $mask_ty {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmple(other.to_raw()).into()
             }
 
@@ -497,7 +497,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmplt(self, other: Self) -> $mask_ty {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmplt(other.to_raw()).into()
             }
 
@@ -505,7 +505,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn min(self, other: Self) -> Self {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(self.to_raw().min(other.to_raw()))
             }
 
@@ -513,7 +513,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn max(self, other: Self) -> Self {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(self.to_raw().max(other.to_raw()))
             }
 
@@ -521,7 +521,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn min_element(self) -> T::Scalar {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 T::Scalar::from_raw(self.to_raw().min_element())
             }
 
@@ -529,7 +529,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn max_element(self) -> T::Scalar {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 T::Scalar::from_raw(self.to_raw().max_element())
             }
 
@@ -537,7 +537,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn select(mask: $mask_ty, if_true: Self, if_false: Self) -> Self {
-                use crate::bindings::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::select(mask.into(), if_true.to_raw(), if_false.to_raw()))
             }
         }
@@ -545,34 +545,34 @@ macro_rules! impl_simd_common {
         impl<T> $base_type_name<T>
         where
             T: crate::traits::UnitTypes,
-            T::$vec_ty: crate::bindings::SimdVecFloat<$dimensions>,
+            T::$vec_ty: crate::bindings::VectorFloat<$dimensions>,
         {
             #[doc = "Return an instance where all components are NaN."]
             #[inline]
             #[must_use]
             pub fn nan() -> Self {
-                use crate::bindings::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(T::$vec_ty::nan())
             }
             #[doc = "True if all components are non-infinity and non-NaN."]
             #[inline]
             #[must_use]
             pub fn is_finite(&self) -> bool {
-                use crate::bindings::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 self.as_raw().is_finite()
             }
             #[doc = "True if any component is NaN."]
             #[inline]
             #[must_use]
             pub fn is_nan(&self) -> bool {
-                use crate::bindings::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 self.as_raw().is_nan()
             }
             #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
             #[inline]
             #[must_use]
             pub fn is_nan_mask(&self) -> $mask_ty {
-                use crate::bindings::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 self.as_raw().is_nan_mask().into()
             }
 
@@ -580,21 +580,21 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn ceil(self) -> Self {
-                use crate::bindings::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(self.to_raw().ceil())
             }
             #[doc = "Round all components down."]
             #[inline]
             #[must_use]
             pub fn floor(self) -> Self {
-                use crate::bindings::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(self.to_raw().floor())
             }
             #[doc = "Round all components."]
             #[inline]
             #[must_use]
             pub fn round(self) -> Self {
-                use crate::bindings::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(self.to_raw().round())
             }
         }

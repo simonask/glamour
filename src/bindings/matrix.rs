@@ -3,7 +3,7 @@ use super::*;
 /// Trait describing a glam N x N matrix type.
 ///
 /// Note: All glam matrices are square.
-pub trait SimdMatrix:
+pub trait Matrix:
     ValueSemantics
     + Add<Self, Output = Self>
     + AddAssign<Self>
@@ -66,7 +66,7 @@ pub trait SimdMatrix:
 ///
 /// Implemented for [`glam::Mat2`] and [`glam::DMat2`].
 pub trait SimdMatrix2:
-    SimdMatrix + Mul<<Self::Scalar as Primitive>::Vec2, Output = <Self::Scalar as Primitive>::Vec2>
+    Matrix + Mul<<Self::Scalar as Primitive>::Vec2, Output = <Self::Scalar as Primitive>::Vec2>
 {
     /// Transform point.
     ///
@@ -111,7 +111,7 @@ pub trait SimdMatrix2:
 ///
 /// Implemented for [`glam::Mat3`] and [`glam::DMat3`].
 pub trait SimdMatrix3:
-    SimdMatrix + Mul<<Self::Scalar as Primitive>::Vec3, Output = <Self::Scalar as Primitive>::Vec3>
+    Matrix + Mul<<Self::Scalar as Primitive>::Vec3, Output = <Self::Scalar as Primitive>::Vec3>
 {
     /// Transform point.
     ///
@@ -166,7 +166,7 @@ pub trait SimdMatrix3:
 ///
 /// Implemented for [`glam::Mat4`] and [`glam::DMat4`].
 pub trait SimdMatrix4:
-    SimdMatrix + Mul<<Self::Scalar as Primitive>::Vec4, Output = <Self::Scalar as Primitive>::Vec4>
+    Matrix + Mul<<Self::Scalar as Primitive>::Vec4, Output = <Self::Scalar as Primitive>::Vec4>
 {
     /// Transform point.
     ///
@@ -233,7 +233,7 @@ macro_rules! impl_matrix {
         $($axes:ident),*
     }
     ) => {
-        impl SimdMatrix for $glam_ty {
+        impl Matrix for $glam_ty {
             type Scalar = $scalar;
 
             #[inline]

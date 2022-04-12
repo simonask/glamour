@@ -2,7 +2,7 @@ use super::*;
 
 /// Basic `glam` types used to back strongly typed vectors.
 #[allow(missing_docs)]
-pub trait SimdVec<const D: usize>:
+pub trait Vector<const D: usize>:
     ValueSemantics
     + Into<[Self::Scalar; D]>
     + From<[Self::Scalar; D]>
@@ -86,7 +86,7 @@ pub trait SimdVec<const D: usize>:
 
 /// Implemented for `glam` vectors with floating-point scalars.
 #[allow(missing_docs)]
-pub trait SimdVecFloat<const D: usize>: SimdVec<D> {
+pub trait VectorFloat<const D: usize>: Vector<D> {
     #[must_use]
     fn nan() -> Self;
     #[must_use]
@@ -147,7 +147,7 @@ macro_rules! impl_base {
         );
     };
     (@impl $scalar:ty [$dimensions:tt] => $glam_ty:ty { $($fields:ident),* } $mask:ty) => {
-        impl SimdVec<$dimensions> for $glam_ty {
+        impl Vector<$dimensions> for $glam_ty {
             type Scalar = $scalar;
             type Mask = $mask;
 
@@ -256,7 +256,7 @@ macro_rules! impl_base_float {
         );
     };
     (@impl $scalar:ty [$dimensions:tt] => $glam_ty:ty { $($fields:ident),* } $mask:ty) => {
-        impl SimdVecFloat<$dimensions> for $glam_ty {
+        impl VectorFloat<$dimensions> for $glam_ty {
             fn nan() -> Self {
                 <$glam_ty>::NAN
             }
@@ -399,8 +399,8 @@ mod tests {
         let a = glam::Vec4::nan();
         let b = glam::Vec4::NAN;
 
-        assert!(SimdVecFloat::is_nan(a));
-        assert!(SimdVecFloat::is_nan(b));
+        assert!(VectorFloat::is_nan(a));
+        assert!(VectorFloat::is_nan(b));
 
         let a: glam::UVec4 = bytemuck::cast(a);
         let b: glam::UVec4 = bytemuck::cast(b);
@@ -410,9 +410,9 @@ mod tests {
     #[test]
     fn is_finite() {
         let a = glam::Vec4::NAN;
-        assert!(!SimdVecFloat::<4>::is_finite(a));
+        assert!(!VectorFloat::<4>::is_finite(a));
 
         let a = glam::DVec4::NAN;
-        assert!(!SimdVecFloat::<4>::is_finite(a));
+        assert!(!VectorFloat::<4>::is_finite(a));
     }
 }

@@ -1,5 +1,5 @@
 use super::Scalar;
-use crate::bindings::{Primitive, SimdVec};
+use crate::bindings::{Primitive, Vector};
 
 /// The name of a coordinate space.
 ///
@@ -80,11 +80,11 @@ pub trait UnitTypes: Unit<Scalar = Self::UnitScalar> {
     type Primitive: Primitive;
 
     /// Fundamental 2D vector type.
-    type Vec2: SimdVec<2, Scalar = Self::Primitive, Mask = glam::BVec2>;
+    type Vec2: Vector<2, Scalar = Self::Primitive, Mask = glam::BVec2>;
     /// Fundamental 2D vector type.
-    type Vec3: SimdVec<3, Scalar = Self::Primitive, Mask = glam::BVec3A>;
+    type Vec3: Vector<3, Scalar = Self::Primitive, Mask = glam::BVec3A>;
     /// Fundamental 2D vector type.
-    type Vec4: SimdVec<4, Scalar = Self::Primitive, Mask = glam::BVec4A>;
+    type Vec4: Vector<4, Scalar = Self::Primitive, Mask = glam::BVec4A>;
 }
 
 impl<T> UnitTypes for T
