@@ -29,8 +29,8 @@ pub use size::{Size2, Size3};
 pub use transform::{Transform2, Transform3, TransformMap};
 pub use vector::{Vector2, Vector3, Vector4};
 
-#[macro_use]
 mod macros;
+use macros::*;
 
 #[doc(no_inline)]
 pub use traits::{Contains, Intersection, Lerp, Scalar, Union, Unit};

@@ -1,5 +1,3 @@
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_common {
     ($base_type_name:ident {
         $($fields:ident: $fields_ty:ty),*
@@ -208,8 +206,6 @@ macro_rules! impl_common {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_as_tuple {
     ($base_type_name:ident {
         $($fields:ident: $fields_ty:ty),*
@@ -332,8 +328,6 @@ macro_rules! impl_as_tuple {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_simd_common {
     ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident, $mask_ty:ty {
         $($fields:ident),*
@@ -737,8 +731,6 @@ macro_rules! impl_simd_common {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_glam_conversion {
     ($base_type_name:ident, $dimensions:literal [
         $(
@@ -797,8 +789,6 @@ macro_rules! impl_glam_conversion {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_scaling {
     ($base_type_name:ident, $dimensions:literal [
         $(
@@ -884,8 +874,6 @@ macro_rules! impl_scaling {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_mint {
     ($base_type_name:ident, $dimensions:literal, $mint_type:ident) => {
         #[cfg(feature = "mint")]
@@ -908,3 +896,10 @@ macro_rules! impl_mint {
         };
     };
 }
+
+pub(crate) use impl_as_tuple;
+pub(crate) use impl_common;
+pub(crate) use impl_glam_conversion;
+pub(crate) use impl_mint;
+pub(crate) use impl_scaling;
+pub(crate) use impl_simd_common;
