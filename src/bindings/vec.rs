@@ -38,12 +38,8 @@ pub trait Vector<const D: usize>:
     #[must_use]
     fn splat(scalar: Self::Scalar) -> Self;
     #[must_use]
-    fn get(&self, index: usize) -> Self::Scalar {
-        self.as_ref()[index]
-    }
-    fn set(&mut self, index: usize, value: Self::Scalar) {
-        self.as_mut()[index] = value;
-    }
+    fn get(&self, index: usize) -> Self::Scalar;
+    fn set(&mut self, index: usize, value: Self::Scalar);
     #[inline]
     #[must_use]
     fn const_get<const N: usize>(&self) -> Self::Scalar {
