@@ -199,17 +199,17 @@ macro_rules! impl_abs {
 }
 
 impl_base!(f32[2] => glam::Vec2, glam::BVec2);
-impl_base!(f32[3] => glam::Vec3, glam::BVec3);
-impl_base!(f32[4] => glam::Vec4, glam::BVec4);
+impl_base!(f32[3] => glam::Vec3, glam::BVec3A);
+impl_base!(f32[4] => glam::Vec4, glam::BVec4A);
 impl_base!(f64[2] => glam::DVec2, glam::BVec2);
-impl_base!(f64[3] => glam::DVec3, glam::BVec3);
-impl_base!(f64[4] => glam::DVec4, glam::BVec4);
+impl_base!(f64[3] => glam::DVec3, glam::BVec3A);
+impl_base!(f64[4] => glam::DVec4, glam::BVec4A);
 impl_base!(i32[2] => glam::IVec2, glam::BVec2);
-impl_base!(i32[3] => glam::IVec3, glam::BVec3);
-impl_base!(i32[4] => glam::IVec4, glam::BVec4);
+impl_base!(i32[3] => glam::IVec3, glam::BVec3A);
+impl_base!(i32[4] => glam::IVec4, glam::BVec4A);
 impl_base!(u32[2] => glam::UVec2, glam::BVec2);
-impl_base!(u32[3] => glam::UVec3, glam::BVec3);
-impl_base!(u32[4] => glam::UVec4, glam::BVec4);
+impl_base!(u32[3] => glam::UVec3, glam::BVec3A);
+impl_base!(u32[4] => glam::UVec4, glam::BVec4A);
 
 impl_base_float!(2 => glam::Vec2);
 impl_base_float!(3 => glam::Vec3);
