@@ -388,6 +388,8 @@ where
 mod tests {
     use approx::assert_abs_diff_eq;
 
+    use crate::vec2;
+
     use super::*;
 
     type Box2 = super::Box2<f32>;
@@ -493,7 +495,7 @@ mod tests {
             min: (1.0, 2.0).into(),
             max: (2.0, 3.0).into(),
         };
-        let b2 = b.translate(Vector2::new(1.0, 0.5));
+        let b2 = b.translate(vec2!(1.0, 0.5));
         assert_abs_diff_eq!(
             b2,
             Box2 {
@@ -503,10 +505,10 @@ mod tests {
         );
 
         let mut b3 = b;
-        b3 += Vector2::new(1.0, 0.5);
+        b3 += vec2![1.0, 0.5];
         assert_abs_diff_eq!(b3, b2);
-        assert_abs_diff_eq!(b3 - Vector2::new(1.0, 0.5), b);
-        b3 -= Vector2::new(1.0, 0.5);
+        assert_abs_diff_eq!(b3 - vec2![1.0, 0.5], b);
+        b3 -= vec2![1.0, 0.5];
         assert_abs_diff_eq!(b3, b);
     }
 

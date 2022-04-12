@@ -54,6 +54,255 @@ pub mod prelude {
     };
 }
 
+/// Construct a [`Vector2`]. Usable in const contexts.
+#[macro_export]
+macro_rules! vec2 {
+    ($x:expr, $y:expr) => {
+        $crate::Vector2 { x: $x, y: $y }
+    };
+    [$x:expr, $y:expr] => {
+        $crate::Vector2 { x: $x, y: $y }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Vector2 {
+            x: splat,
+            y: splat,
+        }
+    }};
+}
+
+/// Construct a [`Vector3`]. Usable in const contexts.
+#[macro_export]
+macro_rules! vec3 {
+    ($x:expr, $y:expr, $z:expr) => {
+        $crate::Vector3 { x: $x, y: $y, z: $z }
+    };
+    [$x:expr, $y:expr, $z:expr] => {
+        $crate::Vector3 { x: $x, y: $y, z: $z }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Vector3 {
+            x: splat,
+            y: splat,
+            z: splat,
+        }
+    }};
+}
+
+/// Construct a [`Vector4`]. Usable in const contexts.
+#[macro_export]
+macro_rules! vec4 {
+    ($x:expr, $y:expr, $z:expr, $w:expr) => {
+        $crate::Vector4 { x: $x, y: $y, z: $z, w: $w }
+    };
+    [$x:expr, $y:expr, $z:expr, $w:expr] => {
+        $crate::Vector4 { x: $x, y: $y, z: $z, w: $w }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Vector4 {
+            x: splat,
+            y: splat,
+            z: splat,
+            w: splat,
+        }
+    }};
+}
+
+/// Construct a [`Vector2`], [`Vector3`], or [`Vector4`] depending on the
+/// number of arguments. Usable in const contexts.
+#[macro_export]
+macro_rules! vector {
+    ($x:expr, $y:expr) => {
+        $crate::vec2!($x, $y)
+    };
+    ($x:expr, $y:expr, $z:expr) => {
+        $crate::vec3!($x, $y, $z)
+    };
+    ($x:expr, $y:expr, $z:expr, $w:expr) => {
+        $crate::vec4!($x, $y, $z, $w)
+    };
+
+    [$x:expr, $y:expr] => {
+        $crate::vec2!($x, $y)
+    };
+    [$x:expr, $y:expr, $z:expr] => {
+        $crate::vec3!($x, $y, $z)
+    };
+    [$x:expr, $y:expr, $z:expr, $w:expr] => {
+        $crate::vec4!($x, $y, $z, $w)
+    };
+
+    ([$splat:expr; 2]) => {
+        $crate::vec2!($splat)
+    };
+    ([$splat:expr; 3]) => {
+        $crate::vec3!($splat)
+    };
+    ([$splat:expr; 4]) => {
+        $crate::vec4!($splat)
+    };
+}
+
+/// Construct a [`Point2`]. Usable in const contexts.
+#[macro_export]
+macro_rules! point2 {
+    ($x:expr, $y:expr) => {
+        $crate::Point2 { x: $x, y: $y }
+    };
+    [$x:expr, $y:expr] => {
+        $crate::Point2 { x: $x, y: $y }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Point2 {
+            x: splat,
+            y: splat,
+        }
+    }};
+}
+
+/// Construct a [`Point3`]. Usable in const contexts.
+#[macro_export]
+macro_rules! point3 {
+    ($x:expr, $y:expr, $z:expr) => {
+        $crate::Point3 { x: $x, y: $y, z: $z }
+    };
+    [$x:expr, $y:expr, $z:expr] => {
+        $crate::Point3 { x: $x, y: $y, z: $z }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Point3 {
+            x: splat,
+            y: splat,
+            z: splat,
+        }
+    }};
+}
+
+/// Construct a [`Point4`]. Usable in const contexts.
+#[macro_export]
+macro_rules! point4 {
+    ($x:expr, $y:expr, $z:expr, $w:expr) => {
+        $crate::Point4 { x: $x, y: $y, z: $z, w: $w }
+    };
+    [$x:expr, $y:expr, $z:expr, $w:expr] => {
+        $crate::Point4 { x: $x, y: $y, z: $z, w: $w }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Point4 {
+            x: splat,
+            y: splat,
+            z: splat,
+            w: splat,
+        }
+    }};
+}
+
+/// Construct a [`Point2`], [`Point3`], or [`Point4`] depending on the
+/// number of arguments. Usable in const contexts.
+#[macro_export]
+macro_rules! point {
+    ($x:expr, $y:expr) => {
+        $crate::point2!($x, $y)
+    };
+    ($x:expr, $y:expr, $z:expr) => {
+        $crate::point3!($x, $y, $z)
+    };
+    ($x:expr, $y:expr, $z:expr, $w:expr) => {
+        $crate::point4!($x, $y, $z, $w)
+    };
+
+    [$x:expr, $y:expr] => {
+        $crate::point2!($x, $y)
+    };
+    [$x:expr, $y:expr, $z:expr] => {
+        $crate::point3!($x, $y, $z)
+    };
+    [$x:expr, $y:expr, $z:expr, $w:expr] => {
+        $crate::point4!($x, $y, $z, $w)
+    };
+
+    ([$splat:expr; 2]) => {
+        $crate::point2!($splat)
+    };
+    ([$splat:expr; 3]) => {
+        $crate::point3!($splat)
+    };
+    ([$splat:expr; 4]) => {
+        $crate::point4!($splat)
+    };
+}
+
+/// Construct a [`Size2`]. Usable in const contexts.
+#[macro_export]
+macro_rules! size2 {
+    ($width:expr, $height:expr) => {
+        $crate::Size2 { width: $width, height: $height }
+    };
+    [$width:expr, $height:expr] => {
+        $crate::Size2 { width: $width, height: $height }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Size2 {
+            width: splat,
+            height: splat,
+        }
+    }};
+}
+
+/// Construct a [`Size3`]. Usable in const contexts.
+#[macro_export]
+macro_rules! size3 {
+
+    ($width:expr, $height:expr, $depth:expr) => {
+        $crate::Size3 { width: $width, height: $height, depth: $depth }
+    };
+    [$width:expr, $height:expr, $depth:expr] => {
+        $crate::Size3 { width: $width, height: $height, depth: $depth }
+    };
+    ($splat:expr) => {{
+        let splat = $splat;
+        $crate::Size3 {
+            width: splat,
+            height: splat,
+            depth: splat,
+        }
+    }};
+}
+
+/// Construct a [`Size2`] or [`Size3`] depending on the number of arguments.
+/// Usable in const contexts.
+#[macro_export]
+macro_rules! size {
+    ($width:expr, $height:expr) => {
+        $crate::size2!($width, $height)
+    };
+    ($width:expr, $height:expr, $depth:expr) => {
+        $crate::size3!($width, $height, $depth)
+    };
+
+    [$width:expr, $height:expr] => {
+        $crate::size2!($width, $height)
+    };
+    [$width:expr, $height:expr, $depth:expr] => {
+        $crate::size3!($width, $height, $depth)
+    };
+
+    ([$splat:expr; 2]) => {
+        $crate::size2!($splat)
+    };
+
+    ([$splat:expr; 3]) => {
+        $crate::size3!($splat)
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -719,4 +968,187 @@ mod tests {
         let t: Option<Vector4<i32>> = v.try_cast();
         assert!(t.is_none());
     }
+
+    #[test]
+    fn vec_macros() {
+        let a: Vector2<f32> = vec2!(1.0, 2.0);
+        let b: Vector2<f32> = vec2![1.0, 2.0];
+        let c: Vector2<f32> = vec2!(2.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(c.x, 2.0);
+        assert_eq!(c.y, 2.0);
+
+        let a: Vector3<f32> = vec3!(1.0, 2.0, 3.0);
+        let b: Vector3<f32> = vec3![1.0, 2.0, 3.0];
+        let c: Vector3<f32> = vec3!(2.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(a.z, 3.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(c.x, 2.0);
+        assert_eq!(c.y, 2.0);
+        assert_eq!(c.z, 2.0);
+
+        let a: Vector4<f32> = vec4!(1.0, 2.0, 3.0, 4.0);
+        let b: Vector4<f32> = vec4![1.0, 2.0, 3.0, 4.0];
+        let c: Vector4<f32> = vec4!(2.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(a.z, 3.0);
+        assert_eq!(a.w, 4.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(b.w, 4.0);
+        assert_eq!(c.x, 2.0);
+        assert_eq!(c.y, 2.0);
+        assert_eq!(c.z, 2.0);
+        assert_eq!(c.w, 2.0);
+
+        let a: Vector2<f32> = vector!(1.0, 2.0);
+        let b: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(c.x, 1.0);
+        assert_eq!(c.y, 2.0);
+        assert_eq!(c.z, 3.0);
+        assert_eq!(c.w, 4.0);
+
+        let a: Vector2<f32> = vector!([2.0; 2]);
+        let b: Vector3<f32> = vector!([3.0; 3]);
+        let c: Vector4<f32> = vector!([4.0; 4]);
+        assert_eq!(a.x, 2.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(b.x, 3.0);
+        assert_eq!(b.y, 3.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(c.x, 4.0);
+        assert_eq!(c.y, 4.0);
+        assert_eq!(c.z, 4.0);
+        assert_eq!(c.w, 4.0);
+    }
+
+    #[test]
+    fn point_macros() {
+        let a: Point2<f32> = point2!(1.0, 2.0);
+        let b: Point2<f32> = point2![1.0, 2.0];
+        let c: Point2<f32> = point2!(2.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(c.x, 2.0);
+        assert_eq!(c.y, 2.0);
+
+        let a: Point3<f32> = point3!(1.0, 2.0, 3.0);
+        let b: Point3<f32> = point3![1.0, 2.0, 3.0];
+        let c: Point3<f32> = point3!(2.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(a.z, 3.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(c.x, 2.0);
+        assert_eq!(c.y, 2.0);
+        assert_eq!(c.z, 2.0);
+
+        let a: Point4<f32> = point4!(1.0, 2.0, 3.0, 4.0);
+        let b: Point4<f32> = point4![1.0, 2.0, 3.0, 4.0];
+        let c: Point4<f32> = point4!(2.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(a.z, 3.0);
+        assert_eq!(a.w, 4.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(b.w, 4.0);
+        assert_eq!(c.x, 2.0);
+        assert_eq!(c.y, 2.0);
+        assert_eq!(c.z, 2.0);
+        assert_eq!(c.w, 2.0);
+
+        let a: Point2<f32> = point!(1.0, 2.0);
+        let b: Point3<f32> = point!(1.0, 2.0, 3.0);
+        let c: Point4<f32> = point!(1.0, 2.0, 3.0, 4.0);
+        assert_eq!(a.x, 1.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(b.x, 1.0);
+        assert_eq!(b.y, 2.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(c.x, 1.0);
+        assert_eq!(c.y, 2.0);
+        assert_eq!(c.z, 3.0);
+        assert_eq!(c.w, 4.0);
+
+        let a: Point2<f32> = point!([2.0; 2]);
+        let b: Point3<f32> = point!([3.0; 3]);
+        let c: Point4<f32> = point!([4.0; 4]);
+        assert_eq!(a.x, 2.0);
+        assert_eq!(a.y, 2.0);
+        assert_eq!(b.x, 3.0);
+        assert_eq!(b.y, 3.0);
+        assert_eq!(b.z, 3.0);
+        assert_eq!(c.x, 4.0);
+        assert_eq!(c.y, 4.0);
+        assert_eq!(c.z, 4.0);
+        assert_eq!(c.w, 4.0);
+    }
+
+    #[test]
+    fn size_macros() {
+        let a: Size2<f32> = size2!(1.0, 2.0);
+        let b: Size2<f32> = size2![1.0, 2.0];
+        let c: Size2<f32> = size2!(2.0);
+        assert_eq!(a.width, 1.0);
+        assert_eq!(a.height, 2.0);
+        assert_eq!(b.width, 1.0);
+        assert_eq!(b.height, 2.0);
+        assert_eq!(c.width, 2.0);
+        assert_eq!(c.height, 2.0);
+
+        let a: Size3<f32> = size3!(1.0, 2.0, 3.0);
+        let b: Size3<f32> = size3![1.0, 2.0, 3.0];
+        let c: Size3<f32> = size3!(2.0);
+        assert_eq!(a.width, 1.0);
+        assert_eq!(a.height, 2.0);
+        assert_eq!(a.depth, 3.0);
+        assert_eq!(b.width, 1.0);
+        assert_eq!(b.height, 2.0);
+        assert_eq!(b.depth, 3.0);
+        assert_eq!(c.width, 2.0);
+        assert_eq!(c.height, 2.0);
+        assert_eq!(c.depth, 2.0);
+
+        let a: Size2<f32> = size!(1.0, 2.0);
+        let b: Size3<f32> = size!(1.0, 2.0, 3.0);
+        assert_eq!(a.width, 1.0);
+        assert_eq!(a.height, 2.0);
+        assert_eq!(b.width, 1.0);
+        assert_eq!(b.height, 2.0);
+        assert_eq!(b.depth, 3.0);
+
+        let a: Size2<f32> = size!([2.0; 2]);
+        let b: Size3<f32> = size!([3.0; 3]);
+        assert_eq!(a.width, 2.0);
+        assert_eq!(a.height, 2.0);
+        assert_eq!(b.width, 3.0);
+        assert_eq!(b.height, 3.0);
+        assert_eq!(b.depth, 3.0);
+    }
+
+    // Verify that the macros can be used in a const context.
+    const _CONST_TEST_VEC: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+    const _CONST_TEST_POINT: Point4<f32> = point!(1.0, 2.0, 3.0, 4.0);
+    const _CONST_TEST_SIZE: Size3<f32> = size!(1.0, 2.0, 3.0);
 }
