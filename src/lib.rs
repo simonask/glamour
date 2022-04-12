@@ -52,6 +52,9 @@ pub mod prelude {
     pub use super::traits::{
         Contains as _, Intersection as _, Lerp as _, Scalar, Union as _, Unit,
     };
+
+    #[doc(no_inline)]
+    pub use super::{point, point2, point3, point4, size, size2, size3, vec2, vec3, vec4, vector};
 }
 
 /// Construct a [`Vector2`]. Usable in const contexts.
