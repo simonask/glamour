@@ -1,7 +1,7 @@
 use approx::AbsDiffEq;
 
 use super::marker::{Serializable, ValueSemantics};
-use super::{SimdMatrix2, SimdMatrix3, SimdMatrix4, SimdVec, Unit};
+use super::{SimdMatrix2, SimdMatrix3, SimdMatrix4, SimdQuat, SimdVec, Unit};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
 /// All types that can serve as components of a SIMD type.
@@ -271,18 +271,22 @@ pub trait PrimitiveMatrices: Primitive + AbsDiffEq {
     type Mat3: SimdMatrix3<Scalar = Self>;
     /// [`glam::Mat4`] or [`glam::DMat4`].
     type Mat4: SimdMatrix4<Scalar = Self>;
+    /// [`glam::Quat`] or [`glam::DQuat`].
+    type Quat: SimdQuat<Scalar = Self, Vec3 = Self::Vec3>;
 }
 
 impl PrimitiveMatrices for f32 {
     type Mat2 = glam::Mat2;
     type Mat3 = glam::Mat3;
     type Mat4 = glam::Mat4;
+    type Quat = glam::Quat;
 }
 
 impl PrimitiveMatrices for f64 {
     type Mat2 = glam::DMat2;
     type Mat3 = glam::DMat3;
     type Mat4 = glam::DMat4;
+    type Quat = glam::DQuat;
 }
 
 /// Convenience trait to go from a (potentially non-primitive) scalar to its
