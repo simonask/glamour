@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- Constructor macros.
 - Support for `glam::Quat` and `glam::DQuat` in `Angle<T>`, `Vector3<T>`, and
   `Point3<T>`.
 
