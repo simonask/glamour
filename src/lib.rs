@@ -16,9 +16,12 @@ mod r#box;
 mod matrix;
 mod point;
 mod rect;
+mod scalar;
 mod size;
 pub mod traits;
+
 mod transform;
+mod unit;
 mod vector;
 
 pub use angle::{Angle, AngleConsts, FloatAngleExt};
@@ -26,33 +29,32 @@ pub use matrix::{Matrix2, Matrix3, Matrix4};
 pub use point::{Point2, Point3, Point4};
 pub use r#box::{Box2, Box3};
 pub use rect::Rect;
+pub use scalar::Scalar;
 pub use size::{Size2, Size3};
 pub use transform::{Transform2, Transform3, TransformMap};
+pub use unit::{Unit, UnitTypes};
 pub use vector::{Vector2, Vector3, Vector4};
 
 mod macros;
 use macros::*;
 
 #[doc(no_inline)]
-pub use traits::{Contains, Intersection, Lerp, Scalar, Union, Unit};
+pub use traits::{Contains, Intersection, Lerp, Union};
 
 /// Convenience glob import.
 ///
-/// All traits are imported anonymously, except [`Unit`](traits::Unit) and
-/// [`Scalar`](traits::Scalar).
+/// All traits are imported anonymously, except [`Unit`] and [`Scalar`].
 pub mod prelude {
     #[doc(no_inline)]
     pub use super::{
         Angle, AngleConsts as _, Box2, Box3, FloatAngleExt as _, Matrix2, Matrix3, Matrix4, Point2,
-        Point3, Point4, Rect, Size2, Size3, Vector2, Vector3, Vector4,
+        Point3, Point4, Rect, Scalar, Size2, Size3, Unit, Vector2, Vector3, Vector4,
     };
     #[doc(no_inline)]
     pub use super::{Transform2, Transform3, TransformMap as _};
 
     #[doc(no_inline)]
-    pub use super::traits::{
-        Contains as _, Intersection as _, Lerp as _, Scalar, Union as _, Unit,
-    };
+    pub use super::traits::{Contains as _, Intersection as _, Lerp as _, Union as _};
 
     #[doc(no_inline)]
     pub use super::{point, point2, point3, point4, size, size2, size3, vec2, vec3, vec4, vector};

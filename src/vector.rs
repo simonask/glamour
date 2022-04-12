@@ -11,7 +11,7 @@
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
-use crate::traits::UnitTypes;
+use crate::UnitTypes;
 use crate::{
     bindings::{Vector, VectorFloat},
     traits::Lerp,
@@ -257,7 +257,7 @@ macro_rules! impl_vector {
 
         impl<T> $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: UnitTypes,
             T::$vec_ty: VectorFloat<$dimensions, Scalar = T::Primitive>,
         {
             #[doc = "Normalize the vector."]
@@ -387,7 +387,7 @@ macro_rules! impl_vector {
 
         impl<T> Lerp<T::Primitive> for $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: UnitTypes,
             T::$vec_ty: Lerp<T::Primitive>,
         {
             #[inline]

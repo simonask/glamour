@@ -1,11 +1,11 @@
 //! Matrix types.
 //!
-//! Matrices do not have a [`Unit`](crate::traits::Unit), because their values
+//! Matrices do not have a [`Unit`](crate::Unit), because their values
 //! do not necessarily have a clear logical meaning in the context of any
 //! particular unit.
 //!
 //! Instead, they are based on fundamental floating-point
-//! [primitive](crate::traits::Primitive) scalars (`f32` or `f64`).
+//! [primitive](crate::bindings::Primitive) scalars (`f32` or `f64`).
 
 use core::ops::Mul;
 

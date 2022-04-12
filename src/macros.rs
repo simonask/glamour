@@ -2,7 +2,7 @@ macro_rules! impl_common {
     ($base_type_name:ident {
         $($fields:ident: $fields_ty:ty),*
     }) => {
-        impl<T: crate::traits::UnitTypes> $base_type_name<T> {
+        impl<T: crate::UnitTypes> $base_type_name<T> {
             #[doc = "Instantiate with field values."]
             #[inline]
             #[must_use]
@@ -45,7 +45,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast<T2>(self) -> $base_type_name<T2>
             where
-                T2: crate::traits::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast(self)
             }
@@ -55,7 +55,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_ref<T2>(&self) -> &$base_type_name<T2>
             where
-                T2: crate::traits::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast_ref(self)
             }
@@ -65,7 +65,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_mut<T2>(&mut self) -> &mut $base_type_name<T2>
             where
-                T2: crate::traits::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast_mut(self)
             }
@@ -121,9 +121,9 @@ macro_rules! impl_common {
         }
 
         /// SAFETY: Vector types only contain members of type `T::Scalar`, which is required to be [`Zeroable`](bytemuck::Zeroable).
-        unsafe impl<T: crate::traits::Unit> bytemuck::Zeroable for $base_type_name<T> where $($fields_ty: bytemuck::Zeroable),* {}
+        unsafe impl<T: crate::Unit> bytemuck::Zeroable for $base_type_name<T> where $($fields_ty: bytemuck::Zeroable),* {}
         /// SAFETY: Vector types only contain members of type `T::Scalar`, which is required to be [`Pod`](bytemuck::Pod).
-        unsafe impl<T: crate::traits::Unit> bytemuck::Pod for $base_type_name<T> where $($fields_ty: bytemuck::Pod),* {}
+        unsafe impl<T: crate::Unit> bytemuck::Pod for $base_type_name<T> where $($fields_ty: bytemuck::Pod),* {}
 
         impl<T: Unit> PartialEq for $base_type_name<T> {
             #[inline]
@@ -332,7 +332,7 @@ macro_rules! impl_simd_common {
     ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident, $mask_ty:ty {
         $($fields:ident),*
     }) => {
-        impl<T: crate::traits::UnitTypes> $base_type_name<T> {
+        impl<T: crate::UnitTypes> $base_type_name<T> {
             #[doc = "Get the underlying `glam` vector."]
             #[inline]
             #[must_use]
@@ -544,7 +544,7 @@ macro_rules! impl_simd_common {
 
         impl<T> $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: crate::UnitTypes,
             T::$vec_ty: crate::bindings::VectorFloat<$dimensions>,
         {
             #[doc = "Return an instance where all components are NaN."]
@@ -601,7 +601,7 @@ macro_rules! impl_simd_common {
 
         impl<T> $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: crate::UnitTypes,
             T::$vec_ty: crate::traits::Abs,
         {
             #[doc = "Computes the absolute value of each component."]
@@ -717,7 +717,7 @@ macro_rules! impl_simd_common {
 
         impl<T> core::ops::Neg for $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: crate::UnitTypes,
             T::$vec_ty: core::ops::Neg<Output = T::$vec_ty>,
         {
             type Output = Self;

@@ -4,8 +4,8 @@ use approx::AbsDiffEq;
 
 use crate::{
     bindings::VectorFloat,
-    traits::{Contains, Intersection, Lerp, Union, UnitTypes},
-    Box2, Point2, Scalar, Size2, Unit, Vector2,
+    traits::{Contains, Intersection, Lerp, Union},
+    Box2, Point2, Scalar, Size2, Unit, UnitTypes, Vector2,
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".

@@ -134,7 +134,7 @@ macro_rules! impl_size {
 
         impl<T> Lerp<T::Primitive> for $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: crate::UnitTypes,
             T::$vec_ty: Lerp<T::Primitive>,
         {
             #[inline]
@@ -148,14 +148,14 @@ macro_rules! impl_size {
 impl_size!(Size2 [2] => Vec2, Vector2);
 impl_size!(Size3 [3] => Vec3, Vector3);
 
-impl<T: crate::traits::UnitTypes> Size2<T> {
+impl<T: crate::UnitTypes> Size2<T> {
     /// Calculate the area.
     pub fn area(&self) -> T::Scalar {
         T::Scalar::from_raw(self.width.to_raw() * self.height.to_raw())
     }
 }
 
-impl<T: crate::traits::UnitTypes> Size3<T> {
+impl<T: crate::UnitTypes> Size3<T> {
     /// Calculate the volume.
     pub fn volume(&self) -> T::Scalar {
         T::Scalar::from_raw(self.width.to_raw() * self.height.to_raw() * self.depth.to_raw())

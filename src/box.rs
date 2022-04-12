@@ -3,8 +3,8 @@
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{
-    traits::{Contains, Intersection, Lerp, UnitTypes},
-    Point2, Point3, Rect, Size2, Union, Unit, Vector2,
+    traits::{Contains, Intersection, Lerp},
+    Point2, Point3, Rect, Size2, Union, Unit, UnitTypes, Vector2,
 };
 
 /// 2D axis-aligned box represented as "min" and "max" points.

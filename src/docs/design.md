@@ -70,34 +70,28 @@ types in the API.
 
 The relevant traits are:
 
-- [`SimdVec`](crate::traits::SimdVec) - describing all `glam` vector types. Note
+- [`Vector`](crate::bindings::Vector) - describing all `glam` vector types. Note
   that this has a generic const parameter `D` describing the dimensionality of
   the vector, but this is only for brevity and should not be relied upon in
   generic code. Specifically it exists because we require that vector types can
   be converted to constant-sized arrays of scalars, so we need `D` in
   supertraits of `SimdVec`.
-- [`SimdMatrix`](crate::traits::SimdMatrix) - describing all `glam` matrix
+- [`Matrix`](crate::bindings::Matrix) - describing all `glam` matrix
   types.
-- [`Primitive`](crate::traits::Primitive) - describes how to map from a
+- [`Primitive`](crate::bindings::Primitive) - describes how to map from a
   primitive to a `glam` vector type of the desired size.
-- [`PrimitiveMatrices`](crate::traits::PrimitiveMatrices) - describes how to map
+- [`PrimitiveMatrices`](crate::bindings::PrimitiveMatrices) - describes how to map
   from a primitive to a `glam` matrix type of the desired size.
-- [`Scalar`](crate::traits::Scalar) - describes which primitive to use for a
+- [`Scalar`](crate::Scalar) - describes which primitive to use for a
   scalar. This will only be different from `Primitive` when using a newtype -
   normally the primitive itself is the scalar.
-- [`Unit`](crate::traits::Unit) - describes which scalar to use for a particular
+- [`Unit`](crate::Unit) - describes which scalar to use for a particular
   logical unit.
 
 Since all of this genericity creates quite the soup of associated types and
-trait bounds, a number of traits exist as shorthands for convenience:
+trait bounds, the [`UnitTypes`](crate::UnitTypes) trait exists as a shorthand.
 
-- [`ScalarVectors`](crate::traits::ScalarVectors) - shorthands for `<<T as
-  Scalar>::Primitive as Primitive>::VecN`.
-- [`UnitTypes`](crate::traits::UnitTypes) - shorthands for `<T::Scalar as
-  Scalar>::Primitive` and `<<T::Scalar as Scalar>::Primitive as
-  Primitive>::VecN`.
-
-Public types use the shorthand trait bounds whenever possible.
+Public types use the shorthand in trait bounds whenever possible.
 
 `glamour` makes extensive use of macros to forward method calls to `glam`
 (similar to what `glam` does internally).

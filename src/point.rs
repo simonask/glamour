@@ -9,10 +9,7 @@
 //! points yields a vector, while subtracting a vector from a point yields
 //! another point.
 
-use crate::{
-    traits::{Lerp, Scalar, UnitTypes},
-    Unit, Vector2, Vector3, Vector4,
-};
+use crate::{traits::Lerp, Scalar, Unit, UnitTypes, Vector2, Vector3, Vector4};
 use core::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
 /// 2D point.
@@ -198,7 +195,7 @@ macro_rules! impl_point {
 
         impl<T> Lerp<T::Primitive> for $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: crate::UnitTypes,
             T::$vec_ty: Lerp<T::Primitive>,
         {
             #[inline]

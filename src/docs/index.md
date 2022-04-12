@@ -46,14 +46,14 @@ legal under these conditions in Rust.
 But to actually allow vector types to be strongly typed, not only in the
 conceptual distinction between "vector", "point", "size", etc., but also in a
 way that the user can customize (i.e., different types of "vectors", "points",
-"sizes", etc.), all types are generic and take a [`Unit`](crate::traits::Unit)
+"sizes", etc.), all types are generic and take a [`Unit`](crate::Unit)
 parameter. To further complicate matters, the design goal has been to avoid
 `PhantomData` members, because they hurt the ergonomics of using the types as
 truly "POD-like" - in particular, destructuring and construction become much
 more verbose.
 
 To solve this, we add some extra information to user-defined `Unit`s. Any unit
-is associated with a [`Scalar`](crate::traits::Scalar) type indicating the
+is associated with a [`Scalar`](crate::Scalar) type indicating the
 component type of the vector, typically one of the primitive types supported by
 `glam`: `f32`, `f64`, `i32`, or `u32`. The type of scalar determines which
 `glam` vector type is used for arithmetic in the vector type with that unit.
@@ -67,7 +67,7 @@ component type of the vector, typically one of the primitive types supported by
 | `u32`      | [`UVec2`][glam_uvec2] | [`UVec3`][glam_uvec3] | [`UVec4`][glam_uvec4] |
 
 The mapping to vector types also works for custom scalar values, through the
-[`Scalar`](crate::traits::Scalar) trait.
+[`Scalar`](crate::Scalar) trait.
 
 [glam_vec2]: glam::Vec2
 [glam_vec3]: glam::Vec3
@@ -82,7 +82,7 @@ The mapping to vector types also works for custom scalar values, through the
 [glam_uvec3]: glam::UVec3
 [glam_uvec4]: glam::UVec4
 
-Custom implementations of [`Scalar`](crate::traits::Scalar) are also possible -
+Custom implementations of [`Scalar`](crate::Scalar) are also possible -
 as long as those values remain 100% bitwise compatible with one of the
 fundamental primitive types mentioned above.
 

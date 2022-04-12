@@ -12,8 +12,8 @@ use bytemuck::{cast, Pod, Zeroable};
 use num_traits::Float;
 
 use crate::{
-    bindings::PrimitiveMatrices, traits::UnitTypes, Angle, AngleConsts, Matrix3, Matrix4, Point2,
-    Point3, Scalar, Unit, Vector2, Vector3,
+    bindings::PrimitiveMatrices, Angle, AngleConsts, Matrix3, Matrix4, Point2, Point3, Scalar,
+    Unit, UnitTypes, Vector2, Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.

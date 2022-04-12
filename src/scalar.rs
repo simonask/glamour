@@ -1,5 +1,5 @@
-use super::marker::{Serializable, ValueSemantics};
 use crate::bindings::Primitive;
+use crate::traits::marker::{Serializable, ValueSemantics};
 
 /// All types that can serve as components of a SIMD type.
 ///
