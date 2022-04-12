@@ -11,6 +11,7 @@
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
+use crate::traits::UnitTypes;
 use crate::{
     traits::{Lerp, SimdVec, SimdVecFloat},
     Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
@@ -611,6 +612,22 @@ impl<T: Unit> Vector4<T> {
 crate::impl_mint!(Vector2, 2, Vector2);
 crate::impl_mint!(Vector3, 3, Vector3);
 crate::impl_mint!(Vector4, 4, Vector4);
+
+impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Vector3<T>> for glam::Quat {
+    type Output = Vector3<T>;
+
+    fn mul(self, rhs: Vector3<T>) -> Self::Output {
+        Vector3::from_raw(self * rhs.to_raw())
+    }
+}
+
+impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Vector3<T>> for glam::DQuat {
+    type Output = Vector3<T>;
+
+    fn mul(self, rhs: Vector3<T>) -> Self::Output {
+        Vector3::from_raw(self * rhs.to_raw())
+    }
+}
 
 #[cfg(test)]
 mod tests {

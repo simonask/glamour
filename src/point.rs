@@ -10,10 +10,10 @@
 //! another point.
 
 use crate::{
-    traits::{Lerp, Scalar},
+    traits::{Lerp, Scalar, UnitTypes},
     Unit, Vector2, Vector3, Vector4,
 };
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
 /// 2D point.
 ///
@@ -259,6 +259,22 @@ where
 {
     fn from(v: Point3<T>) -> Self {
         v.to_raw().into()
+    }
+}
+
+impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Point3<T>> for glam::Quat {
+    type Output = Point3<T>;
+
+    fn mul(self, rhs: Point3<T>) -> Self::Output {
+        Point3::from_raw(self * rhs.to_raw())
+    }
+}
+
+impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Point3<T>> for glam::DQuat {
+    type Output = Point3<T>;
+
+    fn mul(self, rhs: Point3<T>) -> Self::Output {
+        Point3::from_raw(self * rhs.to_raw())
     }
 }
 
