@@ -55,11 +55,6 @@ pub trait Matrix:
     /// If the determinant is non-zero, the matrix is invertible.
     #[must_use]
     fn determinant(&self) -> Self::Scalar;
-
-    /// Check if the matrix is invertible. Default implementation returns
-    /// `self.determinant() != 0.0`.
-    #[must_use]
-    fn is_invertible(&self) -> bool;
 }
 
 /// Primitive 2x2 matrix.
@@ -101,7 +96,7 @@ pub trait SimdMatrix2:
     fn row(&self, index: usize) -> <Self::Scalar as Primitive>::Vec2;
 
     /// 2D scaling matrix.
-    fn from_scale(vector: <Self::Scalar as Primitive>::Vec2) -> Self;
+    fn from_scale_angle(vector: <Self::Scalar as Primitive>::Vec2, angle: Self::Scalar) -> Self;
 
     /// 2D rotation matrix.
     fn from_angle(angle: Self::Scalar) -> Self;
@@ -222,17 +217,13 @@ pub trait SimdMatrix4:
     /// Scale, rotation, translation.
     fn from_scale_rotation_translation(
         scale: <Self::Scalar as Primitive>::Vec3,
-        axis: <Self::Scalar as Primitive>::Vec3,
-        angle: Self::Scalar,
+        axis: <Self::Scalar as PrimitiveMatrices>::Quat,
         translation: <Self::Scalar as Primitive>::Vec3,
     ) -> Self;
 }
 
 macro_rules! impl_matrix {
-    ($scalar:ty, $n:literal, $glam_ty:ty {
-        $($axes:ident),*
-    }
-    ) => {
+    ($scalar:ty, $glam_ty:ty) => {
         impl Matrix for $glam_ty {
             type Scalar = $scalar;
 
@@ -251,46 +242,21 @@ macro_rules! impl_matrix {
                 <$glam_ty>::NAN
             }
 
-            #[inline]
-            fn is_nan(&self) -> bool {
-                <$glam_ty>::is_nan(self)
-            }
-
-            #[inline]
-            fn is_finite(&self) -> bool {
-                <$glam_ty>::is_finite(self)
-            }
-
-            #[inline]
-            fn determinant(&self) -> $scalar {
-                <$glam_ty>::determinant(self)
-            }
-
-            #[inline]
-            fn is_invertible(&self) -> bool {
-                let d = <$glam_ty>::determinant(self);
-                d.is_finite() && d != 0.0
-            }
-
-            #[inline]
-            fn transpose(&self) -> Self {
-                <$glam_ty>::transpose(self)
-            }
-
-            #[inline]
-            fn inverse(&self) -> Self {
-                <$glam_ty>::inverse(self)
-            }
+            forward_impl!($glam_ty => fn is_nan(&self) -> bool);
+            forward_impl!($glam_ty => fn is_finite(&self) -> bool);
+            forward_impl!($glam_ty => fn determinant(&self) -> $scalar);
+            forward_impl!($glam_ty => fn transpose(&self) -> Self);
+            forward_impl!($glam_ty => fn inverse(&self) -> Self);
         }
     };
 }
 
-impl_matrix!(f32, 2, glam::Mat2 { x, y });
-impl_matrix!(f32, 3, glam::Mat3 { x, y, z });
-impl_matrix!(f32, 4, glam::Mat4 { x, y, z, w });
-impl_matrix!(f64, 2, glam::DMat2 { x, y });
-impl_matrix!(f64, 3, glam::DMat3 { x, y, z });
-impl_matrix!(f64, 4, glam::DMat4 { x, y, z, w });
+impl_matrix!(f32, glam::Mat2);
+impl_matrix!(f32, glam::Mat3);
+impl_matrix!(f32, glam::Mat4);
+impl_matrix!(f64, glam::DMat2);
+impl_matrix!(f64, glam::DMat3);
+impl_matrix!(f64, glam::DMat4);
 
 impl SimdMatrix2 for glam::Mat2 {
     #[inline]
@@ -318,25 +284,10 @@ impl SimdMatrix2 for glam::Mat2 {
         [self.row(0), self.row(1)]
     }
 
-    #[inline]
-    fn col(&self, index: usize) -> glam::Vec2 {
-        <glam::Mat2>::col(self, index)
-    }
-
-    #[inline]
-    fn row(&self, index: usize) -> glam::Vec2 {
-        <glam::Mat2>::row(self, index)
-    }
-
-    #[inline]
-    fn from_scale(vector: glam::Vec2) -> Self {
-        <glam::Mat2>::from_scale_angle(vector, 0.0)
-    }
-
-    #[inline]
-    fn from_angle(angle: f32) -> Self {
-        <glam::Mat2>::from_angle(angle)
-    }
+    forward_impl!(glam::Mat2 => fn col(&self, index: usize) -> glam::Vec2);
+    forward_impl!(glam::Mat2 => fn row(&self, index: usize) -> glam::Vec2);
+    forward_impl!(glam::Mat2 => fn from_scale_angle(vector: glam::Vec2, angle: f32) -> Self);
+    forward_impl!(glam::Mat2 => fn from_angle(angle: f32) -> Self);
 }
 
 impl SimdMatrix2 for glam::DMat2 {
@@ -365,25 +316,10 @@ impl SimdMatrix2 for glam::DMat2 {
         [self.row(0), self.row(1)]
     }
 
-    #[inline]
-    fn col(&self, index: usize) -> glam::DVec2 {
-        <glam::DMat2>::col(self, index)
-    }
-
-    #[inline]
-    fn row(&self, index: usize) -> glam::DVec2 {
-        <glam::DMat2>::row(self, index)
-    }
-
-    #[inline]
-    fn from_scale(vector: glam::DVec2) -> Self {
-        <glam::DMat2>::from_scale_angle(vector, 0.0)
-    }
-
-    #[inline]
-    fn from_angle(angle: f64) -> Self {
-        <glam::DMat2>::from_angle(angle)
-    }
+    forward_impl!(glam::DMat2 => fn col(&self, index: usize) -> glam::DVec2);
+    forward_impl!(glam::DMat2 => fn row(&self, index: usize) -> glam::DVec2);
+    forward_impl!(glam::DMat2 => fn from_scale_angle(vector: glam::DVec2, angle: f64) -> Self);
+    forward_impl!(glam::DMat2 => fn from_angle(angle: f64) -> Self);
 }
 
 impl SimdMatrix3 for glam::Mat3 {
@@ -408,43 +344,21 @@ impl SimdMatrix3 for glam::Mat3 {
     }
 
     #[inline]
-    fn col(&self, index: usize) -> glam::Vec3 {
-        <glam::Mat3>::col(self, index)
-    }
-
-    #[inline]
-    fn row(&self, index: usize) -> glam::Vec3 {
-        <glam::Mat3>::row(self, index)
-    }
-
-    #[inline]
     fn transform_vector(&self, vector: glam::Vec2) -> glam::Vec2 {
         self.transform_vector2(vector)
     }
 
-    #[inline]
-    fn from_scale(vector: glam::Vec2) -> Self {
-        <glam::Mat3>::from_scale(vector)
-    }
+    forward_impl!(glam::Mat3 => fn col(&self, index: usize) -> glam::Vec3);
+    forward_impl!(glam::Mat3 => fn row(&self, index: usize) -> glam::Vec3);
+    forward_impl!(glam::Mat3 => fn from_scale(vector: glam::Vec2) -> Self);
+    forward_impl!(glam::Mat3 => fn from_angle(angle: f32) -> Self);
+    forward_impl!(glam::Mat3 => fn from_translation(translation: glam::Vec2) -> Self);
 
-    #[inline]
-    fn from_angle(angle: f32) -> Self {
-        <glam::Mat3>::from_angle(angle)
-    }
-
-    #[inline]
-    fn from_translation(translation: glam::Vec2) -> Self {
-        <glam::Mat3>::from_translation(translation)
-    }
-
-    #[inline]
-    fn from_scale_angle_translation(
+    forward_impl!(glam::Mat3 => fn from_scale_angle_translation(
         scale: glam::Vec2,
         angle: f32,
-        translation: glam::Vec2,
-    ) -> Self {
-        <glam::Mat3>::from_scale_angle_translation(scale, angle, translation)
-    }
+        translation: glam::Vec2
+    ) -> Self);
 }
 
 impl SimdMatrix3 for glam::DMat3 {
@@ -469,43 +383,21 @@ impl SimdMatrix3 for glam::DMat3 {
     }
 
     #[inline]
-    fn col(&self, index: usize) -> glam::DVec3 {
-        <glam::DMat3>::col(self, index)
-    }
-
-    #[inline]
-    fn row(&self, index: usize) -> glam::DVec3 {
-        <glam::DMat3>::row(self, index)
-    }
-
-    #[inline]
     fn transform_vector(&self, vector: glam::DVec2) -> glam::DVec2 {
         self.transform_vector2(vector)
     }
 
-    #[inline]
-    fn from_scale(vector: glam::DVec2) -> Self {
-        <glam::DMat3>::from_scale(vector)
-    }
+    forward_impl!(glam::DMat3 => fn col(&self, index: usize) -> glam::DVec3);
+    forward_impl!(glam::DMat3 => fn row(&self, index: usize) -> glam::DVec3);
+    forward_impl!(glam::DMat3 => fn from_scale(vector: glam::DVec2) -> Self);
+    forward_impl!(glam::DMat3 => fn from_angle(angle: f64) -> Self);
+    forward_impl!(glam::DMat3 => fn from_translation(translation: glam::DVec2) -> Self);
 
-    #[inline]
-    fn from_angle(angle: f64) -> Self {
-        <glam::DMat3>::from_angle(angle)
-    }
-
-    #[inline]
-    fn from_translation(translation: glam::DVec2) -> Self {
-        <glam::DMat3>::from_translation(translation)
-    }
-
-    #[inline]
-    fn from_scale_angle_translation(
+    forward_impl!(glam::DMat3 => fn from_scale_angle_translation(
         scale: glam::DVec2,
         angle: f64,
-        translation: glam::DVec2,
-    ) -> Self {
-        <glam::DMat3>::from_scale_angle_translation(scale, angle, translation)
-    }
+        translation: glam::DVec2
+    ) -> Self);
 }
 
 impl SimdMatrix4 for glam::Mat4 {
@@ -539,40 +431,17 @@ impl SimdMatrix4 for glam::Mat4 {
         [self.row(0), self.row(1), self.row(2), self.row(3)]
     }
 
-    #[inline]
-    fn col(&self, index: usize) -> glam::Vec4 {
-        <glam::Mat4>::col(self, index)
-    }
+    forward_impl!(glam::Mat4 => fn col(&self, index: usize) -> glam::Vec4);
+    forward_impl!(glam::Mat4 => fn row(&self, index: usize) -> glam::Vec4);
+    forward_impl!(glam::Mat4 => fn from_scale(vector: glam::Vec3) -> Self);
+    forward_impl!(glam::Mat4 => fn from_axis_angle(axis: glam::Vec3, angle: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn from_translation(translation: glam::Vec3) -> Self);
 
-    #[inline]
-    fn row(&self, index: usize) -> glam::Vec4 {
-        <glam::Mat4>::row(self, index)
-    }
-
-    #[inline]
-    fn from_scale(vector: glam::Vec3) -> Self {
-        <glam::Mat4>::from_scale(vector)
-    }
-
-    #[inline]
-    fn from_axis_angle(axis: glam::Vec3, angle: f32) -> Self {
-        glam::Mat4::from_axis_angle(axis, angle)
-    }
-
-    #[inline]
-    fn from_translation(translation: glam::Vec3) -> Self {
-        <glam::Mat4>::from_translation(translation)
-    }
-
-    fn from_scale_rotation_translation(
+    forward_impl!(glam::Mat4 => fn from_scale_rotation_translation(
         scale: glam::Vec3,
-        axis: glam::Vec3,
-        angle: f32,
-        translation: glam::Vec3,
-    ) -> Self {
-        let quat = glam::Quat::from_axis_angle(axis, angle);
-        <glam::Mat4>::from_scale_rotation_translation(scale, quat, translation)
-    }
+        rotation: glam::Quat,
+        translation: glam::Vec3
+    ) -> Self);
 }
 
 impl SimdMatrix4 for glam::DMat4 {
@@ -606,39 +475,15 @@ impl SimdMatrix4 for glam::DMat4 {
         [self.row(0), self.row(1), self.row(2), self.row(3)]
     }
 
-    #[inline]
-    fn col(&self, index: usize) -> glam::DVec4 {
-        <glam::DMat4>::col(self, index)
-    }
+    forward_impl!(glam::DMat4 => fn col(&self, index: usize) -> glam::DVec4);
+    forward_impl!(glam::DMat4 => fn row(&self, index: usize) -> glam::DVec4);
+    forward_impl!(glam::DMat4 => fn from_scale(vector: glam::DVec3) -> Self);
+    forward_impl!(glam::DMat4 => fn from_axis_angle(axis: glam::DVec3, angle: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn from_translation(translation: glam::DVec3) -> Self);
 
-    #[inline]
-    fn row(&self, index: usize) -> glam::DVec4 {
-        <glam::DMat4>::row(self, index)
-    }
-
-    #[inline]
-    fn from_scale(vector: glam::DVec3) -> Self {
-        <glam::DMat4>::from_scale(vector)
-    }
-
-    #[inline]
-    fn from_axis_angle(axis: glam::DVec3, angle: f64) -> Self {
-        <glam::DMat4>::from_axis_angle(axis, angle)
-    }
-
-    #[inline]
-    fn from_translation(translation: glam::DVec3) -> Self {
-        <glam::DMat4>::from_translation(translation)
-    }
-
-    #[inline]
-    fn from_scale_rotation_translation(
+    forward_impl!(glam::DMat4 => fn from_scale_rotation_translation(
         scale: glam::DVec3,
-        axis: glam::DVec3,
-        angle: f64,
-        translation: glam::DVec3,
-    ) -> Self {
-        let quat = glam::DQuat::from_axis_angle(axis, angle);
-        <glam::DMat4>::from_scale_rotation_translation(scale, quat, translation)
-    }
+        rotation: glam::DQuat,
+        translation: glam::DVec3
+    ) -> Self);
 }

@@ -19,29 +19,6 @@ pub trait Quat:
     fn from_axis_angle(axis: Self::Vec3, angle: Self::Scalar) -> Self;
 }
 
-macro_rules! forward_impl {
-    ($base:ty => fn $name:ident ( &self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
-        fn $name(&self $(, $arg:$arg_ty)*) -> $ret {
-            <$base>::$name(self $(, $arg)*)
-        }
-    };
-    ($base:ty => fn $name:ident ( &mut self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
-        fn $name(&mut self $(, $arg:$arg_ty)*) -> $ret {
-            <$base>::$name(self $(, $arg)*)
-        }
-    };
-    ($base:ty => fn $name:ident ( self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
-        fn $name(self $(, $arg:$arg_ty)*) -> $ret {
-            <$base>::$name(self $(, $arg)*)
-        }
-    };
-    ($base:ty => fn $name:ident ( $($arg:ident : $arg_ty:ty),*) -> $ret:ty) => {
-        fn $name($($arg:$arg_ty),*) -> $ret {
-            <$base>::$name($($arg),*)
-        }
-    };
-}
-
 macro_rules! impl_quat {
     ($base:ty, $scalar:ty, $vec3:ty, $vec4:ty) => {
         impl Quat for $base {

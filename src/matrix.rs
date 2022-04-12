@@ -234,7 +234,8 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn is_invertible(&self) -> bool {
-                self.as_raw().is_invertible()
+                let d = self.determinant();
+                d != T::zero() && crate::Scalar::is_finite(d)
             }
 
             #[doc = "Return the inverse matrix."]
@@ -332,7 +333,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector2<T>) -> Self {
-        Self::from_raw(T::Mat2::from_scale(scale.to_raw()))
+        Self::from_raw(T::Mat2::from_scale_angle(scale.to_raw(), T::zero()))
     }
 
     /// Rotation matrix.
@@ -764,10 +765,11 @@ where
         angle: Angle<T>,
         translation: Vector3<T>,
     ) -> Self {
+        use crate::bindings::Quat;
+        let quat = <T as PrimitiveMatrices>::Quat::from_axis_angle(axis.to_raw(), angle.radians);
         Self::from_raw(T::Mat4::from_scale_rotation_translation(
             scale.to_raw(),
-            axis.to_raw(),
-            angle.radians,
+            quat,
             translation.to_raw(),
         ))
     }

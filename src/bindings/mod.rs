@@ -22,3 +22,32 @@ pub use matrix::*;
 pub use primitive::*;
 pub use quat::*;
 pub use vec::*;
+
+macro_rules! forward_impl {
+    ($base:ty => fn $name:ident ( &self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
+        #[inline]
+        fn $name(&self $(, $arg:$arg_ty)*) -> $ret {
+            <$base>::$name(self $(, $arg)*).into()
+        }
+    };
+    ($base:ty => fn $name:ident ( &mut self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
+        #[inline]
+        fn $name(&mut self $(, $arg:$arg_ty)*) -> $ret {
+            <$base>::$name(self $(, $arg)*).into()
+        }
+    };
+    ($base:ty => fn $name:ident ( self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
+        #[inline]
+        fn $name(self $(, $arg:$arg_ty)*) -> $ret {
+            <$base>::$name(self $(, $arg)*).into()
+        }
+    };
+    ($base:ty => fn $name:ident ( $($arg:ident : $arg_ty:ty),*) -> $ret:ty) => {
+        #[inline]
+        fn $name($($arg:$arg_ty),*) -> $ret {
+            <$base>::$name($($arg),*).into()
+        }
+    };
+}
+
+use forward_impl;

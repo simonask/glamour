@@ -116,37 +116,7 @@ pub trait VectorFloat<const D: usize>: Vector<D> {
 }
 
 macro_rules! impl_base {
-    ($scalar:ty => $glam_ty:ty { $x:ident, $y:ident }) => {
-        impl_base!(
-            @impl
-            $scalar
-            [2]
-            => $glam_ty
-            { $x, $y }
-            glam::BVec2
-        );
-    };
-    ($scalar:ty => $glam_ty:ty { $x:ident, $y:ident, $z:ident }) => {
-        impl_base!(
-            @impl
-            $scalar
-            [3]
-            => $glam_ty
-            { $x, $y, $z }
-            glam::BVec3A
-        );
-    };
-    ($scalar:ty => $glam_ty:ty { $x:ident, $y:ident, $z:ident, $w:ident }) => {
-        impl_base!(
-            @impl
-            $scalar
-            [4]
-            => $glam_ty
-            { $x, $y, $z, $w }
-            glam::BVec4A
-        );
-    };
-    (@impl $scalar:ty [$dimensions:tt] => $glam_ty:ty { $($fields:ident),* } $mask:ty) => {
+    ($scalar:ty [$dimensions:literal] => $glam_ty:ty, $mask:ty) => {
         impl Vector<$dimensions> for $glam_ty {
             type Scalar = $scalar;
             type Mask = $mask;
@@ -159,13 +129,7 @@ macro_rules! impl_base {
                 <$glam_ty>::ONE
             }
 
-            #[inline]
-            fn splat(scalar: $scalar) -> Self {
-                $(
-                    let $fields = scalar;
-                )*
-                <$glam_ty>::new($($fields),*)
-            }
+            forward_impl!($glam_ty => fn splat(scalar: $scalar) -> Self);
 
             #[inline]
             fn get(&self, lane: usize) -> $scalar {
@@ -179,129 +143,48 @@ macro_rules! impl_base {
                 array[lane] = value;
             }
 
-            fn cmpeq(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpeq(self, other).into()
-            }
-            fn cmpne(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpne(self, other).into()
-            }
-            fn cmpge(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpge(self, other).into()
-            }
-            fn cmpgt(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmpgt(self, other).into()
-            }
-            fn cmple(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmple(self, other).into()
-            }
-            fn cmplt(self, other: Self) -> Self::Mask {
-                <$glam_ty>::cmplt(self, other).into()
-            }
-            fn clamp(self, min: Self, max: Self) -> Self {
-                <$glam_ty>::clamp(self, min, max)
-            }
-            fn min(self, other: Self) -> Self {
-                <$glam_ty>::min(self, other)
-            }
-            fn max(self, other: Self) -> Self {
-                <$glam_ty>::max(self, other)
-            }
-            fn min_element(self) -> $scalar {
-                <$glam_ty>::min_element(self)
-            }
-            fn max_element(self) -> $scalar {
-                <$glam_ty>::max_element(self)
-            }
+            forward_impl!($glam_ty => fn cmpeq(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmpne(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmplt(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmple(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmpgt(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmpge(self, other: Self) -> Self::Mask);
 
-            fn select(mask: $mask, if_true: Self, if_false: Self) -> Self {
-                <$glam_ty>::select(mask.into(), if_true, if_false)
-            }
+            forward_impl!($glam_ty => fn clamp(self, min: Self, max: Self) -> Self);
+            forward_impl!($glam_ty => fn min(self, other: Self) -> Self);
+            forward_impl!($glam_ty => fn max(self, other: Self) -> Self);
+            forward_impl!($glam_ty => fn min_element(self) -> $scalar);
+            forward_impl!($glam_ty => fn max_element(self) -> $scalar);
 
-            fn dot(self, other: Self) -> $scalar {
-                <$glam_ty>::dot(self, other)
-            }
+            forward_impl!($glam_ty => fn select(mask: $mask, if_true: Self, if_false: Self) -> Self);
+            forward_impl!($glam_ty => fn dot(self, other: Self) -> $scalar);
         }
     };
 }
 
 macro_rules! impl_base_float {
-    ($scalar:ty => $glam_ty:ty { $x:ident, $y:ident }) => {
-        impl_base_float!(
-            @impl
-            $scalar
-            [2]
-            => $glam_ty
-            { $x, $y }
-            glam::BVec2
-        );
-    };
-    ($scalar:ty => $glam_ty:ty { $x:ident, $y:ident, $z:ident }) => {
-        impl_base_float!(
-            @impl
-            $scalar
-            [3]
-            => $glam_ty
-            { $x, $y, $z }
-            glam::BVec3
-        );
-    };
-    ($scalar:ty => $glam_ty:ty { $x:ident, $y:ident, $z:ident, $w:ident }) => {
-        impl_base_float!(
-            @impl
-            $scalar
-            [4]
-            => $glam_ty
-            { $x, $y, $z, $w }
-            glam::BVec4
-        );
-    };
-    (@impl $scalar:ty [$dimensions:tt] => $glam_ty:ty { $($fields:ident),* } $mask:ty) => {
+    ($dimensions:literal => $glam_ty:ty) => {
         impl VectorFloat<$dimensions> for $glam_ty {
             fn nan() -> Self {
                 <$glam_ty>::NAN
             }
-            fn is_finite(self) -> bool {
-                <$glam_ty>::is_finite(self)
-            }
-            fn is_nan(self) -> bool {
-                <$glam_ty>::is_nan(self)
-            }
-            fn is_nan_mask(self) -> Self::Mask {
-                <$glam_ty>::is_nan_mask(self).into()
-            }
-            fn ceil(self) -> Self {
-                <$glam_ty>::ceil(self)
-            }
-            fn floor(self) -> Self {
-                <$glam_ty>::floor(self)
-            }
-            fn round(self) -> Self {
-                <$glam_ty>::round(self)
-            }
-            fn normalize(self) -> Self {
-                <$glam_ty>::normalize(self)
-            }
-            fn length(self) -> $scalar {
-                <$glam_ty>::length(self)
-            }
-            fn exp(self) -> Self {
-                <$glam_ty>::exp(self)
-            }
-            fn powf(self, n: $scalar) -> Self {
-                <$glam_ty>::powf(self, n)
-            }
-            fn recip(self) -> Self {
-                <$glam_ty>::recip(self)
-            }
-            fn mul_add(self, a: Self, b: Self) -> Self {
-                <$glam_ty>::mul_add(self, a, b)
-            }
+
+            forward_impl!($glam_ty => fn is_finite(self) -> bool);
+            forward_impl!($glam_ty => fn is_nan(self) -> bool);
+            forward_impl!($glam_ty => fn is_nan_mask(self) -> Self::Mask);
+            forward_impl!($glam_ty => fn ceil(self) -> Self);
+            forward_impl!($glam_ty => fn floor(self) -> Self);
+            forward_impl!($glam_ty => fn round(self) -> Self);
+            forward_impl!($glam_ty => fn normalize(self) -> Self);
+            forward_impl!($glam_ty => fn length(self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn exp(self) -> Self);
+            forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn recip(self) -> Self);
+            forward_impl!($glam_ty => fn mul_add(self, a: Self, b: Self) -> Self);
         }
 
-        impl crate::traits::Lerp<$scalar> for $glam_ty {
-            fn lerp(self, other: $glam_ty, t: $scalar) -> $glam_ty {
-                <$glam_ty>::lerp(self, other, t)
-            }
+        impl crate::traits::Lerp<<$glam_ty as Vector<$dimensions>>::Scalar> for $glam_ty {
+            forward_impl!($glam_ty => fn lerp(self, other: $glam_ty, t: <Self as Vector<$dimensions>>::Scalar) -> Self);
         }
     }
 }
@@ -309,38 +192,31 @@ macro_rules! impl_base_float {
 macro_rules! impl_abs {
     ($glam_ty:ty) => {
         impl crate::traits::Abs for $glam_ty {
-            #[inline]
-            fn abs(self) -> Self {
-                <$glam_ty>::abs(self)
-            }
-
-            #[inline]
-            fn signum(self) -> Self {
-                <$glam_ty>::signum(self)
-            }
+            forward_impl!($glam_ty => fn abs(self) -> Self);
+            forward_impl!($glam_ty => fn signum(self) -> Self);
         }
     };
 }
 
-impl_base!(f32 => glam::Vec2 { x, y });
-impl_base!(f32 => glam::Vec3 { x, y, z});
-impl_base!(f32 => glam::Vec4 { x, y, z, w });
-impl_base!(f64 => glam::DVec2 { x, y });
-impl_base!(f64 => glam::DVec3 { x, y, z});
-impl_base!(f64 => glam::DVec4 { x, y, z, w });
-impl_base!(i32 => glam::IVec2 { x, y });
-impl_base!(i32 => glam::IVec3 { x, y, z});
-impl_base!(i32 => glam::IVec4 { x, y, z, w });
-impl_base!(u32 => glam::UVec2 { x, y });
-impl_base!(u32 => glam::UVec3 { x, y, z});
-impl_base!(u32 => glam::UVec4 { x, y, z, w });
+impl_base!(f32[2] => glam::Vec2, glam::BVec2);
+impl_base!(f32[3] => glam::Vec3, glam::BVec3);
+impl_base!(f32[4] => glam::Vec4, glam::BVec4);
+impl_base!(f64[2] => glam::DVec2, glam::BVec2);
+impl_base!(f64[3] => glam::DVec3, glam::BVec3);
+impl_base!(f64[4] => glam::DVec4, glam::BVec4);
+impl_base!(i32[2] => glam::IVec2, glam::BVec2);
+impl_base!(i32[3] => glam::IVec3, glam::BVec3);
+impl_base!(i32[4] => glam::IVec4, glam::BVec4);
+impl_base!(u32[2] => glam::UVec2, glam::BVec2);
+impl_base!(u32[3] => glam::UVec3, glam::BVec3);
+impl_base!(u32[4] => glam::UVec4, glam::BVec4);
 
-impl_base_float!(f32 => glam::Vec2 { x, y });
-impl_base_float!(f32 => glam::Vec3 { x, y, z});
-impl_base_float!(f32 => glam::Vec4 { x, y, z, w });
-impl_base_float!(f64 => glam::DVec2 { x, y });
-impl_base_float!(f64 => glam::DVec3 { x, y, z});
-impl_base_float!(f64 => glam::DVec4 { x, y, z, w });
+impl_base_float!(2 => glam::Vec2);
+impl_base_float!(3 => glam::Vec3);
+impl_base_float!(4 => glam::Vec4);
+impl_base_float!(2 => glam::DVec2);
+impl_base_float!(3 => glam::DVec3);
+impl_base_float!(4 => glam::DVec4);
 
 impl_abs!(glam::Vec2);
 impl_abs!(glam::Vec3);
