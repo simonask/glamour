@@ -1,11 +1,4 @@
-use approx::AbsDiffEq;
-use num_traits::Float;
-
-use crate::angle::Angle;
-
-use super::{marker::ValueSemantics, Primitive, PrimitiveMatrices};
-
-use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use super::*;
 
 /// Trait describing a glam N x N matrix type.
 ///
@@ -111,7 +104,7 @@ pub trait SimdMatrix2:
     fn from_scale(vector: <Self::Scalar as Primitive>::Vec2) -> Self;
 
     /// 2D rotation matrix.
-    fn from_angle(angle: Angle<Self::Scalar>) -> Self;
+    fn from_angle(angle: Self::Scalar) -> Self;
 }
 
 /// Primitive 3x3 matrix.
@@ -156,7 +149,7 @@ pub trait SimdMatrix3:
     fn from_scale(vector: <Self::Scalar as Primitive>::Vec2) -> Self;
 
     /// Rotation matrix
-    fn from_angle(angle: Angle<Self::Scalar>) -> Self;
+    fn from_angle(angle: Self::Scalar) -> Self;
 
     /// 2D translation matrix.
     fn from_translation(translation: <Self::Scalar as Primitive>::Vec2) -> Self;
@@ -164,7 +157,7 @@ pub trait SimdMatrix3:
     /// 2D transform.
     fn from_scale_angle_translation(
         scale: <Self::Scalar as Primitive>::Vec2,
-        angle: Angle<Self::Scalar>,
+        angle: Self::Scalar,
         translation: <Self::Scalar as Primitive>::Vec2,
     ) -> Self;
 }
@@ -221,8 +214,7 @@ pub trait SimdMatrix4:
     fn from_scale(vector: <Self::Scalar as Primitive>::Vec3) -> Self;
 
     /// Rotation matrix
-    fn from_axis_angle(axis: <Self::Scalar as Primitive>::Vec3, angle: Angle<Self::Scalar>)
-        -> Self;
+    fn from_axis_angle(axis: <Self::Scalar as Primitive>::Vec3, angle: Self::Scalar) -> Self;
 
     /// 3D translation matrix.
     fn from_translation(translation: <Self::Scalar as Primitive>::Vec3) -> Self;
@@ -231,7 +223,7 @@ pub trait SimdMatrix4:
     fn from_scale_rotation_translation(
         scale: <Self::Scalar as Primitive>::Vec3,
         axis: <Self::Scalar as Primitive>::Vec3,
-        angle: Angle<Self::Scalar>,
+        angle: Self::Scalar,
         translation: <Self::Scalar as Primitive>::Vec3,
     ) -> Self;
 }
@@ -342,8 +334,8 @@ impl SimdMatrix2 for glam::Mat2 {
     }
 
     #[inline]
-    fn from_angle(angle: Angle<f32>) -> Self {
-        <glam::Mat2>::from_angle(angle.radians)
+    fn from_angle(angle: f32) -> Self {
+        <glam::Mat2>::from_angle(angle)
     }
 }
 
@@ -389,8 +381,8 @@ impl SimdMatrix2 for glam::DMat2 {
     }
 
     #[inline]
-    fn from_angle(angle: Angle<f64>) -> Self {
-        <glam::DMat2>::from_angle(angle.radians)
+    fn from_angle(angle: f64) -> Self {
+        <glam::DMat2>::from_angle(angle)
     }
 }
 
@@ -436,8 +428,8 @@ impl SimdMatrix3 for glam::Mat3 {
     }
 
     #[inline]
-    fn from_angle(angle: Angle<f32>) -> Self {
-        <glam::Mat3>::from_angle(angle.radians)
+    fn from_angle(angle: f32) -> Self {
+        <glam::Mat3>::from_angle(angle)
     }
 
     #[inline]
@@ -448,10 +440,10 @@ impl SimdMatrix3 for glam::Mat3 {
     #[inline]
     fn from_scale_angle_translation(
         scale: glam::Vec2,
-        angle: Angle<f32>,
+        angle: f32,
         translation: glam::Vec2,
     ) -> Self {
-        <glam::Mat3>::from_scale_angle_translation(scale, angle.radians, translation)
+        <glam::Mat3>::from_scale_angle_translation(scale, angle, translation)
     }
 }
 
@@ -497,8 +489,8 @@ impl SimdMatrix3 for glam::DMat3 {
     }
 
     #[inline]
-    fn from_angle(angle: Angle<f64>) -> Self {
-        <glam::DMat3>::from_angle(angle.radians)
+    fn from_angle(angle: f64) -> Self {
+        <glam::DMat3>::from_angle(angle)
     }
 
     #[inline]
@@ -509,10 +501,10 @@ impl SimdMatrix3 for glam::DMat3 {
     #[inline]
     fn from_scale_angle_translation(
         scale: glam::DVec2,
-        angle: Angle<f64>,
+        angle: f64,
         translation: glam::DVec2,
     ) -> Self {
-        <glam::DMat3>::from_scale_angle_translation(scale, angle.radians, translation)
+        <glam::DMat3>::from_scale_angle_translation(scale, angle, translation)
     }
 }
 
@@ -563,8 +555,8 @@ impl SimdMatrix4 for glam::Mat4 {
     }
 
     #[inline]
-    fn from_axis_angle(axis: glam::Vec3, angle: Angle<f32>) -> Self {
-        glam::Mat4::from_axis_angle(axis, angle.radians)
+    fn from_axis_angle(axis: glam::Vec3, angle: f32) -> Self {
+        glam::Mat4::from_axis_angle(axis, angle)
     }
 
     #[inline]
@@ -575,10 +567,10 @@ impl SimdMatrix4 for glam::Mat4 {
     fn from_scale_rotation_translation(
         scale: glam::Vec3,
         axis: glam::Vec3,
-        angle: Angle<f32>,
+        angle: f32,
         translation: glam::Vec3,
     ) -> Self {
-        let quat = glam::Quat::from_axis_angle(axis, angle.radians);
+        let quat = glam::Quat::from_axis_angle(axis, angle);
         <glam::Mat4>::from_scale_rotation_translation(scale, quat, translation)
     }
 }
@@ -630,8 +622,8 @@ impl SimdMatrix4 for glam::DMat4 {
     }
 
     #[inline]
-    fn from_axis_angle(axis: glam::DVec3, angle: Angle<f64>) -> Self {
-        <glam::DMat4>::from_axis_angle(axis, angle.radians)
+    fn from_axis_angle(axis: glam::DVec3, angle: f64) -> Self {
+        <glam::DMat4>::from_axis_angle(axis, angle)
     }
 
     #[inline]
@@ -643,10 +635,10 @@ impl SimdMatrix4 for glam::DMat4 {
     fn from_scale_rotation_translation(
         scale: glam::DVec3,
         axis: glam::DVec3,
-        angle: Angle<f64>,
+        angle: f64,
         translation: glam::DVec3,
     ) -> Self {
-        let quat = glam::DQuat::from_axis_angle(axis, angle.radians);
+        let quat = glam::DQuat::from_axis_angle(axis, angle);
         <glam::DMat4>::from_scale_rotation_translation(scale, quat, translation)
     }
 }

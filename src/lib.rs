@@ -11,6 +11,7 @@ extern crate mint_crate as mint;
 pub mod docs;
 
 mod angle;
+pub mod bindings;
 mod r#box;
 mod matrix;
 mod point;

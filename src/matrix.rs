@@ -10,7 +10,7 @@
 use core::ops::Mul;
 
 use crate::{
-    traits::{PrimitiveMatrices, SimdMatrix, SimdMatrix2, SimdMatrix3, SimdMatrix4},
+    bindings::{PrimitiveMatrices, SimdMatrix, SimdMatrix2, SimdMatrix3, SimdMatrix4},
     Angle, Point2, Point3, Point4, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -349,7 +349,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_angle(angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat2::from_angle(angle))
+        Self::from_raw(T::Mat2::from_angle(angle.radians))
     }
 
     /// Transform 2D point.
@@ -443,7 +443,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_angle(angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat3::from_angle(angle))
+        Self::from_raw(T::Mat3::from_angle(angle.radians))
     }
 
     /// Translation matrix.
@@ -487,7 +487,7 @@ where
     ) -> Self {
         Self::from_raw(T::Mat3::from_scale_angle_translation(
             scale.to_raw(),
-            angle,
+            angle.radians,
             translation.to_raw(),
         ))
     }
@@ -731,7 +731,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_axis_angle(axis: Vector3<T>, angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat4::from_axis_angle(axis.to_raw(), angle))
+        Self::from_raw(T::Mat4::from_axis_angle(axis.to_raw(), angle.radians))
     }
 
     /// Translation matrix.
@@ -767,7 +767,7 @@ where
         Self::from_raw(T::Mat4::from_scale_rotation_translation(
             scale.to_raw(),
             axis.to_raw(),
-            angle,
+            angle.radians,
             translation.to_raw(),
         ))
     }

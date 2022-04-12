@@ -3,7 +3,8 @@
 use approx::AbsDiffEq;
 
 use crate::{
-    traits::{Contains, Intersection, Lerp, SimdVecFloat, Union, UnitTypes},
+    bindings::SimdVecFloat,
+    traits::{Contains, Intersection, Lerp, Union, UnitTypes},
     Box2, Point2, Scalar, Size2, Unit, Vector2,
 };
 

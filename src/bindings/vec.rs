@@ -1,6 +1,4 @@
-use super::{marker::ValueSemantics, Abs, Primitive};
-
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
+use super::*;
 
 /// Basic `glam` types used to back strongly typed vectors.
 #[allow(missing_docs)]
@@ -310,7 +308,7 @@ macro_rules! impl_base_float {
 
 macro_rules! impl_abs {
     ($glam_ty:ty) => {
-        impl Abs for $glam_ty {
+        impl crate::traits::Abs for $glam_ty {
             #[inline]
             fn abs(self) -> Self {
                 <$glam_ty>::abs(self)

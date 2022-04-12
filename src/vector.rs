@@ -13,7 +13,8 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, 
 
 use crate::traits::UnitTypes;
 use crate::{
-    traits::{Lerp, SimdVec, SimdVecFloat},
+    bindings::{SimdVec, SimdVecFloat},
+    traits::Lerp,
     Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
 

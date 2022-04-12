@@ -35,15 +35,9 @@
 
 pub mod marker;
 mod scalar;
-mod simd_matrix;
-mod simd_quat;
-mod simd_vec;
 mod unit;
 
 pub use scalar::*;
-pub use simd_matrix::*;
-pub use simd_quat::*;
-pub use simd_vec::*;
 pub use unit::*;
 
 /// General trait for the `contains()` method.

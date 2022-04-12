@@ -1,6 +1,5 @@
-use crate::traits::{Scalar, SimdVec};
-
-use super::Primitive;
+use super::Scalar;
+use crate::bindings::{Primitive, SimdVec};
 
 /// The name of a coordinate space.
 ///
