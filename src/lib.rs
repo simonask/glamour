@@ -2,7 +2,11 @@
 #![no_std]
 #![deny(missing_docs)]
 #![warn(clippy::pedantic)]
-#![allow(clippy::inline_always, clippy::module_name_repetitions)]
+#![allow(
+    clippy::inline_always,
+    clippy::module_name_repetitions,
+    clippy::wildcard_imports
+)]
 
 #[cfg(feature = "mint")]
 extern crate mint_crate as mint;
