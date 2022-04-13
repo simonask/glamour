@@ -5,11 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-
 ### Added
 - Constructor macros.
 - Support for `glam::Quat` and `glam::DQuat` in `Angle<T>`, `Vector3<T>`, and
   `Point3<T>`.
+
+### Removed
+- `Vector4::max_element_w()` (no longer needed).
+
+## Changed
+- Bumped `glam` dependency to 0.20.5, which fixes the scalar math implementation
+  of `Vec4::max_element()`.
 
 ## [0.2.0] - 2022-04-12
 
