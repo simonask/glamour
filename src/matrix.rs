@@ -12,7 +12,10 @@
 use core::ops::Mul;
 
 use crate::{
-    bindings::{Matrix, PrimitiveMatrices, SimdMatrix2, SimdMatrix3, SimdMatrix4},
+    bindings::{
+        Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4,
+        PrimitiveMatrices,
+    },
     unit::UnitMatrices,
     Angle, Point2, Point3, Point4, Vector2, Vector3, Vector4,
 };

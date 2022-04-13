@@ -60,7 +60,7 @@ pub trait Matrix:
 /// Primitive 2x2 matrix.
 ///
 /// Implemented for [`glam::Mat2`] and [`glam::DMat2`].
-pub trait SimdMatrix2:
+pub trait Matrix2:
     Matrix + Mul<<Self::Scalar as Primitive>::Vec2, Output = <Self::Scalar as Primitive>::Vec2>
 {
     /// Transform point.
@@ -105,7 +105,7 @@ pub trait SimdMatrix2:
 /// Primitive 3x3 matrix.
 ///
 /// Implemented for [`glam::Mat3`] and [`glam::DMat3`].
-pub trait SimdMatrix3:
+pub trait Matrix3:
     Matrix + Mul<<Self::Scalar as Primitive>::Vec3, Output = <Self::Scalar as Primitive>::Vec3>
 {
     /// Transform point.
@@ -160,7 +160,7 @@ pub trait SimdMatrix3:
 /// Primitive 4x4 matrix.
 ///
 /// Implemented for [`glam::Mat4`] and [`glam::DMat4`].
-pub trait SimdMatrix4:
+pub trait Matrix4:
     Matrix + Mul<<Self::Scalar as Primitive>::Vec4, Output = <Self::Scalar as Primitive>::Vec4>
 {
     /// Transform point.
@@ -258,7 +258,7 @@ impl_matrix!(f64, glam::DMat2);
 impl_matrix!(f64, glam::DMat3);
 impl_matrix!(f64, glam::DMat4);
 
-impl SimdMatrix2 for glam::Mat2 {
+impl Matrix2 for glam::Mat2 {
     #[inline]
     fn transform_point(&self, point: glam::Vec2) -> glam::Vec2 {
         self.mul_vec2(point)
@@ -290,7 +290,7 @@ impl SimdMatrix2 for glam::Mat2 {
     forward_impl!(glam::Mat2 => fn from_angle(angle: f32) -> Self);
 }
 
-impl SimdMatrix2 for glam::DMat2 {
+impl Matrix2 for glam::DMat2 {
     #[inline]
     fn transform_point(&self, point: glam::DVec2) -> glam::DVec2 {
         self.mul_vec2(point)
@@ -322,7 +322,7 @@ impl SimdMatrix2 for glam::DMat2 {
     forward_impl!(glam::DMat2 => fn from_angle(angle: f64) -> Self);
 }
 
-impl SimdMatrix3 for glam::Mat3 {
+impl Matrix3 for glam::Mat3 {
     #[inline]
     fn transform_point(&self, point: glam::Vec2) -> glam::Vec2 {
         self.transform_point2(point)
@@ -361,7 +361,7 @@ impl SimdMatrix3 for glam::Mat3 {
     ) -> Self);
 }
 
-impl SimdMatrix3 for glam::DMat3 {
+impl Matrix3 for glam::DMat3 {
     #[inline]
     fn transform_point(&self, point: glam::DVec2) -> glam::DVec2 {
         self.transform_point2(point)
@@ -400,7 +400,7 @@ impl SimdMatrix3 for glam::DMat3 {
     ) -> Self);
 }
 
-impl SimdMatrix4 for glam::Mat4 {
+impl Matrix4 for glam::Mat4 {
     #[inline]
     fn transform_point(&self, point: glam::Vec3) -> glam::Vec3 {
         self.transform_point3(point)
@@ -444,7 +444,7 @@ impl SimdMatrix4 for glam::Mat4 {
     ) -> Self);
 }
 
-impl SimdMatrix4 for glam::DMat4 {
+impl Matrix4 for glam::DMat4 {
     #[inline]
     fn transform_point(&self, point: glam::DVec3) -> glam::DVec3 {
         self.transform_point3(point)

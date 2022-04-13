@@ -109,11 +109,11 @@ pub trait PrimitiveMatrices:
     Primitive + Float + AngleConsts + AbsDiffEq + RelativeEq + UlpsEq
 {
     /// [`glam::Mat2`] or [`glam::DMat2`].
-    type Mat2: SimdMatrix2<Scalar = Self>;
+    type Mat2: Matrix2<Scalar = Self>;
     /// [`glam::Mat3`] or [`glam::DMat3`].
-    type Mat3: SimdMatrix3<Scalar = Self>;
+    type Mat3: Matrix3<Scalar = Self>;
     /// [`glam::Mat4`] or [`glam::DMat4`].
-    type Mat4: SimdMatrix4<Scalar = Self>;
+    type Mat4: Matrix4<Scalar = Self>;
     /// [`glam::Quat`] or [`glam::DQuat`].
     type Quat: Quat<Scalar = Self, Vec3 = Self::Vec3>;
 }
