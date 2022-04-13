@@ -222,6 +222,8 @@ mod tests {
     fn minmax() {
         assert_eq!(Scalar::min(1.0, 2.0), 1.0);
         assert_eq!(Scalar::max(1.0, 2.0), 2.0);
+        assert_eq!(Scalar::min(2.0, 1.0), 1.0);
+        assert_eq!(Scalar::max(2.0, 1.0), 2.0);
     }
 
     #[test]
