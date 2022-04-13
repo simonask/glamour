@@ -473,7 +473,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use approx::{assert_abs_diff_eq, assert_relative_eq, assert_ulps_eq};
+    use approx::{
+        assert_abs_diff_eq, assert_abs_diff_ne, assert_relative_eq, assert_relative_ne,
+        assert_ulps_eq, assert_ulps_ne,
+    };
 
     use super::*;
 
@@ -487,9 +490,22 @@ mod tests {
         let s: Angle = FloatAngleExt::asin(1.0);
         let c: Angle = FloatAngleExt::acos(1.0);
         let t: Angle = FloatAngleExt::atan(1.0);
-        assert_eq!(s.radians, f32::asin(1.0));
-        assert_eq!(c.radians, f32::acos(1.0));
-        assert_eq!(t.radians, f32::atan(1.0));
+        assert_eq!(s.to_radians(), f32::asin(1.0));
+        assert_eq!(c.to_radians(), f32::acos(1.0));
+        assert_eq!(t.to_radians(), f32::atan(1.0));
+    }
+
+    #[test]
+    fn approx_comparison() {
+        assert_eq!(Angle::PI, Angle::PI);
+        assert_ne!(Angle::PI, Angle::CIRCLE);
+
+        assert_abs_diff_eq!(Angle::PI, Angle::PI);
+        assert_relative_eq!(Angle::PI, Angle::PI);
+        assert_ulps_eq!(Angle::PI, Angle::PI);
+        assert_abs_diff_ne!(Angle::PI, Angle::CIRCLE);
+        assert_relative_ne!(Angle::PI, Angle::CIRCLE);
+        assert_ulps_ne!(Angle::PI, Angle::CIRCLE);
     }
 
     #[test]
