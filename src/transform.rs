@@ -616,7 +616,7 @@ where
     ///
     /// type Transform = Transform3<A, B>;
     ///
-    /// let translate = Transform::from_axis_angle(Vector3::unit_z(), Angle::FRAG_PI_2);
+    /// let translate = Transform::from_axis_angle(Vector3::Z, Angle::FRAG_PI_2);
     /// let a: Vector3<A> = Vector3 { x: 10.0, y: 20.0, z: 30.0 };
     /// let b: Vector3<B> = translate.map(a);
     /// assert_abs_diff_eq!(b, vec3!(-20.0, 10.0, 30.0), epsilon = 0.000001);
