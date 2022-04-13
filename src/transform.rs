@@ -739,7 +739,7 @@ where
     #[inline]
     #[must_use]
     pub fn map_point(&self, point: Point3<Src>) -> Point3<Dst> {
-        cast(self.matrix.project_point(cast(point)))
+        cast(self.matrix.project_point(point))
     }
 
     /// Invert the matrix.

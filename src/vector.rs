@@ -1037,6 +1037,15 @@ mod tests {
         assert_abs_diff_eq!(quat * v, -v);
     }
 
+    #[test]
+    fn matrix_mul_custom_unit() {
+        use crate::{vec2, Matrix3};
+        let mat = Matrix3::<f32>::identity();
+        let a: Vector2<F32> = vec2!(20.0, 30.0);
+        let b: Vector2<F32> = mat * a;
+        assert_eq!(b, (20.0, 30.0));
+    }
+
     #[cfg(feature = "std")]
     #[test]
     fn debug_type_name() {

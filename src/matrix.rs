@@ -11,6 +11,7 @@ use core::ops::Mul;
 
 use crate::{
     bindings::{Matrix, PrimitiveMatrices, SimdMatrix2, SimdMatrix3, SimdMatrix4},
+    unit::UnitMatrices,
     Angle, Point2, Point3, Point4, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -509,7 +510,7 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub fn transform_point(&self, point: Point2<T>) -> Point2<T> {
+    pub fn transform_point<U: UnitMatrices<Vec2 = T::Vec2>>(&self, point: Point2<U>) -> Point2<U> {
         Point2::from_raw(self.as_raw().transform_point(point.to_raw()))
     }
 
@@ -519,7 +520,10 @@ where
     /// [`glam::DMat3::transform_vector2()`] (depending on the scalar).
     #[inline]
     #[must_use]
-    pub fn transform_vector(&self, vector: Vector2<T>) -> Vector2<T> {
+    pub fn transform_vector<U: UnitMatrices<Vec2 = T::Vec2>>(
+        &self,
+        vector: Vector2<U>,
+    ) -> Vector2<U> {
         Vector2::from_raw(self.as_raw().transform_vector(vector.to_raw()))
     }
 }
@@ -535,9 +539,9 @@ where
     }
 }
 
-impl<T> Mul<Vector2<T>> for Matrix2<T>
+impl<T> Mul<Vector2<T>> for Matrix2<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Vector2<T>;
 
@@ -548,9 +552,9 @@ where
     }
 }
 
-impl<T> Mul<Point2<T>> for Matrix2<T>
+impl<T> Mul<Point2<T>> for Matrix2<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Point2<T>;
 
@@ -574,9 +578,9 @@ where
     }
 }
 
-impl<T> Mul<Vector3<T>> for Matrix3<T>
+impl<T> Mul<Vector3<T>> for Matrix3<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Vector3<T>;
 
@@ -587,9 +591,9 @@ where
     }
 }
 
-impl<T> Mul<Point3<T>> for Matrix3<T>
+impl<T> Mul<Point3<T>> for Matrix3<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Point3<T>;
 
@@ -600,9 +604,9 @@ where
     }
 }
 
-impl<T> Mul<Vector2<T>> for Matrix3<T>
+impl<T> Mul<Vector2<T>> for Matrix3<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Vector2<T>;
 
@@ -613,9 +617,9 @@ where
     }
 }
 
-impl<T> Mul<Point2<T>> for Matrix3<T>
+impl<T> Mul<Point2<T>> for Matrix3<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Point2<T>;
 
@@ -626,9 +630,9 @@ where
     }
 }
 
-impl<T> Mul<Vector4<T>> for Matrix4<T>
+impl<T> Mul<Vector4<T>> for Matrix4<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Vector4<T>;
 
@@ -639,9 +643,9 @@ where
     }
 }
 
-impl<T> Mul<Point4<T>> for Matrix4<T>
+impl<T> Mul<Point4<T>> for Matrix4<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Point4<T>;
 
@@ -652,9 +656,9 @@ where
     }
 }
 
-impl<T> Mul<Vector3<T>> for Matrix4<T>
+impl<T> Mul<Vector3<T>> for Matrix4<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Vector3<T>;
 
@@ -665,9 +669,9 @@ where
     }
 }
 
-impl<T> Mul<Point3<T>> for Matrix4<T>
+impl<T> Mul<Point3<T>> for Matrix4<T::Primitive>
 where
-    T: PrimitiveMatrices,
+    T: UnitMatrices,
 {
     type Output = Point3<T>;
 
@@ -793,7 +797,10 @@ where
     /// [`glam::DMat4::transform_vector3()`] (depending on the scalar).
     #[inline]
     #[must_use]
-    pub fn transform_vector(&self, vector: Vector3<T>) -> Vector3<T> {
+    pub fn transform_vector<U: UnitMatrices<Vec3 = T::Vec3>>(
+        &self,
+        vector: Vector3<U>,
+    ) -> Vector3<U> {
         Vector3::from_raw(self.as_raw().transform_vector(vector.to_raw()))
     }
 
@@ -805,7 +812,7 @@ where
     /// [`glam::DMat4::project_point3()`] (depending on the scalar).
     #[inline]
     #[must_use]
-    pub fn project_point(&self, point: Point3<T>) -> Point3<T> {
+    pub fn project_point<U: UnitMatrices<Vec3 = T::Vec3>>(&self, point: Point3<U>) -> Point3<U> {
         Point3::from_raw(self.as_raw().project_point(point.to_raw()))
     }
 }
