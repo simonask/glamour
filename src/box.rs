@@ -413,6 +413,14 @@ mod tests {
     }
 
     #[test]
+    fn from_array() {
+        let array = [Point2::ZERO, Point2::ONE];
+        let b = Box2::from_array(array);
+        assert_eq!(b.min, Point2::ZERO);
+        assert_eq!(b.max, Point2::ONE);
+    }
+
+    #[test]
     fn cast() {
         let mut b = Box2::new(Point2::new(0.5, 0.5), Point2::new(1.0, 1.0));
         let _: &[Point2; 2] = b.as_array();
