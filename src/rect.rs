@@ -127,7 +127,7 @@ impl<T: UnitTypes> Rect<T> {
     #[inline]
     #[must_use]
     pub fn center(&self) -> Point2<T> {
-        self.origin + self.size.to_vector() / Vector2::two()
+        self.origin + self.size.to_vector() / (Vector2::ONE + Vector2::ONE)
     }
 
     /// Translate a copy of the rect by vector.
