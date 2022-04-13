@@ -116,15 +116,6 @@ crate::impl_scaling!(Vector4, 4 [f32, f64, i32, u32]);
 macro_rules! impl_vector {
     ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $point_ty:ident $(, $size_ty:ident)?) => {
         impl<T: Unit> $base_type_name<T> {
-            #[doc = "Instantiate vector with all components set to 2."]
-            #[doc = ""]
-            #[doc = "This is a shorthand for `Self::one() + Self::one()`."]
-            #[inline]
-            #[must_use]
-            pub fn two() -> Self {
-                Self::ONE + Self::ONE
-            }
-
             #[doc = "Multiply all components of this vector with a scalar value."]
             #[doc = ""]
             #[doc = "This exists as a method because `Mul<T::Scalar>` cannot be implemented"]

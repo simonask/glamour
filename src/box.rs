@@ -232,7 +232,7 @@ impl<T: Unit> Box2<T> {
     #[inline]
     #[must_use]
     pub fn center(&self) -> Point2<T> {
-        let v = (self.max - self.min) / Vector2::two();
+        let v = (self.max - self.min) / (Vector2::ONE + Vector2::ONE);
         self.min + v
     }
 
