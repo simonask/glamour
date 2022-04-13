@@ -312,8 +312,8 @@ where
     /// ```rust
     /// # use glamour::prelude::*;
     /// let matrix = Matrix2::<f32>::identity();
-    /// assert_eq!(matrix.row(0), (1.0, 0.0));
-    /// assert_eq!(matrix.row(1), (0.0, 1.0));
+    /// assert_eq!(matrix.row(0), vec2!(1.0, 0.0));
+    /// assert_eq!(matrix.row(1), vec2!(0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -327,8 +327,8 @@ where
     /// ```rust
     /// # use glamour::prelude::*;
     /// let matrix = Matrix2::<f32>::from_scale((2.0, 3.0).into());
-    /// assert_eq!(matrix.row(0), (2.0, 0.0));
-    /// assert_eq!(matrix.row(1), (0.0, 3.0));
+    /// assert_eq!(matrix.row(0), vec2!(2.0, 0.0));
+    /// assert_eq!(matrix.row(1), vec2!(0.0, 3.0));
     /// ```
     #[inline]
     #[must_use]
@@ -344,8 +344,8 @@ where
     /// # use approx::*;
     /// let theta = Angle::from_degrees(90.0);
     /// let matrix = Matrix2::<f32>::from_angle(theta);
-    /// assert_abs_diff_eq!(matrix.row(0), (0.0, -1.0));
-    /// assert_abs_diff_eq!(matrix.row(1), (1.0,  0.0));
+    /// assert_abs_diff_eq!(matrix.row(0), vec2!(0.0, -1.0));
+    /// assert_abs_diff_eq!(matrix.row(1), vec2!(1.0,  0.0));
     /// ```
     #[inline]
     #[must_use]
@@ -365,7 +365,7 @@ where
     /// let matrix = Matrix2::<f32>::from_angle(Angle::<f32>::from_degrees(90.0));
     /// let point = Point2::<f32> { x: 1.0, y: 0.0 };
     /// let rotated = matrix.transform_point(point);
-    /// approx::assert_abs_diff_eq!(rotated, (0.0, 1.0));
+    /// approx::assert_abs_diff_eq!(rotated, point!(0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -384,7 +384,7 @@ where
     /// let matrix = Matrix2::<f32>::from_angle(Angle::<f32>::from_degrees(90.0));
     /// let vector = Vector2::<f32> { x: 1.0, y: 0.0 };
     /// let rotated = matrix.transform_vector(vector);
-    /// approx::assert_abs_diff_eq!(rotated, (0.0, 1.0));
+    /// approx::assert_abs_diff_eq!(rotated, vec2!(0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -403,9 +403,9 @@ where
     /// ```rust
     /// # use glamour::prelude::*;
     /// let matrix = Matrix3::<f32>::identity();
-    /// assert_eq!(matrix.row(0), (1.0, 0.0, 0.0));
-    /// assert_eq!(matrix.row(1), (0.0, 1.0, 0.0));
-    /// assert_eq!(matrix.row(2), (0.0, 0.0, 1.0));
+    /// assert_eq!(matrix.row(0), vec3!(1.0, 0.0, 0.0));
+    /// assert_eq!(matrix.row(1), vec3!(0.0, 1.0, 0.0));
+    /// assert_eq!(matrix.row(2), vec3!(0.0, 0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -419,9 +419,9 @@ where
     /// ```rust
     /// # use glamour::prelude::*;
     /// let matrix = Matrix3::<f32>::from_scale((2.0, 3.0).into());
-    /// assert_eq!(matrix.row(0), (2.0, 0.0, 0.0));
-    /// assert_eq!(matrix.row(1), (0.0, 3.0, 0.0));
-    /// assert_eq!(matrix.row(2), (0.0, 0.0, 1.0));
+    /// assert_eq!(matrix.row(0), vec3!(2.0, 0.0, 0.0));
+    /// assert_eq!(matrix.row(1), vec3!(0.0, 3.0, 0.0));
+    /// assert_eq!(matrix.row(2), vec3!(0.0, 0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -437,9 +437,9 @@ where
     /// # use approx::*;
     /// let theta = Angle::from_degrees(90.0);
     /// let matrix = Matrix3::<f32>::from_angle(theta);
-    /// assert_abs_diff_eq!(matrix.row(0), (0.0, -1.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(1), (1.0,  0.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(2), (0.0,  0.0, 1.0));
+    /// assert_abs_diff_eq!(matrix.row(0), vec3!(0.0, -1.0, 0.0));
+    /// assert_abs_diff_eq!(matrix.row(1), vec3!(1.0,  0.0, 0.0));
+    /// assert_abs_diff_eq!(matrix.row(2), vec3!(0.0,  0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -454,9 +454,9 @@ where
     /// # use glamour::prelude::*;
     /// # use approx::*;
     /// let matrix = Matrix3::<f32>::from_translation((10.0, 20.0).into());
-    /// assert_abs_diff_eq!(matrix.row(0), (1.0, 0.0, 10.0));
-    /// assert_abs_diff_eq!(matrix.row(1), (0.0, 1.0, 20.0));
-    /// assert_abs_diff_eq!(matrix.row(2), (0.0, 0.0,  1.0));
+    /// assert_abs_diff_eq!(matrix.row(0), vec3!(1.0, 0.0, 10.0));
+    /// assert_abs_diff_eq!(matrix.row(1), vec3!(0.0, 1.0, 20.0));
+    /// assert_abs_diff_eq!(matrix.row(2), vec3!(0.0, 0.0,  1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -475,9 +475,9 @@ where
     ///     Angle::from_degrees(90.0),
     ///     (10.0, 20.0).into(),
     /// );
-    /// assert_abs_diff_eq!(matrix.row(0), (0.0, -3.0, 10.0));
-    /// assert_abs_diff_eq!(matrix.row(1), (2.0,  0.0, 20.0));
-    /// assert_abs_diff_eq!(matrix.row(2), (0.0,  0.0,  1.0));
+    /// assert_abs_diff_eq!(matrix.row(0), vec3!(0.0, -3.0, 10.0));
+    /// assert_abs_diff_eq!(matrix.row(1), vec3!(2.0,  0.0, 20.0));
+    /// assert_abs_diff_eq!(matrix.row(2), vec3!(0.0,  0.0,  1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -505,7 +505,7 @@ where
     /// let matrix = Matrix3::<f32>::from_angle(Angle::<f32>::from_degrees(90.0));
     /// let point = Point2::<f32> { x: 1.0, y: 0.0 };
     /// let rotated = matrix.transform_point(point);
-    /// approx::assert_abs_diff_eq!(rotated, (0.0, 1.0));
+    /// approx::assert_abs_diff_eq!(rotated, point!(0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -724,10 +724,10 @@ where
     /// # use approx::*;
     /// let theta = Angle::from_degrees(90.0);
     /// let matrix = Matrix4::<f32>::from_axis_angle(Vector3::unit_z(), theta);
-    /// assert_abs_diff_eq!(matrix.row(0), (0.0, -1.0, 0.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(1), (1.0,  0.0, 0.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(2), (0.0,  0.0, 1.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(3), (0.0,  0.0, 0.0, 1.0));
+    /// assert_abs_diff_eq!(matrix.row(0), vec4!(0.0, -1.0, 0.0, 0.0));
+    /// assert_abs_diff_eq!(matrix.row(1), vec4!(1.0,  0.0, 0.0, 0.0));
+    /// assert_abs_diff_eq!(matrix.row(2), vec4!(0.0,  0.0, 1.0, 0.0));
+    /// assert_abs_diff_eq!(matrix.row(3), vec4!(0.0,  0.0, 0.0, 1.0));
     /// ```
     #[inline]
     #[must_use]
@@ -742,10 +742,10 @@ where
     /// # use glamour::prelude::*;
     /// # use approx::*;
     /// let matrix = Matrix4::<f32>::from_translation((10.0, 20.0, 30.0).into());
-    /// assert_abs_diff_eq!(matrix.row(0), (1.0, 0.0, 0.0, 10.0));
-    /// assert_abs_diff_eq!(matrix.row(1), (0.0, 1.0, 0.0, 20.0));
-    /// assert_abs_diff_eq!(matrix.row(2), (0.0, 0.0, 1.0, 30.0));
-    /// assert_abs_diff_eq!(matrix.row(3), (0.0, 0.0, 0.0,  1.0));
+    /// assert_abs_diff_eq!(matrix.row(0), vec4!(1.0, 0.0, 0.0, 10.0));
+    /// assert_abs_diff_eq!(matrix.row(1), vec4!(0.0, 1.0, 0.0, 20.0));
+    /// assert_abs_diff_eq!(matrix.row(2), vec4!(0.0, 0.0, 1.0, 30.0));
+    /// assert_abs_diff_eq!(matrix.row(3), vec4!(0.0, 0.0, 0.0,  1.0));
     /// ```
     #[inline]
     #[must_use]

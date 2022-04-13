@@ -788,15 +788,16 @@ mod tests {
 
     #[test]
     fn units() {
-        assert_abs_diff_eq!(Vec2::unit_x(), (1.0, 0.0));
-        assert_abs_diff_eq!(Vec2::unit_y(), (0.0, 1.0));
-        assert_abs_diff_eq!(Vec3::unit_x(), (1.0, 0.0, 0.0));
-        assert_abs_diff_eq!(Vec3::unit_y(), (0.0, 1.0, 0.0));
-        assert_abs_diff_eq!(Vec3::unit_z(), (0.0, 0.0, 1.0));
-        assert_abs_diff_eq!(Vec4::unit_x(), (1.0, 0.0, 0.0, 0.0));
-        assert_abs_diff_eq!(Vec4::unit_y(), (0.0, 1.0, 0.0, 0.0));
-        assert_abs_diff_eq!(Vec4::unit_z(), (0.0, 0.0, 1.0, 0.0));
-        assert_abs_diff_eq!(Vec4::unit_w(), (0.0, 0.0, 0.0, 1.0));
+        use crate::vector;
+        assert_abs_diff_eq!(Vec2::unit_x(), vector!(1.0, 0.0));
+        assert_abs_diff_eq!(Vec2::unit_y(), vector!(0.0, 1.0));
+        assert_abs_diff_eq!(Vec3::unit_x(), vector!(1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec3::unit_y(), vector!(0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec3::unit_z(), vector!(0.0, 0.0, 1.0));
+        assert_abs_diff_eq!(Vec4::unit_x(), vector!(1.0, 0.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_y(), vector!(0.0, 1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_z(), vector!(0.0, 0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec4::unit_w(), vector!(0.0, 0.0, 0.0, 1.0));
     }
 
     #[test]

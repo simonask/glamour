@@ -290,7 +290,7 @@ where
     /// let translate = Transform::from_angle(Angle::FRAG_PI_2);
     /// let a: Vector2<A> = Vector2 { x: 10.0, y: 20.0 };
     /// let b: Vector2<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (-20.0, 10.0), epsilon = 0.000001);
+    /// assert_abs_diff_eq!(b, vec2!(-20.0, 10.0), epsilon = 0.000001);
     /// ```
     #[inline]
     #[must_use]
@@ -316,7 +316,7 @@ where
     /// let translate = Transform::from_scale(Vector2 { x: 2.0, y: 3.0 });
     /// let a: Vector2<A> = Vector2 { x: 10.0, y: 20.0 };
     /// let b: Vector2<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (20.0, 60.0));
+    /// assert_abs_diff_eq!(b, vec2!(20.0, 60.0));
     /// ```
     #[inline]
     #[must_use]
@@ -340,7 +340,7 @@ where
     /// let translate = Transform::from_translation(Vector2 { x: 10.0, y: 20.0 });
     /// let a: Point2<A> = Point2 { x: 1.0, y: 2.0 };
     /// let b: Point2<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (11.0, 22.0));
+    /// assert_abs_diff_eq!(b, point!(11.0, 22.0));
     /// ```
     #[inline]
     #[must_use]
@@ -619,7 +619,7 @@ where
     /// let translate = Transform::from_axis_angle(Vector3::unit_z(), Angle::FRAG_PI_2);
     /// let a: Vector3<A> = Vector3 { x: 10.0, y: 20.0, z: 30.0 };
     /// let b: Vector3<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (-20.0, 10.0, 30.0), epsilon = 0.000001);
+    /// assert_abs_diff_eq!(b, vec3!(-20.0, 10.0, 30.0), epsilon = 0.000001);
     /// ```
     #[inline]
     #[must_use]
@@ -648,7 +648,7 @@ where
     /// let scale = Transform::from_scale(Vector3 { x: 2.0, y: 3.0, z: 1.0 });
     /// let a: Vector3<A> = Vector3 { x: 10.0, y: 20.0, z: 30.0 };
     /// let b: Vector3<B> = scale.map(a);
-    /// assert_abs_diff_eq!(b, (20.0, 60.0, 30.0));
+    /// assert_abs_diff_eq!(b, vec3!(20.0, 60.0, 30.0));
     /// ```
     #[inline]
     #[must_use]
@@ -672,7 +672,7 @@ where
     /// let translate = Transform::from_translation(Vector3 { x: 10.0, y: 20.0, z: 30.0 });
     /// let a: Point3<A> = Point3 { x: 1.0, y: 2.0, z: 30.0 };
     /// let b: Point3<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (11.0, 22.0, 60.0));
+    /// assert_abs_diff_eq!(b, point!(11.0, 22.0, 60.0));
     /// ```
     #[inline]
     #[must_use]
