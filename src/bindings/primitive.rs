@@ -110,6 +110,9 @@ impl Primitive for u32 {
 pub trait PrimitiveMatrices:
     Primitive + Float + AngleConsts + AbsDiffEq + RelativeEq + UlpsEq
 {
+    /// NaN.
+    const NAN: Self;
+
     /// [`glam::Mat2`] or [`glam::DMat2`].
     type Mat2: Matrix2<Scalar = Self>;
     /// [`glam::Mat3`] or [`glam::DMat3`].
@@ -121,6 +124,7 @@ pub trait PrimitiveMatrices:
 }
 
 impl PrimitiveMatrices for f32 {
+    const NAN: f32 = core::f32::NAN;
     type Mat2 = glam::Mat2;
     type Mat3 = glam::Mat3;
     type Mat4 = glam::Mat4;
@@ -128,6 +132,7 @@ impl PrimitiveMatrices for f32 {
 }
 
 impl PrimitiveMatrices for f64 {
+    const NAN: f64 = core::f64::NAN;
     type Mat2 = glam::DMat2;
     type Mat3 = glam::DMat3;
     type Mat4 = glam::DMat4;

@@ -266,6 +266,16 @@ macro_rules! impl_simd_common {
         $($fields:ident),*
     }) => {
         impl<T: crate::UnitTypes> $base_type_name<T> {
+            #[doc = "All zeroes."]
+            pub const ZERO: Self = Self {
+                $($fields: T::Scalar::ZERO),*
+            };
+
+            #[doc = "All ones."]
+            pub const ONE: Self = Self {
+                $($fields: T::Scalar::ONE),*
+            };
+
             #[doc = "Get the underlying `glam` vector."]
             #[inline]
             #[must_use]
@@ -326,22 +336,6 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn as_array_mut(&mut self) -> &mut [T::Scalar; $dimensions] {
                 bytemuck::cast_mut(self)
-            }
-
-            #[doc = "Instance with all zeroes."]
-            #[inline]
-            #[must_use]
-            pub fn zero() -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::zero())
-            }
-
-            #[doc = "Instance with all ones."]
-            #[inline]
-            #[must_use]
-            pub fn one() -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::one())
             }
 
             #[doc = "Instance with all components set to `scalar`."]

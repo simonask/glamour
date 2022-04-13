@@ -283,10 +283,10 @@ mod tests {
 
     #[test]
     fn subtraction_yields_vector() {
-        let p = Point::one();
-        let q = Point::one();
+        let p = Point::ONE;
+        let q = Point::ONE;
         let v: Vector3<f32> = q - p;
-        assert_eq!(v, Vector3::zero());
+        assert_eq!(v, Vector3::ZERO);
     }
 
     #[test]

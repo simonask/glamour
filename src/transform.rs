@@ -255,11 +255,10 @@ where
     Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     /// Identity matrix.
-    #[inline]
-    #[must_use]
-    pub fn identity() -> Self {
-        Self::from_matrix_unchecked(Matrix3::identity())
-    }
+    pub const IDENTITY: Self = Self {
+        matrix: Matrix3::IDENTITY,
+        _marker: PhantomData,
+    };
 
     /// Create from matrix.
     #[inline]
@@ -457,7 +456,7 @@ where
     ///
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let a = Transform2::<f32, f32>::identity()
+    /// let a = Transform2::<f32, f32>::IDENTITY
     ///     .then_scale((2.0, 3.0).into());
     /// let b = Transform2::<f32, f32>::from_scale((2.0, 3.0).into());
     /// assert_eq!(a, b);
@@ -523,11 +522,10 @@ where
     Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     /// Identity matrix.
-    #[inline]
-    #[must_use]
-    pub fn identity() -> Self {
-        Self::from_matrix_unchecked(Matrix4::identity())
-    }
+    pub const IDENTITY: Self = Self {
+        matrix: Matrix4::IDENTITY,
+        _marker: PhantomData,
+    };
 
     /// Create from matrix.
     #[inline]
@@ -585,7 +583,7 @@ where
     ///
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let a = Transform3::<f32, f32>::identity()
+    /// let a = Transform3::<f32, f32>::IDENTITY
     ///     .then_scale((2.0, 3.0, 4.0).into());
     /// let b = Transform3::<f32, f32>::from_scale((2.0, 3.0, 4.0).into());
     /// assert_eq!(a, b);
@@ -830,7 +828,7 @@ mod tests {
     #[test]
     fn basic() {
         check_2d_and_3d! {
-            let a = Transform::identity();
+            let a = Transform::IDENTITY;
             let b = a.clone();
             assert_eq!(a, b);
             assert_abs_diff_eq!(a, b);
@@ -845,7 +843,7 @@ mod tests {
         };
 
         check_2d_and_3d! {
-            let a = Transform::identity();
+            let a = Transform::IDENTITY;
             assert_eq!(a, Transform::default());
         };
     }
@@ -853,8 +851,8 @@ mod tests {
     #[test]
     fn from_matrix() {
         check_2d_and_3d! {
-            assert!(Transform::from_matrix(Mat::zero()).is_none());
-            assert_eq!(Transform::from_matrix(Mat::identity()), Some(Transform::identity()));
+            assert!(Transform::from_matrix(Mat::ZERO).is_none());
+            assert_eq!(Transform::from_matrix(Mat::IDENTITY), Some(Transform::IDENTITY));
         };
     }
 
@@ -904,8 +902,8 @@ mod tests {
     fn debug_print() {
         extern crate alloc;
 
-        let t2 = Transform2::<TestSrc, TestDst>::identity();
-        let t3 = Transform3::<TestSrc, TestDst>::identity();
+        let t2 = Transform2::<TestSrc, TestDst>::IDENTITY;
+        let t3 = Transform3::<TestSrc, TestDst>::IDENTITY;
 
         let s2 = alloc::format!("{:?}", t2);
         let s3 = alloc::format!("{:?}", t3);

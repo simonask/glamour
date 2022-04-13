@@ -19,10 +19,6 @@ pub trait Matrix:
     /// The component type of the `glam` matrix. Either `f32` or `f64`.
     type Scalar: PrimitiveMatrices + Primitive + Float + AbsDiffEq;
 
-    /// Matrix with all elements set to zero.
-    #[must_use]
-    fn zero() -> Self;
-
     /// Identity matrix.
     #[must_use]
     fn identity() -> Self;
@@ -226,11 +222,6 @@ macro_rules! impl_matrix {
     ($scalar:ty, $glam_ty:ty) => {
         impl Matrix for $glam_ty {
             type Scalar = $scalar;
-
-            #[inline]
-            fn zero() -> Self {
-                <$glam_ty>::ZERO
-            }
 
             #[inline]
             fn identity() -> Self {

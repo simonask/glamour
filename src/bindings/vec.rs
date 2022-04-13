@@ -32,10 +32,6 @@ pub trait Vector<const D: usize>:
     type Mask;
 
     #[must_use]
-    fn zero() -> Self;
-    #[must_use]
-    fn one() -> Self;
-    #[must_use]
     fn splat(scalar: Self::Scalar) -> Self;
     #[must_use]
     fn get(&self, index: usize) -> Self::Scalar;
@@ -116,14 +112,6 @@ macro_rules! impl_base {
         impl Vector<$dimensions> for $glam_ty {
             type Scalar = $scalar;
             type Mask = $mask;
-
-            fn zero() -> Self {
-                <$glam_ty>::ZERO
-            }
-
-            fn one() -> Self {
-                <$glam_ty>::ONE
-            }
 
             forward_impl!($glam_ty => fn splat(scalar: $scalar) -> Self);
 

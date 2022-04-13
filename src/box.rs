@@ -48,6 +48,12 @@ crate::impl_as_tuple!(Box3 {
 });
 
 impl<T: Unit> Box2<T> {
+    /// Zero-sized box.
+    pub const ZERO: Self = Self {
+        min: Point2::ZERO,
+        max: Point2::ZERO,
+    };
+
     /// Create from [`Rect`].
     ///
     /// Note: This may lose precision due to floating point arithmetic.
@@ -72,7 +78,7 @@ impl<T: Unit> Box2<T> {
     #[must_use]
     pub fn from_size(size: Size2<T>) -> Self {
         Box2 {
-            min: Point2::zero(),
+            min: Point2::ZERO,
             max: size.to_vector().to_point(),
         }
     }
@@ -145,7 +151,7 @@ impl<T: Unit> Box2<T> {
         let (mut min, mut max) = if let Some(first) = points.next() {
             (first, first)
         } else {
-            return Box2::zero();
+            return Box2::ZERO;
         };
 
         for point in points {
@@ -242,13 +248,6 @@ impl<T: Unit> Box2<T> {
     #[must_use]
     pub fn area(&self) -> T::Scalar {
         self.size().area()
-    }
-
-    /// Create a zero-sized box.
-    #[inline]
-    #[must_use]
-    pub fn zero() -> Self {
-        Box2::new(Point2::zero(), Point2::zero())
     }
 }
 
@@ -406,7 +405,7 @@ mod tests {
         assert_abs_diff_eq!(b.max, Point2::new(15.0, 18.0));
 
         let b3 = Box2::from_size((10.0, 12.0).into());
-        assert_abs_diff_eq!(b3.min, Point2::zero());
+        assert_abs_diff_eq!(b3.min, Point2::ZERO);
         assert_abs_diff_eq!(b3.max, Point2::new(10.0, 12.0));
 
         let r2 = b2.to_rect();
@@ -427,7 +426,7 @@ mod tests {
     #[test]
     fn from_points() {
         let b = Box2::from_points(core::iter::empty());
-        assert_eq!(b, Box2::zero());
+        assert_eq!(b, Box2::ZERO);
 
         let b =
             Box2::from_points([(0.0, 1.0), (1.0, 2.0), (0.0, 2.0), (0.5, 0.5)].map(Point2::from));
@@ -540,7 +539,7 @@ mod tests {
         assert_abs_diff_eq!(b.size().area(), b.area());
         assert_abs_diff_eq!(b.area(), 4.0);
 
-        assert_abs_diff_eq!(Box2::zero().area(), 0.0);
+        assert_abs_diff_eq!(Box2::ZERO.area(), 0.0);
     }
 
     #[test]
@@ -684,8 +683,8 @@ mod tests {
             }
         );
 
-        assert_abs_diff_eq!(b.union(Box2::zero()), b);
-        assert_abs_diff_eq!(Box2::zero().union(b), b);
+        assert_abs_diff_eq!(b.union(Box2::ZERO), b);
+        assert_abs_diff_eq!(Box2::ZERO.union(b), b);
     }
 
     #[test]

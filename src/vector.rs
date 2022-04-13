@@ -122,7 +122,7 @@ macro_rules! impl_vector {
             #[inline]
             #[must_use]
             pub fn two() -> Self {
-                Self::one() + Self::one()
+                Self::ONE + Self::ONE
             }
 
             #[doc = "Multiply all components of this vector with a scalar value."]
@@ -381,7 +381,7 @@ macro_rules! impl_vector {
         impl<T: Unit> Sum for $base_type_name<T> {
             #[must_use]
             fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-                iter.fold(Self::zero(), Add::add)
+                iter.fold(Self::ZERO, Add::add)
             }
         }
 
@@ -405,23 +405,32 @@ impl_vector!(Vector4 [4] => Vec4, Point4);
 
 impl<T: Unit> Vector2<T> {
     /// Unit vector in the direction of the X axis.
+    pub const X: Self = Vector2 {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ZERO,
+    };
+
+    /// Unit vector in the direction of the Y axis.
+    pub const Y: Self = Vector2 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ONE,
+    };
+
+    /// The unit axes.
+    pub const AXES: [Self; 2] = [Self::X, Self::Y];
+
+    /// Unit vector in the direction of the X axis.
     #[inline]
     #[must_use]
     pub fn unit_x() -> Self {
-        Self {
-            x: T::Scalar::ONE,
-            y: T::Scalar::ZERO,
-        }
+        Self::X
     }
 
     /// Unit vector in the direction of the Y axis.
     #[inline]
     #[must_use]
     pub fn unit_y() -> Self {
-        Self {
-            x: T::Scalar::ZERO,
-            y: T::Scalar::ONE,
-        }
+        Self::Y
     }
 
     /// Select components of this vector and return a new vector containing
@@ -444,6 +453,28 @@ impl<T: Unit> Vector2<T> {
 }
 
 impl<T: Unit> Vector3<T> {
+    /// Unit vector in the direction of the X axis.
+    pub const X: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
+    /// Unit vector in the direction of the Y axis.
+    pub const Y: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ZERO,
+    };
+    /// Unit vector in the direction of the Z axis.
+    pub const Z: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ONE,
+    };
+
+    /// The unit axes.
+    pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
+
     /// Unit vector in the direction of the X axis.
     #[inline]
     #[must_use]
@@ -544,6 +575,38 @@ where
 }
 
 impl<T: Unit> Vector4<T> {
+    /// Unit vector in the direction of the X axis.
+    pub const X: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+    /// Unit vector in the direction of the Y axis.
+    pub const Y: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+    /// Unit vector in the direction of the Z axis.
+    pub const Z: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ONE,
+        w: T::Scalar::ZERO,
+    };
+    /// Unit vector in the direction of the W axis.
+    pub const W: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ONE,
+    };
+
+    /// The unit axes.
+    pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
+
     /// Unit vector in the direction of the X axis.
     #[inline]
     #[must_use]
@@ -825,7 +888,7 @@ mod tests {
         assert!(Vec4::nan().is_nan());
 
         // Replace NaNs with zeroes.
-        let v = Vec4::select(v4.is_nan_mask(), Vec4::zero(), v4);
+        let v = Vec4::select(v4.is_nan_mask(), Vec4::ZERO, v4);
         assert_eq!(v, (1.0, 2.0, 0.0, 4.0));
     }
 
@@ -1040,7 +1103,7 @@ mod tests {
     #[test]
     fn matrix_mul_custom_unit() {
         use crate::{vec2, Matrix3};
-        let mat = Matrix3::<f32>::identity();
+        let mat = Matrix3::<f32>::IDENTITY;
         let a: Vector2<F32> = vec2!(20.0, 30.0);
         let b: Vector2<F32> = mat * a;
         assert_eq!(b, (20.0, 30.0));
