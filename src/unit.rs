@@ -1,5 +1,5 @@
 use super::Scalar;
-use crate::bindings::{Primitive, Vector};
+use crate::bindings::{Primitive, PrimitiveMatrices, Vector};
 
 /// The name of a coordinate space.
 ///
@@ -77,7 +77,7 @@ pub trait UnitTypes: Unit<Scalar = Self::UnitScalar> {
     /// `Self::Scalar` needed to define trait bounds on the associated type.
     type UnitScalar: Scalar<Primitive = Self::Primitive>;
     /// Shorthand for `<Self::Scalar as Scalar>::Primitive`.
-    type Primitive: Primitive;
+    type Primitive: Primitive<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>;
 
     /// Fundamental 2D vector type.
     type Vec2: Vector<2, Scalar = Self::Primitive, Mask = glam::BVec2>;
@@ -96,4 +96,38 @@ where
     type Vec2 = <Self::Primitive as Primitive>::Vec2;
     type Vec3 = <Self::Primitive as Primitive>::Vec3;
     type Vec4 = <Self::Primitive as Primitive>::Vec4;
+}
+
+/// Shorthand to go from a `Unit` to its corresponding `Matrix` implementations
+/// (through `Scalar::Primitive`).
+pub trait UnitMatrices:
+    UnitTypes<
+    Scalar = Self::UnitMatrixScalar,
+    UnitScalar = Self::UnitMatrixScalar,
+    Primitive = Self::UnitMatrixPrimitive,
+>
+{
+    /// Same as `Unit::Scalar`.
+    type UnitMatrixScalar: Scalar<Primitive = Self::UnitMatrixPrimitive>;
+    /// Same as `UnitTypes::Primitive` and `Unit::Scalar::Primitive`.
+    type UnitMatrixPrimitive: Primitive<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>
+        + PrimitiveMatrices<Mat2 = Self::Mat2, Mat3 = Self::Mat3, Mat4 = Self::Mat4>;
+    /// Either [`glam::Mat2`] or [`glam::DMat2`].
+    type Mat2: crate::bindings::Matrix2<Scalar = Self::Primitive>;
+    /// Either [`glam::Mat3`] or [`glam::DMat3`].
+    type Mat3: crate::bindings::Matrix3<Scalar = Self::Primitive>;
+    /// Either [`glam::Mat4`] or [`glam::DMat4`].
+    type Mat4: crate::bindings::Matrix4<Scalar = Self::Primitive>;
+}
+
+impl<T> UnitMatrices for T
+where
+    T: UnitTypes,
+    T::Primitive: PrimitiveMatrices,
+{
+    type UnitMatrixScalar = Self::UnitScalar;
+    type UnitMatrixPrimitive = T::Primitive;
+    type Mat2 = <T::Primitive as PrimitiveMatrices>::Mat2;
+    type Mat3 = <T::Primitive as PrimitiveMatrices>::Mat3;
+    type Mat4 = <T::Primitive as PrimitiveMatrices>::Mat4;
 }

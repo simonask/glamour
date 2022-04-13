@@ -144,14 +144,17 @@ unsafe impl<T: Pod> Pod for Angle<T> {}
 
 impl<T> Scalar for Angle<T>
 where
-    T: Primitive + AngleConsts + Float,
+    T: Primitive + AngleConsts,
 {
     type Primitive = T;
+
+    const ZERO: Self = Angle { radians: T::ZERO };
+    const ONE: Self = Angle { radians: T::ONE };
 }
 
 impl<T> Unit for Angle<T>
 where
-    T: Primitive + AngleConsts + Float,
+    T: Primitive + AngleConsts,
 {
     type Scalar = Angle<T>;
 
@@ -470,7 +473,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use approx::{assert_abs_diff_eq, assert_relative_eq, assert_ulps_eq};
+    use approx::{
+        assert_abs_diff_eq, assert_abs_diff_ne, assert_relative_eq, assert_relative_ne,
+        assert_ulps_eq, assert_ulps_ne,
+    };
 
     use super::*;
 
@@ -484,9 +490,22 @@ mod tests {
         let s: Angle = FloatAngleExt::asin(1.0);
         let c: Angle = FloatAngleExt::acos(1.0);
         let t: Angle = FloatAngleExt::atan(1.0);
-        assert_eq!(s.radians, f32::asin(1.0));
-        assert_eq!(c.radians, f32::acos(1.0));
-        assert_eq!(t.radians, f32::atan(1.0));
+        assert_eq!(s.to_radians(), f32::asin(1.0));
+        assert_eq!(c.to_radians(), f32::acos(1.0));
+        assert_eq!(t.to_radians(), f32::atan(1.0));
+    }
+
+    #[test]
+    fn approx_comparison() {
+        assert_eq!(Angle::PI, Angle::PI);
+        assert_ne!(Angle::PI, Angle::CIRCLE);
+
+        assert_abs_diff_eq!(Angle::PI, Angle::PI);
+        assert_relative_eq!(Angle::PI, Angle::PI);
+        assert_ulps_eq!(Angle::PI, Angle::PI);
+        assert_abs_diff_ne!(Angle::PI, Angle::CIRCLE);
+        assert_relative_ne!(Angle::PI, Angle::CIRCLE);
+        assert_ulps_ne!(Angle::PI, Angle::CIRCLE);
     }
 
     #[test]
@@ -557,10 +576,10 @@ mod tests {
     #[test]
     fn to_rotation() {
         let angle = Angle::HALF_CIRCLE;
-        let quat = angle.to_rotation(Vector3::unit_z());
+        let quat = angle.to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat, glam::Quat::from_axis_angle(glam::Vec3::Z, f32::PI));
-        let v = quat * Vector3::<f32>::unit_x();
-        assert_abs_diff_eq!(v, -Vector3::unit_x());
+        let v = quat * Vector3::<f32>::X;
+        assert_abs_diff_eq!(v, -Vector3::X);
     }
 
     struct BufWriter<'a> {
@@ -641,6 +660,14 @@ mod tests {
         assert_eq!(
             write_buf(&mut buffer, format_args!("{:?}", Angle::from_radians(1.0))),
             "Angle(1.00000)"
+        );
+
+        assert_eq!(
+            write_buf(
+                &mut buffer,
+                format_args!("{:?}", Vector3::<Angle>::splat(Angle::PI))
+            ),
+            "Vector3<Angle> { x: Angle(π), y: Angle(π), z: Angle(π) }"
         );
     }
 }

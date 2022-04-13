@@ -122,7 +122,7 @@ macro_rules! impl_vector {
             #[inline]
             #[must_use]
             pub fn two() -> Self {
-                Self::one() + Self::one()
+                Self::ONE + Self::ONE
             }
 
             #[doc = "Multiply all components of this vector with a scalar value."]
@@ -381,7 +381,7 @@ macro_rules! impl_vector {
         impl<T: Unit> Sum for $base_type_name<T> {
             #[must_use]
             fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-                iter.fold(Self::zero(), Add::add)
+                iter.fold(Self::ZERO, Add::add)
             }
         }
 
@@ -405,24 +405,19 @@ impl_vector!(Vector4 [4] => Vec4, Point4);
 
 impl<T: Unit> Vector2<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_x() -> Self {
-        Self {
-            x: T::Scalar::one(),
-            y: T::Scalar::zero(),
-        }
-    }
+    pub const X: Self = Vector2 {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ZERO,
+    };
 
     /// Unit vector in the direction of the Y axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_y() -> Self {
-        Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::one(),
-        }
-    }
+    pub const Y: Self = Vector2 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ONE,
+    };
+
+    /// The unit axes.
+    pub const AXES: [Self; 2] = [Self::X, Self::Y];
 
     /// Select components of this vector and return a new vector containing
     /// those components.
@@ -445,37 +440,26 @@ impl<T: Unit> Vector2<T> {
 
 impl<T: Unit> Vector3<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_x() -> Self {
-        Self {
-            x: T::Scalar::one(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::zero(),
-        }
-    }
-
+    pub const X: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
     /// Unit vector in the direction of the Y axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_y() -> Self {
-        Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::one(),
-            z: T::Scalar::zero(),
-        }
-    }
-
+    pub const Y: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ZERO,
+    };
     /// Unit vector in the direction of the Z axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_z() -> Self {
-        Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::one(),
-        }
-    }
+    pub const Z: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ONE,
+    };
+
+    /// The unit axes.
+    pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
 
     /// Select components of this vector and return a new vector containing
     /// those components.
@@ -545,52 +529,36 @@ where
 
 impl<T: Unit> Vector4<T> {
     /// Unit vector in the direction of the X axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_x() -> Self {
-        Self {
-            x: T::Scalar::one(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::zero(),
-            w: T::Scalar::zero(),
-        }
-    }
-
+    pub const X: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
     /// Unit vector in the direction of the Y axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_y() -> Self {
-        Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::one(),
-            z: T::Scalar::zero(),
-            w: T::Scalar::zero(),
-        }
-    }
-
+    pub const Y: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
     /// Unit vector in the direction of the Z axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_z() -> Self {
-        Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::one(),
-            w: T::Scalar::zero(),
-        }
-    }
-
+    pub const Z: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ONE,
+        w: T::Scalar::ZERO,
+    };
     /// Unit vector in the direction of the W axis.
-    #[inline]
-    #[must_use]
-    pub fn unit_w() -> Self {
-        Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::zero(),
-            w: T::Scalar::one(),
-        }
-    }
+    pub const W: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ONE,
+    };
+
+    /// The unit axes.
+    pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
 
     /// Select components of this vector and return a new vector containing
     /// those components.
@@ -788,15 +756,16 @@ mod tests {
 
     #[test]
     fn units() {
-        assert_abs_diff_eq!(Vec2::unit_x(), (1.0, 0.0));
-        assert_abs_diff_eq!(Vec2::unit_y(), (0.0, 1.0));
-        assert_abs_diff_eq!(Vec3::unit_x(), (1.0, 0.0, 0.0));
-        assert_abs_diff_eq!(Vec3::unit_y(), (0.0, 1.0, 0.0));
-        assert_abs_diff_eq!(Vec3::unit_z(), (0.0, 0.0, 1.0));
-        assert_abs_diff_eq!(Vec4::unit_x(), (1.0, 0.0, 0.0, 0.0));
-        assert_abs_diff_eq!(Vec4::unit_y(), (0.0, 1.0, 0.0, 0.0));
-        assert_abs_diff_eq!(Vec4::unit_z(), (0.0, 0.0, 1.0, 0.0));
-        assert_abs_diff_eq!(Vec4::unit_w(), (0.0, 0.0, 0.0, 1.0));
+        use crate::vector;
+        assert_abs_diff_eq!(Vec2::X, vector!(1.0, 0.0));
+        assert_abs_diff_eq!(Vec2::Y, vector!(0.0, 1.0));
+        assert_abs_diff_eq!(Vec3::X, vector!(1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec3::Y, vector!(0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec3::Z, vector!(0.0, 0.0, 1.0));
+        assert_abs_diff_eq!(Vec4::X, vector!(1.0, 0.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::Y, vector!(0.0, 1.0, 0.0, 0.0));
+        assert_abs_diff_eq!(Vec4::Z, vector!(0.0, 0.0, 1.0, 0.0));
+        assert_abs_diff_eq!(Vec4::W, vector!(0.0, 0.0, 0.0, 1.0));
     }
 
     #[test]
@@ -824,13 +793,13 @@ mod tests {
         assert!(Vec4::nan().is_nan());
 
         // Replace NaNs with zeroes.
-        let v = Vec4::select(v4.is_nan_mask(), Vec4::zero(), v4);
+        let v = Vec4::select(v4.is_nan_mask(), Vec4::ZERO, v4);
         assert_eq!(v, (1.0, 2.0, 0.0, 4.0));
     }
 
     #[test]
     fn swizzle2() {
-        assert_eq!(Vec2::unit_x().swizzle::<1, 0>(), (0.0, 1.0));
+        assert_eq!(Vec2::X.swizzle::<1, 0>(), (0.0, 1.0));
         assert_eq!(
             Vec3::new(1.0, 2.0, 3.0).swizzle2::<1, 0>(),
             Vec2::new(2.0, 1.0)
@@ -843,10 +812,7 @@ mod tests {
             Vec3::new(1.0, 2.0, 3.0).swizzle::<2, 1, 0>(),
             (3.0, 2.0, 1.0)
         );
-        assert_eq!(
-            Vec2::unit_x().swizzle3::<1, 0, 1>(),
-            Vec3::new(0.0, 1.0, 0.0)
-        );
+        assert_eq!(Vec2::X.swizzle3::<1, 0, 1>(), Vec3::new(0.0, 1.0, 0.0));
         assert_eq!(
             Vec4::new(1.0, 2.0, 3.0, 4.0).swizzle3::<3, 2, 1>(),
             Vec3::new(4.0, 3.0, 2.0)
@@ -861,7 +827,7 @@ mod tests {
         );
 
         assert_eq!(
-            Vec2::unit_x().swizzle4::<1, 0, 1, 0>(),
+            Vec2::X.swizzle4::<1, 0, 1, 0>(),
             Vec4::new(0.0, 1.0, 0.0, 1.0)
         );
         assert_eq!(
@@ -872,12 +838,12 @@ mod tests {
 
     #[test]
     fn to_3d() {
-        assert_eq!(Vec2::unit_x().to_3d(2.0), Vec3::new(1.0, 0.0, 2.0));
+        assert_eq!(Vec2::X.to_3d(2.0), Vec3::new(1.0, 0.0, 2.0));
     }
 
     #[test]
     fn to_4d() {
-        assert_eq!(Vec3::unit_z().to_4d(2.0), Vec4::new(0.0, 0.0, 1.0, 2.0));
+        assert_eq!(Vec3::Z.to_4d(2.0), Vec4::new(0.0, 0.0, 1.0, 2.0));
     }
 
     #[test]
@@ -1027,13 +993,22 @@ mod tests {
         use crate::Angle;
         use approx::assert_abs_diff_eq;
 
-        let v = Vector3::<f32>::unit_x();
-        let quat = Angle::from_degrees(180.0f32).to_rotation(Vector3::unit_z());
+        let v = Vector3::<f32>::X;
+        let quat = Angle::from_degrees(180.0f32).to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat * v, -v);
 
-        let v = Vector3::<f64>::unit_x();
-        let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::unit_z());
+        let v = Vector3::<f64>::X;
+        let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat * v, -v);
+    }
+
+    #[test]
+    fn matrix_mul_custom_unit() {
+        use crate::{vec2, Matrix3};
+        let mat = Matrix3::<f32>::IDENTITY;
+        let a: Vector2<F32> = vec2!(20.0, 30.0);
+        let b: Vector2<F32> = mat * a;
+        assert_eq!(b, (20.0, 30.0));
     }
 
     #[cfg(feature = "std")]

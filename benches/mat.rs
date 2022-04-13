@@ -10,8 +10,7 @@ impl Unit for MyUnit {
 
 fn mat4_transform_glamour(b: &mut Bencher) {
     let vector: Vector3<MyUnit> = (100.0, 200.0, 300.0).into();
-    let matrix: Matrix4<f32> =
-        Matrix4::from_axis_angle(Vector3::unit_y(), Angle::from_degrees(45.0));
+    let matrix: Matrix4<f32> = Matrix4::from_axis_angle(Vector3::Y, Angle::from_degrees(45.0));
 
     b.iter(|| matrix.transform_vector(black_box(vector.to_untyped())))
 }

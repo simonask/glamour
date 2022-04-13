@@ -725,6 +725,8 @@ mod tests {
 
     impl Scalar for MyInt {
         type Primitive = i32;
+        const ZERO: Self = MyInt(0);
+        const ONE: Self = MyInt(1);
     }
 
     impl Unit for MyInt {
@@ -977,6 +979,10 @@ mod tests {
         let v = Vector4::<f32>::new(core::f32::MAX, 0.0, 1.0, 2.0);
         let t: Option<Vector4<i32>> = v.try_cast();
         assert!(t.is_none());
+
+        let v = Vector4::<f32>::new(3.0, 0.0, 1.0, 2.0);
+        let t: Option<Vector4<i32>> = v.try_cast();
+        assert_eq!(t, Some(vec4!(3, 0, 1, 2)));
     }
 
     #[test]

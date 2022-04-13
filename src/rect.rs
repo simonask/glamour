@@ -26,21 +26,17 @@ crate::impl_common!(Rect {
 
 impl<T: UnitTypes> Rect<T> {
     /// Zero rect (origin = 0.0, size = 0.0).
-    #[inline]
-    #[must_use]
-    pub fn zero() -> Self {
-        Rect {
-            origin: Point2::zero(),
-            size: Size2::zero(),
-        }
-    }
+    pub const ZERO: Self = Rect {
+        origin: Point2::ZERO,
+        size: Size2::ZERO,
+    };
 
     /// Rect at (0.0, 0.0) with `size`.
     #[inline]
     #[must_use]
     pub fn from_size(size: Size2<T>) -> Self {
         Rect {
-            origin: Point2::zero(),
+            origin: Point2::ZERO,
             size,
         }
     }
@@ -181,8 +177,8 @@ impl<T: UnitTypes> Rect<T> {
     #[inline]
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        !(self.size.width > T::Scalar::zero()
-            && self.size.height > T::Scalar::zero()
+        !(self.size.width > T::Scalar::ZERO
+            && self.size.height > T::Scalar::ZERO
             && self.origin.x.is_finite()
             && self.origin.y.is_finite())
     }
@@ -191,8 +187,8 @@ impl<T: UnitTypes> Rect<T> {
     #[inline]
     #[must_use]
     pub fn is_negative(&self) -> bool {
-        !(self.size.width >= T::Scalar::zero()
-            && self.size.height >= T::Scalar::zero()
+        !(self.size.width >= T::Scalar::ZERO
+            && self.size.height >= T::Scalar::ZERO
             && self.origin.x.is_finite()
             && self.origin.y.is_finite())
     }
@@ -463,8 +459,8 @@ impl<T: Unit> Intersection<Point2<T>> for Rect<T> {
 
     fn intersects(&self, thing: &Point2<T>) -> bool {
         let diff = *thing - self.origin;
-        diff.x >= T::Scalar::zero()
-            && diff.y >= T::Scalar::zero()
+        diff.x >= T::Scalar::ZERO
+            && diff.y >= T::Scalar::ZERO
             && diff.x < self.size.width
             && diff.y < self.size.height
     }
@@ -561,7 +557,7 @@ mod tests {
 
     #[test]
     fn basics() {
-        let zero = Rect::zero();
+        let zero = Rect::ZERO;
         assert_eq!(zero.origin, (0, 0));
         assert_eq!(zero.size, (0, 0));
 
@@ -773,8 +769,8 @@ mod tests {
 
         let r: RectF = ((10.0, 10.0), (10.0, 10.0)).into();
 
-        assert_eq!(r.union(RectF::zero()), r);
-        assert_eq!(RectF::zero().union(r), r);
+        assert_eq!(r.union(RectF::ZERO), r);
+        assert_eq!(RectF::ZERO.union(r), r);
 
         assert_eq!(r.union(r), r);
         assert_eq!(
@@ -823,8 +819,8 @@ mod tests {
 
     #[test]
     fn is_finite() {
-        assert!(RectF::zero().is_finite());
-        assert!(RectF::new(super::Point2::zero(), super::Size2::one()).is_finite());
+        assert!(RectF::ZERO.is_finite());
+        assert!(RectF::new(super::Point2::ZERO, super::Size2::ONE).is_finite());
 
         let r: RectF = ((-1.0, -1.0), (10.0, f32::NAN)).into();
         assert!(!r.is_finite());

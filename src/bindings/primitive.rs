@@ -1,3 +1,7 @@
+use approx::{RelativeEq, UlpsEq};
+
+use crate::AngleConsts;
+
 use super::*;
 
 /// Mapping from primitive scalar type to `glam` vector types.
@@ -16,6 +20,8 @@ use super::*;
 pub trait Primitive:
     crate::Scalar<Primitive = Self>
     + crate::Unit<Scalar = Self>
+    + num_traits::NumCast
+    + num_traits::Num
     + Debug
     + Display
     + Add<Self, Output = Self>
@@ -101,18 +107,24 @@ impl Primitive for u32 {
 /// Note that `glam` does not support integer matrices.
 ///
 /// See also [the documentation module](crate::docs#how).
-pub trait PrimitiveMatrices: Primitive + AbsDiffEq {
+pub trait PrimitiveMatrices:
+    Primitive + Float + AngleConsts + AbsDiffEq + RelativeEq + UlpsEq
+{
+    /// NaN.
+    const NAN: Self;
+
     /// [`glam::Mat2`] or [`glam::DMat2`].
-    type Mat2: SimdMatrix2<Scalar = Self>;
+    type Mat2: Matrix2<Scalar = Self>;
     /// [`glam::Mat3`] or [`glam::DMat3`].
-    type Mat3: SimdMatrix3<Scalar = Self>;
+    type Mat3: Matrix3<Scalar = Self>;
     /// [`glam::Mat4`] or [`glam::DMat4`].
-    type Mat4: SimdMatrix4<Scalar = Self>;
+    type Mat4: Matrix4<Scalar = Self>;
     /// [`glam::Quat`] or [`glam::DQuat`].
     type Quat: Quat<Scalar = Self, Vec3 = Self::Vec3>;
 }
 
 impl PrimitiveMatrices for f32 {
+    const NAN: f32 = core::f32::NAN;
     type Mat2 = glam::Mat2;
     type Mat3 = glam::Mat3;
     type Mat4 = glam::Mat4;
@@ -120,6 +132,7 @@ impl PrimitiveMatrices for f32 {
 }
 
 impl PrimitiveMatrices for f64 {
+    const NAN: f64 = core::f64::NAN;
     type Mat2 = glam::DMat2;
     type Mat3 = glam::DMat3;
     type Mat4 = glam::DMat4;

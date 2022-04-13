@@ -283,10 +283,10 @@ mod tests {
 
     #[test]
     fn subtraction_yields_vector() {
-        let p = Point::one();
-        let q = Point::one();
+        let p = Point::ONE;
+        let q = Point::ONE;
         let v: Vector3<f32> = q - p;
-        assert_eq!(v, Vector3::zero());
+        assert_eq!(v, Vector3::ZERO);
     }
 
     #[test]
@@ -313,11 +313,11 @@ mod tests {
         use approx::assert_abs_diff_eq;
 
         let v = Point3::<f32>::new(1.0, 0.0, 0.0);
-        let quat = Angle::from_degrees(180.0f32).to_rotation(Vector3::unit_z());
+        let quat = Angle::from_degrees(180.0f32).to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat * v, -v);
 
         let v = Point3::<f64>::new(1.0, 0.0, 0.0);
-        let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::unit_z());
+        let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat * v, -v);
     }
 }

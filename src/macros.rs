@@ -258,73 +258,6 @@ macro_rules! impl_as_tuple {
                 } == *self
             }
         }
-
-        impl<T> approx::AbsDiffEq<($($fields_ty),*)> for $base_type_name<T>
-        where
-            T: Unit,
-            T::Scalar: approx::AbsDiffEq,
-            <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy
-        {
-            type Epsilon = <T::Scalar as approx::AbsDiffEq>::Epsilon;
-
-            #[must_use]
-            fn default_epsilon() -> Self::Epsilon {
-                T::Scalar::default_epsilon()
-            }
-
-            #[must_use]
-            fn abs_diff_eq(&self, other: &($($fields_ty),*), epsilon: Self::Epsilon) -> bool {
-                self.abs_diff_eq(&Self::from_tuple(*other), epsilon)
-            }
-
-            #[must_use]
-            fn abs_diff_ne(&self, other: &($($fields_ty),*), epsilon: Self::Epsilon) -> bool {
-                self.abs_diff_ne(&Self::from_tuple(*other), epsilon)
-            }
-        }
-
-        impl<T> approx::RelativeEq<($($fields_ty),*)> for $base_type_name<T>
-        where
-            T: Unit,
-            T::Scalar: approx::RelativeEq,
-            <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy
-        {
-            #[must_use]
-            fn default_max_relative() -> Self::Epsilon {
-                T::Scalar::default_max_relative()
-            }
-
-            #[must_use]
-            fn relative_eq(&self, other: &($($fields_ty),*), epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-                self.relative_eq(&Self::from_tuple(*other), epsilon, max_relative)
-            }
-
-            #[must_use]
-            fn relative_ne(&self, other: &($($fields_ty),*), epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
-                self.relative_ne(&Self::from_tuple(*other), epsilon, max_relative)
-            }
-        }
-
-        impl<T: Unit> approx::UlpsEq<($($fields_ty),*)> for $base_type_name<T>
-        where
-            T::Scalar: approx::UlpsEq,
-            <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy
-        {
-            #[must_use]
-            fn default_max_ulps() -> u32 {
-                T::Scalar::default_max_ulps()
-            }
-
-            #[must_use]
-            fn ulps_eq(&self, other: &($($fields_ty),*), epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                self.ulps_eq(&Self::from_tuple(*other), epsilon, max_ulps)
-            }
-
-            #[must_use]
-            fn ulps_ne(&self, other: &($($fields_ty),*), epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                self.ulps_ne(&Self::from_tuple(*other), epsilon, max_ulps)
-            }
-        }
     };
 }
 
@@ -333,6 +266,16 @@ macro_rules! impl_simd_common {
         $($fields:ident),*
     }) => {
         impl<T: crate::UnitTypes> $base_type_name<T> {
+            #[doc = "All zeroes."]
+            pub const ZERO: Self = Self {
+                $($fields: T::Scalar::ZERO),*
+            };
+
+            #[doc = "All ones."]
+            pub const ONE: Self = Self {
+                $($fields: T::Scalar::ONE),*
+            };
+
             #[doc = "Get the underlying `glam` vector."]
             #[inline]
             #[must_use]
@@ -393,22 +336,6 @@ macro_rules! impl_simd_common {
             #[must_use]
             pub fn as_array_mut(&mut self) -> &mut [T::Scalar; $dimensions] {
                 bytemuck::cast_mut(self)
-            }
-
-            #[doc = "Instance with all zeroes."]
-            #[inline]
-            #[must_use]
-            pub fn zero() -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::zero())
-            }
-
-            #[doc = "Instance with all ones."]
-            #[inline]
-            #[must_use]
-            pub fn one() -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::one())
             }
 
             #[doc = "Instance with all components set to `scalar`."]
@@ -664,10 +591,7 @@ macro_rules! impl_simd_common {
             }
         }
 
-        impl<T: Unit> AsMut<[T::Scalar; $dimensions]> for $base_type_name<T>
-        where
-            T::Scalar: bytemuck::Pod
-        {
+        impl<T: Unit> AsMut<[T::Scalar; $dimensions]> for $base_type_name<T> {
             #[inline]
             #[must_use]
             fn as_mut(&mut self) -> &mut [T::Scalar; $dimensions] {
@@ -675,10 +599,7 @@ macro_rules! impl_simd_common {
             }
         }
 
-        impl<T: Unit> AsRef<[T::Scalar]> for $base_type_name<T>
-        where
-            T::Scalar: bytemuck::Pod
-        {
+        impl<T: Unit> AsRef<[T::Scalar]> for $base_type_name<T> {
             #[inline]
             #[must_use]
             fn as_ref(&self) -> &[T::Scalar] {
@@ -686,10 +607,7 @@ macro_rules! impl_simd_common {
             }
         }
 
-        impl<T: Unit> AsMut<[T::Scalar]> for $base_type_name<T>
-        where
-            T::Scalar: bytemuck::Pod
-        {
+        impl<T: Unit> AsMut<[T::Scalar]> for $base_type_name<T> {
             #[inline]
             #[must_use]
             fn as_mut(&mut self) -> &mut [T::Scalar] {

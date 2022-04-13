@@ -4,16 +4,15 @@
 //!
 //!
 
-use core::marker::PhantomData;
 use core::ops::Mul;
+use core::{fmt::Debug, marker::PhantomData};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, Pod, Zeroable};
-use num_traits::Float;
 
 use crate::{
-    bindings::PrimitiveMatrices, Angle, AngleConsts, Matrix3, Matrix4, Point2, Point3, Scalar,
-    Unit, UnitTypes, Vector2, Vector3,
+    unit::UnitMatrices, Angle, Matrix3, Matrix4, Point2, Point3, Scalar, Unit, UnitTypes, Vector2,
+    Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
@@ -77,9 +76,8 @@ impl<Src: Unit, Dst: Unit> Copy for Transform3<Src, Dst> {}
 
 impl<Src, Dst> Default for Transform2<Src, Dst>
 where
-    Src: UnitTypes,
+    Src: UnitMatrices,
     Dst: Unit,
-    Src::Primitive: PrimitiveMatrices,
 {
     #[inline]
     fn default() -> Self {
@@ -92,9 +90,8 @@ where
 
 impl<Src, Dst> Default for Transform3<Src, Dst>
 where
-    Src: UnitTypes,
+    Src: UnitMatrices,
     Dst: Unit,
-    Src::Primitive: PrimitiveMatrices,
 {
     #[inline]
     fn default() -> Self {
@@ -105,9 +102,10 @@ where
     }
 }
 
-impl<Src: UnitTypes, Dst: Unit> core::fmt::Debug for Transform2<Src, Dst>
+impl<Src, Dst> Debug for Transform2<Src, Dst>
 where
-    Src::Primitive: PrimitiveMatrices,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Transform2")
@@ -116,9 +114,10 @@ where
     }
 }
 
-impl<Src: UnitTypes, Dst: Unit> core::fmt::Debug for Transform3<Src, Dst>
+impl<Src, Dst> Debug for Transform3<Src, Dst>
 where
-    Src::Primitive: PrimitiveMatrices,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Transform3")
@@ -127,20 +126,25 @@ where
     }
 }
 
-impl<Src: Unit, Dst: Unit> PartialEq for Transform2<Src, Dst> {
+impl<Src, Dst> PartialEq for Transform2<Src, Dst>
+where
+    Src: Unit,
+    Dst: Unit,
+{
     fn eq(&self, other: &Self) -> bool {
         self.matrix == other.matrix
     }
 }
 
-impl<Src: Unit, Dst: Unit> AbsDiffEq for Transform2<Src, Dst>
+impl<Src, Dst> AbsDiffEq for Transform2<Src, Dst>
 where
-    Matrix3<<Src::Scalar as Scalar>::Primitive>: AbsDiffEq,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
-    type Epsilon = <Matrix3<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::Epsilon;
+    type Epsilon = <Matrix3<Src::Primitive> as AbsDiffEq>::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
-        <Matrix3<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::default_epsilon()
+        <Matrix3<Src::Primitive> as AbsDiffEq>::default_epsilon()
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
@@ -148,12 +152,13 @@ where
     }
 }
 
-impl<Src: Unit, Dst: Unit> RelativeEq for Transform2<Src, Dst>
+impl<Src, Dst> RelativeEq for Transform2<Src, Dst>
 where
-    Matrix3<<Src::Scalar as Scalar>::Primitive>: RelativeEq,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
     fn default_max_relative() -> Self::Epsilon {
-        <Matrix3<<Src::Scalar as Scalar>::Primitive> as RelativeEq>::default_max_relative()
+        <Matrix3<Src::Primitive> as RelativeEq>::default_max_relative()
     }
 
     fn relative_eq(
@@ -167,12 +172,13 @@ where
     }
 }
 
-impl<Src: Unit, Dst: Unit> UlpsEq for Transform2<Src, Dst>
+impl<Src, Dst> UlpsEq for Transform2<Src, Dst>
 where
-    Matrix3<<Src::Scalar as Scalar>::Primitive>: UlpsEq,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
     fn default_max_ulps() -> u32 {
-        <Matrix3<<Src::Scalar as Scalar>::Primitive> as UlpsEq>::default_max_ulps()
+        <Matrix3<Src::Primitive> as UlpsEq>::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
@@ -186,14 +192,15 @@ impl<Src: Unit, Dst: Unit> PartialEq for Transform3<Src, Dst> {
     }
 }
 
-impl<Src: Unit, Dst: Unit> AbsDiffEq for Transform3<Src, Dst>
+impl<Src, Dst> AbsDiffEq for Transform3<Src, Dst>
 where
-    Matrix4<<Src::Scalar as Scalar>::Primitive>: AbsDiffEq,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
-    type Epsilon = <Matrix4<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::Epsilon;
+    type Epsilon = <Matrix4<Src::Primitive> as AbsDiffEq>::Epsilon;
 
     fn default_epsilon() -> Self::Epsilon {
-        <Matrix4<<Src::Scalar as Scalar>::Primitive> as AbsDiffEq>::default_epsilon()
+        <Matrix4<Src::Primitive> as AbsDiffEq>::default_epsilon()
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
@@ -201,12 +208,13 @@ where
     }
 }
 
-impl<Src: Unit, Dst: Unit> RelativeEq for Transform3<Src, Dst>
+impl<Src, Dst> RelativeEq for Transform3<Src, Dst>
 where
-    Matrix4<<Src::Scalar as Scalar>::Primitive>: RelativeEq,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
     fn default_max_relative() -> Self::Epsilon {
-        <Matrix4<<Src::Scalar as Scalar>::Primitive> as RelativeEq>::default_max_relative()
+        <Matrix4<Src::Primitive> as RelativeEq>::default_max_relative()
     }
 
     fn relative_eq(
@@ -220,12 +228,13 @@ where
     }
 }
 
-impl<Src: Unit, Dst: Unit> UlpsEq for Transform3<Src, Dst>
+impl<Src, Dst> UlpsEq for Transform3<Src, Dst>
 where
-    Matrix4<<Src::Scalar as Scalar>::Primitive>: UlpsEq,
+    Src: UnitMatrices,
+    Dst: Unit,
 {
     fn default_max_ulps() -> u32 {
-        <Matrix4<<Src::Scalar as Scalar>::Primitive> as UlpsEq>::default_max_ulps()
+        <Matrix4<Src::Primitive> as UlpsEq>::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
@@ -242,16 +251,14 @@ unsafe impl<Src: Unit, Dst: Unit> Pod for Transform3<Src, Dst> {}
 
 impl<Src, Dst> Transform2<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar>,
-    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     /// Identity matrix.
-    #[inline]
-    #[must_use]
-    pub fn identity() -> Self {
-        Self::from_matrix_unchecked(Matrix3::identity())
-    }
+    pub const IDENTITY: Self = Self {
+        matrix: Matrix3::IDENTITY,
+        _marker: PhantomData,
+    };
 
     /// Create from matrix.
     #[inline]
@@ -290,7 +297,7 @@ where
     /// let translate = Transform::from_angle(Angle::FRAG_PI_2);
     /// let a: Vector2<A> = Vector2 { x: 10.0, y: 20.0 };
     /// let b: Vector2<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (-20.0, 10.0), epsilon = 0.000001);
+    /// assert_abs_diff_eq!(b, vec2!(-20.0, 10.0), epsilon = 0.000001);
     /// ```
     #[inline]
     #[must_use]
@@ -316,7 +323,7 @@ where
     /// let translate = Transform::from_scale(Vector2 { x: 2.0, y: 3.0 });
     /// let a: Vector2<A> = Vector2 { x: 10.0, y: 20.0 };
     /// let b: Vector2<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (20.0, 60.0));
+    /// assert_abs_diff_eq!(b, vec2!(20.0, 60.0));
     /// ```
     #[inline]
     #[must_use]
@@ -340,7 +347,7 @@ where
     /// let translate = Transform::from_translation(Vector2 { x: 10.0, y: 20.0 });
     /// let a: Point2<A> = Point2 { x: 1.0, y: 2.0 };
     /// let b: Point2<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (11.0, 22.0));
+    /// assert_abs_diff_eq!(b, point!(11.0, 22.0));
     /// ```
     #[inline]
     #[must_use]
@@ -385,9 +392,8 @@ where
 
 impl<Src, Dst> TransformMap<Point2<Src>> for Transform2<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     type Output = Point2<Dst>;
 
@@ -399,9 +405,8 @@ where
 
 impl<Src, Dst> TransformMap<Vector2<Src>> for Transform2<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     type Output = Vector2<Dst>;
 
@@ -413,9 +418,8 @@ where
 
 impl<Src, Dst> Transform2<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     /// Perform matrix multiplication such that `other`'s transformation applies
     /// after `self`.
@@ -428,10 +432,10 @@ where
     /// the transformation.
     #[inline]
     #[must_use]
-    pub fn then<Dst2: Unit<Scalar = Dst::Scalar>>(
-        self,
-        other: Transform2<Dst, Dst2>,
-    ) -> Transform2<Src, Dst2> {
+    pub fn then<Dst2>(self, other: Transform2<Dst, Dst2>) -> Transform2<Src, Dst2>
+    where
+        Dst2: UnitTypes<UnitScalar = Dst::Scalar>,
+    {
         Transform2::from_matrix_unchecked(other.matrix * self.matrix)
     }
 
@@ -440,7 +444,7 @@ where
     /// This does not change the target coordinate space.
     #[inline]
     #[must_use]
-    pub fn then_rotate(self, angle: Angle<Dst::Primitive>) -> Self {
+    pub fn then_rotate(self, angle: Angle<Src::Primitive>) -> Self {
         self.then(Transform2::from_angle(angle))
     }
 
@@ -452,7 +456,7 @@ where
     ///
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let a = Transform2::<f32, f32>::identity()
+    /// let a = Transform2::<f32, f32>::IDENTITY
     ///     .then_scale((2.0, 3.0).into());
     /// let b = Transform2::<f32, f32>::from_scale((2.0, 3.0).into());
     /// assert_eq!(a, b);
@@ -484,10 +488,9 @@ where
 
 impl<Src, Dst, Dst2> Mul<Transform2<Dst, Dst2>> for Transform2<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar>,
-    Dst2: UnitTypes<UnitScalar = Src::UnitScalar>,
-    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst2: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     type Output = Transform2<Src, Dst2>;
 
@@ -500,10 +503,9 @@ where
 
 impl<Src, Dst, Dst2> Mul<Transform3<Dst, Dst2>> for Transform3<Src, Dst>
 where
-    Src: Unit,
-    Dst: Unit<Scalar = Src::Scalar>,
-    Dst2: Unit<Scalar = Src::Scalar>,
-    <Src::Scalar as Scalar>::Primitive: PrimitiveMatrices + Float + AngleConsts,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst2: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     type Output = Transform3<Src, Dst2>;
 
@@ -516,16 +518,14 @@ where
 
 impl<Src, Dst> Transform3<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     /// Identity matrix.
-    #[inline]
-    #[must_use]
-    pub fn identity() -> Self {
-        Self::from_matrix_unchecked(Matrix4::identity())
-    }
+    pub const IDENTITY: Self = Self {
+        matrix: Matrix4::IDENTITY,
+        _marker: PhantomData,
+    };
 
     /// Create from matrix.
     #[inline]
@@ -571,7 +571,7 @@ where
     /// This does not change the target coordinate space.
     #[inline]
     #[must_use]
-    pub fn then_rotate(self, axis: Vector3<Dst>, angle: Angle<Dst::Primitive>) -> Self {
+    pub fn then_rotate(self, axis: Vector3<Dst>, angle: Angle<Src::Primitive>) -> Self {
         self.then(Transform3::from_axis_angle(axis, angle))
     }
 
@@ -583,7 +583,7 @@ where
     ///
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let a = Transform3::<f32, f32>::identity()
+    /// let a = Transform3::<f32, f32>::IDENTITY
     ///     .then_scale((2.0, 3.0, 4.0).into());
     /// let b = Transform3::<f32, f32>::from_scale((2.0, 3.0, 4.0).into());
     /// assert_eq!(a, b);
@@ -616,10 +616,10 @@ where
     ///
     /// type Transform = Transform3<A, B>;
     ///
-    /// let translate = Transform::from_axis_angle(Vector3::unit_z(), Angle::FRAG_PI_2);
+    /// let translate = Transform::from_axis_angle(Vector3::Z, Angle::FRAG_PI_2);
     /// let a: Vector3<A> = Vector3 { x: 10.0, y: 20.0, z: 30.0 };
     /// let b: Vector3<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (-20.0, 10.0, 30.0), epsilon = 0.000001);
+    /// assert_abs_diff_eq!(b, vec3!(-20.0, 10.0, 30.0), epsilon = 0.000001);
     /// ```
     #[inline]
     #[must_use]
@@ -648,7 +648,7 @@ where
     /// let scale = Transform::from_scale(Vector3 { x: 2.0, y: 3.0, z: 1.0 });
     /// let a: Vector3<A> = Vector3 { x: 10.0, y: 20.0, z: 30.0 };
     /// let b: Vector3<B> = scale.map(a);
-    /// assert_abs_diff_eq!(b, (20.0, 60.0, 30.0));
+    /// assert_abs_diff_eq!(b, vec3!(20.0, 60.0, 30.0));
     /// ```
     #[inline]
     #[must_use]
@@ -672,7 +672,7 @@ where
     /// let translate = Transform::from_translation(Vector3 { x: 10.0, y: 20.0, z: 30.0 });
     /// let a: Point3<A> = Point3 { x: 1.0, y: 2.0, z: 30.0 };
     /// let b: Point3<B> = translate.map(a);
-    /// assert_abs_diff_eq!(b, (11.0, 22.0, 60.0));
+    /// assert_abs_diff_eq!(b, point!(11.0, 22.0, 60.0));
     /// ```
     #[inline]
     #[must_use]
@@ -739,7 +739,7 @@ where
     #[inline]
     #[must_use]
     pub fn map_point(&self, point: Point3<Src>) -> Point3<Dst> {
-        cast(self.matrix.project_point(cast(point)))
+        cast(self.matrix.project_point(point))
     }
 
     /// Invert the matrix.
@@ -754,9 +754,8 @@ where
 
 impl<Src, Dst> TransformMap<Point3<Src>> for Transform3<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     type Output = Point3<Dst>;
 
@@ -768,9 +767,8 @@ where
 
 impl<Src, Dst> TransformMap<Vector3<Src>> for Transform3<Src, Dst>
 where
-    Src: UnitTypes,
-    Dst: UnitTypes<UnitScalar = Src::UnitScalar, Primitive = Src::Primitive>,
-    Src::Primitive: PrimitiveMatrices + Float + AngleConsts,
+    Src: UnitMatrices,
+    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
 {
     type Output = Vector3<Dst>;
 
@@ -830,7 +828,7 @@ mod tests {
     #[test]
     fn basic() {
         check_2d_and_3d! {
-            let a = Transform::identity();
+            let a = Transform::IDENTITY;
             let b = a.clone();
             assert_eq!(a, b);
             assert_abs_diff_eq!(a, b);
@@ -845,7 +843,7 @@ mod tests {
         };
 
         check_2d_and_3d! {
-            let a = Transform::identity();
+            let a = Transform::IDENTITY;
             assert_eq!(a, Transform::default());
         };
     }
@@ -853,8 +851,8 @@ mod tests {
     #[test]
     fn from_matrix() {
         check_2d_and_3d! {
-            assert!(Transform::from_matrix(Mat::zero()).is_none());
-            assert_eq!(Transform::from_matrix(Mat::identity()), Some(Transform::identity()));
+            assert!(Transform::from_matrix(Mat::ZERO).is_none());
+            assert_eq!(Transform::from_matrix(Mat::IDENTITY), Some(Transform::IDENTITY));
         };
     }
 
@@ -904,8 +902,8 @@ mod tests {
     fn debug_print() {
         extern crate alloc;
 
-        let t2 = Transform2::<TestSrc, TestDst>::identity();
-        let t3 = Transform3::<TestSrc, TestDst>::identity();
+        let t2 = Transform2::<TestSrc, TestDst>::IDENTITY;
+        let t3 = Transform3::<TestSrc, TestDst>::IDENTITY;
 
         let s2 = alloc::format!("{:?}", t2);
         let s3 = alloc::format!("{:?}", t3);
