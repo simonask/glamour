@@ -19,14 +19,6 @@ pub trait Matrix:
     /// The component type of the `glam` matrix. Either `f32` or `f64`.
     type Scalar: PrimitiveMatrices + Primitive + Float + AbsDiffEq;
 
-    /// Identity matrix.
-    #[must_use]
-    fn identity() -> Self;
-
-    /// Matrix with all NaNs.
-    #[must_use]
-    fn nan() -> Self;
-
     /// True if any element is NaN.
     #[must_use]
     fn is_nan(&self) -> bool;
@@ -222,16 +214,6 @@ macro_rules! impl_matrix {
     ($scalar:ty, $glam_ty:ty) => {
         impl Matrix for $glam_ty {
             type Scalar = $scalar;
-
-            #[inline]
-            fn identity() -> Self {
-                <$glam_ty>::IDENTITY
-            }
-
-            #[inline]
-            fn nan() -> Self {
-                <$glam_ty>::NAN
-            }
 
             forward_impl!($glam_ty => fn is_nan(&self) -> bool);
             forward_impl!($glam_ty => fn is_finite(&self) -> bool);
