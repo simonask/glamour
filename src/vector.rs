@@ -829,7 +829,8 @@ mod tests {
 
     #[test]
     fn to_3d() {
-        assert_eq!(Vec2::X.to_3d(2.0), Vec3::new(1.0, 0.0, 2.0));
+        let v = Vec2 { x: 3.0, y: 4.0 };
+        assert_eq!(v.to_3d(2.0), crate::vec3!(3.0, 4.0, 2.0));
     }
 
     #[test]

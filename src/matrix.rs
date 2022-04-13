@@ -1133,6 +1133,8 @@ mod tests {
         assert_ulps_eq, assert_ulps_ne,
     };
 
+    use crate::{point2, vec2};
+
     use super::*;
 
     type Mat2 = Matrix2<f32>;
@@ -1177,6 +1179,11 @@ mod tests {
             ])
         );
 
+        assert_eq!(m2 * Vec2::ONE, vec2!(2.0, 3.0));
+        assert_eq!(m2 * Point2::ONE, point2!(2.0, 3.0));
+        assert_eq!(m3 * Vec2::ONE, vec2!(2.0, 3.0));
+        assert_eq!(m3 * Point2::ONE, point2!(2.0, 3.0));
+
         let m2 = DMat2::from_scale(DVec2::new(2.0, 3.0));
         let m3 = DMat3::from_scale(DVec2::new(2.0, 3.0));
         let m4 = DMat4::from_scale(DVec3::new(2.0, 3.0, 4.0));
@@ -1195,6 +1202,11 @@ mod tests {
                 (0.0, 0.0, 0.0, 1.0)
             ])
         );
+
+        assert_eq!(m2 * DVec2::ONE, vec2!(2.0, 3.0));
+        assert_eq!(m2 * DPoint2::ONE, point2!(2.0, 3.0));
+        assert_eq!(m3 * DVec2::ONE, vec2!(2.0, 3.0));
+        assert_eq!(m3 * DPoint2::ONE, point2!(2.0, 3.0));
     }
 
     #[test]
