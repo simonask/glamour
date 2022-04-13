@@ -398,7 +398,7 @@ mod tests {
     #[test]
     fn from_rect() {
         let r = Rect::new((10.0, 12.0).into(), (5.0, 6.0).into());
-        let b = Box2::from(r);
+        let b = Box2::from_rect(r);
         let b2 = Box2::from_origin_and_size((10.0, 12.0).into(), (5.0, 6.0).into());
         assert_abs_diff_eq!(b, b2);
         assert_abs_diff_eq!(b.min, Point2::new(10.0, 12.0));
