@@ -664,10 +664,7 @@ macro_rules! impl_simd_common {
             }
         }
 
-        impl<T: Unit> AsMut<[T::Scalar; $dimensions]> for $base_type_name<T>
-        where
-            T::Scalar: bytemuck::Pod
-        {
+        impl<T: Unit> AsMut<[T::Scalar; $dimensions]> for $base_type_name<T> {
             #[inline]
             #[must_use]
             fn as_mut(&mut self) -> &mut [T::Scalar; $dimensions] {
@@ -675,10 +672,7 @@ macro_rules! impl_simd_common {
             }
         }
 
-        impl<T: Unit> AsRef<[T::Scalar]> for $base_type_name<T>
-        where
-            T::Scalar: bytemuck::Pod
-        {
+        impl<T: Unit> AsRef<[T::Scalar]> for $base_type_name<T> {
             #[inline]
             #[must_use]
             fn as_ref(&self) -> &[T::Scalar] {
@@ -686,10 +680,7 @@ macro_rules! impl_simd_common {
             }
         }
 
-        impl<T: Unit> AsMut<[T::Scalar]> for $base_type_name<T>
-        where
-            T::Scalar: bytemuck::Pod
-        {
+        impl<T: Unit> AsMut<[T::Scalar]> for $base_type_name<T> {
             #[inline]
             #[must_use]
             fn as_mut(&mut self) -> &mut [T::Scalar] {
