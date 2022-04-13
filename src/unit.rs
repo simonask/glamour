@@ -77,7 +77,7 @@ pub trait UnitTypes: Unit<Scalar = Self::UnitScalar> {
     /// `Self::Scalar` needed to define trait bounds on the associated type.
     type UnitScalar: Scalar<Primitive = Self::Primitive>;
     /// Shorthand for `<Self::Scalar as Scalar>::Primitive`.
-    type Primitive: Primitive;
+    type Primitive: Primitive<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>;
 
     /// Fundamental 2D vector type.
     type Vec2: Vector<2, Scalar = Self::Primitive, Mask = glam::BVec2>;
