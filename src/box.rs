@@ -437,7 +437,7 @@ mod tests {
         assert_eq!(b, Box2::ZERO);
 
         let b =
-            Box2::from_points([(0.0, 1.0), (1.0, 2.0), (0.0, 2.0), (0.5, 0.5)].map(Point2::from));
+            Box2::from_points([(0.1, 1.0), (1.0, 2.0), (0.0, 2.0), (0.5, 0.5)].map(Point2::from));
 
         assert_abs_diff_eq!(
             b,
