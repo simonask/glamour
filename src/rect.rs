@@ -3,8 +3,9 @@
 use approx::AbsDiffEq;
 
 use crate::{
-    traits::{Contains, Intersection, Lerp, SimdVecFloat, Union, UnitTypes},
-    Box2, Point2, Scalar, Size2, Unit, Vector2,
+    bindings::VectorFloat,
+    traits::{Contains, Intersection, Lerp, Union},
+    Box2, Point2, Scalar, Size2, Unit, UnitTypes, Vector2,
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
@@ -201,7 +202,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn is_finite(&self) -> bool
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         self.origin.is_finite() && self.size.is_finite()
     }
@@ -222,7 +223,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn round(self) -> Self
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         Rect {
             origin: self.origin.round(),
@@ -248,7 +249,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn round_in(self) -> Self
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         Rect {
             origin: self.origin.ceil(),
@@ -272,7 +273,7 @@ impl<T: UnitTypes> Rect<T> {
     #[must_use]
     pub fn round_out(self) -> Self
     where
-        T::Vec2: SimdVecFloat<2, Scalar = T::Primitive>,
+        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
     {
         Rect {
             origin: self.origin.floor(),

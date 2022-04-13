@@ -1,10 +1,8 @@
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_common {
     ($base_type_name:ident {
         $($fields:ident: $fields_ty:ty),*
     }) => {
-        impl<T: crate::traits::UnitTypes> $base_type_name<T> {
+        impl<T: crate::UnitTypes> $base_type_name<T> {
             #[doc = "Instantiate with field values."]
             #[inline]
             #[must_use]
@@ -47,7 +45,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast<T2>(self) -> $base_type_name<T2>
             where
-                T2: crate::traits::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast(self)
             }
@@ -57,7 +55,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_ref<T2>(&self) -> &$base_type_name<T2>
             where
-                T2: crate::traits::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast_ref(self)
             }
@@ -67,7 +65,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_mut<T2>(&mut self) -> &mut $base_type_name<T2>
             where
-                T2: crate::traits::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast_mut(self)
             }
@@ -123,9 +121,9 @@ macro_rules! impl_common {
         }
 
         /// SAFETY: Vector types only contain members of type `T::Scalar`, which is required to be [`Zeroable`](bytemuck::Zeroable).
-        unsafe impl<T: crate::traits::Unit> bytemuck::Zeroable for $base_type_name<T> where $($fields_ty: bytemuck::Zeroable),* {}
+        unsafe impl<T: crate::Unit> bytemuck::Zeroable for $base_type_name<T> where $($fields_ty: bytemuck::Zeroable),* {}
         /// SAFETY: Vector types only contain members of type `T::Scalar`, which is required to be [`Pod`](bytemuck::Pod).
-        unsafe impl<T: crate::traits::Unit> bytemuck::Pod for $base_type_name<T> where $($fields_ty: bytemuck::Pod),* {}
+        unsafe impl<T: crate::Unit> bytemuck::Pod for $base_type_name<T> where $($fields_ty: bytemuck::Pod),* {}
 
         impl<T: Unit> PartialEq for $base_type_name<T> {
             #[inline]
@@ -208,8 +206,6 @@ macro_rules! impl_common {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_as_tuple {
     ($base_type_name:ident {
         $($fields:ident: $fields_ty:ty),*
@@ -332,13 +328,11 @@ macro_rules! impl_as_tuple {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_simd_common {
     ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident, $mask_ty:ty {
         $($fields:ident),*
     }) => {
-        impl<T: crate::traits::UnitTypes> $base_type_name<T> {
+        impl<T: crate::UnitTypes> $base_type_name<T> {
             #[doc = "Get the underlying `glam` vector."]
             #[inline]
             #[must_use]
@@ -405,7 +399,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn zero() -> Self {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::zero())
             }
 
@@ -413,7 +407,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn one() -> Self {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::one())
             }
 
@@ -421,7 +415,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn splat(scalar: T::Scalar) -> Self {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::splat(scalar.to_raw()))
             }
 
@@ -429,7 +423,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn clamp(self, min: Self, max: Self) -> Self {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(self.to_raw().clamp(min.to_raw(), max.to_raw()))
             }
 
@@ -463,7 +457,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpeq(self, other: Self) -> $mask_ty {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpeq(other.to_raw()).into()
             }
 
@@ -471,7 +465,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpne(self, other: Self) -> $mask_ty {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpne(other.to_raw()).into()
             }
 
@@ -479,7 +473,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpge(self, other: Self) -> $mask_ty {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpge(other.to_raw()).into()
             }
 
@@ -487,7 +481,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmpgt(self, other: Self) -> $mask_ty {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmpgt(other.to_raw()).into()
             }
 
@@ -495,7 +489,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmple(self, other: Self) -> $mask_ty {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmple(other.to_raw()).into()
             }
 
@@ -503,7 +497,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn cmplt(self, other: Self) -> $mask_ty {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 self.to_raw().cmplt(other.to_raw()).into()
             }
 
@@ -511,7 +505,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn min(self, other: Self) -> Self {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(self.to_raw().min(other.to_raw()))
             }
 
@@ -519,7 +513,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn max(self, other: Self) -> Self {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(self.to_raw().max(other.to_raw()))
             }
 
@@ -527,7 +521,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn min_element(self) -> T::Scalar {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 T::Scalar::from_raw(self.to_raw().min_element())
             }
 
@@ -535,7 +529,7 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn max_element(self) -> T::Scalar {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 T::Scalar::from_raw(self.to_raw().max_element())
             }
 
@@ -543,42 +537,42 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn select(mask: $mask_ty, if_true: Self, if_false: Self) -> Self {
-                use crate::traits::SimdVec;
+                use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::select(mask.into(), if_true.to_raw(), if_false.to_raw()))
             }
         }
 
         impl<T> $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
-            T::$vec_ty: crate::traits::SimdVecFloat<$dimensions>,
+            T: crate::UnitTypes,
+            T::$vec_ty: crate::bindings::VectorFloat<$dimensions>,
         {
             #[doc = "Return an instance where all components are NaN."]
             #[inline]
             #[must_use]
             pub fn nan() -> Self {
-                use crate::traits::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(T::$vec_ty::nan())
             }
             #[doc = "True if all components are non-infinity and non-NaN."]
             #[inline]
             #[must_use]
             pub fn is_finite(&self) -> bool {
-                use crate::traits::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 self.as_raw().is_finite()
             }
             #[doc = "True if any component is NaN."]
             #[inline]
             #[must_use]
             pub fn is_nan(&self) -> bool {
-                use crate::traits::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 self.as_raw().is_nan()
             }
             #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
             #[inline]
             #[must_use]
             pub fn is_nan_mask(&self) -> $mask_ty {
-                use crate::traits::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 self.as_raw().is_nan_mask().into()
             }
 
@@ -586,28 +580,28 @@ macro_rules! impl_simd_common {
             #[inline]
             #[must_use]
             pub fn ceil(self) -> Self {
-                use crate::traits::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(self.to_raw().ceil())
             }
             #[doc = "Round all components down."]
             #[inline]
             #[must_use]
             pub fn floor(self) -> Self {
-                use crate::traits::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(self.to_raw().floor())
             }
             #[doc = "Round all components."]
             #[inline]
             #[must_use]
             pub fn round(self) -> Self {
-                use crate::traits::SimdVecFloat;
+                use crate::bindings::VectorFloat;
                 Self::from_raw(self.to_raw().round())
             }
         }
 
         impl<T> $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: crate::UnitTypes,
             T::$vec_ty: crate::traits::Abs,
         {
             #[doc = "Computes the absolute value of each component."]
@@ -723,7 +717,7 @@ macro_rules! impl_simd_common {
 
         impl<T> core::ops::Neg for $base_type_name<T>
         where
-            T: crate::traits::UnitTypes,
+            T: crate::UnitTypes,
             T::$vec_ty: core::ops::Neg<Output = T::$vec_ty>,
         {
             type Output = Self;
@@ -737,8 +731,6 @@ macro_rules! impl_simd_common {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_glam_conversion {
     ($base_type_name:ident, $dimensions:literal [
         $(
@@ -797,8 +789,6 @@ macro_rules! impl_glam_conversion {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_scaling {
     ($base_type_name:ident, $dimensions:literal [
         $(
@@ -884,8 +874,6 @@ macro_rules! impl_scaling {
     };
 }
 
-#[macro_export]
-#[doc(hidden)]
 macro_rules! impl_mint {
     ($base_type_name:ident, $dimensions:literal, $mint_type:ident) => {
         #[cfg(feature = "mint")]
@@ -908,3 +896,10 @@ macro_rules! impl_mint {
         };
     };
 }
+
+pub(crate) use impl_as_tuple;
+pub(crate) use impl_common;
+pub(crate) use impl_glam_conversion;
+pub(crate) use impl_mint;
+pub(crate) use impl_scaling;
+pub(crate) use impl_simd_common;

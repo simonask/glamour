@@ -1,16 +1,16 @@
 //! Matrix types.
 //!
-//! Matrices do not have a [`Unit`](crate::traits::Unit), because their values
+//! Matrices do not have a [`Unit`](crate::Unit), because their values
 //! do not necessarily have a clear logical meaning in the context of any
 //! particular unit.
 //!
 //! Instead, they are based on fundamental floating-point
-//! [primitive](crate::traits::Primitive) scalars (`f32` or `f64`).
+//! [primitive](crate::bindings::Primitive) scalars (`f32` or `f64`).
 
 use core::ops::Mul;
 
 use crate::{
-    traits::{PrimitiveMatrices, SimdMatrix, SimdMatrix2, SimdMatrix3, SimdMatrix4},
+    bindings::{Matrix, PrimitiveMatrices, SimdMatrix2, SimdMatrix3, SimdMatrix4},
     Angle, Point2, Point3, Point4, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -234,7 +234,8 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn is_invertible(&self) -> bool {
-                self.as_raw().is_invertible()
+                let d = self.determinant();
+                d != T::zero() && crate::Scalar::is_finite(d)
             }
 
             #[doc = "Return the inverse matrix."]
@@ -332,7 +333,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector2<T>) -> Self {
-        Self::from_raw(T::Mat2::from_scale(scale.to_raw()))
+        Self::from_raw(T::Mat2::from_scale_angle(scale.to_raw(), T::zero()))
     }
 
     /// Rotation matrix.
@@ -349,7 +350,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_angle(angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat2::from_angle(angle))
+        Self::from_raw(T::Mat2::from_angle(angle.radians))
     }
 
     /// Transform 2D point.
@@ -443,7 +444,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_angle(angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat3::from_angle(angle))
+        Self::from_raw(T::Mat3::from_angle(angle.radians))
     }
 
     /// Translation matrix.
@@ -487,7 +488,7 @@ where
     ) -> Self {
         Self::from_raw(T::Mat3::from_scale_angle_translation(
             scale.to_raw(),
-            angle,
+            angle.radians,
             translation.to_raw(),
         ))
     }
@@ -731,7 +732,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_axis_angle(axis: Vector3<T>, angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat4::from_axis_angle(axis.to_raw(), angle))
+        Self::from_raw(T::Mat4::from_axis_angle(axis.to_raw(), angle.radians))
     }
 
     /// Translation matrix.
@@ -764,10 +765,11 @@ where
         angle: Angle<T>,
         translation: Vector3<T>,
     ) -> Self {
+        use crate::bindings::Quat;
+        let quat = <T as PrimitiveMatrices>::Quat::from_axis_angle(axis.to_raw(), angle.radians);
         Self::from_raw(T::Mat4::from_scale_rotation_translation(
             scale.to_raw(),
-            axis.to_raw(),
-            angle,
+            quat,
             translation.to_raw(),
         ))
     }

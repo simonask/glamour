@@ -6,7 +6,8 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, 
 use num_traits::{Float, NumAssignOps};
 
 use crate::{
-    traits::{marker::ValueSemantics, Primitive, PrimitiveMatrices},
+    bindings::{Primitive, PrimitiveMatrices, Quat},
+    traits::marker::ValueSemantics,
     Scalar, Unit, Vector2, Vector3, Vector4,
 };
 
@@ -463,8 +464,7 @@ where
     #[inline]
     #[must_use]
     pub fn to_rotation(self, axis: Vector3<T>) -> T::Quat {
-        use crate::traits::SimdQuat;
-        <T::Quat as SimdQuat>::from_axis_angle(axis.to_raw(), self.radians)
+        <T::Quat as Quat>::from_axis_angle(axis.to_raw(), self.radians)
     }
 }
 
