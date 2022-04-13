@@ -815,7 +815,7 @@ where
     /// # use glamour::prelude::*;
     /// # use approx::*;
     /// let theta = Angle::from_degrees(90.0);
-    /// let matrix = Matrix4::<f32>::from_axis_angle(Vector3::unit_z(), theta);
+    /// let matrix = Matrix4::<f32>::from_axis_angle(Vector3::Z, theta);
     /// assert_abs_diff_eq!(matrix.row(0), vec4!(0.0, -1.0, 0.0, 0.0));
     /// assert_abs_diff_eq!(matrix.row(1), vec4!(1.0,  0.0, 0.0, 0.0));
     /// assert_abs_diff_eq!(matrix.row(2), vec4!(0.0,  0.0, 1.0, 0.0));
@@ -1201,7 +1201,7 @@ mod tests {
     fn from_angle() {
         let m2 = Mat2::from_angle(Angle::from_degrees(90.0));
         let m3 = Mat3::from_angle(Angle::from_degrees(90.0));
-        let m4 = Mat4::from_axis_angle(Vec3::unit_z(), Angle::from_degrees(90.0));
+        let m4 = Mat4::from_axis_angle(Vec3::Z, Angle::from_degrees(90.0));
 
         assert_abs_diff_eq!(m2, Mat2::with_rows([(0.0, -1.0), (1.0, 0.0)]));
         assert_abs_diff_eq!(
@@ -1220,7 +1220,7 @@ mod tests {
 
         let m2 = DMat2::from_angle(Angle::from_degrees(90.0));
         let m3 = DMat3::from_angle(Angle::from_degrees(90.0));
-        let m4 = DMat4::from_axis_angle(Vector3::unit_z(), Angle::from_degrees(90.0));
+        let m4 = DMat4::from_axis_angle(Vector3::Z, Angle::from_degrees(90.0));
 
         assert_abs_diff_eq!(m2, DMat2::with_rows([(0.0, -1.0), (1.0, 0.0)]));
         assert_abs_diff_eq!(
@@ -1307,7 +1307,7 @@ mod tests {
 
         {
             let scale = Vec3::new(2.0, 3.0, 4.0);
-            let axis = Vec3::unit_z();
+            let axis = Vec3::Z;
             let angle = Angle::from_degrees(90.0);
             let translation = Vec3::new(5.0, 6.0, 7.0);
 
@@ -1322,7 +1322,7 @@ mod tests {
 
         {
             let scale = DVec3::new(2.0, 3.0, 4.0);
-            let axis = DVec3::unit_z();
+            let axis = DVec3::Z;
             let angle = Angle::from_degrees(90.0);
             let translation = DVec3::new(5.0, 6.0, 7.0);
 

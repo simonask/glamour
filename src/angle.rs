@@ -560,10 +560,10 @@ mod tests {
     #[test]
     fn to_rotation() {
         let angle = Angle::HALF_CIRCLE;
-        let quat = angle.to_rotation(Vector3::unit_z());
+        let quat = angle.to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat, glam::Quat::from_axis_angle(glam::Vec3::Z, f32::PI));
-        let v = quat * Vector3::<f32>::unit_x();
-        assert_abs_diff_eq!(v, -Vector3::unit_x());
+        let v = quat * Vector3::<f32>::X;
+        assert_abs_diff_eq!(v, -Vector3::X);
     }
 
     struct BufWriter<'a> {
