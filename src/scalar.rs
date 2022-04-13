@@ -79,41 +79,6 @@ pub trait Scalar:
         bytemuck::cast_mut(self)
     }
 
-    /// Get the minimum of two scalar values through `PartialOrd`. If the values
-    /// are not meaningfully comparable (such as NaN), either one may be
-    /// returned.
-    #[inline]
-    #[must_use]
-    fn min(self, other: Self) -> Self {
-        if self < other {
-            self
-        } else {
-            other
-        }
-    }
-
-    /// Get the maximum of two scalar values through `PartialOrd`. If the values
-    /// are not meaningfully comparable (such as NaN), either one may be
-    /// returned.
-    #[inline]
-    #[must_use]
-    fn max(self, other: Self) -> Self {
-        if self > other {
-            self
-        } else {
-            other
-        }
-    }
-
-    /// Convenience method for `Self::from_raw(Self::Primitive::ONE +
-    /// Self::Primitive::ONE)`. Note that `Self` does not need to implement
-    /// `Add`.
-    #[inline]
-    #[must_use]
-    fn two() -> Self {
-        Self::from_raw(Self::Primitive::ONE + Self::Primitive::ONE)
-    }
-
     /// Try casting to another scalar type.
     /// 
     /// The cast always succeeds if the scalars have the same underlying type
@@ -216,21 +181,5 @@ mod tests {
             Some(core::f32::NEG_INFINITY)
         );
         assert_eq!(1.0f64.try_cast::<f32>(), Some(1.0));
-    }
-
-    #[test]
-    fn minmax() {
-        assert_eq!(Scalar::min(1.0, 2.0), 1.0);
-        assert_eq!(Scalar::max(1.0, 2.0), 2.0);
-        assert_eq!(Scalar::min(2.0, 1.0), 1.0);
-        assert_eq!(Scalar::max(2.0, 1.0), 2.0);
-    }
-
-    #[test]
-    fn two() {
-        assert_eq!(f32::two(), 2.0f32);
-        assert_eq!(f64::two(), 2.0f64);
-        assert_eq!(i32::two(), 2i32);
-        assert_eq!(u32::two(), 2u32);
     }
 }

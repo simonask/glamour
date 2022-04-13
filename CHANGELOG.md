@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - `Vector4::max_element_w()` (no longer needed).
 - Implementations of `AbsDiffEq` (et al) with tuple right-hand side.
+- `Scalar::min()`, `Scalar::max()`, and `Scalar::two()`, as they are unneeded.
 
 ## Changed
 - Bumped `glam` dependency to 0.20.5, which fixes the scalar math implementation
