@@ -1,8 +1,10 @@
 //! Matrix types.
 //!
-//! Matrices do not have a [`Unit`](crate::Unit), because their values
-//! do not necessarily have a clear logical meaning in the context of any
-//! particular unit.
+//! Matrices do not have a [`Unit`], because their values do not necessarily
+//! have a clear logical meaning in the context of any particular unit.
+//!
+//! Similarly, matrices do not use [`Scalar`]. A matrix of "angle" components is
+//! not really meaningful.
 //!
 //! Instead, they are based on fundamental floating-point
 //! [primitive](crate::bindings::Primitive) scalars (`f32` or `f64`).
@@ -236,7 +238,7 @@ macro_rules! impl_matrix {
             #[must_use]
             pub fn is_invertible(&self) -> bool {
                 let d = self.determinant();
-                d != T::zero() && crate::Scalar::is_finite(d)
+                d != <T as crate::Scalar>::zero() && crate::Scalar::is_finite(d)
             }
 
             #[doc = "Return the inverse matrix."]
@@ -334,7 +336,10 @@ where
     #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector2<T>) -> Self {
-        Self::from_raw(T::Mat2::from_scale_angle(scale.to_raw(), T::zero()))
+        Self::from_raw(T::Mat2::from_scale_angle(
+            scale.to_raw(),
+            <T as crate::Scalar>::zero(),
+        ))
     }
 
     /// Rotation matrix.
@@ -836,7 +841,7 @@ impl_matrix!(Matrix4 <4> => Mat4 [Vector4, Vector3]);
 
 impl<T> AbsDiffEq for Matrix2<T>
 where
-    T: PrimitiveMatrices + AbsDiffEq,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -856,7 +861,7 @@ where
 
 impl<T> RelativeEq for Matrix2<T>
 where
-    T: PrimitiveMatrices + RelativeEq,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -886,7 +891,7 @@ where
 
 impl<T> UlpsEq for Matrix2<T>
 where
-    T: PrimitiveMatrices + UlpsEq,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
@@ -904,7 +909,7 @@ where
 
 impl<T> AbsDiffEq for Matrix3<T>
 where
-    T: PrimitiveMatrices + AbsDiffEq,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -924,7 +929,7 @@ where
 
 impl<T> RelativeEq for Matrix3<T>
 where
-    T: PrimitiveMatrices + RelativeEq,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -954,7 +959,7 @@ where
 
 impl<T> UlpsEq for Matrix3<T>
 where
-    T: PrimitiveMatrices + UlpsEq,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
@@ -972,7 +977,7 @@ where
 
 impl<T> AbsDiffEq for Matrix4<T>
 where
-    T: AbsDiffEq + PrimitiveMatrices,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -992,7 +997,7 @@ where
 
 impl<T> RelativeEq for Matrix4<T>
 where
-    T: RelativeEq + PrimitiveMatrices,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -1022,7 +1027,7 @@ where
 
 impl<T> UlpsEq for Matrix4<T>
 where
-    T: PrimitiveMatrices + UlpsEq,
+    T: PrimitiveMatrices,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {

@@ -1,3 +1,7 @@
+use approx::{RelativeEq, UlpsEq};
+
+use crate::AngleConsts;
+
 use super::*;
 
 /// Mapping from primitive scalar type to `glam` vector types.
@@ -101,7 +105,9 @@ impl Primitive for u32 {
 /// Note that `glam` does not support integer matrices.
 ///
 /// See also [the documentation module](crate::docs#how).
-pub trait PrimitiveMatrices: Primitive + AbsDiffEq {
+pub trait PrimitiveMatrices:
+    Primitive + Float + AngleConsts + AbsDiffEq + RelativeEq + UlpsEq
+{
     /// [`glam::Mat2`] or [`glam::DMat2`].
     type Mat2: SimdMatrix2<Scalar = Self>;
     /// [`glam::Mat3`] or [`glam::DMat3`].
