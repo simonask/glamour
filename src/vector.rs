@@ -592,15 +592,6 @@ impl<T: Unit> Vector4<T> {
         }
     }
 
-    /// Horizontal maximum, taking `w` into account as well.
-    ///
-    /// Workaround for [https://github.com/bitshifter/glam-rs/issues/283](https://github.com/bitshifter/glam-rs/issues/283).
-    #[inline]
-    #[must_use]
-    pub fn max_element_w(self) -> T::Scalar {
-        self.x.max(self.y.max(self.z.max(self.w)))
-    }
-
     /// Select components of this vector and return a new vector containing
     /// those components.
     #[inline]
@@ -963,9 +954,7 @@ mod tests {
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
         assert_eq!(a.min_element(), 1.0);
-        // See https://github.com/bitshifter/glam-rs/issues/283
-        // assert_eq!(a.max_element(), 3.0);
-        assert_eq!(a.max_element_w(), 4.0);
+        assert_eq!(a.max_element(), 4.0);
     }
 
     #[test]
