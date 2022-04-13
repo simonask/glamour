@@ -181,8 +181,8 @@ impl<T: UnitTypes> Rect<T> {
     #[inline]
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        !(self.size.width > T::Scalar::zero()
-            && self.size.height > T::Scalar::zero()
+        !(self.size.width > T::Scalar::ZERO
+            && self.size.height > T::Scalar::ZERO
             && self.origin.x.is_finite()
             && self.origin.y.is_finite())
     }
@@ -191,8 +191,8 @@ impl<T: UnitTypes> Rect<T> {
     #[inline]
     #[must_use]
     pub fn is_negative(&self) -> bool {
-        !(self.size.width >= T::Scalar::zero()
-            && self.size.height >= T::Scalar::zero()
+        !(self.size.width >= T::Scalar::ZERO
+            && self.size.height >= T::Scalar::ZERO
             && self.origin.x.is_finite()
             && self.origin.y.is_finite())
     }
@@ -463,8 +463,8 @@ impl<T: Unit> Intersection<Point2<T>> for Rect<T> {
 
     fn intersects(&self, thing: &Point2<T>) -> bool {
         let diff = *thing - self.origin;
-        diff.x >= T::Scalar::zero()
-            && diff.y >= T::Scalar::zero()
+        diff.x >= T::Scalar::ZERO
+            && diff.y >= T::Scalar::ZERO
             && diff.x < self.size.width
             && diff.y < self.size.height
     }

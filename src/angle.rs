@@ -144,14 +144,17 @@ unsafe impl<T: Pod> Pod for Angle<T> {}
 
 impl<T> Scalar for Angle<T>
 where
-    T: Primitive + AngleConsts + Float,
+    T: Primitive + AngleConsts,
 {
     type Primitive = T;
+
+    const ZERO: Self = Angle { radians: T::ZERO };
+    const ONE: Self = Angle { radians: T::ONE };
 }
 
 impl<T> Unit for Angle<T>
 where
-    T: Primitive + AngleConsts + Float,
+    T: Primitive + AngleConsts,
 {
     type Scalar = Angle<T>;
 

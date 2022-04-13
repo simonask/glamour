@@ -725,6 +725,8 @@ mod tests {
 
     impl Scalar for MyInt {
         type Primitive = i32;
+        const ZERO: Self = MyInt(0);
+        const ONE: Self = MyInt(1);
     }
 
     impl Unit for MyInt {

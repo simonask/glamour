@@ -76,6 +76,8 @@ struct Degrees {
 // Degrees is binary compatible with `f32`, so we can turn it into a scalar.
 impl Scalar for Degrees {
     type Primitive = f32;
+    const ZERO: Self = Degrees { degrees: 0.0 };
+    const ONE: Self = Degrees { degrees: 1.0 };
 }
 
 // If we also declare `Degrees` as `Unit`, it can be used directly in vector

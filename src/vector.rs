@@ -409,8 +409,8 @@ impl<T: Unit> Vector2<T> {
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
-            x: T::Scalar::one(),
-            y: T::Scalar::zero(),
+            x: T::Scalar::ONE,
+            y: T::Scalar::ZERO,
         }
     }
 
@@ -419,8 +419,8 @@ impl<T: Unit> Vector2<T> {
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::one(),
+            x: T::Scalar::ZERO,
+            y: T::Scalar::ONE,
         }
     }
 
@@ -449,9 +449,9 @@ impl<T: Unit> Vector3<T> {
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
-            x: T::Scalar::one(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::zero(),
+            x: T::Scalar::ONE,
+            y: T::Scalar::ZERO,
+            z: T::Scalar::ZERO,
         }
     }
 
@@ -460,9 +460,9 @@ impl<T: Unit> Vector3<T> {
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::one(),
-            z: T::Scalar::zero(),
+            x: T::Scalar::ZERO,
+            y: T::Scalar::ONE,
+            z: T::Scalar::ZERO,
         }
     }
 
@@ -471,9 +471,9 @@ impl<T: Unit> Vector3<T> {
     #[must_use]
     pub fn unit_z() -> Self {
         Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::one(),
+            x: T::Scalar::ZERO,
+            y: T::Scalar::ZERO,
+            z: T::Scalar::ONE,
         }
     }
 
@@ -549,10 +549,10 @@ impl<T: Unit> Vector4<T> {
     #[must_use]
     pub fn unit_x() -> Self {
         Self {
-            x: T::Scalar::one(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::zero(),
-            w: T::Scalar::zero(),
+            x: T::Scalar::ONE,
+            y: T::Scalar::ZERO,
+            z: T::Scalar::ZERO,
+            w: T::Scalar::ZERO,
         }
     }
 
@@ -561,10 +561,10 @@ impl<T: Unit> Vector4<T> {
     #[must_use]
     pub fn unit_y() -> Self {
         Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::one(),
-            z: T::Scalar::zero(),
-            w: T::Scalar::zero(),
+            x: T::Scalar::ZERO,
+            y: T::Scalar::ONE,
+            z: T::Scalar::ZERO,
+            w: T::Scalar::ZERO,
         }
     }
 
@@ -573,10 +573,10 @@ impl<T: Unit> Vector4<T> {
     #[must_use]
     pub fn unit_z() -> Self {
         Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::one(),
-            w: T::Scalar::zero(),
+            x: T::Scalar::ZERO,
+            y: T::Scalar::ZERO,
+            z: T::Scalar::ONE,
+            w: T::Scalar::ZERO,
         }
     }
 
@@ -585,10 +585,10 @@ impl<T: Unit> Vector4<T> {
     #[must_use]
     pub fn unit_w() -> Self {
         Self {
-            x: T::Scalar::zero(),
-            y: T::Scalar::zero(),
-            z: T::Scalar::zero(),
-            w: T::Scalar::one(),
+            x: T::Scalar::ZERO,
+            y: T::Scalar::ZERO,
+            z: T::Scalar::ZERO,
+            w: T::Scalar::ONE,
         }
     }
 

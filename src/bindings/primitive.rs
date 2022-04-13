@@ -20,6 +20,8 @@ use super::*;
 pub trait Primitive:
     crate::Scalar<Primitive = Self>
     + crate::Unit<Scalar = Self>
+    + num_traits::NumCast
+    + num_traits::Num
     + Debug
     + Display
     + Add<Self, Output = Self>

@@ -45,6 +45,10 @@ pub trait Scalar:
         + num_traits::Num
         + num_traits::NumCast;
 
+    /// Zero.
+    const ZERO: Self;
+    /// One.
+    const ONE: Self;
 
     /// Bitwise cast from `Primitive` to `Self`.
     #[inline]
@@ -101,27 +105,13 @@ pub trait Scalar:
         }
     }
 
-    /// "Zero" from the `Primitive` type's implementation of `num_traits::Zero`.
-    #[inline]
-    #[must_use]
-    fn zero() -> Self {
-        Self::from_raw(<Self::Primitive as num_traits::Zero>::zero())
-    }
-
-    /// "One" from the `Primitive` type's implementation of `num_traits::One`.
-    #[inline]
-    #[must_use]
-    fn one() -> Self {
-        Self::from_raw(<Self::Primitive as num_traits::One>::one())
-    }
-
-    /// Convenience method for `Self::from_raw(Self::Primitive::one() +
-    /// Self::Primitive::one())`.
+    /// Convenience method for `Self::from_raw(Self::Primitive::ONE +
+    /// Self::Primitive::ONE)`. Note that `Self` does not need to implement
+    /// `Add`.
     #[inline]
     #[must_use]
     fn two() -> Self {
-        let one = <Self::Primitive as num_traits::One>::one();
-        Self::from_raw(one + one)
+        Self::from_raw(Self::Primitive::ONE + Self::Primitive::ONE)
     }
 
     /// Try casting to another scalar type.
@@ -151,18 +141,30 @@ pub trait Scalar:
 
 impl Scalar for f32 {
     type Primitive = f32;
+
+    const ZERO: Self = 0.0;
+    const ONE: Self = 1.0;
 }
 
 impl Scalar for f64 {
     type Primitive = f64;
+
+    const ZERO: Self = 0.0;
+    const ONE: Self = 1.0;
 }
 
 impl Scalar for i32 {
     type Primitive = i32;
+
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
 }
 
 impl Scalar for u32 {
     type Primitive = u32;
+
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
 }
 
 #[cfg(test)]
