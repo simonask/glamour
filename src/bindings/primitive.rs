@@ -22,6 +22,13 @@ pub trait Primitive:
     + crate::Unit<Scalar = Self>
     + num_traits::NumCast
     + num_traits::Num
+    + num_traits::ToPrimitive
+    + num_traits::AsPrimitive<f32>
+    + num_traits::AsPrimitive<f64>
+    + num_traits::AsPrimitive<i32>
+    + num_traits::AsPrimitive<u32>
+    + num_traits::Num
+    + num_traits::NumCast
     + Debug
     + Display
     + Add<Self, Output = Self>
