@@ -322,6 +322,23 @@ where
         m22: T::ONE,
     };
 
+    /// Create from diagonal.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// assert_eq!(Matrix2::from_diagonal(Vector2::<f32>::ONE), Matrix2::IDENTITY);
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_diagonal(Vector2 { x, y }: Vector2<T>) -> Self {
+        Matrix2 {
+            m11: x,
+            m22: y,
+            ..Self::ZERO
+        }
+    }
+
     /// Create from column vectors.
     ///
     /// #### Example
@@ -384,6 +401,33 @@ where
     #[must_use]
     pub fn from_angle(angle: Angle<T>) -> Self {
         Self::from_raw(T::Mat2::from_angle(angle.radians))
+    }
+
+    /// Create from 3x3 matrix, discarding the third row and column.
+    ///
+    /// ### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let m3 = Matrix3::<f32>::from_cols(
+    ///     vec3!(1.0, 2.0, 3.0),
+    ///     vec3!(4.0, 5.0, 6.0),
+    ///     vec3!(7.0, 8.0, 9.0),
+    /// );
+    /// let m2 = Matrix2::<f32>::from_cols(
+    ///     vec2!(1.0, 2.0),
+    ///     vec2!(4.0, 5.0),
+    /// );
+    /// assert_eq!(Matrix2::from_mat3(m3), m2);
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_mat3(mat3: Matrix3<T>) -> Matrix2<T> {
+        Matrix2 {
+            m11: mat3.m11,
+            m12: mat3.m12,
+            m21: mat3.m21,
+            m22: mat3.m22,
+        }
     }
 
     /// Transform 2D point.
@@ -475,6 +519,27 @@ where
         m32: T::ZERO,
         m33: T::ONE,
     };
+
+    /// Create from diagonal.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// assert_eq!(
+    ///     Matrix3::from_diagonal(Vector3::<f32>::ONE),
+    ///     Matrix3::IDENTITY
+    /// );
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_diagonal(Vector3 { x, y, z }: Vector3<T>) -> Self {
+        Matrix3 {
+            m11: x,
+            m22: y,
+            m33: z,
+            ..Self::ZERO
+        }
+    }
 
     /// Create from column vectors.
     ///
@@ -600,6 +665,68 @@ where
         ))
     }
 
+    /// Create affine transformation matrix from the given 2x2 matrix.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let m2 = Matrix2::<f32>::from_cols(
+    ///     vec2!(1.0, 2.0),
+    ///     vec2!(3.0, 4.0),
+    /// );
+    /// let m3 = Matrix3::<f32>::from_cols(
+    ///     vec3!(1.0, 2.0, 0.0),
+    ///     vec3!(3.0, 4.0, 0.0),
+    ///     vec3!(0.0, 0.0, 1.0),
+    /// );
+    /// assert_eq!(Matrix3::from_mat2(m2), m3);
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_mat2(mat2: Matrix2<T>) -> Self {
+        Matrix3 {
+            m11: mat2.m11,
+            m12: mat2.m12,
+            m21: mat2.m21,
+            m22: mat2.m22,
+            ..Self::IDENTITY
+        }
+    }
+
+    /// Create from 4x4 matrix, discarding the fourth row and column.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let m4 = Matrix4::<f32>::from_cols(
+    ///     vec4!( 1.0,  2.0,  3.0,  4.0),
+    ///     vec4!( 5.0,  6.0,  7.0,  8.0),
+    ///     vec4!( 9.0, 10.0, 11.0, 12.0),
+    ///     vec4!(13.0, 14.0, 15.0, 16.0),
+    /// );
+    /// let m3 = Matrix3::<f32>::from_cols(
+    ///     vec3!( 1.0,  2.0,  3.0),
+    ///     vec3!( 5.0,  6.0,  7.0),
+    ///     vec3!( 9.0, 10.0, 11.0),
+    /// );
+    /// assert_eq!(Matrix3::from_mat4(m4), m3);
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_mat4(mat4: Matrix4<T>) -> Self {
+        Matrix3 {
+            m11: mat4.m11,
+            m12: mat4.m12,
+            m13: mat4.m13,
+            m21: mat4.m21,
+            m22: mat4.m22,
+            m23: mat4.m23,
+            m31: mat4.m31,
+            m32: mat4.m32,
+            m33: mat4.m33,
+        }
+    }
+
     /// Transform 2D point.
     ///
     /// See [`glam::Mat3::transform_point2()`] or
@@ -631,6 +758,18 @@ where
         vector: Vector2<U>,
     ) -> Vector2<U> {
         Vector2::from_raw(self.as_raw().transform_vector2(vector.to_raw()))
+    }
+}
+
+impl From<glam::Mat3A> for Matrix3<f32> {
+    fn from(mat: glam::Mat3A) -> Self {
+        Self::from_raw(mat.into())
+    }
+}
+
+impl From<Matrix3<f32>> for glam::Mat3A {
+    fn from(mat: Matrix3<f32>) -> Self {
+        mat.to_raw().into()
     }
 }
 
@@ -860,6 +999,28 @@ where
         m44: T::ONE,
     };
 
+    /// Create from diagonal.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// assert_eq!(
+    ///     Matrix4::from_diagonal(Vector4::<f32>::ONE),
+    ///     Matrix4::IDENTITY
+    /// );
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_diagonal(Vector4 { x, y, z, w }: Vector4<T>) -> Self {
+        Matrix4 {
+            m11: x,
+            m22: y,
+            m33: z,
+            m44: w,
+            ..Self::ZERO
+        }
+    }
+
     /// Create from column vectors.
     ///
     /// #### Example
@@ -988,6 +1149,41 @@ where
             quat,
             translation.to_raw(),
         ))
+    }
+
+    /// Creates an affine transformation matrix from the given 3x3 linear transformation matrix.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let m3 = Matrix3::<f32>::from_cols(
+    ///     vec3!(1.0, 2.0, 3.0),
+    ///     vec3!(4.0, 5.0, 6.0),
+    ///     vec3!(7.0, 8.0, 9.0),
+    /// );
+    /// let m4 = Matrix4::<f32>::from_cols(
+    ///     vec4!(1.0, 2.0, 3.0, 0.0),
+    ///     vec4!(4.0, 5.0, 6.0, 0.0),
+    ///     vec4!(7.0, 8.0, 9.0, 0.0),
+    ///     vec4!(0.0, 0.0, 0.0, 1.0),
+    /// );
+    /// assert_eq!(Matrix4::from_mat3(m3), m4);
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_mat3(mat3: Matrix3<T>) -> Self {
+        Matrix4 {
+            m11: mat3.m11,
+            m12: mat3.m12,
+            m13: mat3.m13,
+            m21: mat3.m21,
+            m22: mat3.m22,
+            m23: mat3.m23,
+            m31: mat3.m31,
+            m32: mat3.m32,
+            m33: mat3.m33,
+            ..Self::IDENTITY
+        }
     }
 
     /// Transform 3D point.
@@ -1886,6 +2082,22 @@ mod tests {
             assert!(!Mat4::from_rows(Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO).is_invertible());
             assert!(Mat4::IDENTITY.is_invertible());
         }
+    }
+
+    #[test]
+    fn mat3a() {
+        let mat3 = Mat3::with_cols([(1.0, 2.0, 3.0), (4.0, 5.0, 6.0), (7.0, 8.0, 9.0)]);
+        let mat3a: glam::Mat3A = mat3.into();
+        assert_eq!(
+            mat3a,
+            glam::Mat3A::from_cols(
+                (1.0, 2.0, 3.0).into(),
+                (4.0, 5.0, 6.0).into(),
+                (7.0, 8.0, 9.0).into(),
+            )
+        );
+        let mat3_2: Matrix3<f32> = mat3a.into();
+        assert_eq!(mat3_2, mat3);
     }
 
     #[cfg(feature = "std")]
