@@ -121,11 +121,11 @@ pub trait PrimitiveMatrices:
     const NAN: Self;
 
     /// [`glam::Mat2`] or [`glam::DMat2`].
-    type Mat2: Matrix2<Scalar = Self>;
+    type Mat2: Matrix2<Scalar = Self, Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>;
     /// [`glam::Mat3`] or [`glam::DMat3`].
-    type Mat3: Matrix3<Scalar = Self>;
+    type Mat3: Matrix3<Scalar = Self, Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>;
     /// [`glam::Mat4`] or [`glam::DMat4`].
-    type Mat4: Matrix4<Scalar = Self>;
+    type Mat4: Matrix4<Scalar = Self, Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>;
     /// [`glam::Quat`] or [`glam::DQuat`].
     type Quat: Quat<Scalar = Self, Vec3 = Self::Vec3>;
 }

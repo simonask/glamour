@@ -1186,6 +1186,121 @@ where
         }
     }
 
+    /// See [`glam::Mat4::look_at_lh()`] or [`glam::DMat4::look_at_lh()`].
+    pub fn look_at_lh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self {
+        Self::from_raw(T::Mat4::look_at_lh(
+            eye.to_raw(),
+            center.to_raw(),
+            up.to_raw(),
+        ))
+    }
+
+    /// See [`glam::Mat4::look_at_rh()`] or [`glam::DMat4::look_at_rh()`].
+    pub fn look_at_rh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self {
+        Self::from_raw(T::Mat4::look_at_rh(
+            eye.to_raw(),
+            center.to_raw(),
+            up.to_raw(),
+        ))
+    }
+
+    /// See [`glam::Mat4::perspective_rh_gl()`] or
+    /// [`glam::DMat4::perspective_rh_gl()`].
+    pub fn perspective_rh_gl(fov_y_radians: T, aspect_ratio: T, z_near: T, z_far: T) -> Self {
+        Self::from_raw(T::Mat4::perspective_rh_gl(
+            fov_y_radians,
+            aspect_ratio,
+            z_near,
+            z_far,
+        ))
+    }
+
+    /// See [`glam::Mat4::perspective_lh()`] or
+    /// [`glam::DMat4::perspective_lh()`].
+    pub fn perspective_lh(fov_y_radians: T, aspect_ratio: T, z_near: T, z_far: T) -> Self {
+        Self::from_raw(T::Mat4::perspective_lh(
+            fov_y_radians,
+            aspect_ratio,
+            z_near,
+            z_far,
+        ))
+    }
+
+    /// See [`glam::Mat4::perspective_rh()`] or
+    /// [`glam::DMat4::perspective_rh()`].
+    pub fn perspective_rh(fov_y_radians: T, aspect_ratio: T, z_near: T, z_far: T) -> Self {
+        Self::from_raw(T::Mat4::perspective_rh(
+            fov_y_radians,
+            aspect_ratio,
+            z_near,
+            z_far,
+        ))
+    }
+
+    /// See [`glam::Mat4::perspective_infinite_lh()`] or
+    /// [`glam::DMat4::perspective_infinite_lh()`].
+    pub fn perspective_infinite_lh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
+        Self::from_raw(T::Mat4::perspective_infinite_lh(
+            fov_y_radians,
+            aspect_ratio,
+            z_near,
+        ))
+    }
+
+    /// See [`glam::Mat4::perspective_infinite_reverse_lh()`] or
+    /// [`glam::DMat4::perspective_infinite_reverse_lh()`].
+    pub fn perspective_infinite_reverse_lh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
+        Self::from_raw(T::Mat4::perspective_infinite_reverse_lh(
+            fov_y_radians,
+            aspect_ratio,
+            z_near,
+        ))
+    }
+
+    /// See [`glam::Mat4::perspective_infinite_rh()`] or
+    /// [`glam::DMat4::perspective_infinite_rh()`].
+    pub fn perspective_infinite_rh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
+        Self::from_raw(T::Mat4::perspective_infinite_rh(
+            fov_y_radians,
+            aspect_ratio,
+            z_near,
+        ))
+    }
+
+    /// See [`glam::Mat4::perspective_infinite_reverse_rh()`] or
+    /// [`glam::DMat4::perspective_infinite_reverse_rh()`].
+    pub fn perspective_infinite_reverse_rh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
+        Self::from_raw(T::Mat4::perspective_infinite_reverse_rh(
+            fov_y_radians,
+            aspect_ratio,
+            z_near,
+        ))
+    }
+
+    /// See [`glam::Mat4::orthographic_rh_gl()`] or
+    /// [`glam::DMat4::orthographic_rh_gl()`].
+    pub fn orthographic_rh_gl(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
+        Self::from_raw(T::Mat4::orthographic_rh_gl(
+            left, right, bottom, top, near, far,
+        ))
+    }
+
+    /// See [`glam::Mat4::orthographic_lh()`] or
+    /// [`glam::DMat4::orthographic_lh()`].
+    pub fn orthographic_lh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
+        Self::from_raw(T::Mat4::orthographic_lh(
+            left, right, bottom, top, near, far,
+        ))
+    }
+
+    /// See [`glam::Mat4::orthographic_rh()`] or
+    /// [`glam::DMat4::orthographic_rh()`].
+    pub fn orthographic_rh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
+        Self::from_raw(T::Mat4::orthographic_rh(
+            left, right, bottom, top, near, far,
+        ))
+    }
+
     /// Transform 3D point.
     ///
     /// This assumes that the matrix is a valid affine matrix, and does not
@@ -1453,7 +1568,7 @@ mod tests {
         assert_ulps_eq, assert_ulps_ne,
     };
 
-    use crate::{point2, vec2};
+    use crate::{point2, point3, vec2, vec3};
 
     use super::*;
 
@@ -2098,6 +2213,148 @@ mod tests {
         );
         let mat3_2: Matrix3<f32> = mat3a.into();
         assert_eq!(mat3_2, mat3);
+    }
+
+    #[test]
+    fn mat4_constructors() {
+        assert_eq!(
+            Matrix4::<f32>::look_at_lh(
+                point3!(1.0, 2.0, 3.0),
+                point3!(4.0, 5.0, 6.0),
+                vec3!(1.0, 0.0, 0.0)
+            )
+            .to_raw(),
+            glam::Mat4::look_at_lh(
+                (1.0, 2.0, 3.0).into(),
+                (4.0, 5.0, 6.0).into(),
+                (1.0, 0.0, 0.0).into()
+            )
+        );
+        assert_eq!(
+            Matrix4::<f32>::look_at_rh(
+                point3!(1.0, 2.0, 3.0),
+                point3!(4.0, 5.0, 6.0),
+                vec3!(1.0, 0.0, 0.0)
+            )
+            .to_raw(),
+            glam::Mat4::look_at_rh(
+                (1.0, 2.0, 3.0).into(),
+                (4.0, 5.0, 6.0).into(),
+                (1.0, 0.0, 0.0).into()
+            )
+        );
+        assert_eq!(
+            Matrix4::<f32>::perspective_rh_gl(1.0, 2.0, 3.0, 4.0),
+            Matrix4::from_raw(glam::Mat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::perspective_lh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::from_raw(glam::Mat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::perspective_rh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::from_raw(glam::Mat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::perspective_infinite_lh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::Mat4::perspective_infinite_lh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::perspective_infinite_reverse_lh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::Mat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::perspective_infinite_rh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::Mat4::perspective_infinite_rh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::perspective_infinite_reverse_rh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::Mat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::orthographic_rh_gl(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
+            Matrix4::from_raw(glam::Mat4::orthographic_rh_gl(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
+            Matrix4::from_raw(glam::Mat4::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+        );
+        assert_eq!(
+            Matrix4::<f32>::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
+            Matrix4::from_raw(glam::Mat4::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+        );
+    }
+
+    #[test]
+    fn dmat4_constructors() {
+        assert_eq!(
+            Matrix4::<f64>::look_at_lh(
+                point3!(1.0, 2.0, 3.0),
+                point3!(4.0, 5.0, 6.0),
+                vec3!(1.0, 0.0, 0.0)
+            )
+            .to_raw(),
+            glam::DMat4::look_at_lh(
+                (1.0, 2.0, 3.0).into(),
+                (4.0, 5.0, 6.0).into(),
+                (1.0, 0.0, 0.0).into()
+            )
+        );
+        assert_eq!(
+            Matrix4::<f64>::look_at_rh(
+                point3!(1.0, 2.0, 3.0),
+                point3!(4.0, 5.0, 6.0),
+                vec3!(1.0, 0.0, 0.0)
+            )
+            .to_raw(),
+            glam::DMat4::look_at_rh(
+                (1.0, 2.0, 3.0).into(),
+                (4.0, 5.0, 6.0).into(),
+                (1.0, 0.0, 0.0).into()
+            )
+        );
+        assert_eq!(
+            Matrix4::<f64>::perspective_rh_gl(1.0, 2.0, 3.0, 4.0),
+            Matrix4::from_raw(glam::DMat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::perspective_lh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::from_raw(glam::DMat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::perspective_rh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::from_raw(glam::DMat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::perspective_infinite_lh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::DMat4::perspective_infinite_lh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::perspective_infinite_reverse_lh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::DMat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::perspective_infinite_rh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::DMat4::perspective_infinite_rh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::perspective_infinite_reverse_rh(1.0, 2.0, 3.0),
+            Matrix4::from_raw(glam::DMat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::orthographic_rh_gl(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
+            Matrix4::from_raw(glam::DMat4::orthographic_rh_gl(
+                1.0, 2.0, 3.0, 4.0, 5.0, 6.0
+            ))
+        );
+        assert_eq!(
+            Matrix4::<f64>::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
+            Matrix4::from_raw(glam::DMat4::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+        );
+        assert_eq!(
+            Matrix4::<f64>::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
+            Matrix4::from_raw(glam::DMat4::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+        );
     }
 
     #[cfg(feature = "std")]

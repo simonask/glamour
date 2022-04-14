@@ -113,11 +113,26 @@ pub trait UnitMatrices:
     type UnitMatrixPrimitive: Primitive<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>
         + PrimitiveMatrices<Mat2 = Self::Mat2, Mat3 = Self::Mat3, Mat4 = Self::Mat4>;
     /// Either [`glam::Mat2`] or [`glam::DMat2`].
-    type Mat2: crate::bindings::Matrix2<Scalar = Self::Primitive>;
+    type Mat2: crate::bindings::Matrix2<
+        Scalar = Self::Primitive,
+        Vec2 = Self::Vec2,
+        Vec3 = Self::Vec3,
+        Vec4 = Self::Vec4,
+    >;
     /// Either [`glam::Mat3`] or [`glam::DMat3`].
-    type Mat3: crate::bindings::Matrix3<Scalar = Self::Primitive>;
+    type Mat3: crate::bindings::Matrix3<
+        Scalar = Self::Primitive,
+        Vec2 = Self::Vec2,
+        Vec3 = Self::Vec3,
+        Vec4 = Self::Vec4,
+    >;
     /// Either [`glam::Mat4`] or [`glam::DMat4`].
-    type Mat4: crate::bindings::Matrix4<Scalar = Self::Primitive>;
+    type Mat4: crate::bindings::Matrix4<
+        Scalar = Self::Primitive,
+        Vec2 = Self::Vec2,
+        Vec3 = Self::Vec3,
+        Vec4 = Self::Vec4,
+    >;
 }
 
 impl<T> UnitMatrices for T

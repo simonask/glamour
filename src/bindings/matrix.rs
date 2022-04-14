@@ -17,7 +17,15 @@ pub trait Matrix:
     + AbsDiffEq<Epsilon = <Self::Scalar as AbsDiffEq>::Epsilon>
 {
     /// The component type of the `glam` matrix. Either `f32` or `f64`.
-    type Scalar: PrimitiveMatrices + Primitive + Float + AbsDiffEq;
+    type Scalar: PrimitiveMatrices<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>
+        + Float
+        + AbsDiffEq;
+    /// Shorthand for `glam::Vec2` or `glam::DVec2".
+    type Vec2: Vector<2, Scalar = Self::Scalar>;
+    /// Shorthand for `glam::Vec3` or `glam::DVec3".
+    type Vec3: Vector<3, Scalar = Self::Scalar>;
+    /// Shorthand for `glam::Vec4` or `glam::DVec4".
+    type Vec4: Vector<4, Scalar = Self::Scalar>;
 
     /// True if any element is NaN.
     #[must_use]
@@ -48,29 +56,23 @@ pub trait Matrix:
 /// Primitive 2x2 matrix.
 ///
 /// Implemented for [`glam::Mat2`] and [`glam::DMat2`].
-pub trait Matrix2:
-    Matrix + Mul<<Self::Scalar as Primitive>::Vec2, Output = <Self::Scalar as Primitive>::Vec2>
-{
+pub trait Matrix2: Matrix + Mul<Self::Vec2, Output = Self::Vec2> {
     /// Transform vector or point.
     ///
     /// See [`glam::Mat2::mul_vec2()`] or
     /// [`glam::DMat2::mul_vec2()`].
-    fn mul_vec2(&self, vec: <Self::Scalar as Primitive>::Vec2)
-        -> <Self::Scalar as Primitive>::Vec2;
+    fn mul_vec2(&self, vec: Self::Vec2) -> Self::Vec2;
 
     /// Create from column vectors.
-    fn from_cols(
-        x_axis: <Self::Scalar as Primitive>::Vec2,
-        y_axis: <Self::Scalar as Primitive>::Vec2,
-    ) -> Self;
+    fn from_cols(x_axis: Self::Vec2, y_axis: Self::Vec2) -> Self;
 
     /// Get column at `index`.
-    fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec2;
+    fn col(&self, index: usize) -> Self::Vec2;
     /// Get row at `index`.
-    fn row(&self, index: usize) -> <Self::Scalar as Primitive>::Vec2;
+    fn row(&self, index: usize) -> Self::Vec2;
 
     /// 2D scaling matrix.
-    fn from_scale_angle(vector: <Self::Scalar as Primitive>::Vec2, angle: Self::Scalar) -> Self;
+    fn from_scale_angle(vector: Self::Vec2, angle: Self::Scalar) -> Self;
 
     /// 2D rotation matrix.
     fn from_angle(angle: Self::Scalar) -> Self;
@@ -79,117 +81,160 @@ pub trait Matrix2:
 /// Primitive 3x3 matrix.
 ///
 /// Implemented for [`glam::Mat3`] and [`glam::DMat3`].
-pub trait Matrix3:
-    Matrix + Mul<<Self::Scalar as Primitive>::Vec3, Output = <Self::Scalar as Primitive>::Vec3>
-{
+pub trait Matrix3: Matrix + Mul<Self::Vec3, Output = Self::Vec3> {
     /// Create from column vectors.
-    fn from_cols(
-        x_axis: <Self::Scalar as Primitive>::Vec3,
-        y_axis: <Self::Scalar as Primitive>::Vec3,
-        z_axis: <Self::Scalar as Primitive>::Vec3,
-    ) -> Self;
+    fn from_cols(x_axis: Self::Vec3, y_axis: Self::Vec3, z_axis: Self::Vec3) -> Self;
 
     /// Get column at `index`.
-    fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec3;
+    fn col(&self, index: usize) -> Self::Vec3;
     /// Get row at `index`.
-    fn row(&self, index: usize) -> <Self::Scalar as Primitive>::Vec3;
+    fn row(&self, index: usize) -> Self::Vec3;
 
     /// Transform vector.
     ///
     /// See [`glam::Mat3::transform_vector2()`] or
     /// [`glam::DMat3::transform_vector2()`].
-    fn transform_vector2(
-        &self,
-        vector: <Self::Scalar as Primitive>::Vec2,
-    ) -> <Self::Scalar as Primitive>::Vec2;
+    fn transform_vector2(&self, vector: Self::Vec2) -> Self::Vec2;
 
     /// Transform point.
     ///
     /// See [`glam::Mat3::transform_point2()`] or
     /// [`glam::DMat3::transform_point2()`].
-    fn transform_point2(
-        &self,
-        point: <Self::Scalar as Primitive>::Vec2,
-    ) -> <Self::Scalar as Primitive>::Vec2;
+    fn transform_point2(&self, point: Self::Vec2) -> Self::Vec2;
 
     /// Scaling matrix
-    fn from_scale(vector: <Self::Scalar as Primitive>::Vec2) -> Self;
+    fn from_scale(vector: Self::Vec2) -> Self;
 
     /// Rotation matrix
     fn from_angle(angle: Self::Scalar) -> Self;
 
     /// 2D translation matrix.
-    fn from_translation(translation: <Self::Scalar as Primitive>::Vec2) -> Self;
+    fn from_translation(translation: Self::Vec2) -> Self;
 
     /// 2D transform.
     fn from_scale_angle_translation(
-        scale: <Self::Scalar as Primitive>::Vec2,
+        scale: Self::Vec2,
         angle: Self::Scalar,
-        translation: <Self::Scalar as Primitive>::Vec2,
+        translation: Self::Vec2,
     ) -> Self;
 }
 
 /// Primitive 4x4 matrix.
 ///
 /// Implemented for [`glam::Mat4`] and [`glam::DMat4`].
-pub trait Matrix4:
-    Matrix + Mul<<Self::Scalar as Primitive>::Vec4, Output = <Self::Scalar as Primitive>::Vec4>
-{
+#[allow(missing_docs)]
+pub trait Matrix4: Matrix + Mul<Self::Vec4, Output = Self::Vec4> {
     /// Transform point.
     ///
     /// See [`glam::Mat4::transform_point3()`] or
     /// [`glam::DMat4::transform_point3()`].
-    fn transform_point3(
-        &self,
-        point: <Self::Scalar as Primitive>::Vec3,
-    ) -> <Self::Scalar as Primitive>::Vec3;
+    fn transform_point3(&self, point: Self::Vec3) -> Self::Vec3;
 
     /// Transform vector.
     ///
     /// See [`glam::Mat4::transform_vector3()`] or
     /// [`glam::DMat4::transform_vector3()`].
-    fn transform_vector3(
-        &self,
-        vector: <Self::Scalar as Primitive>::Vec3,
-    ) -> <Self::Scalar as Primitive>::Vec3;
+    fn transform_vector3(&self, vector: Self::Vec3) -> Self::Vec3;
 
     /// Project point.
     ///
     /// See [`glam::Mat4::project_point3()`] or
     /// [`glam::DMat4::project_point3()`].
-    fn project_point3(
-        &self,
-        vector: <Self::Scalar as Primitive>::Vec3,
-    ) -> <Self::Scalar as Primitive>::Vec3;
+    fn project_point3(&self, vector: Self::Vec3) -> Self::Vec3;
 
     /// Create from column vectors.
     fn from_cols(
-        x_axis: <Self::Scalar as Primitive>::Vec4,
-        y_axis: <Self::Scalar as Primitive>::Vec4,
-        z_axis: <Self::Scalar as Primitive>::Vec4,
-        w_axis: <Self::Scalar as Primitive>::Vec4,
+        x_axis: Self::Vec4,
+        y_axis: Self::Vec4,
+        z_axis: Self::Vec4,
+        w_axis: Self::Vec4,
     ) -> Self;
 
     /// Get column at `index`.
-    fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec4;
+    fn col(&self, index: usize) -> Self::Vec4;
 
     /// Get row at `index`.
-    fn row(&self, index: usize) -> <Self::Scalar as Primitive>::Vec4;
+    fn row(&self, index: usize) -> Self::Vec4;
 
     /// Scaling matrix
-    fn from_scale(vector: <Self::Scalar as Primitive>::Vec3) -> Self;
+    fn from_scale(vector: Self::Vec3) -> Self;
 
     /// Rotation matrix
-    fn from_axis_angle(axis: <Self::Scalar as Primitive>::Vec3, angle: Self::Scalar) -> Self;
+    fn from_axis_angle(axis: Self::Vec3, angle: Self::Scalar) -> Self;
 
     /// 3D translation matrix.
-    fn from_translation(translation: <Self::Scalar as Primitive>::Vec3) -> Self;
+    fn from_translation(translation: Self::Vec3) -> Self;
 
     /// Scale, rotation, translation.
     fn from_scale_rotation_translation(
-        scale: <Self::Scalar as Primitive>::Vec3,
+        scale: Self::Vec3,
         axis: <Self::Scalar as PrimitiveMatrices>::Quat,
-        translation: <Self::Scalar as Primitive>::Vec3,
+        translation: Self::Vec3,
+    ) -> Self;
+
+    fn look_at_lh(eye: Self::Vec3, center: Self::Vec3, up: Self::Vec3) -> Self;
+    fn look_at_rh(eye: Self::Vec3, center: Self::Vec3, up: Self::Vec3) -> Self;
+    fn perspective_rh_gl(
+        fov_y_radians: Self::Scalar,
+        aspect_ratio: Self::Scalar,
+        z_near: Self::Scalar,
+        z_far: Self::Scalar,
+    ) -> Self;
+    fn perspective_lh(
+        fov_y_radians: Self::Scalar,
+        aspect_ratio: Self::Scalar,
+        z_near: Self::Scalar,
+        z_far: Self::Scalar,
+    ) -> Self;
+    fn perspective_rh(
+        fov_y_radians: Self::Scalar,
+        aspect_ratio: Self::Scalar,
+        z_near: Self::Scalar,
+        z_far: Self::Scalar,
+    ) -> Self;
+    fn perspective_infinite_lh(
+        fov_y_radians: Self::Scalar,
+        aspect_ratio: Self::Scalar,
+        z_near: Self::Scalar,
+    ) -> Self;
+    fn perspective_infinite_reverse_lh(
+        fov_y_radians: Self::Scalar,
+        aspect_ratio: Self::Scalar,
+        z_near: Self::Scalar,
+    ) -> Self;
+    fn perspective_infinite_rh(
+        fov_y_radians: Self::Scalar,
+        aspect_ratio: Self::Scalar,
+        z_near: Self::Scalar,
+    ) -> Self;
+    fn perspective_infinite_reverse_rh(
+        fov_y_radians: Self::Scalar,
+        aspect_ratio: Self::Scalar,
+        z_near: Self::Scalar,
+    ) -> Self;
+    fn orthographic_rh_gl(
+        left: Self::Scalar,
+        right: Self::Scalar,
+        bottom: Self::Scalar,
+        top: Self::Scalar,
+        near: Self::Scalar,
+        far: Self::Scalar,
+    ) -> Self;
+    fn orthographic_lh(
+        left: Self::Scalar,
+        right: Self::Scalar,
+        bottom: Self::Scalar,
+        top: Self::Scalar,
+        near: Self::Scalar,
+        far: Self::Scalar,
+    ) -> Self;
+    fn orthographic_rh(
+        left: Self::Scalar,
+        right: Self::Scalar,
+        bottom: Self::Scalar,
+        top: Self::Scalar,
+        near: Self::Scalar,
+        far: Self::Scalar,
     ) -> Self;
 }
 
@@ -197,6 +242,9 @@ macro_rules! impl_matrix {
     ($scalar:ty, $glam_ty:ty) => {
         impl Matrix for $glam_ty {
             type Scalar = $scalar;
+            type Vec2 = <$scalar as Primitive>::Vec2;
+            type Vec3 = <$scalar as Primitive>::Vec3;
+            type Vec4 = <$scalar as Primitive>::Vec4;
 
             forward_impl!($glam_ty => fn is_nan(&self) -> bool);
             forward_impl!($glam_ty => fn is_finite(&self) -> bool);
@@ -282,6 +330,26 @@ impl Matrix4 for glam::Mat4 {
         rotation: glam::Quat,
         translation: glam::Vec3
     ) -> Self);
+
+    forward_impl!(glam::Mat4 => fn look_at_lh(eye: glam::Vec3, center: glam::Vec3, up: glam::Vec3) -> Self);
+    forward_impl!(glam::Mat4 => fn look_at_rh(eye: glam::Vec3, center: glam::Vec3, up: glam::Vec3) -> Self);
+    forward_impl!(glam::Mat4 => fn perspective_rh_gl(fov_y_radians: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn perspective_lh(fov_y_radians: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn perspective_rh(fov_y_radians: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn perspective_infinite_lh(fov_y_radians: f32, aspect_ratio: f32, z_near: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn perspective_infinite_reverse_lh(fov_y_radians: f32, aspect_ratio: f32, z_near: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn perspective_infinite_rh(fov_y_radians: f32, aspect_ratio: f32, z_near: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn perspective_infinite_reverse_rh(fov_y_radians: f32, aspect_ratio: f32, z_near: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn orthographic_rh_gl(
+        left: f32,
+        right: f32,
+        bottom: f32,
+        top: f32,
+        near: f32,
+        far: f32
+    ) -> Self);
+    forward_impl!(glam::Mat4 => fn orthographic_lh(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self);
+    forward_impl!(glam::Mat4 => fn orthographic_rh(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self);
 }
 
 impl Matrix4 for glam::DMat4 {
@@ -300,4 +368,24 @@ impl Matrix4 for glam::DMat4 {
         rotation: glam::DQuat,
         translation: glam::DVec3
     ) -> Self);
+
+    forward_impl!(glam::DMat4 => fn look_at_lh(eye: glam::DVec3, center: glam::DVec3, up: glam::DVec3) -> Self);
+    forward_impl!(glam::DMat4 => fn look_at_rh(eye: glam::DVec3, center: glam::DVec3, up: glam::DVec3) -> Self);
+    forward_impl!(glam::DMat4 => fn perspective_rh_gl(fov_y_radians: f64, aspect_ratio: f64, z_near: f64, z_far: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn perspective_lh(fov_y_radians: f64, aspect_ratio: f64, z_near: f64, z_far: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn perspective_rh(fov_y_radians: f64, aspect_ratio: f64, z_near: f64, z_far: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn perspective_infinite_lh(fov_y_radians: f64, aspect_ratio: f64, z_near: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn perspective_infinite_reverse_lh(fov_y_radians: f64, aspect_ratio: f64, z_near: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn perspective_infinite_rh(fov_y_radians: f64, aspect_ratio: f64, z_near: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn perspective_infinite_reverse_rh(fov_y_radians: f64, aspect_ratio: f64, z_near: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn orthographic_rh_gl(
+        left: f64,
+        right: f64,
+        bottom: f64,
+        top: f64,
+        near: f64,
+        far: f64
+    ) -> Self);
+    forward_impl!(glam::DMat4 => fn orthographic_lh(left: f64, right: f64, bottom: f64, top: f64, near: f64, far: f64) -> Self);
+    forward_impl!(glam::DMat4 => fn orthographic_rh(left: f64, right: f64, bottom: f64, top: f64, near: f64, far: f64) -> Self);
 }
