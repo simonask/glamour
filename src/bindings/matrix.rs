@@ -51,32 +51,18 @@ pub trait Matrix:
 pub trait Matrix2:
     Matrix + Mul<<Self::Scalar as Primitive>::Vec2, Output = <Self::Scalar as Primitive>::Vec2>
 {
-    /// Transform point.
+    /// Transform vector or point.
     ///
     /// See [`glam::Mat2::mul_vec2()`] or
     /// [`glam::DMat2::mul_vec2()`].
-    fn transform_point(
-        &self,
-        point: <Self::Scalar as Primitive>::Vec2,
-    ) -> <Self::Scalar as Primitive>::Vec2;
-
-    /// Transform vector.
-    ///
-    /// See [`glam::Mat2::mul_vec2()`] or
-    /// [`glam::DMat2::mul_vec2()`].
-    fn transform_vector(
-        &self,
-        vector: <Self::Scalar as Primitive>::Vec2,
-    ) -> <Self::Scalar as Primitive>::Vec2;
+    fn mul_vec2(&self, vec: <Self::Scalar as Primitive>::Vec2)
+        -> <Self::Scalar as Primitive>::Vec2;
 
     /// Create from column vectors.
-    fn from_cols(cols: [<Self::Scalar as Primitive>::Vec2; 2]) -> Self;
-
-    /// Convert to column vectors.
-    fn to_cols(self) -> [<Self::Scalar as Primitive>::Vec2; 2];
-
-    /// Convert to row vectors.
-    fn to_rows(self) -> [<Self::Scalar as Primitive>::Vec2; 2];
+    fn from_cols(
+        x_axis: <Self::Scalar as Primitive>::Vec2,
+        y_axis: <Self::Scalar as Primitive>::Vec2,
+    ) -> Self;
 
     /// Get column at `index`.
     fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec2;
@@ -96,23 +82,12 @@ pub trait Matrix2:
 pub trait Matrix3:
     Matrix + Mul<<Self::Scalar as Primitive>::Vec3, Output = <Self::Scalar as Primitive>::Vec3>
 {
-    /// Transform point.
-    ///
-    /// See [`glam::Mat3::transform_point2()`] or
-    /// [`glam::DMat3::transform_point2()`].
-    fn transform_point(
-        &self,
-        point: <Self::Scalar as Primitive>::Vec2,
-    ) -> <Self::Scalar as Primitive>::Vec2;
-
     /// Create from column vectors.
-    fn from_cols(cols: [<Self::Scalar as Primitive>::Vec3; 3]) -> Self;
-
-    /// Convert to column vectors.
-    fn to_cols(self) -> [<Self::Scalar as Primitive>::Vec3; 3];
-
-    /// Convert to row vectors.
-    fn to_rows(self) -> [<Self::Scalar as Primitive>::Vec3; 3];
+    fn from_cols(
+        x_axis: <Self::Scalar as Primitive>::Vec3,
+        y_axis: <Self::Scalar as Primitive>::Vec3,
+        z_axis: <Self::Scalar as Primitive>::Vec3,
+    ) -> Self;
 
     /// Get column at `index`.
     fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec3;
@@ -123,9 +98,18 @@ pub trait Matrix3:
     ///
     /// See [`glam::Mat3::transform_vector2()`] or
     /// [`glam::DMat3::transform_vector2()`].
-    fn transform_vector(
+    fn transform_vector2(
         &self,
         vector: <Self::Scalar as Primitive>::Vec2,
+    ) -> <Self::Scalar as Primitive>::Vec2;
+
+    /// Transform point.
+    ///
+    /// See [`glam::Mat3::transform_point2()`] or
+    /// [`glam::DMat3::transform_point2()`].
+    fn transform_point2(
+        &self,
+        point: <Self::Scalar as Primitive>::Vec2,
     ) -> <Self::Scalar as Primitive>::Vec2;
 
     /// Scaling matrix
@@ -155,7 +139,7 @@ pub trait Matrix4:
     ///
     /// See [`glam::Mat4::transform_point3()`] or
     /// [`glam::DMat4::transform_point3()`].
-    fn transform_point(
+    fn transform_point3(
         &self,
         point: <Self::Scalar as Primitive>::Vec3,
     ) -> <Self::Scalar as Primitive>::Vec3;
@@ -164,7 +148,7 @@ pub trait Matrix4:
     ///
     /// See [`glam::Mat4::transform_vector3()`] or
     /// [`glam::DMat4::transform_vector3()`].
-    fn transform_vector(
+    fn transform_vector3(
         &self,
         vector: <Self::Scalar as Primitive>::Vec3,
     ) -> <Self::Scalar as Primitive>::Vec3;
@@ -173,19 +157,18 @@ pub trait Matrix4:
     ///
     /// See [`glam::Mat4::project_point3()`] or
     /// [`glam::DMat4::project_point3()`].
-    fn project_point(
+    fn project_point3(
         &self,
         vector: <Self::Scalar as Primitive>::Vec3,
     ) -> <Self::Scalar as Primitive>::Vec3;
 
     /// Create from column vectors.
-    fn from_cols(cols: [<Self::Scalar as Primitive>::Vec4; 4]) -> Self;
-
-    /// Convert to column vectors.
-    fn to_cols(self) -> [<Self::Scalar as Primitive>::Vec4; 4];
-
-    /// Convert to row vectors.
-    fn to_rows(self) -> [<Self::Scalar as Primitive>::Vec4; 4];
+    fn from_cols(
+        x_axis: <Self::Scalar as Primitive>::Vec4,
+        y_axis: <Self::Scalar as Primitive>::Vec4,
+        z_axis: <Self::Scalar as Primitive>::Vec4,
+        w_axis: <Self::Scalar as Primitive>::Vec4,
+    ) -> Self;
 
     /// Get column at `index`.
     fn col(&self, index: usize) -> <Self::Scalar as Primitive>::Vec4;
@@ -232,31 +215,8 @@ impl_matrix!(f64, glam::DMat3);
 impl_matrix!(f64, glam::DMat4);
 
 impl Matrix2 for glam::Mat2 {
-    #[inline]
-    fn transform_point(&self, point: glam::Vec2) -> glam::Vec2 {
-        self.mul_vec2(point)
-    }
-
-    #[inline]
-    fn transform_vector(&self, vector: glam::Vec2) -> glam::Vec2 {
-        self.mul_vec2(vector)
-    }
-
-    #[inline]
-    fn from_cols([x_axis, y_axis]: [glam::Vec2; 2]) -> Self {
-        <glam::Mat2>::from_cols(x_axis, y_axis)
-    }
-
-    #[inline]
-    fn to_cols(self) -> [glam::Vec2; 2] {
-        bytemuck::cast(self)
-    }
-
-    #[inline]
-    fn to_rows(self) -> [glam::Vec2; 2] {
-        [self.row(0), self.row(1)]
-    }
-
+    forward_impl!(glam::Mat2 => fn from_cols(x: glam::Vec2, y: glam::Vec2) -> Self);
+    forward_impl!(glam::Mat2 => fn mul_vec2(&self, vec: glam::Vec2) -> glam::Vec2);
     forward_impl!(glam::Mat2 => fn col(&self, index: usize) -> glam::Vec2);
     forward_impl!(glam::Mat2 => fn row(&self, index: usize) -> glam::Vec2);
     forward_impl!(glam::Mat2 => fn from_scale_angle(vector: glam::Vec2, angle: f32) -> Self);
@@ -264,31 +224,8 @@ impl Matrix2 for glam::Mat2 {
 }
 
 impl Matrix2 for glam::DMat2 {
-    #[inline]
-    fn transform_point(&self, point: glam::DVec2) -> glam::DVec2 {
-        self.mul_vec2(point)
-    }
-
-    #[inline]
-    fn transform_vector(&self, vector: glam::DVec2) -> glam::DVec2 {
-        self.mul_vec2(vector)
-    }
-
-    #[inline]
-    fn from_cols([x_axis, y_axis]: [glam::DVec2; 2]) -> Self {
-        <glam::DMat2>::from_cols(x_axis, y_axis)
-    }
-
-    #[inline]
-    fn to_cols(self) -> [glam::DVec2; 2] {
-        bytemuck::cast(self)
-    }
-
-    #[inline]
-    fn to_rows(self) -> [glam::DVec2; 2] {
-        [self.row(0), self.row(1)]
-    }
-
+    forward_impl!(glam::DMat2 => fn from_cols(x: glam::DVec2, y: glam::DVec2) -> Self);
+    forward_impl!(glam::DMat2 => fn mul_vec2(&self, vec: glam::DVec2) -> glam::DVec2);
     forward_impl!(glam::DMat2 => fn col(&self, index: usize) -> glam::DVec2);
     forward_impl!(glam::DMat2 => fn row(&self, index: usize) -> glam::DVec2);
     forward_impl!(glam::DMat2 => fn from_scale_angle(vector: glam::DVec2, angle: f64) -> Self);
@@ -296,31 +233,9 @@ impl Matrix2 for glam::DMat2 {
 }
 
 impl Matrix3 for glam::Mat3 {
-    #[inline]
-    fn transform_point(&self, point: glam::Vec2) -> glam::Vec2 {
-        self.transform_point2(point)
-    }
-
-    #[inline]
-    fn from_cols([x_axis, y_axis, z_axis]: [glam::Vec3; 3]) -> Self {
-        <glam::Mat3>::from_cols(x_axis, y_axis, z_axis)
-    }
-
-    #[inline]
-    fn to_cols(self) -> [glam::Vec3; 3] {
-        bytemuck::cast(self)
-    }
-
-    #[inline]
-    fn to_rows(self) -> [glam::Vec3; 3] {
-        [self.row(0), self.row(1), self.row(2)]
-    }
-
-    #[inline]
-    fn transform_vector(&self, vector: glam::Vec2) -> glam::Vec2 {
-        self.transform_vector2(vector)
-    }
-
+    forward_impl!(glam::Mat3 => fn transform_point2(&self, point: glam::Vec2) -> glam::Vec2);
+    forward_impl!(glam::Mat3 => fn transform_vector2(&self, point: glam::Vec2) -> glam::Vec2);
+    forward_impl!(glam::Mat3 => fn from_cols(x: glam::Vec3, y: glam::Vec3, z: glam::Vec3) -> Self);
     forward_impl!(glam::Mat3 => fn col(&self, index: usize) -> glam::Vec3);
     forward_impl!(glam::Mat3 => fn row(&self, index: usize) -> glam::Vec3);
     forward_impl!(glam::Mat3 => fn from_scale(vector: glam::Vec2) -> Self);
@@ -335,31 +250,9 @@ impl Matrix3 for glam::Mat3 {
 }
 
 impl Matrix3 for glam::DMat3 {
-    #[inline]
-    fn transform_point(&self, point: glam::DVec2) -> glam::DVec2 {
-        self.transform_point2(point)
-    }
-
-    #[inline]
-    fn from_cols([x_axis, y_axis, z_axis]: [glam::DVec3; 3]) -> Self {
-        <glam::DMat3>::from_cols(x_axis, y_axis, z_axis)
-    }
-
-    #[inline]
-    fn to_cols(self) -> [glam::DVec3; 3] {
-        bytemuck::cast(self)
-    }
-
-    #[inline]
-    fn to_rows(self) -> [glam::DVec3; 3] {
-        [self.row(0), self.row(1), self.row(2)]
-    }
-
-    #[inline]
-    fn transform_vector(&self, vector: glam::DVec2) -> glam::DVec2 {
-        self.transform_vector2(vector)
-    }
-
+    forward_impl!(glam::DMat3 => fn from_cols(x: glam::DVec3, y: glam::DVec3, z: glam::DVec3) -> Self);
+    forward_impl!(glam::DMat3 => fn transform_point2(&self, point: glam::DVec2) -> glam::DVec2);
+    forward_impl!(glam::DMat3 => fn transform_vector2(&self, point: glam::DVec2) -> glam::DVec2);
     forward_impl!(glam::DMat3 => fn col(&self, index: usize) -> glam::DVec3);
     forward_impl!(glam::DMat3 => fn row(&self, index: usize) -> glam::DVec3);
     forward_impl!(glam::DMat3 => fn from_scale(vector: glam::DVec2) -> Self);
@@ -374,36 +267,10 @@ impl Matrix3 for glam::DMat3 {
 }
 
 impl Matrix4 for glam::Mat4 {
-    #[inline]
-    fn transform_point(&self, point: glam::Vec3) -> glam::Vec3 {
-        self.transform_point3(point)
-    }
-
-    #[inline]
-    fn transform_vector(&self, vector: glam::Vec3) -> glam::Vec3 {
-        self.transform_vector3(vector)
-    }
-
-    #[inline]
-    fn project_point(&self, vector: glam::Vec3) -> glam::Vec3 {
-        <glam::Mat4>::project_point3(self, vector)
-    }
-
-    #[inline]
-    fn from_cols([x_axis, y_axis, z_axis, w_axis]: [glam::Vec4; 4]) -> Self {
-        <glam::Mat4>::from_cols(x_axis, y_axis, z_axis, w_axis)
-    }
-
-    #[inline]
-    fn to_cols(self) -> [glam::Vec4; 4] {
-        bytemuck::cast(self)
-    }
-
-    #[inline]
-    fn to_rows(self) -> [glam::Vec4; 4] {
-        [self.row(0), self.row(1), self.row(2), self.row(3)]
-    }
-
+    forward_impl!(glam::Mat4 => fn transform_point3(&self, point: glam::Vec3) -> glam::Vec3);
+    forward_impl!(glam::Mat4 => fn transform_vector3(&self, point: glam::Vec3) -> glam::Vec3);
+    forward_impl!(glam::Mat4 => fn project_point3(&self, point: glam::Vec3) -> glam::Vec3);
+    forward_impl!(glam::Mat4 => fn from_cols(x: glam::Vec4, y: glam::Vec4, z: glam::Vec4, w: glam::Vec4) -> Self);
     forward_impl!(glam::Mat4 => fn col(&self, index: usize) -> glam::Vec4);
     forward_impl!(glam::Mat4 => fn row(&self, index: usize) -> glam::Vec4);
     forward_impl!(glam::Mat4 => fn from_scale(vector: glam::Vec3) -> Self);
@@ -418,36 +285,10 @@ impl Matrix4 for glam::Mat4 {
 }
 
 impl Matrix4 for glam::DMat4 {
-    #[inline]
-    fn transform_point(&self, point: glam::DVec3) -> glam::DVec3 {
-        self.transform_point3(point)
-    }
-
-    #[inline]
-    fn transform_vector(&self, vector: glam::DVec3) -> glam::DVec3 {
-        self.transform_vector3(vector)
-    }
-
-    #[inline]
-    fn project_point(&self, vector: glam::DVec3) -> glam::DVec3 {
-        <glam::DMat4>::project_point3(self, vector)
-    }
-
-    #[inline]
-    fn from_cols([x_axis, y_axis, z_axis, w_axis]: [glam::DVec4; 4]) -> Self {
-        <glam::DMat4>::from_cols(x_axis, y_axis, z_axis, w_axis)
-    }
-
-    #[inline]
-    fn to_cols(self) -> [glam::DVec4; 4] {
-        bytemuck::cast(self)
-    }
-
-    #[inline]
-    fn to_rows(self) -> [glam::DVec4; 4] {
-        [self.row(0), self.row(1), self.row(2), self.row(3)]
-    }
-
+    forward_impl!(glam::DMat4 => fn transform_point3(&self, point: glam::DVec3) -> glam::DVec3);
+    forward_impl!(glam::DMat4 => fn transform_vector3(&self, point: glam::DVec3) -> glam::DVec3);
+    forward_impl!(glam::DMat4 => fn project_point3(&self, point: glam::DVec3) -> glam::DVec3);
+    forward_impl!(glam::DMat4 => fn from_cols(x: glam::DVec4, y: glam::DVec4, z: glam::DVec4, w: glam::DVec4) -> Self);
     forward_impl!(glam::DMat4 => fn col(&self, index: usize) -> glam::DVec4);
     forward_impl!(glam::DMat4 => fn row(&self, index: usize) -> glam::DVec4);
     forward_impl!(glam::DMat4 => fn from_scale(vector: glam::DVec3) -> Self);

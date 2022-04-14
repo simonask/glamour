@@ -110,7 +110,7 @@ macro_rules! impl_matrix {
             where
                 U: Into<$axis_vector_ty<T>>,
             {
-                Self::from_rows(rows.map(Into::into))
+                Self::with_cols(rows).transpose()
             }
 
             #[doc = "Create from columns with implicit conversion."]
@@ -120,21 +120,7 @@ macro_rules! impl_matrix {
             where
                 U: Into<$axis_vector_ty<T>>,
             {
-                Self::from_cols(rows.map(Into::into))
-            }
-
-            #[doc = "Create from column vectors."]
-            #[inline]
-            #[must_use]
-            pub fn from_cols(cols: [$axis_vector_ty<T>; $dimensions]) -> Self {
-                Self::from_raw(T::$mat_name::from_cols(bytemuck::cast(cols)))
-            }
-
-            #[doc = "Create from row vectors."]
-            #[inline]
-            #[must_use]
-            pub fn from_rows(cols: [$axis_vector_ty<T>; $dimensions]) -> Self {
-                Self::from_raw(T::$mat_name::from_cols(bytemuck::cast(cols)).transpose())
+                bytemuck::cast(rows.map(Into::into))
             }
 
             #[doc = "Get the underlying `glam` matrix."]
@@ -190,14 +176,14 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn to_cols(&self) -> [$axis_vector_ty<T>; $dimensions] {
-                bytemuck::cast(self.as_raw().to_cols())
+                bytemuck::cast(*self)
             }
 
             #[doc = "Get row vectors."]
             #[inline]
             #[must_use]
             pub fn to_rows(&self) -> [$axis_vector_ty<T>; $dimensions] {
-                bytemuck::cast(self.as_raw().to_rows())
+                self.transpose().to_cols()
             }
 
             #[doc = "Get column vectors as slice."]
@@ -253,6 +239,13 @@ macro_rules! impl_matrix {
                 } else {
                     None
                 }
+            }
+
+            #[doc = "Return the transposed matrix."]
+            #[inline]
+            #[must_use]
+            pub fn transpose(&self) -> Self {
+                Self::from_raw(self.as_raw().transpose())
             }
 
             #[doc = "True if any element in the matrix is NaN."]
@@ -329,6 +322,38 @@ where
         m22: T::ONE,
     };
 
+    /// Create from column vectors.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    ///
+    /// let m = Matrix2::<f32>::from_cols(vec2!(0.0, 1.0), vec2!(2.0, 3.0));
+    /// assert_eq!(m.col(0), (0.0, 1.0));
+    /// assert_eq!(m.col(1), (2.0, 3.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_cols(x_axis: Vector2<T>, y_axis: Vector2<T>) -> Self {
+        Self::from_raw(T::Mat2::from_cols(x_axis.to_raw(), y_axis.to_raw()))
+    }
+
+    /// Create from row vectors.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    ///
+    /// let m = Matrix2::<f32>::from_rows(vec2!(0.0, 1.0), vec2!(2.0, 3.0));
+    /// assert_eq!(m.col(0), (0.0, 2.0));
+    /// assert_eq!(m.col(1), (1.0, 3.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_rows(x_axis: Vector2<T>, y_axis: Vector2<T>) -> Self {
+        Self::from_cols(x_axis, y_axis).transpose()
+    }
+
     /// Scaling matrix.
     ///
     /// #### Example
@@ -378,7 +403,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_point(&self, point: Point2<T>) -> Point2<T> {
-        Point2::from_raw(self.as_raw().transform_point(point.to_raw()))
+        Point2::from_raw(self.as_raw().mul_vec2(point.to_raw()))
     }
 
     /// Transform 2D vector.
@@ -397,7 +422,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_vector(&self, vector: Vector2<T>) -> Vector2<T> {
-        Vector2::from_raw(self.as_raw().transform_vector(vector.to_raw()))
+        Vector2::from_raw(self.as_raw().mul_vec2(vector.to_raw()))
     }
 }
 
@@ -450,6 +475,50 @@ where
         m32: T::ZERO,
         m33: T::ONE,
     };
+
+    /// Create from column vectors.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    ///
+    /// let m = Matrix3::<f32>::from_cols(
+    ///     vec3!(0.0, 1.0, 2.0),
+    ///     vec3!(3.0, 4.0, 5.0),
+    ///     vec3!(6.0, 7.0, 8.0));
+    /// assert_eq!(m.col(0), (0.0, 1.0, 2.0));
+    /// assert_eq!(m.col(1), (3.0, 4.0, 5.0));
+    /// assert_eq!(m.col(2), (6.0, 7.0, 8.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_cols(x_axis: Vector3<T>, y_axis: Vector3<T>, z_axis: Vector3<T>) -> Self {
+        Self::from_raw(T::Mat3::from_cols(
+            x_axis.to_raw(),
+            y_axis.to_raw(),
+            z_axis.to_raw(),
+        ))
+    }
+
+    /// Create from row vectors.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    ///
+    /// let m = Matrix3::<f32>::from_rows(
+    ///     vec3!(0.0, 1.0, 2.0),
+    ///     vec3!(3.0, 4.0, 5.0),
+    ///     vec3!(6.0, 7.0, 8.0));
+    /// assert_eq!(m.col(0), (0.0, 3.0, 6.0));
+    /// assert_eq!(m.col(1), (1.0, 4.0, 7.0));
+    /// assert_eq!(m.col(2), (2.0, 5.0, 8.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_rows(x_axis: Vector3<T>, y_axis: Vector3<T>, z_axis: Vector3<T>) -> Self {
+        Self::from_cols(x_axis, y_axis, z_axis).transpose()
+    }
 
     /// Scaling matrix.
     ///
@@ -548,7 +617,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_point<U: UnitMatrices<Vec2 = T::Vec2>>(&self, point: Point2<U>) -> Point2<U> {
-        Point2::from_raw(self.as_raw().transform_point(point.to_raw()))
+        Point2::from_raw(self.as_raw().transform_point2(point.to_raw()))
     }
 
     /// Transform 2D vector.
@@ -561,7 +630,7 @@ where
         &self,
         vector: Vector2<U>,
     ) -> Vector2<U> {
-        Vector2::from_raw(self.as_raw().transform_vector(vector.to_raw()))
+        Vector2::from_raw(self.as_raw().transform_vector2(vector.to_raw()))
     }
 }
 
@@ -791,6 +860,61 @@ where
         m44: T::ONE,
     };
 
+    /// Create from column vectors.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    ///
+    /// let _m = Matrix4::<f32>::from_cols(
+    ///     vec4!( 0.0,  1.0,  2.0,  3.0),
+    ///     vec4!( 4.0,  5.0,  6.0,  7.0),
+    ///     vec4!( 8.0,  9.0, 10.0, 11.0),
+    ///     vec4!(12.0, 13.0, 14.0, 15.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_cols(
+        x_axis: Vector4<T>,
+        y_axis: Vector4<T>,
+        z_axis: Vector4<T>,
+        w_axis: Vector4<T>,
+    ) -> Self {
+        Self::from_raw(T::Mat4::from_cols(
+            x_axis.to_raw(),
+            y_axis.to_raw(),
+            z_axis.to_raw(),
+            w_axis.to_raw(),
+        ))
+    }
+
+    /// Create from row vectors.
+    ///
+    /// #### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    ///
+    /// let m = Matrix4::<f32>::from_rows(
+    ///     vec4!( 0.0,  1.0,  2.0,  3.0),
+    ///     vec4!( 4.0,  5.0,  6.0,  7.0),
+    ///     vec4!( 8.0,  9.0, 10.0, 11.0),
+    ///     vec4!(12.0, 13.0, 14.0, 15.0));
+    /// assert_eq!(m.col(0), (0.0, 4.0,  8.0, 12.0));
+    /// assert_eq!(m.col(1), (1.0, 5.0,  9.0, 13.0));
+    /// assert_eq!(m.col(2), (2.0, 6.0, 10.0, 14.0));
+    /// assert_eq!(m.col(3), (3.0, 7.0, 11.0, 15.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn from_rows(
+        x_axis: Vector4<T>,
+        y_axis: Vector4<T>,
+        z_axis: Vector4<T>,
+        w_axis: Vector4<T>,
+    ) -> Self {
+        Self::from_cols(x_axis, y_axis, z_axis, w_axis).transpose()
+    }
+
     /// Scaling matrix.
     ///
     /// #### Example
@@ -876,7 +1000,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_point(&self, point: Point3<T>) -> Point3<T> {
-        Point3::from_raw(self.as_raw().transform_point(point.to_raw()))
+        Point3::from_raw(self.as_raw().transform_point3(point.to_raw()))
     }
 
     /// Transform 3D vector.
@@ -889,7 +1013,7 @@ where
         &self,
         vector: Vector3<U>,
     ) -> Vector3<U> {
-        Vector3::from_raw(self.as_raw().transform_vector(vector.to_raw()))
+        Vector3::from_raw(self.as_raw().transform_vector3(vector.to_raw()))
     }
 
     /// Project 3D point.
@@ -901,7 +1025,7 @@ where
     #[inline]
     #[must_use]
     pub fn project_point<U: UnitMatrices<Vec3 = T::Vec3>>(&self, point: Point3<U>) -> Point3<U> {
-        Point3::from_raw(self.as_raw().project_point(point.to_raw()))
+        Point3::from_raw(self.as_raw().project_point3(point.to_raw()))
     }
 }
 
@@ -1417,46 +1541,46 @@ mod tests {
     #[test]
     fn from_cols() {
         assert_eq!(
-            Mat2::from_cols([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            Mat2::from_cols((1.0, 0.0).into(), (0.0, 1.0).into()),
             Mat2::IDENTITY
         );
         assert_eq!(
-            Mat3::from_cols([
+            Mat3::from_cols(
                 (1.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 1.0).into()
-            ]),
+            ),
             Mat3::IDENTITY
         );
         assert_eq!(
-            Mat4::from_cols([
+            Mat4::from_cols(
                 (1.0, 0.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0, 0.0).into(),
                 (0.0, 0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 0.0, 1.0).into()
-            ]),
+            ),
             Mat4::IDENTITY
         );
 
         assert_eq!(
-            DMat2::from_cols([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            DMat2::from_cols((1.0, 0.0).into(), (0.0, 1.0).into()),
             DMat2::IDENTITY
         );
         assert_eq!(
-            DMat3::from_cols([
+            DMat3::from_cols(
                 (1.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 1.0).into()
-            ]),
+            ),
             DMat3::IDENTITY
         );
         assert_eq!(
-            DMat4::from_cols([
+            DMat4::from_cols(
                 (1.0, 0.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0, 0.0).into(),
                 (0.0, 0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 0.0, 1.0).into()
-            ]),
+            ),
             DMat4::IDENTITY
         );
     }
@@ -1464,46 +1588,46 @@ mod tests {
     #[test]
     fn from_rows() {
         assert_eq!(
-            Mat2::from_rows([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            Mat2::from_rows((1.0, 0.0).into(), (0.0, 1.0).into()),
             Mat2::IDENTITY
         );
         assert_eq!(
-            Mat3::from_rows([
+            Mat3::from_rows(
                 (1.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 1.0).into()
-            ]),
+            ),
             Mat3::IDENTITY
         );
         assert_eq!(
-            Mat4::from_rows([
+            Mat4::from_rows(
                 (1.0, 0.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0, 0.0).into(),
                 (0.0, 0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 0.0, 1.0).into()
-            ]),
+            ),
             Mat4::IDENTITY
         );
 
         assert_eq!(
-            DMat2::from_rows([(1.0, 0.0).into(), (0.0, 1.0).into()]),
+            DMat2::from_rows((1.0, 0.0).into(), (0.0, 1.0).into()),
             DMat2::IDENTITY
         );
         assert_eq!(
-            DMat3::from_rows([
+            DMat3::from_rows(
                 (1.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 1.0).into()
-            ]),
+            ),
             DMat3::IDENTITY
         );
         assert_eq!(
-            DMat4::from_rows([
+            DMat4::from_rows(
                 (1.0, 0.0, 0.0, 0.0).into(),
                 (0.0, 1.0, 0.0, 0.0).into(),
                 (0.0, 0.0, 1.0, 0.0).into(),
                 (0.0, 0.0, 0.0, 1.0).into()
-            ]),
+            ),
             DMat4::IDENTITY
         );
     }
@@ -1734,48 +1858,32 @@ mod tests {
 
         {
             assert!(!Mat2::zeroed().is_invertible());
-            assert!(!Mat2::from_cols([Vec2::ZERO, Vec2::ONE]).is_invertible());
-            assert!(!Mat2::from_cols([Vec2::ONE, Vec2::ZERO]).is_invertible());
-            assert!(!Mat2::from_rows([Vec2::ZERO, Vec2::ONE]).is_invertible());
-            assert!(!Mat2::from_rows([Vec2::ONE, Vec2::ZERO]).is_invertible());
+            assert!(!Mat2::from_cols(Vec2::ZERO, Vec2::ONE).is_invertible());
+            assert!(!Mat2::from_cols(Vec2::ONE, Vec2::ZERO).is_invertible());
+            assert!(!Mat2::from_rows(Vec2::ZERO, Vec2::ONE).is_invertible());
+            assert!(!Mat2::from_rows(Vec2::ONE, Vec2::ZERO).is_invertible());
             assert!(Mat2::IDENTITY.is_invertible());
         }
         {
             assert!(!Mat3::zeroed().is_invertible());
-            assert!(!Mat3::from_cols([Vec3::ZERO, Vec3::ONE, Vec3::ONE]).is_invertible());
-            assert!(!Mat3::from_cols([Vec3::ONE, Vec3::ZERO, Vec3::ONE]).is_invertible());
-            assert!(!Mat3::from_cols([Vec3::ONE, Vec3::ONE, Vec3::ZERO]).is_invertible());
-            assert!(!Mat3::from_rows([Vec3::ZERO, Vec3::ONE, Vec3::ONE]).is_invertible());
-            assert!(!Mat3::from_rows([Vec3::ONE, Vec3::ZERO, Vec3::ONE]).is_invertible());
-            assert!(!Mat3::from_rows([Vec3::ONE, Vec3::ONE, Vec3::ZERO]).is_invertible());
+            assert!(!Mat3::from_cols(Vec3::ZERO, Vec3::ONE, Vec3::ONE).is_invertible());
+            assert!(!Mat3::from_cols(Vec3::ONE, Vec3::ZERO, Vec3::ONE).is_invertible());
+            assert!(!Mat3::from_cols(Vec3::ONE, Vec3::ONE, Vec3::ZERO).is_invertible());
+            assert!(!Mat3::from_rows(Vec3::ZERO, Vec3::ONE, Vec3::ONE).is_invertible());
+            assert!(!Mat3::from_rows(Vec3::ONE, Vec3::ZERO, Vec3::ONE).is_invertible());
+            assert!(!Mat3::from_rows(Vec3::ONE, Vec3::ONE, Vec3::ZERO).is_invertible());
             assert!(Mat3::IDENTITY.is_invertible());
         }
         {
             assert!(!Mat4::zeroed().is_invertible());
-            assert!(
-                !Mat4::from_cols([Vec4::ZERO, Vec4::ONE, Vec4::ONE, Vec4::ONE]).is_invertible()
-            );
-            assert!(
-                !Mat4::from_cols([Vec4::ONE, Vec4::ZERO, Vec4::ONE, Vec4::ONE]).is_invertible()
-            );
-            assert!(
-                !Mat4::from_cols([Vec4::ONE, Vec4::ONE, Vec4::ZERO, Vec4::ONE]).is_invertible()
-            );
-            assert!(
-                !Mat4::from_cols([Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO]).is_invertible()
-            );
-            assert!(
-                !Mat4::from_rows([Vec4::ZERO, Vec4::ONE, Vec4::ONE, Vec4::ONE]).is_invertible()
-            );
-            assert!(
-                !Mat4::from_rows([Vec4::ONE, Vec4::ZERO, Vec4::ONE, Vec4::ONE]).is_invertible()
-            );
-            assert!(
-                !Mat4::from_rows([Vec4::ONE, Vec4::ONE, Vec4::ZERO, Vec4::ONE]).is_invertible()
-            );
-            assert!(
-                !Mat4::from_rows([Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO]).is_invertible()
-            );
+            assert!(!Mat4::from_cols(Vec4::ZERO, Vec4::ONE, Vec4::ONE, Vec4::ONE).is_invertible());
+            assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ZERO, Vec4::ONE, Vec4::ONE).is_invertible());
+            assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ONE, Vec4::ZERO, Vec4::ONE).is_invertible());
+            assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO).is_invertible());
+            assert!(!Mat4::from_rows(Vec4::ZERO, Vec4::ONE, Vec4::ONE, Vec4::ONE).is_invertible());
+            assert!(!Mat4::from_rows(Vec4::ONE, Vec4::ZERO, Vec4::ONE, Vec4::ONE).is_invertible());
+            assert!(!Mat4::from_rows(Vec4::ONE, Vec4::ONE, Vec4::ZERO, Vec4::ONE).is_invertible());
+            assert!(!Mat4::from_rows(Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO).is_invertible());
             assert!(Mat4::IDENTITY.is_invertible());
         }
     }
