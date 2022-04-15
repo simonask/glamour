@@ -237,12 +237,6 @@ where
     }
 }
 
-impl<T: Primitive + Float> PartialEq<T> for Angle<T> {
-    fn eq(&self, other: &T) -> bool {
-        self.radians == *other
-    }
-}
-
 macro_rules! forward_to_unit {
     (
         $(#[$attr:meta])?
