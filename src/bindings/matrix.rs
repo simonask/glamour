@@ -20,11 +20,11 @@ pub trait Matrix:
     type Scalar: PrimitiveMatrices<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>
         + Float
         + AbsDiffEq;
-    /// Shorthand for `glam::Vec2` or `glam::DVec2".
+    /// Shorthand for `glam::Vec2` or `glam::DVec2`.
     type Vec2: Vector<2, Scalar = Self::Scalar>;
-    /// Shorthand for `glam::Vec3` or `glam::DVec3".
+    /// Shorthand for `glam::Vec3` or `glam::DVec3`.
     type Vec3: Vector<3, Scalar = Self::Scalar>;
-    /// Shorthand for `glam::Vec4` or `glam::DVec4".
+    /// Shorthand for `glam::Vec4` or `glam::DVec4`.
     type Vec4: Vector<4, Scalar = Self::Scalar>;
 
     /// True if any element is NaN.
