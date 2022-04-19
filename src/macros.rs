@@ -86,6 +86,7 @@ macro_rules! impl_common {
         impl<T: Unit> Clone for $base_type_name<T> {
             #[inline]
             #[must_use]
+            #[cfg_attr(coverage, no_coverage)]
             fn clone(&self) -> Self {
                 *self
             }
@@ -231,8 +232,8 @@ macro_rules! impl_as_tuple {
             #[inline]
             #[allow(unused_parens)]
             #[must_use]
-            fn from(($($fields),*): ($($fields_ty),*)) -> $base_type_name<T> {
-                $base_type_name { $($fields),* }
+            fn from(tuple: ($($fields_ty),*)) -> $base_type_name<T> {
+                $base_type_name::from_tuple(tuple)
             }
         }
 
@@ -240,10 +241,7 @@ macro_rules! impl_as_tuple {
             #[inline]
             #[must_use]
             fn from(value: $base_type_name<T>) -> ($($fields_ty),*) {
-                let $base_type_name {
-                    $($fields),*
-                } = value;
-                ($($fields),*)
+                value.to_tuple()
             }
         }
 

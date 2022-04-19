@@ -277,6 +277,8 @@ impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Point3<T>> for glam::DQuat {
 
 #[cfg(test)]
 mod tests {
+    use crate::point;
+
     use super::*;
 
     type Point = super::Point3<f32>;
@@ -319,5 +321,19 @@ mod tests {
         let v = Point3::<f64>::new(1.0, 0.0, 0.0);
         let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat * v, -v);
+    }
+
+    #[test]
+    fn from_into_vector() {
+        let mut p: Point4<f32> = point!(1.0, 2.0, 3.0, 4.0);
+        let mut v: Vector4<f32> = p.to_vector();
+        let q: Point4<f32> = Point4::from_vector(v);
+        assert_eq!(p, q);
+        assert_eq!(Vector4::from_point(p), v);
+
+        let _: &Vector4<_> = p.as_vector();
+        let _: &mut Vector4<_> = p.as_vector_mut();
+        let _: &Point4<_> = v.as_point();
+        let _: &mut Point4<_> = v.as_point_mut();
     }
 }

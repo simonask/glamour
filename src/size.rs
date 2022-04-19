@@ -164,7 +164,28 @@ impl<T: crate::UnitTypes> Size3<T> {
 
 #[cfg(test)]
 mod tests {
+    use crate::size;
+
     use super::*;
+
+    #[test]
+    fn arithmetic() {
+        let mut a: Size2<f32> = size!(100.0, 200.0);
+        let b: Size2<f32> = a - size!(50.0, 100.0);
+        assert_eq!(b, (50.0, 100.0));
+        a -= size!(50.0, 100.0);
+        assert_eq!(a, (50.0, 100.0));
+        assert_eq!(a + size!(2.0, 3.0), (52.0, 103.0));
+        a += size!(100.0, 200.0);
+        assert_eq!(a, size!(150.0, 300.0));
+    }
+
+    #[test]
+    fn as_vector() {
+        let mut a: Size2<f32> = size!(100.0, 200.0);
+        let _: &Vector2<f32> = a.as_vector();
+        let _: &mut Vector2<f32> = a.as_vector_mut();
+    }
 
     #[test]
     fn area() {
@@ -207,5 +228,19 @@ mod tests {
         assert_eq!(a.volume(), 12.0);
         assert_eq!(b.volume(), 60);
         assert_eq!(c.volume(), 60000.0);
+    }
+
+    #[test]
+    fn from_into_vector() {
+        let mut p: Size2<f32> = size!(1.0, 2.0);
+        let mut v: Vector2<f32> = p.to_vector();
+        let q: Size2<f32> = Size2::from_vector(v);
+        assert_eq!(p, q);
+        assert_eq!(Vector2::from_size(p), v);
+
+        let _: &Vector2<_> = p.as_vector();
+        let _: &mut Vector2<_> = p.as_vector_mut();
+        let _: &Size2<_> = v.as_size();
+        let _: &mut Size2<_> = v.as_size_mut();
     }
 }
