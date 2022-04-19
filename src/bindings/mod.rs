@@ -33,6 +33,12 @@ macro_rules! forward_impl {
             <$base>::$name(self $(, ($arg).into())*).into()
         }
     };
+    ($base:ty: $base_fn:ident => fn $name:ident ( &self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
+        #[inline]
+        fn $name(&self $(, $arg:$arg_ty)*) -> $ret {
+            <$base>::$base_fn(self $(, ($arg).into())*).into()
+        }
+    };
     ($base:ty => fn $name:ident ( &mut self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
         #[inline]
         fn $name(&mut self $(, $arg:$arg_ty)*) -> $ret {

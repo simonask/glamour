@@ -433,7 +433,8 @@ mod tests {
 
     #[test]
     fn from_points() {
-        let b = Box2::from_points(core::iter::empty());
+        let empty: [Point2<_>; 0] = [];
+        let b = Box2::from_points(empty);
         assert_eq!(b, Box2::ZERO);
 
         let b =

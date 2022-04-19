@@ -896,24 +896,4 @@ mod tests {
             );
         }
     }
-
-    #[cfg(feature = "std")]
-    #[test]
-    fn debug_print() {
-        extern crate alloc;
-
-        let t2 = Transform2::<TestSrc, TestDst>::IDENTITY;
-        let t3 = Transform3::<TestSrc, TestDst>::IDENTITY;
-
-        let s2 = alloc::format!("{:?}", t2);
-        let s3 = alloc::format!("{:?}", t3);
-        assert_eq!(
-            s2,
-            alloc::format!("Transform2 {{ matrix: {:?} }}", t2.matrix)
-        );
-        assert_eq!(
-            s3,
-            alloc::format!("Transform3 {{ matrix: {:?} }}", t3.matrix)
-        );
-    }
 }

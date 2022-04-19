@@ -584,6 +584,8 @@ impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Vector3<T>> for glam::DQuat {
 mod tests {
     use approx::assert_abs_diff_eq;
 
+    use crate::vector;
+
     use super::*;
 
     struct F32;
@@ -724,6 +726,28 @@ mod tests {
         check_splat_ints!(10, add(2), 12);
         check_splat_ints!(2, sub(1), 1);
         check_splat_ints!(10, sub(2), 8);
+
+        let mut v: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        v *= Vector4::splat(2.0);
+        assert_eq!(v, (2.0, 4.0, 6.0, 8.0));
+        v /= Vector4::splat(2.0);
+        assert_eq!(v, (1.0, 2.0, 3.0, 4.0));
+        v += Vector4::splat(1.0);
+        assert_eq!(v, (2.0, 3.0, 4.0, 5.0));
+        v -= Vector4::splat(2.0);
+        assert_eq!(v, (0.0, 1.0, 2.0, 3.0));
+        v %= Vector4::splat(2.0);
+        assert_eq!(v, (0.0, 1.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn sum() {
+        let a: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let b: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let d: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let sum: Vector4<f32> = [a, b, c, d].into_iter().sum();
+        assert_eq!(sum, (4.0, 8.0, 12.0, 16.0));
     }
 
     #[test]
@@ -855,11 +879,23 @@ mod tests {
         {
             let x: Vec4 = (1.0, 2.0, 3.0, 4.0).into();
 
-            let a = x * 2.0;
-            let b = x / 2.0;
+            let a = x.mul_scalar(2.0);
+            let b = x.div_scalar(2.0);
+            let c = x.rem_scalar(2.0);
 
             assert_eq!(a, (2.0, 4.0, 6.0, 8.0));
             assert_eq!(b, (0.5, 1.0, 1.5, 2.0));
+            assert_eq!(c, (1.0, 0.0, 1.0, 0.0));
+
+            let mut a = x;
+            let mut b = x;
+            let mut c = x;
+            a *= 2.0;
+            b /= 2.0;
+            c %= 2.0;
+            assert_eq!(a, (2.0, 4.0, 6.0, 8.0));
+            assert_eq!(b, (0.5, 1.0, 1.5, 2.0));
+            assert_eq!(c, (1.0, 0.0, 1.0, 0.0));
         }
         {
             let x: DVec4 = (1.0, 2.0, 3.0, 4.0).into();
@@ -943,6 +979,12 @@ mod tests {
     }
 
     #[test]
+    fn length() {
+        let v = Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(v.length(), glam::Vec3::new(1.0, 2.0, 3.0).length());
+    }
+
+    #[test]
     fn exp() {
         let a = Vec3::splat(1.0);
         assert_eq!(a.exp(), Vec3::splat(1.0f32.exp()));
@@ -1001,86 +1043,5 @@ mod tests {
         let a: Vector2<F32> = vec2!(20.0, 30.0);
         let b: Vector2<F32> = mat * a;
         assert_eq!(b, (20.0, 30.0));
-    }
-
-    #[cfg(feature = "std")]
-    #[test]
-    fn debug_type_name() {
-        extern crate alloc;
-
-        let untyped_f32: Vector2<f32> = Vector2 { x: 123.0, y: 456.0 };
-        let untyped_f64: Vector2<f64> = Vector2 { x: 123.0, y: 456.0 };
-        let untyped_u32: Vector2<u32> = Vector2 { x: 123, y: 456 };
-
-        assert_eq!(
-            alloc::format!("{:?}", untyped_f32),
-            "Vector2<f32> { x: 123.0, y: 456.0 }"
-        );
-        assert_eq!(
-            alloc::format!("{:?}", untyped_f64),
-            "Vector2<f64> { x: 123.0, y: 456.0 }"
-        );
-        assert_eq!(
-            alloc::format!("{:?}", untyped_u32),
-            "Vector2<u32> { x: 123, y: 456 }"
-        );
-
-        let untyped_i32: Vector2<i32> = Vector2 { x: 123, y: 456 };
-        assert_eq!(
-            alloc::format!("{:?}", untyped_i32),
-            "Vector2<i32> { x: 123, y: 456 }"
-        );
-        assert_eq!(
-            alloc::format!("{:#?}", untyped_i32),
-            r#"
-Vector2<i32> {
-    x: 123,
-    y: 456,
-}"#
-            .trim()
-        );
-
-        enum UnnamedUnit {}
-        impl Unit for UnnamedUnit {
-            type Scalar = i32;
-        }
-
-        let unnamed: Vector2<UnnamedUnit> = Vector2 { x: 123, y: 456 };
-        assert_eq!(
-            alloc::format!("{:?}", unnamed),
-            "Vector2 { x: 123, y: 456 }"
-        );
-        assert_eq!(
-            alloc::format!("{:#?}", unnamed),
-            r#"
-Vector2 {
-    x: 123,
-    y: 456,
-}"#
-            .trim()
-        );
-
-        enum CustomName {}
-        impl Unit for CustomName {
-            type Scalar = i32;
-            fn name() -> Option<&'static str> {
-                Some("Custom")
-            }
-        }
-
-        let custom: Vector2<CustomName> = Vector2 { x: 123, y: 456 };
-        assert_eq!(
-            alloc::format!("{:?}", custom),
-            "Vector2<Custom> { x: 123, y: 456 }"
-        );
-        assert_eq!(
-            alloc::format!("{:#?}", custom),
-            r#"
-Vector2<Custom> {
-    x: 123,
-    y: 456,
-}"#
-            .trim()
-        );
     }
 }

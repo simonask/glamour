@@ -237,12 +237,6 @@ where
     }
 }
 
-impl<T: Primitive + Float> PartialEq<T> for Angle<T> {
-    fn eq(&self, other: &T) -> bool {
-        self.radians == *other
-    }
-}
-
 macro_rules! forward_to_unit {
     (
         $(#[$attr:meta])?
@@ -493,11 +487,15 @@ mod tests {
         assert_eq!(s.to_radians(), f32::asin(1.0));
         assert_eq!(c.to_radians(), f32::acos(1.0));
         assert_eq!(t.to_radians(), f32::atan(1.0));
+
+        assert_eq!(Angle::PI.clone(), Angle::PI);
+        assert_eq!(Angle::default(), Angle::from_radians(0.0));
+        assert!(Angle::PI >= Angle::default());
     }
 
     #[test]
     fn approx_comparison() {
-        assert_eq!(Angle::PI, Angle::PI);
+        assert_eq!(Angle::PI, Angle::from_radians(f32::PI));
         assert_ne!(Angle::PI, Angle::CIRCLE);
 
         assert_abs_diff_eq!(Angle::PI, Angle::PI);
@@ -519,6 +517,15 @@ mod tests {
         assert_abs_diff_eq!(y, Angle::from_radians(0.5));
         let z: f32 = a / b;
         assert_abs_diff_eq!(z, -2.0);
+
+        let mut a = Angle::from_radians(1.0);
+        a += Angle::from_radians(2.0);
+        assert_eq!(a, Angle::from_radians(3.0));
+        a -= Angle::from_radians(4.0);
+        assert_eq!(a, Angle::from_radians(-1.0));
+        let mut a = Angle::from_radians(3.0);
+        a %= Angle::from_radians(2.0);
+        assert_eq!(a, Angle::from_radians(1.0));
     }
 
     #[test]
@@ -574,100 +581,97 @@ mod tests {
     }
 
     #[test]
+    fn forwarded() {
+        assert_eq!(Angle::PI.to_degrees(), f32::PI.to_degrees());
+        assert_eq!(Angle::PI.sin(), f32::PI.sin());
+        assert_eq!(Angle::PI.cos(), f32::PI.cos());
+        assert_eq!(Angle::PI.tan(), f32::PI.tan());
+        assert_eq!(Angle::PI.sin_cos(), f32::PI.sin_cos());
+
+        assert_eq!(
+            Angle::PI.min(Angle::CIRCLE).to_radians(),
+            f32::PI.min(2.0 * f32::PI)
+        );
+        assert_eq!(
+            Angle::PI.max(Angle::CIRCLE).to_radians(),
+            f32::PI.max(2.0 * f32::PI)
+        );
+
+        assert_eq!((Angle::PI * 2.0).to_radians(), f32::PI * 2.0);
+        assert_eq!((Angle::PI / 2.0).to_radians(), f32::PI / 2.0);
+        assert_eq!((Angle::PI % 2.0).to_radians(), f32::PI % 2.0);
+
+        assert_eq!(
+            (Vector2::<Angle>::splat(Angle::PI) * Vector2::<f32>::splat(2.0)).to_untyped(),
+            Vector2::splat(f32::PI * 2.0)
+        );
+        assert_eq!(
+            (Vector3::<Angle>::splat(Angle::PI) / Vector3::<f32>::splat(2.0)).to_untyped(),
+            Vector3::splat(f32::PI / 2.0)
+        );
+        assert_eq!(
+            (Vector4::<Angle>::splat(Angle::PI) % Vector4::<f32>::splat(2.0)).to_untyped(),
+            Vector4::splat(f32::PI % 2.0)
+        );
+
+        let a = Angle::PI;
+        let (mut a, mut b, mut c) = (a, a, a);
+        a *= 2.0;
+        b /= 2.0;
+        c %= 2.0;
+        assert_eq!(a.to_radians(), f32::PI * 2.0);
+        assert_eq!(b.to_radians(), f32::PI / 2.0);
+        assert_eq!(c.to_radians(), f32::PI % 2.0);
+
+        let a = Angle::PI;
+        let abc = (
+            Vector2::<Angle>::splat(a),
+            Vector3::<Angle>::splat(a),
+            Vector4::<Angle>::splat(a),
+        );
+        let (two_a, two_b, two_c) = (
+            Vector2::<f32>::splat(2.0),
+            Vector3::<f32>::splat(2.0),
+            Vector4::<f32>::splat(2.0),
+        );
+        {
+            let (mut a, mut b, mut c) = abc;
+            a *= two_a;
+            b *= two_b;
+            c *= two_c;
+            assert_eq!(Vector2::<f32>::splat(f32::PI * 2.0), a.to_untyped());
+            assert_eq!(Vector3::<f32>::splat(f32::PI * 2.0), b.to_untyped());
+            assert_eq!(Vector4::<f32>::splat(f32::PI * 2.0), c.to_untyped());
+        }
+        {
+            let (mut a, mut b, mut c) = abc;
+            a /= two_a;
+            b /= two_b;
+            c /= two_c;
+            assert_eq!(Vector2::<f32>::splat(f32::PI / 2.0), a.to_untyped());
+            assert_eq!(Vector3::<f32>::splat(f32::PI / 2.0), b.to_untyped());
+            assert_eq!(Vector4::<f32>::splat(f32::PI / 2.0), c.to_untyped());
+        }
+        {
+            let (mut a, mut b, mut c) = abc;
+            a %= two_a;
+            b %= two_b;
+            c %= two_c;
+            assert_eq!(Vector2::<f32>::splat(f32::PI % 2.0), a.to_untyped());
+            assert_eq!(Vector3::<f32>::splat(f32::PI % 2.0), b.to_untyped());
+            assert_eq!(Vector4::<f32>::splat(f32::PI % 2.0), c.to_untyped());
+        }
+
+        let two: f32 = Angle::CIRCLE / Angle::PI;
+        assert_abs_diff_eq!(two, 2.0);
+    }
+
+    #[test]
     fn to_rotation() {
         let angle = Angle::HALF_CIRCLE;
         let quat = angle.to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat, glam::Quat::from_axis_angle(glam::Vec3::Z, f32::PI));
         let v = quat * Vector3::<f32>::X;
         assert_abs_diff_eq!(v, -Vector3::X);
-    }
-
-    struct BufWriter<'a> {
-        buffer: &'a mut [u8],
-        pos: usize,
-    }
-
-    impl<'a> core::fmt::Write for BufWriter<'a> {
-        fn write_str(&mut self, s: &str) -> core::fmt::Result {
-            let bytes = s.as_bytes();
-            if self.buffer.len() < bytes.len() + self.pos {
-                Err(core::fmt::Error)
-            } else {
-                (&mut self.buffer[self.pos..self.pos + bytes.len()]).copy_from_slice(bytes);
-                self.pos += bytes.len();
-                Ok(())
-            }
-        }
-    }
-
-    fn write_buf<'a>(buffer: &'a mut [u8], fmt: core::fmt::Arguments) -> &'a str {
-        use core::fmt::Write;
-        let mut writer = BufWriter { buffer, pos: 0 };
-        writer.write_fmt(fmt).unwrap();
-        core::str::from_utf8(&writer.buffer[0..writer.pos]).unwrap()
-    }
-
-    #[test]
-    fn angle_debug_print() {
-        let mut buffer = [0; 128];
-
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::HALF_CIRCLE)),
-            "Angle(π)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::CIRCLE)),
-            "Angle(2π)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::PI)),
-            "Angle(π)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::TAU)),
-            "Angle(2π)"
-        );
-
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_1_PI)),
-            "Angle(1/π)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_2_PI)),
-            "Angle(2/π)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_2)),
-            "Angle(π/2)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_3)),
-            "Angle(π/3)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_4)),
-            "Angle(π/4)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_6)),
-            "Angle(π/6)"
-        );
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::FRAG_PI_8)),
-            "Angle(π/8)"
-        );
-
-        assert_eq!(
-            write_buf(&mut buffer, format_args!("{:?}", Angle::from_radians(1.0))),
-            "Angle(1.00000)"
-        );
-
-        assert_eq!(
-            write_buf(
-                &mut buffer,
-                format_args!("{:?}", Vector3::<Angle>::splat(Angle::PI))
-            ),
-            "Vector3<Angle> { x: Angle(π), y: Angle(π), z: Angle(π) }"
-        );
     }
 }
