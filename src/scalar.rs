@@ -40,10 +40,7 @@ pub trait Scalar:
     /// Must be bitwise compatible with `Self`. If it isn't, you will get
     /// nonsensical results for arithmetic operations, and in case of a
     /// size/alignment difference, panics.
-    type Primitive: Primitive
-        + num_traits::ToPrimitive
-        + num_traits::Num
-        + num_traits::NumCast;
+    type Primitive: Primitive;
 
     /// Zero.
     const ZERO: Self;

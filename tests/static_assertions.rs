@@ -334,15 +334,9 @@ const _CHECK_TYPES: () = {
     impl AssertConversion<(Point2<UnitU32>, Size2<UnitU32>)> for Rect<UnitU32> {}
 
     impl AssertMatrixLike<Vector2<f32>> for Matrix2<f32> {}
-    impl AssertMatrixLike<Point2<f32>> for Matrix2<f32> {}
-    impl AssertMatrixLike<Vector2<f32>> for Matrix3<f32> {}
-    impl AssertMatrixLike<Point2<f32>> for Matrix3<f32> {}
-    impl AssertMatrixLike<Vector3<f32>> for Matrix4<f32> {}
-    impl AssertMatrixLike<Point3<f32>> for Matrix4<f32> {}
+    impl AssertMatrixLike<Vector3<f32>> for Matrix3<f32> {}
+    impl AssertMatrixLike<Vector4<f32>> for Matrix4<f32> {}
     impl AssertMatrixLike<Vector2<f64>> for Matrix2<f64> {}
-    impl AssertMatrixLike<Point2<f64>> for Matrix2<f64> {}
-    impl AssertMatrixLike<Vector2<f64>> for Matrix3<f64> {}
-    impl AssertMatrixLike<Point2<f64>> for Matrix3<f64> {}
-    impl AssertMatrixLike<Vector3<f64>> for Matrix4<f64> {}
-    impl AssertMatrixLike<Point3<f64>> for Matrix4<f64> {}
+    impl AssertMatrixLike<Vector3<f64>> for Matrix3<f64> {}
+    impl AssertMatrixLike<Vector4<f64>> for Matrix4<f64> {}
 };
