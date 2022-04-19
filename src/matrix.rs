@@ -18,7 +18,7 @@ use crate::{
         PrimitiveMatrices,
     },
     unit::UnitMatrices,
-    Angle, Point2, Point3, Point4, Vector2, Vector3, Vector4,
+    Angle, Point2, Point3, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, cast_mut, cast_ref, Pod, Zeroable};
@@ -98,7 +98,7 @@ unsafe impl<T: Zeroable> Zeroable for Matrix4<T> {}
 unsafe impl<T: Pod> Pod for Matrix4<T> {}
 
 macro_rules! impl_matrix {
-    ($base_type_name:ident < $dimensions:literal > => $mat_name:ident [ $axis_vector_ty:ident, $transform_vector_ty:ident ]) => {
+    ($base_type_name:ident < $dimensions:literal > => $mat_name:ident [ $axis_vector_ty:ident ]) => {
         impl<T> $base_type_name<T>
         where
             T: PrimitiveMatrices,
@@ -790,23 +790,8 @@ where
 {
     type Output = Vector2<T>;
 
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Vector2<T>) -> Self::Output {
+    fn mul(self, rhs: Vector2<T>) -> Vector2<T> {
         Vector2::from_raw(self.to_raw() * rhs.to_raw())
-    }
-}
-
-impl<T> Mul<Point2<T>> for Matrix2<T::Primitive>
-where
-    T: UnitMatrices,
-{
-    type Output = Point2<T>;
-
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Point2<T>) -> Self::Output {
-        Point2::from_raw(self.to_raw() * rhs.to_raw())
     }
 }
 
@@ -836,45 +821,6 @@ where
     }
 }
 
-impl<T> Mul<Point3<T>> for Matrix3<T::Primitive>
-where
-    T: UnitMatrices,
-{
-    type Output = Point3<T>;
-
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Point3<T>) -> Self::Output {
-        Point3::from_raw(self.to_raw() * rhs.to_raw())
-    }
-}
-
-impl<T> Mul<Vector2<T>> for Matrix3<T::Primitive>
-where
-    T: UnitMatrices,
-{
-    type Output = Vector2<T>;
-
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Vector2<T>) -> Self::Output {
-        self.transform_vector(rhs)
-    }
-}
-
-impl<T> Mul<Point2<T>> for Matrix3<T::Primitive>
-where
-    T: UnitMatrices,
-{
-    type Output = Point2<T>;
-
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Point2<T>) -> Self::Output {
-        self.transform_point(rhs)
-    }
-}
-
 impl<T> Mul<Vector4<T>> for Matrix4<T::Primitive>
 where
     T: UnitMatrices,
@@ -885,45 +831,6 @@ where
     #[must_use]
     fn mul(self, rhs: Vector4<T>) -> Self::Output {
         Vector4::from_raw(self.to_raw() * rhs.to_raw())
-    }
-}
-
-impl<T> Mul<Point4<T>> for Matrix4<T::Primitive>
-where
-    T: UnitMatrices,
-{
-    type Output = Point4<T>;
-
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Point4<T>) -> Self::Output {
-        Point4::from_raw(self.to_raw() * rhs.to_raw())
-    }
-}
-
-impl<T> Mul<Vector3<T>> for Matrix4<T::Primitive>
-where
-    T: UnitMatrices,
-{
-    type Output = Vector3<T>;
-
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Vector3<T>) -> Self::Output {
-        self.transform_vector(rhs)
-    }
-}
-
-impl<T> Mul<Point3<T>> for Matrix4<T::Primitive>
-where
-    T: UnitMatrices,
-{
-    type Output = Point3<T>;
-
-    #[inline]
-    #[must_use]
-    fn mul(self, rhs: Point3<T>) -> Self::Output {
-        self.project_point(rhs)
     }
 }
 
@@ -1353,9 +1260,9 @@ where
     }
 }
 
-impl_matrix!(Matrix2 <2> => Mat2 [Vector2, Vector2]);
-impl_matrix!(Matrix3 <3> => Mat3 [Vector3, Vector2]);
-impl_matrix!(Matrix4 <4> => Mat4 [Vector4, Vector3]);
+impl_matrix!(Matrix2 <2> => Mat2 [Vector2]);
+impl_matrix!(Matrix3 <3> => Mat3 [Vector3]);
+impl_matrix!(Matrix4 <4> => Mat4 [Vector4]);
 
 impl<T> AbsDiffEq for Matrix2<T>
 where
@@ -1568,7 +1475,7 @@ mod tests {
         assert_ulps_eq, assert_ulps_ne,
     };
 
-    use crate::{point2, point3, vec2, vec3};
+    use crate::{point3, vec2, vec3};
 
     use super::*;
 
@@ -1585,13 +1492,6 @@ mod tests {
     type DVec2 = Vector2<f64>;
     type DVec3 = Vector3<f64>;
     type DVec4 = Vector4<f64>;
-
-    type Point2 = super::Point2<f32>;
-    type Point3 = super::Point3<f32>;
-    type Point4 = super::Point4<f32>;
-    type DPoint2 = super::Point2<f64>;
-    type DPoint3 = super::Point3<f64>;
-    type DPoint4 = super::Point4<f64>;
 
     #[test]
     fn from_scale() {
@@ -1615,9 +1515,7 @@ mod tests {
         );
 
         assert_eq!(m2 * Vec2::ONE, vec2!(2.0, 3.0));
-        assert_eq!(m2 * Point2::ONE, point2!(2.0, 3.0));
-        assert_eq!(m3 * Vec2::ONE, vec2!(2.0, 3.0));
-        assert_eq!(m3 * Point2::ONE, point2!(2.0, 3.0));
+        assert_eq!(m3 * Vec3::ONE, vec3!(2.0, 3.0, 1.0));
 
         let m2 = DMat2::from_scale(DVec2::new(2.0, 3.0));
         let m3 = DMat3::from_scale(DVec2::new(2.0, 3.0));
@@ -1639,9 +1537,7 @@ mod tests {
         );
 
         assert_eq!(m2 * DVec2::ONE, vec2!(2.0, 3.0));
-        assert_eq!(m2 * DPoint2::ONE, point2!(2.0, 3.0));
-        assert_eq!(m3 * DVec2::ONE, vec2!(2.0, 3.0));
-        assert_eq!(m3 * DPoint2::ONE, point2!(2.0, 3.0));
+        assert_eq!(m3 * DVec3::ONE, vec3!(2.0, 3.0, 1.0));
     }
 
     #[test]
@@ -2012,23 +1908,14 @@ mod tests {
         let v2 = Vec2::new(1.0, 2.0);
         let v3 = Vec3::new(1.0, 2.0, 3.0);
         let v4 = Vec4::new(1.0, 2.0, 3.0, 4.0);
-        let p2 = Point2::new(1.0, 2.0);
-        let p3 = Point3::new(1.0, 2.0, 3.0);
-        let p4 = Point4::new(1.0, 2.0, 3.0, 4.0);
 
         let mat2 = Mat2::from_scale((2.0, 2.0).into());
         let mat3 = Mat3::from_scale((2.0, 2.0).into());
         let mat4 = Mat4::from_scale((2.0, 2.0, 2.0).into());
 
         assert_eq!(mat2 * v2, mat2.transform_vector(v2));
-        assert_eq!(mat3 * v2, mat3.transform_vector(v2));
-        assert_eq!(mat4 * v3, mat4.transform_vector(v3));
+        assert_eq!(mat3 * v3, Vec3::new(2.0, 4.0, 3.0));
         assert_eq!(mat4 * v4, Vec4::new(2.0, 4.0, 6.0, 4.0));
-
-        assert_eq!(mat2 * p2, mat2.transform_point(p2));
-        assert_eq!(mat3 * p2, mat3.transform_point(p2));
-        assert_eq!(mat4 * p3, mat4.transform_point(p3));
-        assert_eq!(mat4 * p4, Point4::new(2.0, 4.0, 6.0, 4.0));
     }
 
     #[test]
@@ -2036,23 +1923,14 @@ mod tests {
         let v2 = DVec2::new(1.0, 2.0);
         let v3 = DVec3::new(1.0, 2.0, 3.0);
         let v4 = DVec4::new(1.0, 2.0, 3.0, 4.0);
-        let p2 = DPoint2::new(1.0, 2.0);
-        let p3 = DPoint3::new(1.0, 2.0, 3.0);
-        let p4 = DPoint4::new(1.0, 2.0, 3.0, 4.0);
 
         let mat2 = DMat2::from_scale((2.0, 2.0).into());
         let mat3 = DMat3::from_scale((2.0, 2.0).into());
         let mat4 = DMat4::from_scale((2.0, 2.0, 2.0).into());
 
         assert_eq!(mat2 * v2, mat2.transform_vector(v2));
-        assert_eq!(mat3 * v2, mat3.transform_vector(v2));
-        assert_eq!(mat4 * v3, mat4.transform_vector(v3));
+        assert_eq!(mat3 * v3, mat3.transform_vector(v2).to_3d(3.0));
         assert_eq!(mat4 * v4, DVec4::new(2.0, 4.0, 6.0, 4.0));
-
-        assert_eq!(mat2 * p2, mat2.transform_point(p2));
-        assert_eq!(mat3 * p2, mat3.transform_point(p2));
-        assert_eq!(mat4 * p3, mat4.transform_point(p3));
-        assert_eq!(mat4 * p4, DPoint4::new(2.0, 4.0, 6.0, 4.0));
     }
 
     #[test]

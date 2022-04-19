@@ -1038,10 +1038,10 @@ mod tests {
 
     #[test]
     fn matrix_mul_custom_unit() {
-        use crate::{vec2, Matrix3};
+        use crate::{vec3, Matrix3};
         let mat = Matrix3::<f32>::IDENTITY;
-        let a: Vector2<F32> = vec2!(20.0, 30.0);
-        let b: Vector2<F32> = mat * a;
-        assert_eq!(b, (20.0, 30.0));
+        let a: Vector3<F32> = vec3!(20.0, 30.0, 1.0);
+        let b: Vector3<F32> = mat * a;
+        assert_eq!(b, (20.0, 30.0, 1.0));
     }
 }

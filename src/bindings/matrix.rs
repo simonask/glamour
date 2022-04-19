@@ -40,7 +40,7 @@ pub trait Matrix:
 ///
 /// Implemented for [`glam::Mat2`] and [`glam::DMat2`].
 #[allow(missing_docs)]
-pub trait Matrix2: Matrix {
+pub trait Matrix2: Matrix + Mul<Self::Vec2, Output = Self::Vec2> {
     fn mul_vec2(&self, vec: Self::Vec2) -> Self::Vec2;
     fn from_cols(x_axis: Self::Vec2, y_axis: Self::Vec2) -> Self;
     fn col(&self, index: usize) -> Self::Vec2;
