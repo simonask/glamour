@@ -96,7 +96,13 @@ pub trait VectorFloat<const D: usize>: Vector<D> {
     #[must_use]
     fn normalize(self) -> Self;
     #[must_use]
+    fn normalize_or_zero(self) -> Self;
+    #[must_use]
+    fn is_normalized(self) -> bool;
+    #[must_use]
     fn length(self) -> Self::Scalar;
+    #[must_use]
+    fn length_squared(self) -> Self::Scalar;
     #[must_use]
     fn exp(self) -> Self;
     #[must_use]
@@ -160,7 +166,10 @@ macro_rules! impl_base_float {
             forward_impl!($glam_ty => fn floor(self) -> Self);
             forward_impl!($glam_ty => fn round(self) -> Self);
             forward_impl!($glam_ty => fn normalize(self) -> Self);
+            forward_impl!($glam_ty => fn normalize_or_zero(self) -> Self);
+            forward_impl!($glam_ty => fn is_normalized(self) -> bool);
             forward_impl!($glam_ty => fn length(self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn length_squared(self) -> Self::Scalar);
             forward_impl!($glam_ty => fn exp(self) -> Self);
             forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
             forward_impl!($glam_ty => fn recip(self) -> Self);

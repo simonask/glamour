@@ -260,6 +260,24 @@ macro_rules! impl_vector {
                 Self::from_raw(self.to_raw().normalize())
             }
 
+            #[doc = "Normalize the vector if possible, else returns a zero vector."]
+            #[doc = ""]
+            #[doc = "See (e.g.) [`glam::Vec4::normalize_or_zero()`]."]
+            #[must_use]
+            #[inline]
+            pub fn normalize_or_zero(&self) -> Self {
+                Self::from_raw(self.to_raw().normalize_or_zero())
+            }
+
+            #[doc = "Returns whether `self` is length 1.0 or not"]
+            #[doc = ""]
+            #[doc = "See (e.g.) [`glam::Vec4::normalize()`]."]
+            #[must_use]
+            #[inline]
+            pub fn is_normalized(self) -> bool {
+                self.as_raw().is_normalized()
+            }
+
             #[doc = "Get the length of the vector"]
             #[doc = ""]
             #[doc = "See (e.g.) [`glam::Vec3::length()]."]
@@ -267,6 +285,15 @@ macro_rules! impl_vector {
             #[inline]
             pub fn length(&self) -> T::Primitive {
                 T::Primitive::from_raw(self.as_raw().length())
+            }
+
+            #[doc = "Get the squared length of the vector"]
+            #[doc = ""]
+            #[doc = "See (e.g.) [`glam::Vec3::length_squared()]."]
+            #[must_use]
+            #[inline]
+            pub fn length_squared(&self) -> T::Primitive {
+                T::Primitive::from_raw(self.as_raw().length_squared())
             }
 
             #[doc = "Returns a vector containing `e^self` (the exponential function) for each element of `self`."]
@@ -976,12 +1003,22 @@ mod tests {
         let d = a.dot(a).sqrt();
         let b = a / Vec3::splat(d);
         assert_abs_diff_eq!(a.normalize(), b);
+
+        let z = Vec3::ZERO;
+        assert_eq!(z.normalize_or_zero(), Vec3::ZERO);
     }
 
     #[test]
     fn length() {
         let v = Vec3::new(1.0, 2.0, 3.0);
-        assert_eq!(v.length(), glam::Vec3::new(1.0, 2.0, 3.0).length());
+        let u = glam::Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(v.length(), u.length());
+
+        assert_abs_diff_eq!(
+            v.length_squared(),
+            u.length() * u.length(),
+            epsilon = 0.00001
+        );
     }
 
     #[test]
