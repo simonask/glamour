@@ -1000,9 +1000,12 @@ mod tests {
     #[test]
     fn normalize() {
         let a = Vec3::new(1.0, 1.0, 2.0);
+        assert!(!a.is_normalized());
         let d = a.dot(a).sqrt();
         let b = a / Vec3::splat(d);
         assert_abs_diff_eq!(a.normalize(), b);
+
+        assert!(a.normalize().is_normalized());
 
         let z = Vec3::ZERO;
         assert_eq!(z.normalize_or_zero(), Vec3::ZERO);
