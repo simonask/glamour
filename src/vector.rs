@@ -925,14 +925,14 @@ mod tests {
         let v3 = Vec3::new(1.0, core::f32::NAN, 3.0);
         assert!(v3.is_nan());
         assert!(!v3.is_finite());
-        assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
+        assert_eq!(v3.is_nan_mask(), glam::BVec3A::new(false, true, false));
 
         let v4 = Vec4::new(1.0, 2.0, core::f32::NAN, 4.0);
         assert!(v4.is_nan());
         assert!(!v4.is_finite());
         assert_eq!(
             v4.is_nan_mask(),
-            glam::BVec4::new(false, false, true, false)
+            glam::BVec4A::new(false, false, true, false)
         );
 
         assert!(Vec2::nan().is_nan());
