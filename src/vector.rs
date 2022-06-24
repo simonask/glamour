@@ -93,9 +93,9 @@ crate::impl_common!(Vector4 {
     w: T::Scalar
 });
 
-crate::impl_simd_common!(Vector2 [2] => Vec2, glam::BVec2 { x, y });
-crate::impl_simd_common!(Vector3 [3] => Vec3, glam::BVec3A { x, y, z });
-crate::impl_simd_common!(Vector4 [4] => Vec4, glam::BVec4A { x, y, z, w });
+crate::impl_simd_common!(Vector2 [2] => Vec2 { x, y });
+crate::impl_simd_common!(Vector3 [3] => Vec3 { x, y, z });
+crate::impl_simd_common!(Vector4 [4] => Vec4 { x, y, z, w });
 
 crate::impl_as_tuple!(Vector2 {
     x: T::Scalar,
@@ -931,7 +931,7 @@ mod tests {
         let v3 = Vec3::new(1.0, core::f32::NAN, 3.0);
         assert!(v3.is_nan());
         assert!(!v3.is_finite());
-        assert_eq!(v3.is_nan_mask(), glam::BVec3A::new(false, true, false));
+        assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
 
         let v4 = Vec4::new(1.0, 2.0, core::f32::NAN, 4.0);
         assert!(v4.is_nan());

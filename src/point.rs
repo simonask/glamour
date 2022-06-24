@@ -47,9 +47,15 @@ pub struct Point3<T: Unit = f32> {
 /// aligned (for some reason), and integer vectors are only 4-byte aligned,
 /// which means that reference-casting from those glam types to `Point4` type
 /// will fail (but not the other way around).
-#[repr(C, align(16))]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound = ""))]
+#[cfg_attr(
+    any(
+        not(any(feature = "scalar-math", target_arch = "spirv")),
+        feature = "cuda"
+    ),
+    repr(C, align(16))
+)]
 pub struct Point4<T: Unit = f32> {
     /// X coordinate
     pub x: T::Scalar,
@@ -77,9 +83,9 @@ crate::impl_common!(Point4 {
     w: T::Scalar
 });
 
-crate::impl_simd_common!(Point2 [2] => Vec2, glam::BVec2 { x, y });
-crate::impl_simd_common!(Point3 [3] => Vec3, glam::BVec3A { x, y, z });
-crate::impl_simd_common!(Point4 [4] => Vec4, glam::BVec4A { x, y, z, w });
+crate::impl_simd_common!(Point2 [2] => Vec2 { x, y });
+crate::impl_simd_common!(Point3 [3] => Vec3 { x, y, z });
+crate::impl_simd_common!(Point4 [4] => Vec4 { x, y, z, w });
 
 crate::impl_as_tuple!(Point2 {
     x: T::Scalar,

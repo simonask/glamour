@@ -28,7 +28,13 @@ use bytemuck::{cast, cast_mut, cast_ref, Pod, Zeroable};
 /// Bitwise compatible with [`glam::Mat2`] / [`glam::DMat2`].
 ///
 /// Alignment: Always 16-byte aligned.
-#[repr(C, align(16))]
+#[cfg_attr(
+    any(
+        not(any(feature = "scalar-math", target_arch = "spirv")),
+        feature = "cuda"
+    ),
+    repr(C, align(16))
+)]
 #[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
@@ -71,7 +77,13 @@ unsafe impl<T: Pod> Pod for Matrix3<T> {}
 /// Bitwise compatible with [`glam::Mat4`] / [`glam::DMat4`].
 ///
 /// Alignment: Always 16-byte aligned.
-#[repr(C, align(16))]
+#[cfg_attr(
+    any(
+        not(any(feature = "scalar-math", target_arch = "spirv")),
+        feature = "cuda"
+    ),
+    repr(C, align(16))
+)]
 #[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]

@@ -121,68 +121,6 @@ pub trait VectorFloat2: VectorFloat<2> {
     fn rotate(self, other: Self) -> Self;
 }
 
-macro_rules! forward_cmp {
-    ($glam_ty:ty => $cmpfn:ident) => {
-        fn $cmpfn(self, other: Self) -> Self::Mask {
-            <$glam_ty>::$cmpfn(self, other).convert_mask()
-        }
-    };
-}
-
-/// This trait is a workaround for the fact that glam uses `BVec4` and `BVec4A`
-/// inconsistently between vectors with different scalar types. We only want the
-/// "A" variants.
-trait ConvertMask {
-    type Output;
-    fn convert_mask(self) -> Self::Output;
-}
-
-impl ConvertMask for glam::BVec2 {
-    type Output = glam::BVec2;
-
-    fn convert_mask(self) -> Self::Output {
-        self
-    }
-}
-
-impl ConvertMask for glam::BVec3A {
-    type Output = glam::BVec3A;
-
-    fn convert_mask(self) -> Self::Output {
-        self
-    }
-}
-
-impl ConvertMask for glam::BVec4A {
-    type Output = glam::BVec4A;
-
-    fn convert_mask(self) -> Self::Output {
-        self
-    }
-}
-
-/// On these platforms, `glam` the "A" variants are different from the normal
-/// vector types.
-#[cfg(all(
-    any(target_feature = "sse2", target_feature = "simd128"),
-    not(feature = "scalar-math")
-))]
-const _: () = {
-    impl ConvertMask for glam::BVec3 {
-        type Output = glam::BVec3A;
-        fn convert_mask(self) -> Self::Output {
-            glam::BVec3A::new(self.x, self.y, self.z)
-        }
-    }
-
-    impl ConvertMask for glam::BVec4 {
-        type Output = glam::BVec4A;
-        fn convert_mask(self) -> Self::Output {
-            glam::BVec4A::new(self.x, self.y, self.z, self.w)
-        }
-    }
-};
-
 macro_rules! impl_base {
     ($scalar:ty [$dimensions:literal] => $glam_ty:ty, $mask:ty) => {
         impl Vector<$dimensions> for $glam_ty {
@@ -203,12 +141,12 @@ macro_rules! impl_base {
                 array[lane] = value;
             }
 
-            forward_cmp!($glam_ty => cmpeq);
-            forward_cmp!($glam_ty => cmpne);
-            forward_cmp!($glam_ty => cmplt);
-            forward_cmp!($glam_ty => cmple);
-            forward_cmp!($glam_ty => cmpgt);
-            forward_cmp!($glam_ty => cmpge);
+            forward_impl!($glam_ty => fn cmpeq(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmpne(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmplt(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmple(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmpgt(self, other: Self) -> Self::Mask);
+            forward_impl!($glam_ty => fn cmpge(self, other: Self) -> Self::Mask);
 
             forward_impl!($glam_ty => fn clamp(self, min: Self, max: Self) -> Self);
             forward_impl!($glam_ty => fn min(self, other: Self) -> Self);
@@ -231,6 +169,7 @@ macro_rules! impl_base_float {
 
             forward_impl!($glam_ty => fn is_finite(self) -> bool);
             forward_impl!($glam_ty => fn is_nan(self) -> bool);
+            forward_impl!($glam_ty => fn is_nan_mask(self) -> Self::Mask);
             forward_impl!($glam_ty => fn ceil(self) -> Self);
             forward_impl!($glam_ty => fn floor(self) -> Self);
             forward_impl!($glam_ty => fn round(self) -> Self);
@@ -243,10 +182,6 @@ macro_rules! impl_base_float {
             forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
             forward_impl!($glam_ty => fn recip(self) -> Self);
             forward_impl!($glam_ty => fn mul_add(self, a: Self, b: Self) -> Self);
-
-            fn is_nan_mask(self) -> Self::Mask {
-                <$glam_ty>::is_nan_mask(self).convert_mask()
-            }
         }
 
         impl crate::traits::Lerp<<$glam_ty as Vector<$dimensions>>::Scalar> for $glam_ty {
@@ -265,17 +200,17 @@ macro_rules! impl_abs {
 }
 
 impl_base!(f32[2] => glam::Vec2, glam::BVec2);
-impl_base!(f32[3] => glam::Vec3, glam::BVec3A);
+impl_base!(f32[3] => glam::Vec3, glam::BVec3);
 impl_base!(f32[4] => glam::Vec4, glam::BVec4A);
 impl_base!(f64[2] => glam::DVec2, glam::BVec2);
-impl_base!(f64[3] => glam::DVec3, glam::BVec3A);
-impl_base!(f64[4] => glam::DVec4, glam::BVec4A);
+impl_base!(f64[3] => glam::DVec3, glam::BVec3);
+impl_base!(f64[4] => glam::DVec4, glam::BVec4);
 impl_base!(i32[2] => glam::IVec2, glam::BVec2);
-impl_base!(i32[3] => glam::IVec3, glam::BVec3A);
-impl_base!(i32[4] => glam::IVec4, glam::BVec4A);
+impl_base!(i32[3] => glam::IVec3, glam::BVec3);
+impl_base!(i32[4] => glam::IVec4, glam::BVec4);
 impl_base!(u32[2] => glam::UVec2, glam::BVec2);
-impl_base!(u32[3] => glam::UVec3, glam::BVec3A);
-impl_base!(u32[4] => glam::UVec4, glam::BVec4A);
+impl_base!(u32[3] => glam::UVec3, glam::BVec3);
+impl_base!(u32[4] => glam::UVec4, glam::BVec4);
 
 impl_base_float!(2 => glam::Vec2);
 impl_base_float!(3 => glam::Vec3);
