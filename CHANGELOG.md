@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `glam`.
 
 ### Breaking Changes
-- Minimum supported Rust version bumped to 1.58.1, because that is the new MSRV
-  of `glam`.
+- Minimum supported Rust version bumped to 1.61.0, because of support for
+  generic `const fn` methods.
 - `glam` 0.21.1 contains breaking changes:
   https://github.com/bitshifter/glam-rs/blob/main/CHANGELOG.md#breaking-changes.
 
@@ -102,6 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial release.
 
+[0.4.0]: https://github.com/simonask/glamour/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/simonask/glamour/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/simonask/glamour/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/simonask/glamour/compare/v0.1.1...v0.2.0
