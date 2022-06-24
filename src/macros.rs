@@ -6,9 +6,9 @@ macro_rules! impl_common {
             #[doc = "Instantiate with field values."]
             #[inline]
             #[must_use]
-            pub fn new($($fields: $fields_ty),*) -> $base_type_name<T> {
+            pub const fn new($($fields: $fields_ty),*) -> $base_type_name<T> {
                 $base_type_name {
-                    $($fields: $fields.into()),*
+                    $($fields),*
                 }
             }
 
@@ -216,14 +216,14 @@ macro_rules! impl_as_tuple {
             #[allow(unused_parens)]
             #[inline]
             #[must_use]
-            pub fn from_tuple(($($fields),*): ($($fields_ty),*)) -> Self {
+            pub const fn from_tuple(($($fields),*): ($($fields_ty),*)) -> Self {
                 $base_type_name { $($fields),* }
             }
 
             #[doc = "Convert to tuple."]
             #[inline]
             #[must_use]
-            pub fn to_tuple(self) -> ($($fields_ty),*) {
+            pub const fn to_tuple(self) -> ($($fields_ty),*) {
                 ($(self.$fields),*)
             }
         }
@@ -260,10 +260,10 @@ macro_rules! impl_as_tuple {
 }
 
 macro_rules! impl_simd_common {
-    ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident, $mask_ty:ty {
+    ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident {
         $($fields:ident),*
     }) => {
-        impl<T: crate::UnitTypes> $base_type_name<T> {
+        impl<T> $base_type_name<T> where T: crate::UnitTypes {
             #[doc = "All zeroes."]
             pub const ZERO: Self = Self {
                 $($fields: T::Scalar::ZERO),*
@@ -310,14 +310,14 @@ macro_rules! impl_simd_common {
             #[doc = "Instantiate from array."]
             #[inline]
             #[must_use]
-            pub fn from_array([$($fields),*]: [T::Scalar; $dimensions]) -> Self {
+            pub const fn from_array([$($fields),*]: [T::Scalar; $dimensions]) -> Self {
                 Self { $($fields),* }
             }
 
             #[doc = "Convert to array."]
             #[inline]
             #[must_use]
-            pub fn to_array(self) -> [T::Scalar; $dimensions] {
+            pub const fn to_array(self) -> [T::Scalar; $dimensions] {
                 let Self { $($fields),* } = self;
                 [$($fields),*]
             }
@@ -339,9 +339,10 @@ macro_rules! impl_simd_common {
             #[doc = "Instance with all components set to `scalar`."]
             #[inline]
             #[must_use]
-            pub fn splat(scalar: T::Scalar) -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::splat(scalar.to_raw()))
+            pub const fn splat(scalar: T::Scalar) -> Self {
+                $base_type_name {
+                    $($fields: scalar),*
+                }
             }
 
             #[doc = "Component-wise clamp."]
@@ -381,49 +382,49 @@ macro_rules! impl_simd_common {
             #[doc = "Return a mask with the result of a component-wise equals comparison."]
             #[inline]
             #[must_use]
-            pub fn cmpeq(self, other: Self) -> $mask_ty {
+            pub fn cmpeq(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
                 use crate::bindings::Vector;
-                self.to_raw().cmpeq(other.to_raw()).into()
+                self.to_raw().cmpeq(other.to_raw())
             }
 
             #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
             #[inline]
             #[must_use]
-            pub fn cmpne(self, other: Self) -> $mask_ty {
+            pub fn cmpne(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
                 use crate::bindings::Vector;
-                self.to_raw().cmpne(other.to_raw()).into()
+                self.to_raw().cmpne(other.to_raw())
             }
 
             #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
             #[inline]
             #[must_use]
-            pub fn cmpge(self, other: Self) -> $mask_ty {
+            pub fn cmpge(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
                 use crate::bindings::Vector;
-                self.to_raw().cmpge(other.to_raw()).into()
+                self.to_raw().cmpge(other.to_raw())
             }
 
             #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
             #[inline]
             #[must_use]
-            pub fn cmpgt(self, other: Self) -> $mask_ty {
+            pub fn cmpgt(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
                 use crate::bindings::Vector;
-                self.to_raw().cmpgt(other.to_raw()).into()
+                self.to_raw().cmpgt(other.to_raw())
             }
 
             #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
             #[inline]
             #[must_use]
-            pub fn cmple(self, other: Self) -> $mask_ty {
+            pub fn cmple(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
                 use crate::bindings::Vector;
-                self.to_raw().cmple(other.to_raw()).into()
+                self.to_raw().cmple(other.to_raw())
             }
 
             #[doc = "Return a mask with the result of a component-wise less-than comparison."]
             #[inline]
             #[must_use]
-            pub fn cmplt(self, other: Self) -> $mask_ty {
+            pub fn cmplt(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
                 use crate::bindings::Vector;
-                self.to_raw().cmplt(other.to_raw()).into()
+                self.to_raw().cmplt(other.to_raw())
             }
 
             #[doc = "Minimum by component."]
@@ -461,10 +462,17 @@ macro_rules! impl_simd_common {
             #[doc = "Select components from two instances based on a mask."]
             #[inline]
             #[must_use]
-            pub fn select(mask: $mask_ty, if_true: Self, if_false: Self) -> Self {
+            pub fn select(mask: <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask, if_true: Self, if_false: Self) -> Self {
                 use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::select(mask.into(), if_true.to_raw(), if_false.to_raw()))
+                Self::from_raw(T::$vec_ty::select(mask, if_true.to_raw(), if_false.to_raw()))
             }
+        }
+
+        impl<T> $base_type_name<T> where T: crate::UnitTypes, T::Scalar: crate::scalar::SignedScalar {
+            #[doc = "All negative one"]
+            pub const NEG_ONE: Self = $base_type_name {
+                $($fields: <T::Scalar as crate::scalar::SignedScalar>::NEG_ONE),*
+            };
         }
 
         impl<T> $base_type_name<T>
@@ -496,7 +504,7 @@ macro_rules! impl_simd_common {
             #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
             #[inline]
             #[must_use]
-            pub fn is_nan_mask(&self) -> $mask_ty {
+            pub fn is_nan_mask(&self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
                 use crate::bindings::VectorFloat;
                 self.as_raw().is_nan_mask().into()
             }

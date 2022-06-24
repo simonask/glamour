@@ -11,12 +11,14 @@
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
-use crate::UnitTypes;
+use crate::bindings::VectorFloat2;
+use crate::scalar::SignedScalar;
 use crate::{
     bindings::{Vector, VectorFloat},
     traits::Lerp,
     Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
+use crate::{Angle, UnitTypes};
 
 /// 2D vector.
 ///
@@ -55,9 +57,15 @@ pub struct Vector3<T: Unit = f32> {
 /// aligned (for some reason), and integer vectors are only 4-byte aligned,
 /// which means that reference-casting from those glam types to `Vector4` type
 /// will fail (but not the other way around - see [`Vector4::as_raw()`]).
-#[repr(C, align(16))]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound = ""))]
+#[cfg_attr(
+    any(
+        not(any(feature = "scalar-math", target_arch = "spirv")),
+        feature = "cuda"
+    ),
+    repr(C, align(16))
+)]
 pub struct Vector4<T: Unit = f32> {
     /// X coordinate
     pub x: T::Scalar,
@@ -85,9 +93,9 @@ crate::impl_common!(Vector4 {
     w: T::Scalar
 });
 
-crate::impl_simd_common!(Vector2 [2] => Vec2, glam::BVec2 { x, y });
-crate::impl_simd_common!(Vector3 [3] => Vec3, glam::BVec3 { x, y, z });
-crate::impl_simd_common!(Vector4 [4] => Vec4, glam::BVec4 { x, y, z, w });
+crate::impl_simd_common!(Vector2 [2] => Vec2 { x, y });
+crate::impl_simd_common!(Vector3 [3] => Vec3 { x, y, z });
+crate::impl_simd_common!(Vector4 [4] => Vec4 { x, y, z, w });
 
 crate::impl_as_tuple!(Vector2 {
     x: T::Scalar,
@@ -456,6 +464,49 @@ impl<T: Unit> Vector2<T> {
     }
 }
 
+impl<T> Vector2<T>
+where
+    T: UnitTypes,
+    T::Vec2: VectorFloat2,
+{
+    /// Return `(sin(angle), cos(angle))`.
+    ///
+    /// See [`glam::Vec2::from_angle()`] and [`glam::DVec2::from_angle()`].
+    #[must_use]
+    pub fn from_angle(angle: Angle<T::Primitive>) -> Vector2<T::Primitive> {
+        let angle = angle.radians;
+        Vector2::from_raw(<T::Vec2 as VectorFloat2>::from_angle(angle))
+    }
+
+    /// Rotate by a vector containing `(sin(angle), cos(angle))`.
+    ///
+    /// See [`glam::Vec2::rotate()`] and [`glam::DVec2::rotate()`].
+    #[must_use]
+    pub fn rotate(self, rotation: Vector2<T::Primitive>) -> Self {
+        Self::from_raw(<T::Vec2 as VectorFloat2>::rotate(
+            self.to_raw(),
+            rotation.to_raw(),
+        ))
+    }
+}
+
+impl<T> Vector2<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    /// (-1, 0)
+    pub const NEG_X: Self = Vector2 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::ZERO,
+    };
+    /// (0, -1)
+    pub const NEG_Y: Self = Vector2 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::NEG_ONE,
+    };
+}
+
 impl<T: Unit> Vector3<T> {
     /// Unit vector in the direction of the X axis.
     pub const X: Self = Self {
@@ -497,6 +548,31 @@ impl<T: Unit> Vector3<T> {
             w,
         }
     }
+}
+
+impl<T> Vector3<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    /// (-1, 0, 0)
+    pub const NEG_X: Self = Vector3 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
+    /// (0, -1, 0)
+    pub const NEG_Y: Self = Vector3 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::ZERO,
+    };
+    /// (0, 0, -1)
+    pub const NEG_Z: Self = Vector3 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::NEG_ONE,
+    };
 }
 
 impl<T> Vector3<T>
@@ -587,6 +663,41 @@ impl<T: Unit> Vector4<T> {
     }
 }
 
+impl<T> Vector4<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    /// (-1, 0, 0, 0)
+    pub const NEG_X: Self = Vector4 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+    /// (0, -1, 0, 0)
+    pub const NEG_Y: Self = Vector4 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+    /// (0, 0, -1, 0)
+    pub const NEG_Z: Self = Vector4 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::NEG_ONE,
+        w: T::Scalar::ZERO,
+    };
+    /// (0, 0, 0, -1)
+    pub const NEG_W: Self = Vector4 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::NEG_ONE,
+    };
+}
+
 crate::impl_mint!(Vector2, 2, Vector2);
 crate::impl_mint!(Vector3, 3, Vector3);
 crate::impl_mint!(Vector4, 4, Vector4);
@@ -611,7 +722,7 @@ impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Vector3<T>> for glam::DQuat {
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::vector;
+    use crate::{vector, AngleConsts};
 
     use super::*;
 
@@ -827,7 +938,7 @@ mod tests {
         assert!(!v4.is_finite());
         assert_eq!(
             v4.is_nan_mask(),
-            glam::BVec4::new(false, false, true, false)
+            glam::BVec4A::new(false, false, true, false)
         );
 
         assert!(Vec2::nan().is_nan());
@@ -965,12 +1076,37 @@ mod tests {
         let gt = a.cmpgt(b);
         let ge = a.cmpge(b);
 
-        assert_eq!(eq.as_ref(), &[false, true, false, false]);
-        assert_eq!(ne.as_ref(), &[true, false, true, true]);
-        assert_eq!(lt.as_ref(), &[true, false, false, false]);
-        assert_eq!(le.as_ref(), &[true, true, false, false]);
-        assert_eq!(gt.as_ref(), &[false, false, true, true]);
-        assert_eq!(ge.as_ref(), &[false, true, true, true]);
+        assert_eq!(eq, glam::BVec4A::new(false, true, false, false));
+        assert_eq!(ne, glam::BVec4A::new(true, false, true, true));
+        assert_eq!(lt, glam::BVec4A::new(true, false, false, false));
+        assert_eq!(le, glam::BVec4A::new(true, true, false, false));
+        assert_eq!(gt, glam::BVec4A::new(false, false, true, true));
+        assert_eq!(ge, glam::BVec4A::new(false, true, true, true));
+
+        assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
+        assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
+        assert_eq!(a.min_element(), 1.0);
+        assert_eq!(a.max_element(), 4.0);
+    }
+
+    #[test]
+    fn cmp_f64() {
+        let a = Vector4::<f64>::new(1.0, 2.0, 3.0, 4.0);
+        let b = Vector4::<f64>::new(4.0, 2.0, 1.0, 3.0);
+
+        let eq = a.cmpeq(b);
+        let ne = a.cmpne(b);
+        let lt = a.cmplt(b);
+        let le = a.cmple(b);
+        let gt = a.cmpgt(b);
+        let ge = a.cmpge(b);
+
+        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
+        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
+        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
+        assert_eq!(le, glam::BVec4::new(true, true, false, false));
+        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
+        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
 
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
@@ -1074,6 +1210,20 @@ mod tests {
         let v = Vector3::<f64>::X;
         let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat * v, -v);
+    }
+
+    #[test]
+    fn rotate2() {
+        let a = Vector2::<f32>::X;
+        let rotate_by = Angle::<f32>::FRAG_PI_2;
+        let b = Vector2::<f32>::from_angle(rotate_by);
+        let rotated = a.rotate(b);
+        assert_abs_diff_eq!(rotated, Vector2::<f32>::Y);
+
+        let x = glam::Vec2::X;
+        let rotate_by = glam::Vec2::from_angle(f32::FRAG_PI_2);
+        let y = x.rotate(rotate_by);
+        assert_abs_diff_eq!(rotated.to_raw(), y);
     }
 
     #[test]

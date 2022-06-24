@@ -101,11 +101,20 @@ pub trait Scalar:
     }
 }
 
+/// Signed scalar types (`i32`, `f32`, `f64`).
+pub trait SignedScalar: Scalar {
+    const NEG_ONE: Self;
+}
+
 impl Scalar for f32 {
     type Primitive = f32;
 
     const ZERO: Self = 0.0;
     const ONE: Self = 1.0;
+}
+
+impl SignedScalar for f32 {
+    const NEG_ONE: Self = -1.0;
 }
 
 impl Scalar for f64 {
@@ -115,11 +124,19 @@ impl Scalar for f64 {
     const ONE: Self = 1.0;
 }
 
+impl SignedScalar for f64 {
+    const NEG_ONE: Self = -1.0;
+}
+
 impl Scalar for i32 {
     type Primitive = i32;
 
     const ZERO: Self = 0;
     const ONE: Self = 1;
+}
+
+impl SignedScalar for i32 {
+    const NEG_ONE: Self = -1;
 }
 
 impl Scalar for u32 {

@@ -33,7 +33,7 @@ pub struct Transform2<Src: Unit, Dst: Unit> {
 ///
 /// This is a strongly typed wrapper around a [`Matrix4`], where that matrix
 /// describes how to map between units.
-#[repr(C, align(16))]
+#[repr(C)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound = ""))]
 pub struct Transform3<Src: Unit, Dst: Unit> {

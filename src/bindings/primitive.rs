@@ -48,11 +48,11 @@ pub trait Primitive:
     + 'static
 {
     /// 2D vector type
-    type Vec2: Vector<2, Scalar = Self, Mask = glam::BVec2>;
+    type Vec2: Vector<2, Scalar = Self>;
     /// 3D vector type
-    type Vec3: Vector<3, Scalar = Self, Mask = glam::BVec3A>;
+    type Vec3: Vector<3, Scalar = Self>;
     /// 4D vector type
-    type Vec4: Vector<4, Scalar = Self, Mask = glam::BVec4A>;
+    type Vec4: Vector<4, Scalar = Self>;
 
     /// True if the value is finite (not infinity, not NaN).
     ///

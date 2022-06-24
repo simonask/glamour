@@ -28,7 +28,7 @@ pub trait Vector<const D: usize>:
     /// The component type of this `glam` vector.
     type Scalar: Primitive;
     /// The corresponding boolean vector of the same dimensionality as `Self`.
-    /// Always one of [`glam::BVec2`], [`glam::BVec3`], or [`glam::BVec4`].
+    /// Always one of [`glam::BVec2`], [`glam::BVec3A`], or [`glam::BVec4`].
     type Mask;
 
     #[must_use]
@@ -113,6 +113,14 @@ pub trait VectorFloat<const D: usize>: Vector<D> {
     fn mul_add(self, a: Self, b: Self) -> Self;
 }
 
+#[allow(missing_docs)]
+pub trait VectorFloat2: VectorFloat<2> {
+    #[must_use]
+    fn from_angle(angle: Self::Scalar) -> Self;
+    #[must_use]
+    fn rotate(self, other: Self) -> Self;
+}
+
 macro_rules! impl_base {
     ($scalar:ty [$dimensions:literal] => $glam_ty:ty, $mask:ty) => {
         impl Vector<$dimensions> for $glam_ty {
@@ -192,17 +200,17 @@ macro_rules! impl_abs {
 }
 
 impl_base!(f32[2] => glam::Vec2, glam::BVec2);
-impl_base!(f32[3] => glam::Vec3, glam::BVec3A);
+impl_base!(f32[3] => glam::Vec3, glam::BVec3);
 impl_base!(f32[4] => glam::Vec4, glam::BVec4A);
 impl_base!(f64[2] => glam::DVec2, glam::BVec2);
-impl_base!(f64[3] => glam::DVec3, glam::BVec3A);
-impl_base!(f64[4] => glam::DVec4, glam::BVec4A);
+impl_base!(f64[3] => glam::DVec3, glam::BVec3);
+impl_base!(f64[4] => glam::DVec4, glam::BVec4);
 impl_base!(i32[2] => glam::IVec2, glam::BVec2);
-impl_base!(i32[3] => glam::IVec3, glam::BVec3A);
-impl_base!(i32[4] => glam::IVec4, glam::BVec4A);
+impl_base!(i32[3] => glam::IVec3, glam::BVec3);
+impl_base!(i32[4] => glam::IVec4, glam::BVec4);
 impl_base!(u32[2] => glam::UVec2, glam::BVec2);
-impl_base!(u32[3] => glam::UVec3, glam::BVec3A);
-impl_base!(u32[4] => glam::UVec4, glam::BVec4A);
+impl_base!(u32[3] => glam::UVec3, glam::BVec3);
+impl_base!(u32[4] => glam::UVec4, glam::BVec4);
 
 impl_base_float!(2 => glam::Vec2);
 impl_base_float!(3 => glam::Vec3);
@@ -210,6 +218,26 @@ impl_base_float!(4 => glam::Vec4);
 impl_base_float!(2 => glam::DVec2);
 impl_base_float!(3 => glam::DVec3);
 impl_base_float!(4 => glam::DVec4);
+
+impl VectorFloat2 for glam::Vec2 {
+    fn from_angle(angle: Self::Scalar) -> Self {
+        <glam::Vec2>::from_angle(angle)
+    }
+
+    fn rotate(self, other: Self) -> Self {
+        <glam::Vec2>::rotate(self, other)
+    }
+}
+
+impl VectorFloat2 for glam::DVec2 {
+    fn from_angle(angle: Self::Scalar) -> Self {
+        <glam::DVec2>::from_angle(angle)
+    }
+
+    fn rotate(self, other: Self) -> Self {
+        <glam::DVec2>::rotate(self, other)
+    }
+}
 
 impl_abs!(glam::Vec2);
 impl_abs!(glam::Vec3);

@@ -38,9 +38,9 @@ crate::impl_common!(Size3 {
     depth: T::Scalar
 });
 
-crate::impl_simd_common!(Size2 [2] => Vec2, glam::BVec2 { width, height });
+crate::impl_simd_common!(Size2 [2] => Vec2 { width, height });
 
-crate::impl_simd_common!(Size3 [3] => Vec3, glam::BVec3 {
+crate::impl_simd_common!(Size3 [3] => Vec3 {
     width,
     height,
     depth
