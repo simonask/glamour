@@ -78,7 +78,7 @@ crate::impl_common!(Point4 {
 });
 
 crate::impl_simd_common!(Point2 [2] => Vec2, glam::BVec2 { x, y });
-crate::impl_simd_common!(Point3 [3] => Vec3, glam::BVec3 { x, y, z });
+crate::impl_simd_common!(Point3 [3] => Vec3, glam::BVec3A { x, y, z });
 crate::impl_simd_common!(Point4 [4] => Vec4, glam::BVec4A { x, y, z, w });
 
 crate::impl_as_tuple!(Point2 {

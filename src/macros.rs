@@ -8,7 +8,7 @@ macro_rules! impl_common {
             #[must_use]
             pub const fn new($($fields: $fields_ty),*) -> $base_type_name<T> {
                 $base_type_name {
-                    $($fields: $fields),*
+                    $($fields),*
                 }
             }
 
