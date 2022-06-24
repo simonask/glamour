@@ -89,7 +89,7 @@ crate::impl_common!(Vector4 {
 
 crate::impl_simd_common!(Vector2 [2] => Vec2, glam::BVec2 { x, y });
 crate::impl_simd_common!(Vector3 [3] => Vec3, glam::BVec3 { x, y, z });
-crate::impl_simd_common!(Vector4 [4] => Vec4, glam::BVec4 { x, y, z, w });
+crate::impl_simd_common!(Vector4 [4] => Vec4, glam::BVec4A { x, y, z, w });
 
 crate::impl_as_tuple!(Vector2 {
     x: T::Scalar,
@@ -1070,12 +1070,12 @@ mod tests {
         let gt = a.cmpgt(b);
         let ge = a.cmpge(b);
 
-        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
-        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
-        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
-        assert_eq!(le, glam::BVec4::new(true, true, false, false));
-        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
-        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
+        assert_eq!(eq, glam::BVec4A::new(false, true, false, false));
+        assert_eq!(ne, glam::BVec4A::new(true, false, true, true));
+        assert_eq!(lt, glam::BVec4A::new(true, false, false, false));
+        assert_eq!(le, glam::BVec4A::new(true, true, false, false));
+        assert_eq!(gt, glam::BVec4A::new(false, false, true, true));
+        assert_eq!(ge, glam::BVec4A::new(false, true, true, true));
 
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
