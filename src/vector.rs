@@ -1084,6 +1084,31 @@ mod tests {
     }
 
     #[test]
+    fn cmp_f64() {
+        let a = Vector4::<f64>::new(1.0, 2.0, 3.0, 4.0);
+        let b = Vector4::<f64>::new(4.0, 2.0, 1.0, 3.0);
+
+        let eq = a.cmpeq(b);
+        let ne = a.cmpne(b);
+        let lt = a.cmplt(b);
+        let le = a.cmple(b);
+        let gt = a.cmpgt(b);
+        let ge = a.cmpge(b);
+
+        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
+        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
+        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
+        assert_eq!(le, glam::BVec4::new(true, true, false, false));
+        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
+        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
+
+        assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
+        assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
+        assert_eq!(a.min_element(), 1.0);
+        assert_eq!(a.max_element(), 4.0);
+    }
+
+    #[test]
     fn clamp() {
         let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
         assert_eq!(
