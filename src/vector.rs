@@ -11,6 +11,7 @@
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
+use crate::scalar::SignedScalar;
 use crate::UnitTypes;
 use crate::{
     bindings::{Vector, VectorFloat},
@@ -456,6 +457,23 @@ impl<T: Unit> Vector2<T> {
     }
 }
 
+impl<T> Vector2<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    /// (-1, 0)
+    pub const NEG_X: Self = Vector2 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::ZERO,
+    };
+    /// (0, -1)
+    pub const NEG_Y: Self = Vector2 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::NEG_ONE,
+    };
+}
+
 impl<T: Unit> Vector3<T> {
     /// Unit vector in the direction of the X axis.
     pub const X: Self = Self {
@@ -497,6 +515,31 @@ impl<T: Unit> Vector3<T> {
             w,
         }
     }
+}
+
+impl<T> Vector3<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    /// (-1, 0, 0)
+    pub const NEG_X: Self = Vector3 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
+    /// (0, -1, 0)
+    pub const NEG_Y: Self = Vector3 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::ZERO,
+    };
+    /// (0, 0, -1)
+    pub const NEG_Z: Self = Vector3 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::NEG_ONE,
+    };
 }
 
 impl<T> Vector3<T>
@@ -585,6 +628,41 @@ impl<T: Unit> Vector4<T> {
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize, const W: usize>(&self) -> Self {
         self.swizzle4::<X, Y, Z, W>()
     }
+}
+
+impl<T> Vector4<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    /// (-1, 0, 0, 0)
+    pub const NEG_X: Self = Vector4 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+    /// (0, -1, 0, 0)
+    pub const NEG_Y: Self = Vector4 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+    /// (0, 0, -1, 0)
+    pub const NEG_Z: Self = Vector4 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::NEG_ONE,
+        w: T::Scalar::ZERO,
+    };
+    /// (0, 0, 0, -1)
+    pub const NEG_W: Self = Vector4 {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::NEG_ONE,
+    };
 }
 
 crate::impl_mint!(Vector2, 2, Vector2);
