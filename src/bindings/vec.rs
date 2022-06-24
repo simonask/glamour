@@ -231,7 +231,6 @@ macro_rules! impl_base_float {
 
             forward_impl!($glam_ty => fn is_finite(self) -> bool);
             forward_impl!($glam_ty => fn is_nan(self) -> bool);
-            forward_impl!($glam_ty => fn is_nan_mask(self) -> Self::Mask);
             forward_impl!($glam_ty => fn ceil(self) -> Self);
             forward_impl!($glam_ty => fn floor(self) -> Self);
             forward_impl!($glam_ty => fn round(self) -> Self);
@@ -244,6 +243,10 @@ macro_rules! impl_base_float {
             forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
             forward_impl!($glam_ty => fn recip(self) -> Self);
             forward_impl!($glam_ty => fn mul_add(self, a: Self, b: Self) -> Self);
+
+            fn is_nan_mask(self) -> Self::Mask {
+                <$glam_ty>::is_nan_mask(self).convert_mask()
+            }
         }
 
         impl crate::traits::Lerp<<$glam_ty as Vector<$dimensions>>::Scalar> for $glam_ty {
