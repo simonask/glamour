@@ -2,7 +2,7 @@
 
 [![Build Status]][github-ci] [![codecov-badge]][codecov]
 [![Latest Version]][crates.io] [![docs]][docs.rs]
-[![Minimum Supported Rust Version]][Rust 1.56]
+[![Minimum Supported Rust Version]][Rust 1.58.1]
 
 This crate uses [bytemuck][] to implement a zero-cost[^zero_cost] strongly typed
 interface on top of [glam][].
@@ -163,5 +163,5 @@ builds.
 [crates.io]: https://crates.io/crates/glamour/
 [docs]: https://docs.rs/glamour/badge.svg
 [docs.rs]: https://docs.rs/glamour/
-[Minimum Supported Rust Version]: https://img.shields.io/badge/Rust-1.56.1-blue?color=fc8d62&logo=rust
-[Rust 1.56]: https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1561-2021-11-01
+[Minimum Supported Rust Version]: https://img.shields.io/badge/Rust-1.58.1-blue?color=fc8d62&logo=rust
+[Rust 1.58.1]: https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1581-2022-01-19
