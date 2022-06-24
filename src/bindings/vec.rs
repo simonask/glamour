@@ -28,7 +28,7 @@ pub trait Vector<const D: usize>:
     /// The component type of this `glam` vector.
     type Scalar: Primitive;
     /// The corresponding boolean vector of the same dimensionality as `Self`.
-    /// Always one of [`glam::BVec2`], [`glam::BVec3`], or [`glam::BVec4`].
+    /// Always one of [`glam::BVec2`], [`glam::BVec3A`], or [`glam::BVec4`].
     type Mask;
 
     #[must_use]
