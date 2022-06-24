@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2022-06-24
+### Added
+- Added APIs mirroring new additions in `glam` 0.21.1: `Vector2::from_angle()`,
+  `Vector2::rotate()`, `NEG_*` constants for signed vector types.
+
+### Changed
+- Bumped `glam` version to 0.21.1. Note that this version introduced breaking
+  changes.
+- Constified a couple of methods. Unfortunately, since `bytemuck::cast` and
+  friends are not `const`, functions that delegate directly to `glam` cannot be
+  made `const` for the time being, even if those functions are `const fn` in
+  `glam`.
+
+### Breaking Changes
+- Minimum supported Rust version bumped to 1.58.1, because that is the new MSRV
+  of `glam`.
+- `glam` 0.21.1 contains breaking changes:
+  https://github.com/bitshifter/glam-rs/blob/main/CHANGELOG.md#breaking-changes.
+
 ## [0.3.1] - 2022-04-25
 ### Added
 - Added `length_squared` and `normalize_or_zero` for vectors (#16).
