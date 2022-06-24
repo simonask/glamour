@@ -57,9 +57,15 @@ pub struct Vector3<T: Unit = f32> {
 /// aligned (for some reason), and integer vectors are only 4-byte aligned,
 /// which means that reference-casting from those glam types to `Vector4` type
 /// will fail (but not the other way around - see [`Vector4::as_raw()`]).
-#[repr(C, align(16))]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound = ""))]
+#[cfg_attr(
+    any(
+        not(any(feature = "scalar-math", target_arch = "spirv")),
+        feature = "cuda"
+    ),
+    repr(C, align(16))
+)]
 pub struct Vector4<T: Unit = f32> {
     /// X coordinate
     pub x: T::Scalar,
