@@ -36,6 +36,7 @@ optional = true
 [features]
 default = ["std"]
 std = ["glam/std", "num-traits/std"]
+scalar-math = ["glam/scalar-math"]
 
 # Enable conversions to `mint` types
 mint = ["mint_crate", "glam/mint"]
