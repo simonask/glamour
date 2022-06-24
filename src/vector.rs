@@ -11,13 +11,14 @@
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
+use crate::bindings::VectorFloat2;
 use crate::scalar::SignedScalar;
-use crate::UnitTypes;
 use crate::{
     bindings::{Vector, VectorFloat},
     traits::Lerp,
     Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
+use crate::{Angle, UnitTypes};
 
 /// 2D vector.
 ///
@@ -459,6 +460,32 @@ impl<T: Unit> Vector2<T> {
 
 impl<T> Vector2<T>
 where
+    T: UnitTypes,
+    T::Vec2: VectorFloat2,
+{
+    /// Return `(sin(angle), cos(angle))`.
+    ///
+    /// See [`glam::Vec2::from_angle()`] and [`glam::DVec2::from_angle()`].
+    #[must_use]
+    pub fn from_angle(angle: Angle<T::Primitive>) -> Vector2<T::Primitive> {
+        let angle = angle.radians;
+        Vector2::from_raw(<T::Vec2 as VectorFloat2>::from_angle(angle))
+    }
+
+    /// Rotate by a vector containing `(sin(angle), cos(angle))`.
+    ///
+    /// See [`glam::Vec2::rotate()`] and [`glam::DVec2::rotate()`].
+    #[must_use]
+    pub fn rotate(self, rotation: Vector2<T::Primitive>) -> Self {
+        Self::from_raw(<T::Vec2 as VectorFloat2>::rotate(
+            self.to_raw(),
+            rotation.to_raw(),
+        ))
+    }
+}
+
+impl<T> Vector2<T>
+where
     T: Unit,
     T::Scalar: SignedScalar,
 {
@@ -689,7 +716,7 @@ impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Vector3<T>> for glam::DQuat {
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::vector;
+    use crate::{vector, AngleConsts};
 
     use super::*;
 
@@ -1152,6 +1179,20 @@ mod tests {
         let v = Vector3::<f64>::X;
         let quat = Angle::from_degrees(180.0f64).to_rotation(Vector3::Z);
         assert_abs_diff_eq!(quat * v, -v);
+    }
+
+    #[test]
+    fn rotate2() {
+        let a = Vector2::<f32>::X;
+        let rotate_by = Angle::<f32>::FRAG_PI_2;
+        let b = Vector2::<f32>::from_angle(rotate_by);
+        let rotated = a.rotate(b);
+        assert_abs_diff_eq!(rotated, Vector2::<f32>::Y);
+
+        let x = glam::Vec2::X;
+        let rotate_by = glam::Vec2::from_angle(f32::FRAG_PI_2);
+        let y = x.rotate(rotate_by);
+        assert_abs_diff_eq!(rotated.to_raw(), y);
     }
 
     #[test]

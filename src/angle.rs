@@ -7,6 +7,7 @@ use num_traits::{Float, NumAssignOps};
 
 use crate::{
     bindings::{Primitive, PrimitiveMatrices, Quat},
+    scalar::SignedScalar,
     traits::marker::ValueSemantics,
     Scalar, Unit, Vector2, Vector3, Vector4,
 };
@@ -150,6 +151,15 @@ where
 
     const ZERO: Self = Angle { radians: T::ZERO };
     const ONE: Self = Angle { radians: T::ONE };
+}
+
+impl<T> SignedScalar for Angle<T>
+where
+    T: Primitive + AngleConsts + SignedScalar,
+{
+    const NEG_ONE: Self = Angle {
+        radians: T::NEG_ONE,
+    };
 }
 
 impl<T> Unit for Angle<T>
