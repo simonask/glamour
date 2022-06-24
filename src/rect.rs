@@ -34,7 +34,7 @@ impl<T: UnitTypes> Rect<T> {
     /// Rect at (0.0, 0.0) with `size`.
     #[inline]
     #[must_use]
-    pub fn from_size(size: Size2<T>) -> Self {
+    pub const fn from_size(size: Size2<T>) -> Self {
         Rect {
             origin: Point2::ZERO,
             size,
@@ -71,7 +71,7 @@ impl<T: UnitTypes> Rect<T> {
     /// Get rect lower bound (`origin`).
     #[inline]
     #[must_use]
-    pub fn min(&self) -> Point2<T> {
+    pub const fn min(&self) -> Point2<T> {
         self.origin
     }
 
@@ -85,14 +85,14 @@ impl<T: UnitTypes> Rect<T> {
     /// Width of the rectangle.
     #[inline]
     #[must_use]
-    pub fn width(&self) -> T::Scalar {
+    pub const fn width(&self) -> T::Scalar {
         self.size.width
     }
 
     /// Height of the rectangle.
     #[inline]
     #[must_use]
-    pub fn height(&self) -> T::Scalar {
+    pub const fn height(&self) -> T::Scalar {
         self.size.height
     }
 
@@ -315,7 +315,7 @@ impl<T: UnitTypes> Rect<T> {
     /// ```
     #[inline]
     #[must_use]
-    pub fn to_tuple(self) -> (Point2<T>, Size2<T>) {
+    pub const fn to_tuple(self) -> (Point2<T>, Size2<T>) {
         (self.origin, self.size)
     }
 }

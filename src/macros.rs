@@ -6,9 +6,9 @@ macro_rules! impl_common {
             #[doc = "Instantiate with field values."]
             #[inline]
             #[must_use]
-            pub fn new($($fields: $fields_ty),*) -> $base_type_name<T> {
+            pub const fn new($($fields: $fields_ty),*) -> $base_type_name<T> {
                 $base_type_name {
-                    $($fields: $fields.into()),*
+                    $($fields: $fields),*
                 }
             }
 
@@ -216,14 +216,14 @@ macro_rules! impl_as_tuple {
             #[allow(unused_parens)]
             #[inline]
             #[must_use]
-            pub fn from_tuple(($($fields),*): ($($fields_ty),*)) -> Self {
+            pub const fn from_tuple(($($fields),*): ($($fields_ty),*)) -> Self {
                 $base_type_name { $($fields),* }
             }
 
             #[doc = "Convert to tuple."]
             #[inline]
             #[must_use]
-            pub fn to_tuple(self) -> ($($fields_ty),*) {
+            pub const fn to_tuple(self) -> ($($fields_ty),*) {
                 ($(self.$fields),*)
             }
         }
@@ -310,14 +310,14 @@ macro_rules! impl_simd_common {
             #[doc = "Instantiate from array."]
             #[inline]
             #[must_use]
-            pub fn from_array([$($fields),*]: [T::Scalar; $dimensions]) -> Self {
+            pub const fn from_array([$($fields),*]: [T::Scalar; $dimensions]) -> Self {
                 Self { $($fields),* }
             }
 
             #[doc = "Convert to array."]
             #[inline]
             #[must_use]
-            pub fn to_array(self) -> [T::Scalar; $dimensions] {
+            pub const fn to_array(self) -> [T::Scalar; $dimensions] {
                 let Self { $($fields),* } = self;
                 [$($fields),*]
             }
@@ -339,9 +339,10 @@ macro_rules! impl_simd_common {
             #[doc = "Instance with all components set to `scalar`."]
             #[inline]
             #[must_use]
-            pub fn splat(scalar: T::Scalar) -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::splat(scalar.to_raw()))
+            pub const fn splat(scalar: T::Scalar) -> Self {
+                $base_type_name {
+                    $($fields: scalar),*
+                }
             }
 
             #[doc = "Component-wise clamp."]
@@ -465,6 +466,13 @@ macro_rules! impl_simd_common {
                 use crate::bindings::Vector;
                 Self::from_raw(T::$vec_ty::select(mask.into(), if_true.to_raw(), if_false.to_raw()))
             }
+        }
+
+        impl<T> $base_type_name<T> where T: crate::UnitTypes, T::Scalar: crate::scalar::SignedScalar {
+            #[doc = "All negative one"]
+            pub const NEG_ONE: Self = $base_type_name {
+                $($fields: <T::Scalar as crate::scalar::SignedScalar>::NEG_ONE),*
+            };
         }
 
         impl<T> $base_type_name<T>
