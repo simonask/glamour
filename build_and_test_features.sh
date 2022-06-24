@@ -9,11 +9,13 @@ FEATURE_SETS=(
   "std mint"
   "std serde"
   "std mint serde"
+  "std mint serde scalar-math"
   # no_std
   "libm"
   "libm mint"
   "libm serde"
   "libm mint serde"
+  "libm mint serde scalar-math"
 )
 
 rustc --version
