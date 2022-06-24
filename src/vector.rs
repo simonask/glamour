@@ -965,12 +965,12 @@ mod tests {
         let gt = a.cmpgt(b);
         let ge = a.cmpge(b);
 
-        assert_eq!(eq.as_ref(), &[false, true, false, false]);
-        assert_eq!(ne.as_ref(), &[true, false, true, true]);
-        assert_eq!(lt.as_ref(), &[true, false, false, false]);
-        assert_eq!(le.as_ref(), &[true, true, false, false]);
-        assert_eq!(gt.as_ref(), &[false, false, true, true]);
-        assert_eq!(ge.as_ref(), &[false, true, true, true]);
+        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
+        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
+        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
+        assert_eq!(le, glam::BVec4::new(true, true, false, false));
+        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
+        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
 
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
