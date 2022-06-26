@@ -1,3 +1,5 @@
+use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign};
+
 use approx::{RelativeEq, UlpsEq};
 
 use crate::AngleConsts;
@@ -48,11 +50,18 @@ pub trait Primitive:
     + 'static
 {
     /// 2D vector type
-    type Vec2: Vector<2, Scalar = Self>;
+    type Vec2: Vector<2, Scalar = Self, Mask = Self::BVec2>;
     /// 3D vector type
-    type Vec3: Vector<3, Scalar = Self>;
+    type Vec3: Vector<3, Scalar = Self, Mask = Self::BVec3>;
     /// 4D vector type
-    type Vec4: Vector<4, Scalar = Self>;
+    type Vec4: Vector<4, Scalar = Self, Mask = Self::BVec4>;
+
+    /// 2D mask type. Always [`glam::BVec2`].
+    type BVec2: Copy + Eq + BitAnd + BitAndAssign + BitOr + BitOrAssign;
+    /// 3D mask type. Either [`glam::BVec3`] or [`glam::BVec3A`].
+    type BVec3: Copy + Eq + BitAnd + BitAndAssign + BitOr + BitOrAssign;
+    /// 4D mask type. Either [`glam::BVec4`] or [`glam::BVec4A`].
+    type BVec4: Copy + Eq + BitAnd + BitAndAssign + BitOr + BitOrAssign;
 
     /// True if the value is finite (not infinity, not NaN).
     ///
@@ -65,6 +74,9 @@ impl Primitive for f32 {
     type Vec2 = glam::Vec2;
     type Vec3 = glam::Vec3;
     type Vec4 = glam::Vec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4A;
 
     fn is_finite(self) -> bool {
         <f32>::is_finite(self)
@@ -75,6 +87,9 @@ impl Primitive for f64 {
     type Vec2 = glam::DVec2;
     type Vec3 = glam::DVec3;
     type Vec4 = glam::DVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
 
     fn is_finite(self) -> bool {
         <f64>::is_finite(self)
@@ -85,6 +100,9 @@ impl Primitive for i32 {
     type Vec2 = glam::IVec2;
     type Vec3 = glam::IVec3;
     type Vec4 = glam::IVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
 
     fn is_finite(self) -> bool {
         true
@@ -95,6 +113,9 @@ impl Primitive for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
 
     fn is_finite(self) -> bool {
         true

@@ -7,15 +7,12 @@ use bytemuck::Pod;
 
 use core::fmt::Debug;
 
-/// Convenience marker trait for any type that has value semantics.
-pub trait ValueSemantics:
+/// Convenience marker trait for any POD type that has value semantics.
+pub trait PodValue:
     Copy + Debug + Default + PartialEq + Pod + Send + Sync + Sized + 'static
 {
 }
-impl<T> ValueSemantics for T where
-    T: Copy + Debug + Default + PartialEq + Pod + Send + Sync + 'static
-{
-}
+impl<T> PodValue for T where T: Copy + Debug + Default + PartialEq + Pod + Send + Sync + 'static {}
 
 /// When compiled with the `serde` feature, this trait marks every type that
 /// implements `Serialize` and `Deserialize`. When `serde` is disabled, it is an

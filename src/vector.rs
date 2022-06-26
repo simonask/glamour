@@ -93,25 +93,9 @@ crate::impl_common!(Vector4 {
     w: T::Scalar
 });
 
-crate::impl_simd_common!(Vector2 [2] => Vec2 { x, y });
-crate::impl_simd_common!(Vector3 [3] => Vec3 { x, y, z });
-crate::impl_simd_common!(Vector4 [4] => Vec4 { x, y, z, w });
-
-crate::impl_as_tuple!(Vector2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::impl_as_tuple!(Vector3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::impl_as_tuple!(Vector4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
+crate::impl_vector_common!(Vector2 [2] => Vec2 { x, y });
+crate::impl_vector_common!(Vector3 [3] => Vec3 { x, y, z });
+crate::impl_vector_common!(Vector4 [4] => Vec4 { x, y, z, w });
 
 crate::impl_glam_conversion!(Vector2, 2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
 crate::impl_glam_conversion!(Vector3, 3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);

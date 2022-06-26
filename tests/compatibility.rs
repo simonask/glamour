@@ -128,9 +128,9 @@ fn cast_to_glam_by_reference() {
     let mut ivec2 = Vector2::<i32>::new(1, 2);
     let mut ivec3 = Vector3::<i32>::new(1, 2, 3);
     let mut ivec4 = Vector4::<i32>::new(1, 2, 3, 4);
-    let mut uvec2 = Vector2::<u32>::new(1, 2);
-    let mut uvec3 = Vector3::<u32>::new(1, 2, 3);
-    let mut uvec4 = Vector4::<u32>::new(1, 2, 3, 4);
+    let mut uvec2 = Vector2::<u32>::new(1u32, 2u32);
+    let mut uvec3 = Vector3::<u32>::new(1u32, 2u32, 3u32);
+    let mut uvec4 = Vector4::<u32>::new(1u32, 2u32, 3u32, 4u32);
 
     let mut point2 = Point2::<f32>::new(1.0, 2.0);
     let mut point3 = Point3::<f32>::new(1.0, 2.0, 3.0);
@@ -141,9 +141,9 @@ fn cast_to_glam_by_reference() {
     let mut ipoint2 = Point2::<i32>::new(1, 2);
     let mut ipoint3 = Point3::<i32>::new(1, 2, 3);
     let mut ipoint4 = Point4::<i32>::new(1, 2, 3, 4);
-    let mut upoint2 = Point2::<u32>::new(1, 2);
-    let mut upoint3 = Point3::<u32>::new(1, 2, 3);
-    let mut upoint4 = Point4::<u32>::new(1, 2, 3, 4);
+    let mut upoint2 = Point2::<u32>::new(1u32, 2u32);
+    let mut upoint3 = Point3::<u32>::new(1u32, 2u32, 3u32);
+    let mut upoint4 = Point4::<u32>::new(1u32, 2u32, 3u32, 4u32);
 
     let mut mat2 = Matrix2::<f32>::IDENTITY;
     let mut mat3 = Matrix3::<f32>::IDENTITY;
