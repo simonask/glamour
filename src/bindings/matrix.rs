@@ -5,7 +5,7 @@ use super::*;
 /// Note: All glam matrices are square.
 #[allow(missing_docs)]
 pub trait Matrix:
-    ValueSemantics
+    PodValue
     + Add<Self, Output = Self>
     + AddAssign<Self>
     + Sub<Self, Output = Self>

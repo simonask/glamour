@@ -14,7 +14,7 @@ use core::ops::{
 use approx::AbsDiffEq;
 use num_traits::Float;
 
-use crate::traits::marker::ValueSemantics;
+use crate::traits::marker::PodValue;
 
 mod matrix;
 mod primitive;

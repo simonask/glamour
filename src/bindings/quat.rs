@@ -3,7 +3,7 @@ use super::*;
 /// Common trait for [`glam::Quat`] and [`glam::DQuat`].
 #[allow(missing_docs)]
 pub trait Quat:
-    ValueSemantics
+    PodValue
     + Add<Self, Output = Self>
     + Sub<Self, Output = Self>
     + Mul<Self, Output = Self>

@@ -11,8 +11,7 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, Pod, Zeroable};
 
 use crate::{
-    unit::UnitMatrices, Angle, Matrix3, Matrix4, Point2, Point3, Scalar, Unit, UnitTypes, Vector2,
-    Vector3,
+    unit::UnitMatrices, Angle, Matrix3, Matrix4, Point2, Point3, Scalar, Unit, Vector2, Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
@@ -252,7 +251,7 @@ unsafe impl<Src: Unit, Dst: Unit> Pod for Transform3<Src, Dst> {}
 impl<Src, Dst> Transform2<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
 {
     /// Identity matrix.
     pub const IDENTITY: Self = Self {
@@ -393,7 +392,7 @@ where
 impl<Src, Dst> TransformMap<Point2<Src>> for Transform2<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
 {
     type Output = Point2<Dst>;
 
@@ -406,7 +405,7 @@ where
 impl<Src, Dst> TransformMap<Vector2<Src>> for Transform2<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
 {
     type Output = Vector2<Dst>;
 
@@ -419,7 +418,7 @@ where
 impl<Src, Dst> Transform2<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
 {
     /// Perform matrix multiplication such that `other`'s transformation applies
     /// after `self`.
@@ -434,7 +433,7 @@ where
     #[must_use]
     pub fn then<Dst2>(self, other: Transform2<Dst, Dst2>) -> Transform2<Src, Dst2>
     where
-        Dst2: UnitTypes<UnitScalar = Dst::Scalar>,
+        Dst2: Unit<Scalar = Dst::Scalar>,
     {
         Transform2::from_matrix_unchecked(other.matrix * self.matrix)
     }
@@ -489,8 +488,8 @@ where
 impl<Src, Dst, Dst2> Mul<Transform2<Dst, Dst2>> for Transform2<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
-    Dst2: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
+    Dst2: Unit<Scalar = Src::Scalar>,
 {
     type Output = Transform2<Src, Dst2>;
 
@@ -504,8 +503,8 @@ where
 impl<Src, Dst, Dst2> Mul<Transform3<Dst, Dst2>> for Transform3<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
-    Dst2: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
+    Dst2: Unit<Scalar = Src::Scalar>,
 {
     type Output = Transform3<Src, Dst2>;
 
@@ -519,7 +518,7 @@ where
 impl<Src, Dst> Transform3<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
 {
     /// Identity matrix.
     pub const IDENTITY: Self = Self {
@@ -755,7 +754,7 @@ where
 impl<Src, Dst> TransformMap<Point3<Src>> for Transform3<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
 {
     type Output = Point3<Dst>;
 
@@ -768,7 +767,7 @@ where
 impl<Src, Dst> TransformMap<Vector3<Src>> for Transform3<Src, Dst>
 where
     Src: UnitMatrices,
-    Dst: Unit<Scalar = Src::UnitMatrixScalar>,
+    Dst: Unit<Scalar = Src::Scalar>,
 {
     type Output = Vector3<Dst>;
 

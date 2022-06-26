@@ -1,6 +1,6 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
-use glamour::{prelude::*, traits::marker::ValueSemantics, Lerp};
+use glamour::{prelude::*, traits::marker::PodValue, Lerp};
 
 //
 // A whole bunch of traits that exist to check if a type implements its
@@ -10,7 +10,7 @@ use glamour::{prelude::*, traits::marker::ValueSemantics, Lerp};
 // results in the correct traits being implemented for our types.
 //
 
-trait AssertValueLike: ValueSemantics {}
+trait AssertValueLike: PodValue {}
 
 trait AssertSigned: AssertValueLike + core::ops::Neg<Output = Self> {}
 

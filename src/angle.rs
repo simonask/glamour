@@ -8,7 +8,7 @@ use num_traits::{Float, NumAssignOps};
 use crate::{
     bindings::{Primitive, PrimitiveMatrices, Quat},
     scalar::SignedScalar,
-    traits::marker::ValueSemantics,
+    traits::marker::PodValue,
     Scalar, Unit, Vector2, Vector3, Vector4,
 };
 
@@ -93,7 +93,7 @@ macro_rules! forward_to_float_as_angle {
 }
 
 /// Convenience trait to create strongly typed angles from floats.
-pub trait FloatAngleExt: num_traits::Float + AngleConsts + ValueSemantics {
+pub trait FloatAngleExt: num_traits::Float + AngleConsts + PodValue {
     forward_to_float_as_angle!(
         #[doc = "asin()"]
         fn asin(self) -> Angle<Self>

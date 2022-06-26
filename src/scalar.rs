@@ -1,5 +1,5 @@
 use crate::bindings::Primitive;
-use crate::traits::marker::{Serializable, ValueSemantics};
+use crate::traits::marker::{PodValue, Serializable};
 
 /// All types that can serve as components of a SIMD type.
 ///
@@ -30,7 +30,7 @@ pub trait Scalar:
     // This bound is important because it implies `Pod`, which means that types
     // that are `#[repr(C)]` and only have `Scalar` members can safely implement
     // `Pod` as well.
-    ValueSemantics
+    PodValue
     + PartialOrd
     + Serializable
 {

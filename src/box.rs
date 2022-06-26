@@ -22,11 +22,6 @@ crate::impl_common!(Box2 {
     max: Point2<T>
 });
 
-crate::impl_as_tuple!(Box2 {
-    min: Point2<T>,
-    max: Point2<T>
-});
-
 /// 3D axis-aligned box.
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound = ""))]
@@ -38,11 +33,6 @@ pub struct Box3<T: Unit = f32> {
 }
 
 crate::impl_common!(Box3 {
-    min: Point3<T>,
-    max: Point3<T>
-});
-
-crate::impl_as_tuple!(Box3 {
     min: Point3<T>,
     max: Point3<T>
 });
@@ -397,7 +387,7 @@ mod tests {
 
     #[test]
     fn from_rect() {
-        let r = Rect::new((10.0, 12.0).into(), (5.0, 6.0).into());
+        let r = Rect::new((10.0, 12.0), (5.0, 6.0));
         let b = Box2::from_rect(r);
         let b2 = Box2::from_origin_and_size((10.0, 12.0).into(), (5.0, 6.0).into());
         assert_abs_diff_eq!(b, b2);
@@ -482,7 +472,7 @@ mod tests {
         assert!(r.is_empty());
         assert!(!r.is_negative());
 
-        let r = Box2::new((1.0, 1.0).into(), (-0.0, -0.0).into());
+        let r = Box2::new((1.0, 1.0), (-0.0, -0.0));
         assert!(r.is_empty());
         assert!(r.is_negative());
 
@@ -492,7 +482,7 @@ mod tests {
         assert!(r.is_empty());
         assert!(r.is_negative());
 
-        let r = Box2::new((core::f32::NAN, 1.0).into(), (1.0, 1.0).into());
+        let r = Box2::new((core::f32::NAN, 1.0), (1.0, 1.0));
         assert!(r.is_empty());
         assert!(r.is_negative());
     }
@@ -553,7 +543,7 @@ mod tests {
 
     #[test]
     fn contains() {
-        let b = Box2::new((-1.0, -1.0).into(), (1.0, 1.0).into());
+        let b = Box2::new((-1.0, -1.0), (1.0, 1.0));
         assert!(b.contains(&Point2::new(-1.0, 0.0)));
         assert!(b.contains(&Point2::new(1.0, 1.0)));
     }
@@ -561,20 +551,20 @@ mod tests {
     #[test]
     fn intersection() {
         type Box2 = super::Box2<f32>;
-        let x = Box2::new((10.0, 10.0).into(), (20.0, 20.0).into());
+        let x = Box2::new((10.0, 10.0), (20.0, 20.0));
 
         {
             // No intersection
             assert!(x.intersection(&Point2::new(0.0, 0.0)).is_none());
 
-            let nw = Box2::new((0.0, 0.0).into(), (10.0, 10.0).into());
-            let n = Box2::new((10.0, 0.0).into(), (20.0, 10.0).into());
-            let ne = Box2::new((20.0, 0.0).into(), (30.0, 10.0).into());
-            let e = Box2::new((20.0, 10.0).into(), (30.0, 20.0).into());
-            let se = Box2::new((20.0, 20.0).into(), (30.0, 30.0).into());
-            let s = Box2::new((10.0, 20.0).into(), (20.0, 30.0).into());
-            let sw = Box2::new((0.0, 20.0).into(), (10.0, 30.0).into());
-            let w = Box2::new((0.0, 10.0).into(), (10.0, 20.0).into());
+            let nw = Box2::new((0.0, 0.0), (10.0, 10.0));
+            let n = Box2::new((10.0, 0.0), (20.0, 10.0));
+            let ne = Box2::new((20.0, 0.0), (30.0, 10.0));
+            let e = Box2::new((20.0, 10.0), (30.0, 20.0));
+            let se = Box2::new((20.0, 20.0), (30.0, 30.0));
+            let s = Box2::new((10.0, 20.0), (20.0, 30.0));
+            let sw = Box2::new((0.0, 20.0), (10.0, 30.0));
+            let w = Box2::new((0.0, 10.0), (10.0, 20.0));
 
             assert_eq!(x.intersection(&nw), None);
             assert_eq!(x.intersection(&n), None);
@@ -635,14 +625,14 @@ mod tests {
             );
 
             // Intersections
-            let nw = Box2::new((0.0, 0.0).into(), (11.0, 11.0).into());
-            let n = Box2::new((11.0, 0.0).into(), (19.0, 11.0).into());
-            let ne = Box2::new((19.0, 0.0).into(), (29.0, 11.0).into());
-            let e = Box2::new((19.0, 11.0).into(), (30.0, 29.0).into());
-            let se = Box2::new((19.0, 19.0).into(), (30.0, 30.0).into());
-            let s = Box2::new((11.0, 19.0).into(), (19.0, 30.0).into());
-            let sw = Box2::new((0.0, 19.0).into(), (11.0, 30.0).into());
-            let w = Box2::new((0.0, 11.0).into(), (11.0, 19.0).into());
+            let nw = Box2::new((0.0, 0.0), (11.0, 11.0));
+            let n = Box2::new((11.0, 0.0), (19.0, 11.0));
+            let ne = Box2::new((19.0, 0.0), (29.0, 11.0));
+            let e = Box2::new((19.0, 11.0), (30.0, 29.0));
+            let se = Box2::new((19.0, 19.0), (30.0, 30.0));
+            let s = Box2::new((11.0, 19.0), (19.0, 30.0));
+            let sw = Box2::new((0.0, 19.0), (11.0, 30.0));
+            let w = Box2::new((0.0, 11.0), (11.0, 19.0));
 
             assert!(nw.intersects(&x));
             assert!(n.intersects(&x));

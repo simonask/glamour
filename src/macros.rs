@@ -1,3 +1,4 @@
+/// Implement common operations for all vector-like types.
 macro_rules! impl_common {
     ($base_type_name:ident {
         $($fields:ident: $fields_ty:ty),*
@@ -6,9 +7,9 @@ macro_rules! impl_common {
             #[doc = "Instantiate with field values."]
             #[inline]
             #[must_use]
-            pub const fn new($($fields: $fields_ty),*) -> $base_type_name<T> {
+            pub fn new($($fields: impl Into<$fields_ty>),*) -> $base_type_name<T> {
                 $base_type_name {
-                    $($fields),*
+                    $($fields: $fields.into()),*
                 }
             }
 
@@ -45,7 +46,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast<T2>(self) -> $base_type_name<T2>
             where
-                T2: crate::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::unit::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast(self)
             }
@@ -55,7 +56,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_ref<T2>(&self) -> &$base_type_name<T2>
             where
-                T2: crate::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::unit::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast_ref(self)
             }
@@ -65,7 +66,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_mut<T2>(&mut self) -> &mut $base_type_name<T2>
             where
-                T2: crate::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::unit::UnitTypes<Primitive = T::Primitive>,
             {
                 bytemuck::cast_mut(self)
             }
@@ -204,13 +205,7 @@ macro_rules! impl_common {
                 $(self.$fields.ulps_ne(&other.$fields, epsilon.clone(), max_ulps) || )* false
             }
         }
-    };
-}
 
-macro_rules! impl_as_tuple {
-    ($base_type_name:ident {
-        $($fields:ident: $fields_ty:ty),*
-    }) => {
         impl<T: Unit> $base_type_name<T> {
             #[doc = "Instantiate from tuple."]
             #[allow(unused_parens)]
@@ -245,21 +240,67 @@ macro_rules! impl_as_tuple {
             }
         }
 
-        impl<T: Unit> PartialEq<($($fields_ty),*)> for $base_type_name<T> {
-            #[inline]
-            #[must_use]
-            fn eq(&self, ($($fields),*): &($($fields_ty),*)) -> bool {
-                Self {
-                    $(
-                        $fields: *$fields
-                    ),*
-                } == *self
+        $crate::macros::impl_tuple_eq!($base_type_name {
+            $($fields: $fields_ty,)*
+        });
+    };
+}
+
+macro_rules! impl_tuple_eq {
+    ($base_type_name:ident {
+        $x:ident: $x_ty:ty,
+        $y:ident: $y_ty:ty
+        $(,)?
+    }) => {
+        impl<T: Unit, A, B> PartialEq<(A, B)> for $base_type_name<T>
+        where
+            $x_ty: PartialEq<A>,
+            $y_ty: PartialEq<B>,
+        {
+            fn eq(&self, other: &(A, B)) -> bool {
+                self.$x == other.0 && self.$y == other.1
+            }
+        }
+    };
+    ($base_type_name:ident {
+        $x:ident: $x_ty:ty,
+        $y:ident: $y_ty:ty,
+        $z:ident: $z_ty:ty
+        $(,)?
+    }) => {
+        impl<T: Unit, A, B, C> PartialEq<(A, B, C)> for $base_type_name<T>
+        where
+            $x_ty: PartialEq<A>,
+            $y_ty: PartialEq<B>,
+            $z_ty: PartialEq<C>,
+        {
+            fn eq(&self, other: &(A, B, C)) -> bool {
+                self.$x == other.0 && self.$y == other.1 && self.$z == other.2
+            }
+        }
+    };
+    ($base_type_name:ident {
+        $x:ident: $x_ty:ty,
+        $y:ident: $y_ty:ty,
+        $z:ident: $z_ty:ty,
+        $w:ident: $w_ty:ty
+        $(,)?
+    }) => {
+        impl<T: Unit, A, B, C, D> PartialEq<(A, B, C, D)> for $base_type_name<T>
+        where
+            $x_ty: PartialEq<A>,
+            $y_ty: PartialEq<B>,
+            $z_ty: PartialEq<C>,
+            $w_ty: PartialEq<D>,
+        {
+            fn eq(&self, other: &(A, B, C, D)) -> bool {
+                self.$x == other.0 && self.$y == other.1 && self.$z == other.2 && self.$w == other.3
             }
         }
     };
 }
 
-macro_rules! impl_simd_common {
+macro_rules! impl_vector_common {
     ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident {
         $($fields:ident),*
     }) => {
@@ -821,9 +862,9 @@ macro_rules! impl_mint {
     };
 }
 
-pub(crate) use impl_as_tuple;
 pub(crate) use impl_common;
 pub(crate) use impl_glam_conversion;
 pub(crate) use impl_mint;
 pub(crate) use impl_scaling;
-pub(crate) use impl_simd_common;
+pub(crate) use impl_tuple_eq;
+pub(crate) use impl_vector_common;

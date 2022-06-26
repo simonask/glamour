@@ -8,20 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added APIs mirroring new additions in `glam` 0.21.1: `Vector2::from_angle()`,
   `Vector2::rotate()`, `NEG_*` constants for signed vector types.
+- Feature: `scalar-math`, which is required if `glam` is built with its
+  `scalar-math` feature. This feature affects alignment of vector types.
 
 ### Changed
 - Bumped `glam` version to 0.21.1. Note that this version introduced breaking
   changes.
+- Fixed alignment of 4-component types to match `glam` exactly. Previously, it
+  didn't work with the `scalar-math` feature.
 - Constified a couple of methods. Unfortunately, since `bytemuck::cast` and
   friends are not `const`, functions that delegate directly to `glam` cannot be
   made `const` for the time being, even if those functions are `const fn` in
   `glam`.
 
 ### Breaking Changes
+- All `new` methods now receive parameters as `impl Into`.
 - Minimum supported Rust version bumped to 1.61.0, because of support for
   generic `const fn` methods.
 - `glam` 0.21.1 contains breaking changes:
   https://github.com/bitshifter/glam-rs/blob/main/CHANGELOG.md#breaking-changes.
+
+### Internal changes
+- Renamed the `ValueSemantics` marker trait to `PodValue`.
+- Added `BVec` associated types to `Primitive`.
+- Cleaned up implementation macros, removed the `impl_as_tuple` macro (because
+  tuple conversion is now present for all types).
+- Cleaned up some trait bounds for documentation clarity.
 
 ## [0.3.1] - 2022-04-25
 ### Added

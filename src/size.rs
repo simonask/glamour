@@ -38,9 +38,9 @@ crate::impl_common!(Size3 {
     depth: T::Scalar
 });
 
-crate::impl_simd_common!(Size2 [2] => Vec2 { width, height });
+crate::impl_vector_common!(Size2 [2] => Vec2 { width, height });
 
-crate::impl_simd_common!(Size3 [3] => Vec3 {
+crate::impl_vector_common!(Size3 [3] => Vec3 {
     width,
     height,
     depth
@@ -51,16 +51,6 @@ crate::impl_glam_conversion!(Size3, 3 [f32 => glam::Vec3, f64 => glam::DVec3, i3
 
 crate::impl_scaling!(Size2, 2 [f32, f64, i32, u32]);
 crate::impl_scaling!(Size3, 3 [f32, f64, i32, u32]);
-
-crate::impl_as_tuple!(Size2 {
-    width: T::Scalar,
-    height: T::Scalar
-});
-crate::impl_as_tuple!(Size3 {
-    width: T::Scalar,
-    height: T::Scalar,
-    depth: T::Scalar
-});
 
 macro_rules! impl_size {
     ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $vector_type:ident) => {
