@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - 2022-06-24
+## [0.4.0] - 2022-06-27
 ### Added
 - Added APIs mirroring new additions in `glam` 0.21.1: `Vector2::from_angle()`,
   `Vector2::rotate()`, `NEG_*` constants for signed vector types.
