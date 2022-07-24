@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Conversion to/from glam 0.20.0 types (gated behind the `glam_0_20` feature).
+- New feature: `bevy_0_7_0`. Bevy uses glam 0.20.0, but `glamour` uses 0.21.
+  Enable the feature to integrate `glamour` with Bevy 0.7 types.
+
 ## [0.4.0] - 2022-06-27
 ### Added
 - Added APIs mirroring new additions in `glam` 0.21.1: `Vector2::from_angle()`,

@@ -9,9 +9,6 @@
 )]
 #![cfg_attr(coverage, feature(no_coverage))]
 
-#[cfg(feature = "mint")]
-extern crate mint_crate as mint;
-
 #[cfg(doc)]
 #[cfg_attr(coverage, no_coverage)]
 pub mod docs;
@@ -26,6 +23,7 @@ mod scalar;
 mod size;
 pub mod traits;
 
+mod compat;
 mod transform;
 mod unit;
 mod vector;

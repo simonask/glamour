@@ -200,9 +200,6 @@ impl_point!(Point2 [2] => Vec2, Vector2);
 impl_point!(Point3 [3] => Vec3, Vector3);
 impl_point!(Point4 [4] => Vec4, Vector4);
 
-crate::impl_mint!(Point2, 2, Point2);
-crate::impl_mint!(Point3, 3, Point3);
-
 impl<T> Point3<T>
 where
     T: Unit,
