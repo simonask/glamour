@@ -78,12 +78,3 @@ impl_conv_mat!(Matrix3 { x, y, z }, ColumnMatrix3<f32>);
 impl_conv_mat!(Matrix3 { x, y, z }, ColumnMatrix3<f64>);
 impl_conv_mat!(Matrix4 { x, y, z, w }, ColumnMatrix4<f32>);
 impl_conv_mat!(Matrix4 { x, y, z, w }, ColumnMatrix4<f64>);
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn convert() {
-    }
-}
