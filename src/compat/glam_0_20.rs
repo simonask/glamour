@@ -65,7 +65,9 @@ impl_conv!(
 );
 
 impl_conv!(Vector3 { x: x, y: y, z: z }, glam_0_20::Vec3, f32);
+impl_conv!(Vector3 { x: x, y: y, z: z }, glam_0_20::Vec3A, f32);
 impl_conv!(Point3 { x: x, y: y, z: z }, glam_0_20::Vec3, f32);
+impl_conv!(Point3 { x: x, y: y, z: z }, glam_0_20::Vec3A, f32);
 impl_conv!(
     Size3 {
         width: x,
@@ -73,6 +75,15 @@ impl_conv!(
         depth: z
     },
     glam_0_20::Vec3,
+    f32
+);
+impl_conv!(
+    Size3 {
+        width: x,
+        height: y,
+        depth: z
+    },
+    glam_0_20::Vec3A,
     f32
 );
 impl_conv!(Vector3 { x: x, y: y, z: z }, glam_0_20::DVec3, f64);
@@ -225,6 +236,15 @@ impl_conv_mat!(
         y_axis,
         z_axis
     },
+    glam_0_20::Mat3A,
+    f32
+);
+impl_conv_mat!(
+    Matrix3 {
+        x_axis,
+        y_axis,
+        z_axis
+    },
     glam_0_20::DMat3,
     f64
 );
@@ -260,5 +280,37 @@ mod tests {
         let glam_0_20_vec2 = glam_0_20::Vec2::from(glamour_vec2);
         let glamour_vec2 = Vector2::<f32>::from(glam_0_20_vec2);
         assert_eq!(glamour_vec2, (10.0, 20.0));
+    }
+
+    #[test]
+    fn from_into() {
+        assert_eq!(
+            Matrix2::from(glam_0_20::Mat2::from(Matrix2::IDENTITY)),
+            Matrix2::IDENTITY
+        );
+        assert_eq!(
+            Matrix2::from(glam_0_20::DMat2::from(Matrix2::IDENTITY)),
+            Matrix2::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(glam_0_20::Mat3::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(glam_0_20::Mat3A::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(glam_0_20::DMat3::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix4::from(glam_0_20::Mat4::from(Matrix4::IDENTITY)),
+            Matrix4::IDENTITY
+        );
+        assert_eq!(
+            Matrix4::from(glam_0_20::DMat4::from(Matrix4::IDENTITY)),
+            Matrix4::IDENTITY
+        );
     }
 }
