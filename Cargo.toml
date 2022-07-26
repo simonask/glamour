@@ -28,21 +28,29 @@ version = "^1.0"
 features = ["derive"]
 optional = true
 
-[dependencies.mint_crate]
+[dependencies.mint]
 version = "^0.5"
 package = "mint"
+optional = true
+
+[dependencies.glam_0_20]
+version = "0.20.0"
+package = "glam"
 optional = true
 
 [features]
 default = ["std"]
 std = ["glam/std", "num-traits/std"]
-scalar-math = ["glam/scalar-math"]
+scalar-math = ["glam/scalar-math", "glam_0_20?/scalar-math"]
 
 # Enable conversions to `mint` types
-mint = ["mint_crate", "glam/mint"]
+mint = ["dep:mint", "glam/mint"]
+
+# Enable conversions to `bevy` 0.7.x math types (which uses glam 0.20.0).
+bevy_0_7_0 = ["glam_0_20"]
 
 # Required for compiling without `std`.
-libm = ["glam/libm", "num-traits/libm"]
+libm = ["glam/libm", "num-traits/libm", "glam_0_20?/libm"]
 
 [dev-dependencies]
 euclid = "^0.22"

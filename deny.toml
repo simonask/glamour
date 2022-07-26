@@ -1,5 +1,5 @@
 [bans]
-multiple-versions = "deny"
+multiple-versions = "allow"
 deny = []
 skip-tree = [
     # ignore criterion dev-dependency that often have duplicate dependencies internally
@@ -15,4 +15,5 @@ allow = [
     "ISC",
     "MIT",
     "MPL-2.0",
+    "Unicode-DFS-2016",
 ]

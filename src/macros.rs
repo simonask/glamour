@@ -839,32 +839,8 @@ macro_rules! impl_scaling {
     };
 }
 
-macro_rules! impl_mint {
-    ($base_type_name:ident, $dimensions:literal, $mint_type:ident) => {
-        #[cfg(feature = "mint")]
-        const _: () = {
-            impl<T: Scalar + Unit<Scalar = T>> mint::IntoMint for $base_type_name<T> {
-                type MintType = mint::$mint_type<T>;
-            }
-
-            impl<T: Scalar + Unit<Scalar = T>> From<mint::$mint_type<T>> for $base_type_name<T> {
-                fn from(x: mint::$mint_type<T>) -> $base_type_name<T> {
-                    $base_type_name::from_array(*x.as_ref())
-                }
-            }
-
-            impl<T: Scalar + Unit<Scalar = T>> From<$base_type_name<T>> for mint::$mint_type<T> {
-                fn from(x: $base_type_name<T>) -> mint::$mint_type<T> {
-                    x.to_array().into()
-                }
-            }
-        };
-    };
-}
-
 pub(crate) use impl_common;
 pub(crate) use impl_glam_conversion;
-pub(crate) use impl_mint;
 pub(crate) use impl_scaling;
 pub(crate) use impl_tuple_eq;
 pub(crate) use impl_vector_common;

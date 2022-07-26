@@ -773,6 +773,30 @@ where
     }
 }
 
+impl From<glam::Mat2> for Matrix2<f32> {
+    fn from(mat: glam::Mat2) -> Self {
+        Self::from_raw(mat)
+    }
+}
+
+impl From<Matrix2<f32>> for glam::Mat2 {
+    fn from(mat: Matrix2<f32>) -> Self {
+        mat.to_raw()
+    }
+}
+
+impl From<glam::DMat2> for Matrix2<f64> {
+    fn from(mat: glam::DMat2) -> Self {
+        Self::from_raw(mat)
+    }
+}
+
+impl From<Matrix2<f64>> for glam::DMat2 {
+    fn from(mat: Matrix2<f64>) -> Self {
+        mat.to_raw()
+    }
+}
+
 impl From<glam::Mat3A> for Matrix3<f32> {
     fn from(mat: glam::Mat3A) -> Self {
         Self::from_raw(mat.into())
@@ -782,6 +806,54 @@ impl From<glam::Mat3A> for Matrix3<f32> {
 impl From<Matrix3<f32>> for glam::Mat3A {
     fn from(mat: Matrix3<f32>) -> Self {
         mat.to_raw().into()
+    }
+}
+
+impl From<glam::Mat3> for Matrix3<f32> {
+    fn from(mat: glam::Mat3) -> Self {
+        Self::from_raw(mat)
+    }
+}
+
+impl From<Matrix3<f32>> for glam::Mat3 {
+    fn from(mat: Matrix3<f32>) -> Self {
+        mat.to_raw()
+    }
+}
+
+impl From<glam::DMat3> for Matrix3<f64> {
+    fn from(mat: glam::DMat3) -> Self {
+        Self::from_raw(mat)
+    }
+}
+
+impl From<Matrix3<f64>> for glam::DMat3 {
+    fn from(mat: Matrix3<f64>) -> Self {
+        mat.to_raw()
+    }
+}
+
+impl From<glam::Mat4> for Matrix4<f32> {
+    fn from(mat: glam::Mat4) -> Self {
+        Self::from_raw(mat)
+    }
+}
+
+impl From<Matrix4<f32>> for glam::Mat4 {
+    fn from(mat: Matrix4<f32>) -> Self {
+        mat.to_raw()
+    }
+}
+
+impl From<glam::DMat4> for Matrix4<f64> {
+    fn from(mat: glam::DMat4) -> Self {
+        Self::from_raw(mat)
+    }
+}
+
+impl From<Matrix4<f64>> for glam::DMat4 {
+    fn from(mat: Matrix4<f64>) -> Self {
+        mat.to_raw()
     }
 }
 
@@ -2256,5 +2328,37 @@ mod tests {
 
         let s = alloc::format!("{:?}", m4);
         assert_eq!(s, "[(1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)]");
+    }
+
+    #[test]
+    fn from_into() {
+        assert_eq!(
+            Matrix2::from(glam::Mat2::from(Matrix2::IDENTITY)),
+            Matrix2::IDENTITY
+        );
+        assert_eq!(
+            Matrix2::from(glam::DMat2::from(Matrix2::IDENTITY)),
+            Matrix2::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(glam::Mat3::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(glam::Mat3A::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(glam::DMat3::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix4::from(glam::Mat4::from(Matrix4::IDENTITY)),
+            Matrix4::IDENTITY
+        );
+        assert_eq!(
+            Matrix4::from(glam::DMat4::from(Matrix4::IDENTITY)),
+            Matrix4::IDENTITY
+        );
     }
 }

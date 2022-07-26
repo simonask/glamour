@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![no_std]
-#![deny(missing_docs)]
+#![deny(missing_docs, clippy::useless_conversion, clippy::useless_asref)]
 #![warn(clippy::pedantic)]
 #![allow(
     clippy::inline_always,
@@ -8,9 +8,6 @@
     clippy::wildcard_imports
 )]
 #![cfg_attr(coverage, feature(no_coverage))]
-
-#[cfg(feature = "mint")]
-extern crate mint_crate as mint;
 
 #[cfg(doc)]
 #[cfg_attr(coverage, no_coverage)]
@@ -26,6 +23,7 @@ mod scalar;
 mod size;
 pub mod traits;
 
+mod compat;
 mod transform;
 mod unit;
 mod vector;

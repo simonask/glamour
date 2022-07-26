@@ -58,6 +58,21 @@ let vector_raw: &glam::Vec4 = vector.as_raw();
 
 [See the documentation module for more examples.](crate::docs::examples)
 
+# Feature gates
+
+- `std` - enables the `glam/std` feature. Enabled by default.
+- `libm` - required to compile with `no_std` (transitively enables
+  `glam/no_std`).
+- `mint` - enables conversion to/from
+  [`mint`](https://docs.rs/mint/latest/mint/) types.
+- `glam_0_20` - enables `Into`/`From` conversions to the glam 0.20 versions of
+  vector and matrix types. This is intended for interoperability with
+  significant ecosystems, such as Bevy 0.7. To be clear, this creates a
+  duplicate dependency on `glam`: One at the currently targeted version
+  (0.21.x), and one at glam 0.20.0.
+- `bevy_0_7_0`: Enables the `glam_0_20` feature, which is needed to perform
+  conversions to/from the math types exposed by Bevy 0.7.
+
 # Advantages
 
 - Structural type construction is sometimes better because it doesn't rely on

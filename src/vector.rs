@@ -682,10 +682,6 @@ where
     };
 }
 
-crate::impl_mint!(Vector2, 2, Vector2);
-crate::impl_mint!(Vector3, 3, Vector3);
-crate::impl_mint!(Vector4, 4, Vector4);
-
 impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Vector3<T>> for glam::Quat {
     type Output = Vector3<T>;
 
