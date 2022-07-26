@@ -180,6 +180,15 @@ mod tests {
     type UVec3 = mint::Vector3<u32>;
     type UVec4 = mint::Vector4<u32>;
 
+    type Pos2 = mint::Point2<f32>;
+    type Pos3 = mint::Point3<f32>;
+    type DPos2 = mint::Point2<f64>;
+    type DPos3 = mint::Point3<f64>;
+    type IPos2 = mint::Point2<i32>;
+    type IPos3 = mint::Point3<i32>;
+    type UPos2 = mint::Point2<u32>;
+    type UPos3 = mint::Point3<u32>;
+
     type Mat2 = mint::ColumnMatrix2<f32>;
     type Mat3 = mint::ColumnMatrix3<f32>;
     type Mat4 = mint::ColumnMatrix4<f32>;
@@ -188,7 +197,7 @@ mod tests {
     type DMat4 = mint::ColumnMatrix4<f64>;
 
     #[test]
-    fn convert() {
+    fn convert_vec() {
         type V2f = Vector2<f32>;
         type V3f = Vector3<f32>;
         type V4f = Vector4<f32>;
@@ -243,6 +252,45 @@ mod tests {
         assert_eq!(
             V4u::from(UVec4::from(V4u::new(1u32, 2u32, 3u32, 4u32))),
             V4u::new(1u32, 2u32, 3u32, 4u32)
+        );
+    }
+
+    #[test]
+    fn convert_point() {
+        type V2f = Point2<f32>;
+        type V3f = Point3<f32>;
+        type V2d = Point2<f64>;
+        type V3d = Point3<f64>;
+        type V2i = Point2<i32>;
+        type V3i = Point3<i32>;
+        type V2u = Point2<u32>;
+        type V3u = Point3<u32>;
+
+        assert_eq!(
+            V2f::from(Pos2::from(V2f::new(1.0, 2.0))),
+            V2f::new(1.0, 2.0)
+        );
+        assert_eq!(
+            V3f::from(Pos3::from(V3f::new(1.0, 2.0, 3.0))),
+            V3f::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(
+            V2d::from(DPos2::from(V2d::new(1.0, 2.0))),
+            V2d::new(1.0, 2.0)
+        );
+        assert_eq!(
+            V3d::from(DPos3::from(V3d::new(1.0, 2.0, 3.0))),
+            V3d::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(V2i::from(IPos2::from(V2i::new(1, 2))), V2i::new(1, 2));
+        assert_eq!(V3i::from(IPos3::from(V3i::new(1, 2, 3))), V3i::new(1, 2, 3));
+        assert_eq!(
+            V2u::from(UPos2::from(V2u::new(1u32, 2u32))),
+            V2u::new(1u32, 2u32)
+        );
+        assert_eq!(
+            V3u::from(UPos3::from(V3u::new(1u32, 2u32, 3u32))),
+            V3u::new(1u32, 2u32, 3u32)
         );
     }
 
