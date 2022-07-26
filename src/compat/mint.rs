@@ -20,6 +20,10 @@ macro_rules! impl_conv {
                 mint::$mint_ty { $($mint_field),* }
             }
         }
+
+        impl mint::IntoMint for $glamour_ty<$scalar> {
+            type MintType = mint::$mint_ty<$scalar>;
+        }
     };
 }
 
