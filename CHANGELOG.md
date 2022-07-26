@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Conversion to/from glam 0.20.0 types (gated behind the `glam_0_20` feature).
 - New feature: `bevy_0_7_0`. Bevy uses glam 0.20.0, but `glamour` uses 0.21.
   Enable the feature to integrate `glamour` with Bevy 0.7 types.
+- Added missing `Into`/`From` implementations for matrix types.
 
 ## [0.4.0] - 2022-06-27
 ### Added
