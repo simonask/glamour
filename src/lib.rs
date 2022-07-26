@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![no_std]
-#![deny(missing_docs)]
+#![deny(missing_docs, clippy::useless_conversion, clippy::useless_asref)]
 #![warn(clippy::pedantic)]
 #![allow(
     clippy::inline_always,
