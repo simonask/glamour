@@ -162,3 +162,115 @@ impl_conv_mat!(Matrix3 { x, y, z }, ColumnMatrix3<f32>);
 impl_conv_mat!(Matrix3 { x, y, z }, ColumnMatrix3<f64>);
 impl_conv_mat!(Matrix4 { x, y, z, w }, ColumnMatrix4<f32>);
 impl_conv_mat!(Matrix4 { x, y, z, w }, ColumnMatrix4<f64>);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    type Vec2 = mint::Vector2<f32>;
+    type Vec3 = mint::Vector3<f32>;
+    type Vec4 = mint::Vector4<f32>;
+    type DVec2 = mint::Vector2<f64>;
+    type DVec3 = mint::Vector3<f64>;
+    type DVec4 = mint::Vector4<f64>;
+    type IVec2 = mint::Vector2<i32>;
+    type IVec3 = mint::Vector3<i32>;
+    type IVec4 = mint::Vector4<i32>;
+    type UVec2 = mint::Vector2<u32>;
+    type UVec3 = mint::Vector3<u32>;
+    type UVec4 = mint::Vector4<u32>;
+
+    type Mat2 = mint::ColumnMatrix2<f32>;
+    type Mat3 = mint::ColumnMatrix3<f32>;
+    type Mat4 = mint::ColumnMatrix4<f32>;
+    type DMat2 = mint::ColumnMatrix2<f64>;
+    type DMat3 = mint::ColumnMatrix3<f64>;
+    type DMat4 = mint::ColumnMatrix4<f64>;
+
+    #[test]
+    fn convert() {
+        type V2f = Vector2<f32>;
+        type V3f = Vector3<f32>;
+        type V4f = Vector4<f32>;
+        type V2d = Vector2<f64>;
+        type V3d = Vector3<f64>;
+        type V4d = Vector4<f64>;
+        type V2i = Vector2<i32>;
+        type V3i = Vector3<i32>;
+        type V4i = Vector4<i32>;
+        type V2u = Vector2<u32>;
+        type V3u = Vector3<u32>;
+        type V4u = Vector4<u32>;
+
+        assert_eq!(
+            V2f::from(Vec2::from(V2f::new(1.0, 2.0))),
+            V2f::new(1.0, 2.0)
+        );
+        assert_eq!(
+            V3f::from(Vec3::from(V3f::new(1.0, 2.0, 3.0))),
+            V3f::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(
+            V4f::from(Vec4::from(V4f::new(1.0, 2.0, 3.0, 4.0))),
+            V4f::new(1.0, 2.0, 3.0, 4.0)
+        );
+        assert_eq!(
+            V2d::from(DVec2::from(V2d::new(1.0, 2.0))),
+            V2d::new(1.0, 2.0)
+        );
+        assert_eq!(
+            V3d::from(DVec3::from(V3d::new(1.0, 2.0, 3.0))),
+            V3d::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(
+            V4d::from(DVec4::from(V4d::new(1.0, 2.0, 3.0, 4.0))),
+            V4d::new(1.0, 2.0, 3.0, 4.0)
+        );
+        assert_eq!(V2i::from(IVec2::from(V2i::new(1, 2))), V2i::new(1, 2));
+        assert_eq!(V3i::from(IVec3::from(V3i::new(1, 2, 3))), V3i::new(1, 2, 3));
+        assert_eq!(
+            V4i::from(IVec4::from(V4i::new(1, 2, 3, 4))),
+            V4i::new(1, 2, 3, 4)
+        );
+        assert_eq!(
+            V2u::from(UVec2::from(V2u::new(1u32, 2u32))),
+            V2u::new(1u32, 2u32)
+        );
+        assert_eq!(
+            V3u::from(UVec3::from(V3u::new(1u32, 2u32, 3u32))),
+            V3u::new(1u32, 2u32, 3u32)
+        );
+        assert_eq!(
+            V4u::from(UVec4::from(V4u::new(1u32, 2u32, 3u32, 4u32))),
+            V4u::new(1u32, 2u32, 3u32, 4u32)
+        );
+    }
+
+    #[test]
+    fn from_into() {
+        assert_eq!(
+            Matrix2::from(Mat2::from(Matrix2::IDENTITY)),
+            Matrix2::IDENTITY
+        );
+        assert_eq!(
+            Matrix2::from(DMat2::from(Matrix2::IDENTITY)),
+            Matrix2::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(Mat3::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix3::from(DMat3::from(Matrix3::IDENTITY)),
+            Matrix3::IDENTITY
+        );
+        assert_eq!(
+            Matrix4::from(Mat4::from(Matrix4::IDENTITY)),
+            Matrix4::IDENTITY
+        );
+        assert_eq!(
+            Matrix4::from(DMat4::from(Matrix4::IDENTITY)),
+            Matrix4::IDENTITY
+        );
+    }
+}
