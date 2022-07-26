@@ -275,11 +275,71 @@ mod tests {
 
     #[test]
     fn convert() {
-        let glam_vec2 = glam::Vec2::new(10.0, 20.0);
-        let glamour_vec2 = Vector2::<f32>::from(glam_vec2);
-        let glam_0_20_vec2 = glam_0_20::Vec2::from(glamour_vec2);
-        let glamour_vec2 = Vector2::<f32>::from(glam_0_20_vec2);
-        assert_eq!(glamour_vec2, (10.0, 20.0));
+        type V2f = Vector2<f32>;
+        type V3f = Vector3<f32>;
+        type V4f = Vector4<f32>;
+        type V2d = Vector2<f64>;
+        type V3d = Vector3<f64>;
+        type V4d = Vector4<f64>;
+        type V2i = Vector2<i32>;
+        type V3i = Vector3<i32>;
+        type V4i = Vector4<i32>;
+        type V2u = Vector2<u32>;
+        type V3u = Vector3<u32>;
+        type V4u = Vector4<u32>;
+
+        assert_eq!(
+            V2f::from(glam_0_20::Vec2::from(V2f::new(1.0, 2.0))),
+            V2f::new(1.0, 2.0)
+        );
+        assert_eq!(
+            V3f::from(glam_0_20::Vec3::from(V3f::new(1.0, 2.0, 3.0))),
+            V3f::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(
+            V3f::from(glam_0_20::Vec3A::from(V3f::new(1.0, 2.0, 3.0))),
+            V3f::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(
+            V4f::from(glam_0_20::Vec4::from(V4f::new(1.0, 2.0, 3.0, 4.0))),
+            V4f::new(1.0, 2.0, 3.0, 4.0)
+        );
+        assert_eq!(
+            V2d::from(glam_0_20::DVec2::from(V2d::new(1.0, 2.0))),
+            V2d::new(1.0, 2.0)
+        );
+        assert_eq!(
+            V3d::from(glam_0_20::DVec3::from(V3d::new(1.0, 2.0, 3.0))),
+            V3d::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(
+            V4d::from(glam_0_20::DVec4::from(V4d::new(1.0, 2.0, 3.0, 4.0))),
+            V4d::new(1.0, 2.0, 3.0, 4.0)
+        );
+        assert_eq!(
+            V2i::from(glam_0_20::IVec2::from(V2i::new(1, 2))),
+            V2i::new(1, 2)
+        );
+        assert_eq!(
+            V3i::from(glam_0_20::IVec3::from(V3i::new(1, 2, 3))),
+            V3i::new(1, 2, 3)
+        );
+        assert_eq!(
+            V4i::from(glam_0_20::IVec4::from(V4i::new(1, 2, 3, 4))),
+            V4i::new(1, 2, 3, 4)
+        );
+        assert_eq!(
+            V2u::from(glam_0_20::UVec2::from(V2u::new(1u32, 2u32))),
+            V2u::new(1u32, 2u32)
+        );
+        assert_eq!(
+            V3u::from(glam_0_20::UVec3::from(V3u::new(1u32, 2u32, 3u32))),
+            V3u::new(1u32, 2u32, 3u32)
+        );
+        assert_eq!(
+            V4u::from(glam_0_20::UVec4::from(V4u::new(1u32, 2u32, 3u32, 4u32))),
+            V4u::new(1u32, 2u32, 3u32, 4u32)
+        );
     }
 
     #[test]
