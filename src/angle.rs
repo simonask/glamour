@@ -11,9 +11,6 @@ use crate::{
 };
 
 /// Angle in radians.
-///
-/// Note that Angle implements both [Scalar] and [Unit], so it is compatible
-/// with vector types: `Vector2<Angle<f32>>` is a vector containing two angles.
 #[repr(transparent)]
 #[derive(Clone, Copy, Default, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]

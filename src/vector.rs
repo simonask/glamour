@@ -203,6 +203,8 @@ impl<T: Unit> Vector2<T> {
         pub fn max_element(self) -> T::Scalar;
         #[doc = "Component-wise clamp."]
         pub fn clamp(self, min: Self, max: Self) -> Self;
+        #[doc = "Dot product"]
+        pub fn dot(self, other: Self) -> T::Scalar;
     );
 }
 
@@ -251,6 +253,8 @@ where
         pub fn mul_add(self, a: Self, b: Self) -> Self;
         #[doc = "Linear interpolation."]
         pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+        #[doc = "Angle between this and another vector."]
+        pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
     );
 }
 
@@ -264,6 +268,8 @@ where
         pub fn abs(self) -> Self;
         #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
         pub fn signum(self) -> Self;
+        #[doc = "Get the perpendicular vector."]
+        pub fn perp(self) -> Self;
     );
 }
 
@@ -316,6 +322,8 @@ impl<T: Unit> Vector3<T> {
         pub fn max_element(self) -> T::Scalar;
         #[doc = "Component-wise clamp."]
         pub fn clamp(self, min: Self, max: Self) -> Self;
+        #[doc = "Dot product"]
+        pub fn dot(self, other: Self) -> T::Scalar;
     );
 }
 
@@ -365,6 +373,8 @@ where
         pub fn mul_add(self, a: Self, b: Self) -> Self;
         #[doc = "Linear interpolation."]
         pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+        #[doc = "Angle between this and another vector."]
+        pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
     );
 }
 
@@ -432,6 +442,8 @@ impl<T: Unit> Vector4<T> {
         pub fn max_element(self) -> T::Scalar;
         #[doc = "Component-wise clamp."]
         pub fn clamp(self, min: Self, max: Self) -> Self;
+        #[doc = "Dot product"]
+        pub fn dot(self, other: Self) -> T::Scalar;
     );
 }
 
@@ -526,13 +538,6 @@ macro_rules! impl_vector {
             #[must_use]
             pub fn rem_scalar(self, scalar: T::Scalar) -> Self {
                 self % Self::splat(scalar)
-            }
-
-            #[doc = "Dot product."]
-            #[inline]
-            #[must_use]
-            pub fn dot(self, other: Self) -> T::Scalar {
-                self.to_raw().dot(other.to_raw())
             }
 
             #[doc = "Instantiate from point."]

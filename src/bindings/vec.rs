@@ -193,17 +193,20 @@ macro_rules! impl_vector4 {
 }
 
 pub trait SignedVector2: SignedVector + Vector2 {
+    fn perp(self) -> Self;
     fn perp_dot(self, other: Self) -> Self::Scalar;
 }
 
 pub trait FloatVector2: SignedVector2 + FloatVector {
     fn is_nan_mask(self) -> glam::BVec2;
     fn from_angle(angle: Self::Scalar) -> Self;
+    fn angle_between(self, rhs: Self) -> Self::Scalar;
     fn rotate(self, other: Self) -> Self;
 }
 
 pub trait FloatVector3: Vector3 + FloatVector {
     fn is_nan_mask(self) -> glam::BVec3;
+    fn angle_between(self, rhs: Self) -> Self::Scalar;
 }
 
 pub trait FloatVector4: Vector4 + FloatVector {
@@ -300,32 +303,39 @@ impl Vector4 for glam::Vec4 {
 }
 
 impl SignedVector2 for glam::Vec2 {
+    forward_impl!(glam::Vec2 => fn perp(self) -> Self);
     forward_impl!(glam::Vec2 => fn perp_dot(self, other: Self) -> Self::Scalar);
 }
 impl SignedVector2 for glam::DVec2 {
+    forward_impl!(glam::DVec2 => fn perp(self) -> Self);
     forward_impl!(glam::DVec2 => fn perp_dot(self, other: Self) -> Self::Scalar);
 }
 impl SignedVector2 for glam::IVec2 {
+    forward_impl!(glam::IVec2 => fn perp(self) -> Self);
     forward_impl!(glam::IVec2 => fn perp_dot(self, other: Self) -> Self::Scalar);
 }
 
 impl FloatVector2 for glam::Vec2 {
     forward_impl!(glam::Vec2 => fn is_nan_mask(self) -> glam::BVec2);
     forward_impl!(glam::Vec2 => fn from_angle(angle: Self::Scalar) -> Self);
+    forward_impl!(glam::Vec2 => fn angle_between(self, other: Self) -> f32);
     forward_impl!(glam::Vec2 => fn rotate(self, other: Self) -> Self);
 }
 
 impl FloatVector2 for glam::DVec2 {
     forward_impl!(glam::DVec2 => fn is_nan_mask(self) -> glam::BVec2);
     forward_impl!(glam::DVec2 => fn from_angle(angle: Self::Scalar) -> Self);
+    forward_impl!(glam::DVec2 => fn angle_between(self, other: Self) -> f64);
     forward_impl!(glam::DVec2 => fn rotate(self, other: Self) -> Self);
 }
 
 impl FloatVector3 for glam::Vec3 {
     forward_impl!(glam::Vec3 => fn is_nan_mask(self) -> glam::BVec3);
+    forward_impl!(glam::Vec3 => fn angle_between(self, other: Self) -> f32);
 }
 impl FloatVector3 for glam::DVec3 {
     forward_impl!(glam::DVec3 => fn is_nan_mask(self) -> glam::BVec3);
+    forward_impl!(glam::DVec3 => fn angle_between(self, other: Self) -> f64);
 }
 impl FloatVector4 for glam::Vec4 {
     #[inline]

@@ -30,12 +30,12 @@ use super::Scalar;
 /// assert_eq!(v[0], v.x);
 /// ```
 pub trait Unit: 'static {
-    /// The type of scalar in this space. This can be any type that implements
-    /// `Scalar`, such as the primitives `i32`, `u32`, `f32`, or `f64`, but also
-    /// custom scalar types that implement [`Scalar`].
+    /// One of the vector component types of glam: `f32`, `f64`, `i32`, or
+    /// `u32`.
     type Scalar: Scalar;
 
-    /// Human-readable name of this coordinate space, used in debugging.
+    /// Human-readable name of this coordinate space, used in debugging. `None`
+    /// by default.
     #[must_use]
     fn name() -> Option<&'static str> {
         None

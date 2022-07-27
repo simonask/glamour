@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking Changes
 - Major trait reorganization. The `Scalar` trait is no longer customizable.
 - `Angle<T>` can no longer appear as the component type of a vector.
+- The `Lerp` trait is replaced with regular methods.
 
 ### Internal changes
 - Major refactoring of traits and macros. It should be way easier to grok the
