@@ -1,43 +1,203 @@
+macro_rules! forward_all_to_raw {
+    (
+        $(
+            $(#[
+                $($attr:meta),*
+            ])*
+            $visibility:vis
+            fn $fn_name:ident (
+                $($args:tt)*
+            )
+            $(-> $ret_ty:ty)?
+            ;
+        )*
+    ) => {
+        $(
+            crate::forward_to_raw!(
+                $(#[$($attr),*])*
+                $visibility fn $fn_name($($args)*) $(-> $ret_ty)*;
+            );
+        )*
+    };
+}
+
+macro_rules! forward_to_raw {
+    (
+        $(#[$($attr:meta),*])*
+        $visibility:vis
+        fn $fn_name:ident (
+            self
+            $(, $arg_name:ident: $arg_ty:ty)*
+        ) -> $ret_ty:ty;
+    ) => {
+        #[inline]
+        #[must_use]
+        $(#[$($attr),*])*
+        $visibility
+        fn $fn_name(self $(, $arg_name: $arg_ty)*) -> $ret_ty {
+            <$ret_ty>::from_raw(self.to_raw().$fn_name($($arg_name.to_raw()),*))
+        }
+    };
+
+    (
+        $(#[$($attr:meta),*])*
+        $visibility:vis
+        fn $fn_name:ident (
+            &self
+            $(, $arg_name:ident: $arg_ty:ty)*
+        ) -> $ret_ty:ty;
+    ) => {
+        #[inline]
+        #[must_use]
+        $(#[$($attr),*])*
+        $visibility
+        fn $fn_name(&self, $(arg_name: $arg_ty),*) -> $ret_ty {
+            <$ret_ty>::from_raw(self.as_raw().$fn_name($($arg_name.to_raw()),*))
+        }
+    };
+
+    (
+        $(#[$($attr:meta),*])*
+        $visibility:vis
+        fn $fn_name:ident (
+            &mut self
+            $(, $arg_name:ident: $arg_ty:ty)*
+        ) -> $ret_ty:ty;
+    ) => {
+        #[inline]
+        #[must_use]
+        $(#[$($attr),*])*
+        $visibility
+        fn $fn_name(&mut self, $(arg_name: $arg_ty),*) -> $ret_ty {
+            self.as_raw_mut().$fn_name($($arg_name.into()),*).into()
+        }
+    };
+
+    (
+        $(#[$($attr:meta),*])*
+        $visibility:vis
+        fn $fn_name:ident (
+            &mut self
+            $(, $arg_name:ident: $arg_ty:ty)*
+        );
+    ) => {
+        #[inline]
+        $(#[$($attr),*])*
+        $visibility
+        fn $fn_name(&mut self, $(arg_name: $arg_ty),*) {
+            self.as_raw_mut().$fn_name($($arg_name.into()),*)
+        }
+    };
+
+    (
+        $(#[$($attr:meta),*])*
+        $visibility:vis
+        fn $fn_name:ident(
+            $($arg_name:ident: $arg_ty:ty),*
+        ) -> $ret_ty:ty;
+    ) => {
+        #[inline]
+        #[must_use]
+        $(#[$($attr),*])*
+        $visibility
+        fn $fn_name(
+            $($arg_name: $arg_ty),*
+        ) -> $ret_ty {
+            <$ret_ty>::from_raw(<Self as crate::ToRaw>::Raw::$fn_name($($arg_name.to_raw()),*))
+        }
+    };
+}
+
+/// Generate a `core::ops::*` implementation, delegating to underlying raw
+/// types.
+macro_rules! forward_op_to_raw {
+    // Implement operation for specific scalar types.
+    ($base_type_name:ident, $op_name:ident < [$($scalars:ty),+] > :: $op_fn_name:ident -> $output:ty) => {
+        $(
+            impl<T: Unit<Scalar = $scalars>> core::ops::$op_name<$scalars> for $base_type_name<T> {
+                type Output = $output;
+
+                #[inline]
+                fn $op_fn_name(self, other: $scalars) -> $output {
+                    <$output>::from_raw(core::ops::$op_name::$op_fn_name(
+                        self.to_raw(),
+                        other,
+                    ))
+                }
+            }
+        )*
+    };
+
+    // Implement operation for a generic non-scalar argument.
+    ($base_type_name:ident, $op_name:ident < $arg_ty:ty > :: $op_fn_name:ident -> $output:ty) => {
+        impl<T: Unit> core::ops::$op_name<$arg_ty> for $base_type_name<T> {
+            type Output = $output;
+
+            #[inline]
+            fn $op_fn_name(self, other: $arg_ty) -> $output {
+                <$output>::from_raw(core::ops::$op_name::$op_fn_name(
+                    self.to_raw(),
+                    other.to_raw(),
+                ))
+            }
+        }
+    };
+}
+
+/// Similar to `forward_op_to_raw!`, but for assigning ops.
+macro_rules! forward_op_assign_to_raw {
+    ($base_type_name:ident, $op_name:ident < [$($scalars:ty),+] > :: $op_fn_name:ident) => {
+        $(
+            impl<T: Unit<Scalar = $scalars>> core::ops::$op_name<$scalars> for $base_type_name<T> {
+                #[inline]
+                fn $op_fn_name(&mut self, other: $scalars) {
+                    core::ops::$op_name::$op_fn_name(self.as_raw_mut(), other)
+                }
+            }
+        )*
+    };
+
+    ($base_type_name:ident, $op_name:ident < $arg_ty:ty > :: $op_fn_name:ident) => {
+        impl<T: Unit> core::ops::$op_name<$arg_ty> for $base_type_name<T> {
+            #[inline]
+            fn $op_fn_name(&mut self, other: $arg_ty) {
+                core::ops::$op_name::$op_fn_name(self.as_raw_mut(), other.to_raw())
+            }
+        }
+    };
+}
+
 /// Implement common operations for all vector-like types.
 macro_rules! impl_common {
     ($base_type_name:ident {
         $($fields:ident: $fields_ty:ty),*
     }) => {
-        impl<T: crate::UnitTypes> $base_type_name<T> {
-            #[doc = "Instantiate with field values."]
-            #[inline]
-            #[must_use]
-            pub fn new($($fields: impl Into<$fields_ty>),*) -> $base_type_name<T> {
-                $base_type_name {
-                    $($fields: $fields.into()),*
-                }
-            }
-
+        impl<T: crate::Unit> $base_type_name<T> {
             #[doc = "Bitcast an untyped instance to self."]
             #[inline]
             #[must_use]
-            pub fn from_untyped(untyped: $base_type_name<T::Primitive>) -> $base_type_name<T> {
+            pub fn from_untyped(untyped: $base_type_name<T::Scalar>) -> $base_type_name<T> {
                 untyped.cast()
             }
 
             #[doc = "Bitcast self to an untyped instance."]
             #[inline]
             #[must_use]
-            pub fn to_untyped(self) -> $base_type_name<T::Primitive> {
+            pub fn to_untyped(self) -> $base_type_name<T::Scalar> {
                 self.cast()
             }
 
             #[doc = "Reinterpret cast self as the untyped variant."]
             #[inline]
             #[must_use]
-            pub fn as_untyped(&self) -> &$base_type_name<T::Primitive> {
+            pub fn as_untyped(&self) -> &$base_type_name<T::Scalar> {
                 self.cast_ref()
             }
 
             #[doc = "Reinterpret cast self as the untyped variant."]
             #[inline]
             #[must_use]
-            pub fn as_untyped_mut(&mut self) -> &mut $base_type_name<T::Primitive> {
+            pub fn as_untyped_mut(&mut self) -> &mut $base_type_name<T::Scalar> {
                 self.cast_mut()
             }
 
@@ -46,7 +206,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast<T2>(self) -> $base_type_name<T2>
             where
-                T2: crate::unit::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::unit::Unit<Scalar = T::Scalar>,
             {
                 bytemuck::cast(self)
             }
@@ -56,7 +216,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_ref<T2>(&self) -> &$base_type_name<T2>
             where
-                T2: crate::unit::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::unit::Unit<Scalar = T::Scalar>,
             {
                 bytemuck::cast_ref(self)
             }
@@ -66,7 +226,7 @@ macro_rules! impl_common {
             #[must_use]
             pub fn cast_mut<T2>(&mut self) -> &mut $base_type_name<T2>
             where
-                T2: crate::unit::UnitTypes<Primitive = T::Primitive>,
+                T2: crate::unit::Unit<Scalar = T::Scalar>,
             {
                 bytemuck::cast_mut(self)
             }
@@ -304,65 +464,10 @@ macro_rules! impl_vector_common {
     ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident {
         $($fields:ident),*
     }) => {
-        impl<T> $base_type_name<T> where T: crate::UnitTypes {
-            #[doc = "All zeroes."]
-            pub const ZERO: Self = Self {
-                $($fields: T::Scalar::ZERO),*
-            };
-
-            #[doc = "All ones."]
-            pub const ONE: Self = Self {
-                $($fields: T::Scalar::ONE),*
-            };
-
-            #[doc = "Get the underlying `glam` vector."]
-            #[inline]
-            #[must_use]
-            pub fn to_raw(self) -> T::$vec_ty {
-                bytemuck::cast(self)
-            }
-
-            #[doc = "Create new instance from `glam` vector."]
-            #[inline]
-            #[must_use]
-            pub fn from_raw(raw: T::$vec_ty) -> Self {
-                bytemuck::cast(raw)
-            }
-
-            #[doc = "Reinterpret as the underlying `glam` vector."]
-            #[doc = ""]
-            #[doc = "Note: The corresponding \"from_raw_ref\" method does not exist"]
-            #[doc = "because some `glam` vector types have smaller alignment than"]
-            #[doc = "these vector types, so the cast may fail. If you are sure this"]
-            #[doc = "isn't the case, you can use [`bytemuck::cast_ref()`] directly."]
-            #[inline]
-            #[must_use]
-            pub fn as_raw(&self) -> &T::$vec_ty {
-                bytemuck::cast_ref(self)
-            }
-
-            #[doc = "Reinterpret as the underlying `glam` vector."]
-            #[inline]
-            #[must_use]
-            pub fn as_raw_mut(&mut self) -> &mut T::$vec_ty {
-                bytemuck::cast_mut(self)
-            }
-
-            #[doc = "Instantiate from array."]
-            #[inline]
-            #[must_use]
-            pub const fn from_array([$($fields),*]: [T::Scalar; $dimensions]) -> Self {
-                Self { $($fields),* }
-            }
-
-            #[doc = "Convert to array."]
-            #[inline]
-            #[must_use]
-            pub const fn to_array(self) -> [T::Scalar; $dimensions] {
-                let Self { $($fields),* } = self;
-                [$($fields),*]
-            }
-
+        impl<T> $base_type_name<T>
+        where
+            T: crate::Unit,
+        {
             #[doc = "Reinterpret as array."]
             #[inline]
             #[must_use]
@@ -375,23 +480,6 @@ macro_rules! impl_vector_common {
             #[must_use]
             pub fn as_array_mut(&mut self) -> &mut [T::Scalar; $dimensions] {
                 bytemuck::cast_mut(self)
-            }
-
-            #[doc = "Instance with all components set to `scalar`."]
-            #[inline]
-            #[must_use]
-            pub const fn splat(scalar: T::Scalar) -> Self {
-                $base_type_name {
-                    $($fields: scalar),*
-                }
-            }
-
-            #[doc = "Component-wise clamp."]
-            #[inline]
-            #[must_use]
-            pub fn clamp(self, min: Self, max: Self) -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(self.to_raw().clamp(min.to_raw(), max.to_raw()))
             }
 
             #[doc = "Get component at `index`."]
@@ -419,180 +507,6 @@ macro_rules! impl_vector_common {
             pub fn const_set<const N: usize>(&mut self, value: T::Scalar) {
                 self.as_array_mut()[N] = value;
             }
-
-            #[doc = "Return a mask with the result of a component-wise equals comparison."]
-            #[inline]
-            #[must_use]
-            pub fn cmpeq(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
-                use crate::bindings::Vector;
-                self.to_raw().cmpeq(other.to_raw())
-            }
-
-            #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
-            #[inline]
-            #[must_use]
-            pub fn cmpne(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
-                use crate::bindings::Vector;
-                self.to_raw().cmpne(other.to_raw())
-            }
-
-            #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
-            #[inline]
-            #[must_use]
-            pub fn cmpge(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
-                use crate::bindings::Vector;
-                self.to_raw().cmpge(other.to_raw())
-            }
-
-            #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
-            #[inline]
-            #[must_use]
-            pub fn cmpgt(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
-                use crate::bindings::Vector;
-                self.to_raw().cmpgt(other.to_raw())
-            }
-
-            #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
-            #[inline]
-            #[must_use]
-            pub fn cmple(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
-                use crate::bindings::Vector;
-                self.to_raw().cmple(other.to_raw())
-            }
-
-            #[doc = "Return a mask with the result of a component-wise less-than comparison."]
-            #[inline]
-            #[must_use]
-            pub fn cmplt(self, other: Self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
-                use crate::bindings::Vector;
-                self.to_raw().cmplt(other.to_raw())
-            }
-
-            #[doc = "Minimum by component."]
-            #[inline]
-            #[must_use]
-            pub fn min(self, other: Self) -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(self.to_raw().min(other.to_raw()))
-            }
-
-            #[doc = "Maximum by component."]
-            #[inline]
-            #[must_use]
-            pub fn max(self, other: Self) -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(self.to_raw().max(other.to_raw()))
-            }
-
-            #[doc = "Horizontal minimum (smallest component)."]
-            #[inline]
-            #[must_use]
-            pub fn min_element(self) -> T::Scalar {
-                use crate::bindings::Vector;
-                T::Scalar::from_raw(self.to_raw().min_element())
-            }
-
-            #[doc = "Horizontal maximum (largest component)."]
-            #[inline]
-            #[must_use]
-            pub fn max_element(self) -> T::Scalar {
-                use crate::bindings::Vector;
-                T::Scalar::from_raw(self.to_raw().max_element())
-            }
-
-            #[doc = "Select components from two instances based on a mask."]
-            #[inline]
-            #[must_use]
-            pub fn select(mask: <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask, if_true: Self, if_false: Self) -> Self {
-                use crate::bindings::Vector;
-                Self::from_raw(T::$vec_ty::select(mask, if_true.to_raw(), if_false.to_raw()))
-            }
-        }
-
-        impl<T> $base_type_name<T> where T: crate::UnitTypes, T::Scalar: crate::scalar::SignedScalar {
-            #[doc = "All negative one"]
-            pub const NEG_ONE: Self = $base_type_name {
-                $($fields: <T::Scalar as crate::scalar::SignedScalar>::NEG_ONE),*
-            };
-        }
-
-        impl<T> $base_type_name<T>
-        where
-            T: crate::UnitTypes,
-            T::$vec_ty: crate::bindings::VectorFloat<$dimensions>,
-        {
-            #[doc = "Return an instance where all components are NaN."]
-            #[inline]
-            #[must_use]
-            pub fn nan() -> Self {
-                use crate::bindings::VectorFloat;
-                Self::from_raw(T::$vec_ty::nan())
-            }
-            #[doc = "True if all components are non-infinity and non-NaN."]
-            #[inline]
-            #[must_use]
-            pub fn is_finite(&self) -> bool {
-                use crate::bindings::VectorFloat;
-                self.as_raw().is_finite()
-            }
-            #[doc = "True if any component is NaN."]
-            #[inline]
-            #[must_use]
-            pub fn is_nan(&self) -> bool {
-                use crate::bindings::VectorFloat;
-                self.as_raw().is_nan()
-            }
-            #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
-            #[inline]
-            #[must_use]
-            pub fn is_nan_mask(&self) -> <T::$vec_ty as crate::bindings::Vector<$dimensions>>::Mask {
-                use crate::bindings::VectorFloat;
-                self.as_raw().is_nan_mask().into()
-            }
-
-            #[doc = "Round all components up."]
-            #[inline]
-            #[must_use]
-            pub fn ceil(self) -> Self {
-                use crate::bindings::VectorFloat;
-                Self::from_raw(self.to_raw().ceil())
-            }
-            #[doc = "Round all components down."]
-            #[inline]
-            #[must_use]
-            pub fn floor(self) -> Self {
-                use crate::bindings::VectorFloat;
-                Self::from_raw(self.to_raw().floor())
-            }
-            #[doc = "Round all components."]
-            #[inline]
-            #[must_use]
-            pub fn round(self) -> Self {
-                use crate::bindings::VectorFloat;
-                Self::from_raw(self.to_raw().round())
-            }
-        }
-
-        impl<T> $base_type_name<T>
-        where
-            T: crate::UnitTypes,
-            T::$vec_ty: crate::traits::Abs,
-        {
-            #[doc = "Computes the absolute value of each component."]
-            #[inline]
-            #[must_use]
-            pub fn abs(self) -> Self {
-                use crate::traits::Abs;
-                Self::from_raw(self.to_raw().abs())
-            }
-
-            #[doc = "Return a copy where each component is either -1 or 1, depending on the sign."]
-            #[inline]
-            #[must_use]
-            pub fn signum(self) -> Self {
-                use crate::traits::Abs;
-                Self::from_raw(self.to_raw().signum())
-            }
         }
 
         impl<T: Unit> core::ops::Index<usize> for $base_type_name<T> {
@@ -613,8 +527,7 @@ macro_rules! impl_vector_common {
             }
         }
 
-        impl<T: Unit> AsRef<[T::Scalar; $dimensions]> for $base_type_name<T>
-        {
+        impl<T: Unit> AsRef<[T::Scalar; $dimensions]> for $base_type_name<T> {
             #[inline]
             #[must_use]
             fn as_ref(&self) -> &[T::Scalar; $dimensions] {
@@ -682,8 +595,8 @@ macro_rules! impl_vector_common {
 
         impl<T> core::ops::Neg for $base_type_name<T>
         where
-            T: crate::UnitTypes,
-            T::$vec_ty: core::ops::Neg<Output = T::$vec_ty>,
+            T: Unit,
+            <T::Scalar as Scalar>::$vec_ty: core::ops::Neg<Output = <T::Scalar as Scalar>::$vec_ty>,
         {
             type Output = Self;
 
@@ -697,7 +610,7 @@ macro_rules! impl_vector_common {
 }
 
 macro_rules! impl_glam_conversion {
-    ($base_type_name:ident, $dimensions:literal [
+    ($base_type_name:ident [
         $(
             $scalar:ty => $glam_type:ty
         ),*
@@ -705,8 +618,7 @@ macro_rules! impl_glam_conversion {
         $(
             impl<T> From<$base_type_name<T>> for $glam_type
             where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar>
+                T: Unit<Scalar = $scalar>,
             {
                 #[inline]
                 #[must_use]
@@ -717,8 +629,7 @@ macro_rules! impl_glam_conversion {
 
             impl<T> From<$glam_type> for $base_type_name<T>
             where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar>
+                T: Unit<Scalar = $scalar>,
             {
                 #[inline]
                 #[must_use]
@@ -729,8 +640,7 @@ macro_rules! impl_glam_conversion {
 
             impl<T> AsRef<$glam_type> for $base_type_name<T>
             where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar>
+                T: Unit<Scalar = $scalar>,
             {
                 #[inline]
                 #[must_use]
@@ -741,8 +651,7 @@ macro_rules! impl_glam_conversion {
 
             impl<T> AsMut<$glam_type> for $base_type_name<T>
             where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar>
+                T: Unit<Scalar = $scalar>,
             {
                 #[inline]
                 #[must_use]
@@ -754,93 +663,11 @@ macro_rules! impl_glam_conversion {
     };
 }
 
-macro_rules! impl_scaling {
-    ($base_type_name:ident, $dimensions:literal [
-        $(
-            $scalar:ty
-        ),*
-    ]) => {
-        $(
-            impl<T> core::ops::Mul<$scalar> for $base_type_name<T>
-            where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::Mul<$scalar, Output = T::Scalar>
-            {
-                type Output = Self;
-
-                #[inline]
-                #[must_use]
-                fn mul(self, rhs: $scalar) -> Self::Output {
-                    Self::from_raw(self.to_raw() * rhs)
-                }
-            }
-
-            impl<T> core::ops::MulAssign<$scalar> for $base_type_name<T>
-            where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::MulAssign<$scalar>
-            {
-                #[inline]
-                fn mul_assign(&mut self, rhs: $scalar) {
-                    *self.as_raw_mut() *= rhs;
-                }
-            }
-
-            impl<T> core::ops::Div<$scalar> for $base_type_name<T>
-            where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::Div<$scalar, Output = T::Scalar>
-            {
-                type Output = Self;
-
-                #[inline]
-                #[must_use]
-                fn div(self, rhs: $scalar) -> Self::Output {
-                    Self::from_raw(self.to_raw() / rhs)
-                }
-            }
-
-            impl<T> core::ops::DivAssign<$scalar> for $base_type_name<T>
-            where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::DivAssign<$scalar>
-            {
-                #[inline]
-                fn div_assign(&mut self, rhs: $scalar) {
-                    *self.as_raw_mut() /= rhs;
-                }
-            }
-
-            impl<T> core::ops::Rem<$scalar> for $base_type_name<T>
-            where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::Rem<$scalar, Output = T::Scalar>
-            {
-                type Output = Self;
-
-                #[inline]
-                #[must_use]
-                fn rem(self, rhs: $scalar) -> Self::Output {
-                    Self::from_raw(self.to_raw() % rhs)
-                }
-            }
-
-            impl<T> core::ops::RemAssign<$scalar> for $base_type_name<T>
-            where
-                T: Unit,
-                T::Scalar: crate::Scalar<Primitive = $scalar> + core::ops::RemAssign<$scalar>
-            {
-                #[inline]
-                fn rem_assign(&mut self, rhs: $scalar) {
-                    *self.as_raw_mut() %= rhs;
-                }
-            }
-        )*
-    };
-}
-
+pub(crate) use forward_all_to_raw;
+pub(crate) use forward_op_assign_to_raw;
+pub(crate) use forward_op_to_raw;
+pub(crate) use forward_to_raw;
 pub(crate) use impl_common;
 pub(crate) use impl_glam_conversion;
-pub(crate) use impl_scaling;
 pub(crate) use impl_tuple_eq;
 pub(crate) use impl_vector_common;

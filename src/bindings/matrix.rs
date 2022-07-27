@@ -1,3 +1,5 @@
+use crate::scalar::{FloatScalar, Scalar};
+
 use super::*;
 
 /// Trait describing a glam N x N matrix type.
@@ -17,12 +19,10 @@ pub trait Matrix:
     + Neg<Output = Self>
     + AbsDiffEq<Epsilon = <Self::Scalar as AbsDiffEq>::Epsilon>
 {
-    type Scalar: PrimitiveMatrices<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>
-        + Float
-        + AbsDiffEq;
-    type Vec2: Vector<2, Scalar = Self::Scalar>;
-    type Vec3: Vector<3, Scalar = Self::Scalar>;
-    type Vec4: Vector<4, Scalar = Self::Scalar>;
+    type Scalar: FloatScalar<Vec2f = Self::Vec2, Vec3f = Self::Vec3, Vec4f = Self::Vec4> + AbsDiffEq;
+    type Vec2: FloatVector2<Scalar = Self::Scalar>;
+    type Vec3: FloatVector3<Scalar = Self::Scalar>;
+    type Vec4: FloatVector4<Scalar = Self::Scalar>;
 
     #[must_use]
     fn is_nan(&self) -> bool;
@@ -91,7 +91,7 @@ pub trait Matrix4: Matrix + Mul<Self::Vec4, Output = Self::Vec4> {
     fn from_translation(translation: Self::Vec3) -> Self;
     fn from_scale_rotation_translation(
         scale: Self::Vec3,
-        axis: <Self::Scalar as PrimitiveMatrices>::Quat,
+        axis: <Self::Scalar as FloatScalar>::Quat,
         translation: Self::Vec3,
     ) -> Self;
     fn look_at_lh(eye: Self::Vec3, center: Self::Vec3, up: Self::Vec3) -> Self;
@@ -164,9 +164,9 @@ macro_rules! impl_matrix {
     ($scalar:ty, $glam_ty:ty) => {
         impl Matrix for $glam_ty {
             type Scalar = $scalar;
-            type Vec2 = <$scalar as Primitive>::Vec2;
-            type Vec3 = <$scalar as Primitive>::Vec3;
-            type Vec4 = <$scalar as Primitive>::Vec4;
+            type Vec2 = <$scalar as Scalar>::Vec2;
+            type Vec3 = <$scalar as Scalar>::Vec3;
+            type Vec4 = <$scalar as Scalar>::Vec4;
 
             forward_impl!($glam_ty => fn is_nan(&self) -> bool);
             forward_impl!($glam_ty => fn is_finite(&self) -> bool);

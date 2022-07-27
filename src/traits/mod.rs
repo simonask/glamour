@@ -47,24 +47,3 @@ pub trait Union<T = Self> {
     /// Compute the union of two things.
     fn union(self, other: T) -> Self::Union;
 }
-
-/// Linear interpolation between scalars.
-pub trait Lerp<T> {
-    /// Linear interpolation.
-    ///
-    /// `self` will be interpolated towards `other`, with progress indicated by
-    /// `t`, where `t == 0.0` returns `self` and `t == 1.0` returns `other`.
-    #[must_use]
-    fn lerp(self, other: Self, t: T) -> Self;
-}
-
-/// Computes the absolute value of `Self`.
-pub trait Abs {
-    /// Computes the absolute value of `Self`.
-    #[must_use]
-    fn abs(self) -> Self;
-
-    /// Returns a vector with elements representing the sign of `self`.
-    #[must_use]
-    fn signum(self) -> Self;
-}

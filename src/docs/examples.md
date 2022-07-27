@@ -3,7 +3,6 @@
 Table of contents:
 
 - [Transformation with units](#transformation-with-units)
-- [Custom scalar](#custom-scalar)
 - [Boolean masks](#boolean-masks)
 
 ## Transformation with units
@@ -48,75 +47,6 @@ let world_vector = view_to_world.map(vector);
 
 assert_eq!(world_point, (200.0, 400.0, 600.0));
 assert_eq!(world_vector, (100.0, 0.0, 0.0));
-```
-
-## Custom scalar
-
-```rust
-use glamour::prelude::*;
-use derive_more::*;
-use serde::{Serialize, Deserialize};
-
-// Derive everything for our custom scalar to make it act as a primitive `f32`.
-#[derive(
-    // Must be bitwise compatible with `f32`.
-    bytemuck::Zeroable, bytemuck::Pod,
-    // Must act as a primitive value.
-    Debug, Copy, Clone, Default, PartialEq, PartialOrd,
-    // Must be serializable when "serde" is enabled.
-    Serialize, Deserialize,
-    // Should support arithmetic to be useful.
-    Add, AddAssign, Sub, SubAssign, Div, DivAssign, Mul, MulAssign
-)]
-#[repr(transparent)] // needed for bytemuck
-struct Degrees {
-    pub degrees: f32,
-}
-
-// Degrees is binary compatible with `f32`, so we can turn it into a scalar.
-impl Scalar for Degrees {
-    type Primitive = f32;
-    const ZERO: Self = Degrees { degrees: 0.0 };
-    const ONE: Self = Degrees { degrees: 1.0 };
-}
-
-// If we also declare `Degrees` as `Unit`, it can be used directly in vector
-// types without an additional "space" tag.
-impl Unit for Degrees {
-    type Scalar = Self;
-}
-
-// Type alias for convenience.
-type DegreesVector = Vector4<Degrees>;
-
-let a1 = DegreesVector {
-    x: Degrees { degrees: 180.0 },
-    y: Degrees { degrees: 90.0 },
-    z: Degrees { degrees: 0.0 },
-    w: Degrees { degrees: 90.0 },
-};
-
-let a2 = DegreesVector {
-    x: Degrees { degrees: 10.0 },
-    y: Degrees { degrees: 20.0 },
-    z: Degrees { degrees: 90.0 },
-    w: Degrees { degrees: 45.0 },
-};
-
-// The value type of the vector is still `Degrees`.
-let d = a1.get(0);
-assert_eq!(d, Degrees { degrees: 180.0 });
-
-// Vector arithmetic works.
-let added = a1 + a2;
-
-assert_eq!(added, (
-    Degrees { degrees: 190.0 },
-    Degrees { degrees: 110.0 },
-    Degrees { degrees: 90.0 },
-    Degrees { degrees: 135.0 }
-));
-
 ```
 
 ## Boolean masks

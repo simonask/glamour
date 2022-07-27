@@ -3,13 +3,15 @@
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{
-    traits::{Contains, Intersection, Lerp},
-    Point2, Point3, Rect, Size2, Union, Unit, UnitTypes, Vector2,
+    scalar::FloatScalar,
+    traits::{Contains, Intersection},
+    Point2, Point3, Rect, Size2, Union, Unit, Vector2,
 };
 
 /// 2D axis-aligned box represented as "min" and "max" points.
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound = ""))]
+#[repr(C)]
 pub struct Box2<T: Unit = f32> {
     /// Lower bound of the box.
     pub min: Point2<T>,
@@ -25,6 +27,7 @@ crate::impl_common!(Box2 {
 /// 3D axis-aligned box.
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound = ""))]
+#[repr(C)]
 pub struct Box3<T: Unit = f32> {
     /// Lower bound of the box.
     pub min: Point3<T>,
@@ -43,6 +46,14 @@ impl<T: Unit> Box2<T> {
         min: Point2::ZERO,
         max: Point2::ZERO,
     };
+
+    /// New 2D box from min/max coordinates.
+    pub fn new(min: impl Into<Point2<T>>, max: impl Into<Point2<T>>) -> Self {
+        Box2 {
+            min: min.into(),
+            max: max.into(),
+        }
+    }
 
     /// Create from [`Rect`].
     ///
@@ -362,14 +373,31 @@ impl<T: Unit> Union<Box2<T>> for Box2<T> {
     }
 }
 
-impl<T: UnitTypes> Lerp<T::Primitive> for Box2<T>
+impl<T> Box2<T>
 where
-    Point2<T>: Lerp<T::Primitive>,
+    T: Unit,
+    T::Scalar: FloatScalar,
 {
-    fn lerp(self, other: Self, t: T::Primitive) -> Self {
+    /// Linear interpolation between boxes.
+    #[must_use]
+    pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
         let min = self.min.lerp(other.min, t);
         let max = self.max.lerp(other.max, t);
         Box2 { min, max }
+    }
+}
+
+impl<T> Box3<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    /// Linear interpolation between boxes.
+    #[must_use]
+    pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
+        let min = self.min.lerp(other.min, t);
+        let max = self.max.lerp(other.max, t);
+        Box3 { min, max }
     }
 }
 

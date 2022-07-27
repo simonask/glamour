@@ -1,3 +1,5 @@
+use crate::scalar::FloatScalar;
+
 use super::*;
 
 /// Common trait for [`glam::Quat`] and [`glam::DQuat`].
@@ -12,9 +14,9 @@ pub trait Quat:
     + Neg<Output = Self>
     + AbsDiffEq
 {
-    type Scalar: PrimitiveMatrices<Vec3 = Self::Vec3, Quat = Self> + Float + AbsDiffEq;
-    type Vec3: Vector<3, Scalar = Self::Scalar>;
-    type Vec4: Vector<4, Scalar = Self::Scalar>;
+    type Scalar: FloatScalar<Quat = Self, Vec3 = Self::Vec3, Vec4 = Self::Vec4> + AbsDiffEq;
+    type Vec3: FloatVector3<Scalar = Self::Scalar>;
+    type Vec4: FloatVector4<Scalar = Self::Scalar>;
 
     fn from_axis_angle(axis: Self::Vec3, angle: Self::Scalar) -> Self;
 }

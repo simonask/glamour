@@ -9,16 +9,13 @@
 //! transparently.
 
 use core::iter::Sum;
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
+use core::ops::{Add, Mul};
 
-use crate::bindings::VectorFloat2;
 use crate::scalar::SignedScalar;
 use crate::{
-    bindings::{Vector, VectorFloat},
-    traits::Lerp,
-    Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
+    bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
-use crate::{Angle, UnitTypes};
+use crate::{Angle, AsRaw, FromRawRef, ToRaw};
 
 /// 2D vector.
 ///
@@ -97,13 +94,409 @@ crate::impl_vector_common!(Vector2 [2] => Vec2 { x, y });
 crate::impl_vector_common!(Vector3 [3] => Vec3 { x, y, z });
 crate::impl_vector_common!(Vector4 [4] => Vec4 { x, y, z, w });
 
-crate::impl_glam_conversion!(Vector2, 2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
-crate::impl_glam_conversion!(Vector3, 3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
-crate::impl_glam_conversion!(Vector4, 4 [f32 => glam::Vec4, f64 => glam::DVec4, i32 => glam::IVec4, u32 => glam::UVec4]);
+crate::impl_glam_conversion!(Vector2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
+crate::impl_glam_conversion!(Vector3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
+crate::impl_glam_conversion!(Vector4 [f32 => glam::Vec4, f64 => glam::DVec4, i32 => glam::IVec4, u32 => glam::UVec4]);
 
-crate::impl_scaling!(Vector2, 2 [f32, f64, i32, u32]);
-crate::impl_scaling!(Vector3, 3 [f32, f64, i32, u32]);
-crate::impl_scaling!(Vector4, 4 [f32, f64, i32, u32]);
+crate::forward_op_to_raw!(Vector2, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Vector3, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Vector4, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Vector2, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Vector3, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Vector4, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Vector2, Mul<Self>::mul -> Self);
+crate::forward_op_to_raw!(Vector3, Mul<Self>::mul -> Self);
+crate::forward_op_to_raw!(Vector4, Mul<Self>::mul -> Self);
+crate::forward_op_to_raw!(Vector2, Div<Self>::div -> Self);
+crate::forward_op_to_raw!(Vector3, Div<Self>::div -> Self);
+crate::forward_op_to_raw!(Vector4, Div<Self>::div -> Self);
+crate::forward_op_to_raw!(Vector2, Rem<Self>::rem -> Self);
+crate::forward_op_to_raw!(Vector3, Rem<Self>::rem -> Self);
+crate::forward_op_to_raw!(Vector4, Rem<Self>::rem -> Self);
+
+crate::forward_op_to_raw!(Vector2, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::forward_op_to_raw!(Vector3, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::forward_op_to_raw!(Vector4, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::forward_op_to_raw!(Vector2, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::forward_op_to_raw!(Vector3, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::forward_op_to_raw!(Vector4, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::forward_op_to_raw!(Vector2, Rem<[f32, f64, i32, u32]>::rem -> Self);
+crate::forward_op_to_raw!(Vector3, Rem<[f32, f64, i32, u32]>::rem -> Self);
+crate::forward_op_to_raw!(Vector4, Rem<[f32, f64, i32, u32]>::rem -> Self);
+
+crate::forward_op_assign_to_raw!(Vector2, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Vector3, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Vector4, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Vector2, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector3, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector4, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector2, MulAssign<Self>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector3, MulAssign<Self>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector4, MulAssign<Self>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector2, DivAssign<Self>::div_assign);
+crate::forward_op_assign_to_raw!(Vector3, DivAssign<Self>::div_assign);
+crate::forward_op_assign_to_raw!(Vector4, DivAssign<Self>::div_assign);
+crate::forward_op_assign_to_raw!(Vector2, RemAssign<Self>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector3, RemAssign<Self>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector4, RemAssign<Self>::rem_assign);
+
+crate::forward_op_assign_to_raw!(Vector2, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::forward_op_assign_to_raw!(Vector3, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::forward_op_assign_to_raw!(Vector4, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::forward_op_assign_to_raw!(Vector2, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector3, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector4, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector2, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector3, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector4, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector2, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::forward_op_assign_to_raw!(Vector3, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::forward_op_assign_to_raw!(Vector4, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::forward_op_assign_to_raw!(Vector2, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector3, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector4, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+
+impl<T: Unit> Vector2<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+    };
+
+    /// New vector.
+    pub const fn new(x: T::Scalar, y: T::Scalar) -> Self {
+        Self { x, y }
+    }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 2]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 2];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec2;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
+}
+
+impl<T> Vector2<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    /// All NaN.
+    pub const NAN: Self = Vector2 {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+    };
+
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec2;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+
+        #[doc = "Normalize the vector. Undefined results in the vector's length is (very close to) zero."]
+        pub fn normalize(self) -> Self;
+        #[doc = "Normalize the vector, returning zero if the length was already (very close to) zero."]
+        pub fn normalize_or_zero(self) -> Self;
+        #[doc = "True if the vector is normalized."]
+        pub fn is_normalized(self) -> bool;
+        #[doc = "Length of the vector"]
+        pub fn length(self) -> T::Scalar;
+        #[doc = "Squared length of the vector"]
+        pub fn length_squared(self) -> T::Scalar;
+        #[doc = "e^self by component"]
+        pub fn exp(self) -> Self;
+        #[doc = "self^n by component"]
+        pub fn powf(self, n: T::Scalar) -> Self;
+        #[doc = "1.0/self by component"]
+        pub fn recip(self) -> Self;
+        #[doc = "self * a + b"]
+        pub fn mul_add(self, a: Self, b: Self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
+}
+
+impl<T> Vector2<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "Turn all components positive."]
+        pub fn abs(self) -> Self;
+        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
+        pub fn signum(self) -> Self;
+    );
+}
+
+impl<T: Unit> Vector3<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+    };
+
+    /// New vector.
+    pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar) -> Self {
+        Self { x, y, z }
+    }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 3]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 3];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec3;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
+}
+
+impl<T> Vector3<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    /// All NaN.
+    pub const NAN: Self = Vector3 {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+        z: <T::Scalar as FloatScalar>::NAN,
+    };
+
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec3;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+
+        #[doc = "Normalize the vector. Undefined results in the vector's length is (very close to) zero."]
+        pub fn normalize(self) -> Self;
+        #[doc = "Normalize the vector, returning zero if the length was already (very close to) zero."]
+        pub fn normalize_or_zero(self) -> Self;
+        #[doc = "True if the vector is normalized."]
+        pub fn is_normalized(self) -> bool;
+        #[doc = "Length of the vector"]
+        pub fn length(self) -> T::Scalar;
+        #[doc = "Squared length of the vector"]
+        pub fn length_squared(self) -> T::Scalar;
+        #[doc = "e^self by component"]
+        pub fn exp(self) -> Self;
+        #[doc = "self^n by component"]
+        pub fn powf(self, n: T::Scalar) -> Self;
+        #[doc = "1.0/self by component"]
+        pub fn recip(self) -> Self;
+        #[doc = "self * a + b"]
+        pub fn mul_add(self, a: Self, b: Self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
+}
+
+impl<T> Vector3<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "Turn all components positive."]
+        pub fn abs(self) -> Self;
+        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
+        pub fn signum(self) -> Self;
+    );
+}
+
+impl<T: Unit> Vector4<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+        w: T::Scalar::ONE,
+    };
+
+    /// New vector.
+    pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar, w: T::Scalar) -> Self {
+        Self { x, y, z, w }
+    }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 4]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 4];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec4;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
+}
+
+impl<T> Vector4<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    /// All NaN.
+    pub const NAN: Self = Vector4 {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+        z: <T::Scalar as FloatScalar>::NAN,
+        w: <T::Scalar as FloatScalar>::NAN,
+    };
+
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec4;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+
+        #[doc = "Normalize the vector. Undefined results in the vector's length is (very close to) zero."]
+        pub fn normalize(self) -> Self;
+        #[doc = "Normalize the vector, returning zero if the length was already (very close to) zero."]
+        pub fn normalize_or_zero(self) -> Self;
+        #[doc = "True if the vector is normalized."]
+        pub fn is_normalized(self) -> bool;
+        #[doc = "Length of the vector"]
+        pub fn length(self) -> T::Scalar;
+        #[doc = "Squared length of the vector"]
+        pub fn length_squared(self) -> T::Scalar;
+        #[doc = "e^self by component"]
+        pub fn exp(self) -> Self;
+        #[doc = "self^n by component"]
+        pub fn powf(self, n: T::Scalar) -> Self;
+        #[doc = "1.0/self by component"]
+        pub fn recip(self) -> Self;
+        #[doc = "self * a + b"]
+        pub fn mul_add(self, a: Self, b: Self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
+}
+
+impl<T> Vector4<T>
+where
+    T: Unit,
+    T::Scalar: SignedScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "Turn all components positive."]
+        pub fn abs(self) -> Self;
+        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
+        pub fn signum(self) -> Self;
+    );
+}
 
 macro_rules! impl_vector {
     ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $point_ty:ident $(, $size_ty:ident)?) => {
@@ -139,7 +532,7 @@ macro_rules! impl_vector {
             #[inline]
             #[must_use]
             pub fn dot(self, other: Self) -> T::Scalar {
-                T::Scalar::from_raw(self.to_raw().dot(other.to_raw()))
+                self.to_raw().dot(other.to_raw())
             }
 
             #[doc = "Instantiate from point."]
@@ -238,172 +631,10 @@ macro_rules! impl_vector {
             }
         }
 
-        impl<T> $base_type_name<T>
-        where
-            T: UnitTypes,
-            T::$vec_ty: VectorFloat<$dimensions, Scalar = T::Primitive>,
-        {
-            #[doc = "Normalize the vector."]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec4::normalize()`]."]
-            #[must_use]
-            #[inline]
-            pub fn normalize(&self) -> Self {
-                Self::from_raw(self.to_raw().normalize())
-            }
-
-            #[doc = "Normalize the vector if possible, else returns a zero vector."]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec4::normalize_or_zero()`]."]
-            #[must_use]
-            #[inline]
-            pub fn normalize_or_zero(&self) -> Self {
-                Self::from_raw(self.to_raw().normalize_or_zero())
-            }
-
-            #[doc = "Returns whether `self` is length 1.0 or not"]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec4::normalize()`]."]
-            #[must_use]
-            #[inline]
-            pub fn is_normalized(self) -> bool {
-                self.as_raw().is_normalized()
-            }
-
-            #[doc = "Get the length of the vector"]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec3::length()]."]
-            #[must_use]
-            #[inline]
-            pub fn length(&self) -> T::Primitive {
-                T::Primitive::from_raw(self.as_raw().length())
-            }
-
-            #[doc = "Get the squared length of the vector"]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec3::length_squared()]."]
-            #[must_use]
-            #[inline]
-            pub fn length_squared(&self) -> T::Primitive {
-                T::Primitive::from_raw(self.as_raw().length_squared())
-            }
-
-            #[doc = "Returns a vector containing `e^self` (the exponential function) for each element of `self`."]
-            #[inline]
-            #[must_use]
-            pub fn exp(self) -> Self {
-                Self::from_raw(self.to_raw().exp())
-            }
-            #[doc = "Returns a vector containing each element of `self` raised to the power of `n`."]
-            #[inline]
-            #[must_use]
-            pub fn powf(self, n: T::Scalar) -> Self {
-                Self::from_raw(self.to_raw().powf(n.to_raw()))
-            }
-            #[doc = "Returns a vector containing the reciprocal `1.0/n` of each element of `self`."]
-            #[inline]
-            #[must_use]
-            pub fn recip(self) -> Self {
-                Self::from_raw(self.to_raw().recip())
-            }
-            #[doc = "Fused multiply-add. Computes `(self * a) + b` element-wise with only one rounding error, yielding a more accurate result than an unfused multiply-add."]
-            #[inline]
-            #[must_use]
-            pub fn mul_add(self, a: Self, b: Self) -> Self {
-                Self::from_raw(self.to_raw().mul_add(a.to_raw(), b.to_raw()))
-            }
-        }
-
-        impl<T: Unit> Add<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn add(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() + rhs.to_raw())
-            }
-        }
-        impl<T: Unit> Sub<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn sub(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() - rhs.to_raw())
-            }
-        }
-        impl<T: Unit> Mul<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn mul(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() * rhs.to_raw())
-            }
-        }
-        impl<T: Unit> Div<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn div(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() / rhs.to_raw())
-            }
-        }
-
-        impl<T: Unit> AddAssign for $base_type_name<T> {
-            fn add_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() += rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> SubAssign for $base_type_name<T> {
-            fn sub_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() -= rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> MulAssign for $base_type_name<T> {
-            fn mul_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() *= rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> DivAssign for $base_type_name<T> {
-            fn div_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() /= rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> Rem for $base_type_name<T> {
-            type Output = Self;
-
-            #[inline]
-            #[must_use]
-            fn rem(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() % rhs.to_raw())
-            }
-        }
-
-        impl<T: Unit> RemAssign for $base_type_name<T> {
-            #[inline]
-            fn rem_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() %= rhs.to_raw();
-            }
-        }
-
         impl<T: Unit> Sum for $base_type_name<T> {
             #[must_use]
             fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
                 iter.fold(Self::ZERO, Add::add)
-            }
-        }
-
-        impl<T> Lerp<T::Primitive> for $base_type_name<T>
-        where
-            T: UnitTypes,
-            T::$vec_ty: Lerp<T::Primitive>,
-        {
-            #[inline]
-            #[must_use]
-            fn lerp(self, end: Self, t: T::Primitive) -> Self {
-                Self::from_raw(self.to_raw().lerp(end.to_raw(), t.to_raw()))
             }
         }
     };
@@ -446,31 +677,125 @@ impl<T: Unit> Vector2<T> {
             z,
         }
     }
+
+    crate::forward_to_raw!(
+        #[doc = "Select components from two instances based on a mask."]
+        pub fn select(mask: glam::BVec2, a: Self, b: Self) -> Self;
+    );
 }
 
 impl<T> Vector2<T>
 where
-    T: UnitTypes,
-    T::Vec2: VectorFloat2,
+    T: Unit,
+    T::Scalar: FloatScalar,
 {
-    /// Return `(sin(angle), cos(angle))`.
-    ///
-    /// See [`glam::Vec2::from_angle()`] and [`glam::DVec2::from_angle()`].
-    #[must_use]
-    pub fn from_angle(angle: Angle<T::Primitive>) -> Vector2<T::Primitive> {
-        let angle = angle.radians;
-        Vector2::from_raw(<T::Vec2 as VectorFloat2>::from_angle(angle))
+    crate::forward_all_to_raw!(
+        #[doc = "Return `(sin(angle), cos(angle)`."]
+        pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar>;
+        #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
+        pub fn rotate(self, rotation: Vector2<T::Scalar>) -> Self;
+    );
+}
+
+impl<T: Unit> ToRaw for Vector2<T> {
+    type Raw = <T::Scalar as Scalar>::Vec2;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
     }
 
-    /// Rotate by a vector containing `(sin(angle), cos(angle))`.
-    ///
-    /// See [`glam::Vec2::rotate()`] and [`glam::DVec2::rotate()`].
-    #[must_use]
-    pub fn rotate(self, rotation: Vector2<T::Primitive>) -> Self {
-        Self::from_raw(<T::Vec2 as VectorFloat2>::rotate(
-            self.to_raw(),
-            rotation.to_raw(),
-        ))
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Vector2<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Vector2<T> {
+    /// By-ref conversion from `Self::Raw`.
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    /// By-ref mutable conversion from `Self::Raw`.
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
+impl<T: Unit> ToRaw for Vector3<T> {
+    type Raw = <T::Scalar as Scalar>::Vec3;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Vector3<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Vector3<T> {
+    /// By-ref conversion from `Self::Raw`.
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    /// By-ref mutable conversion from `Self::Raw`.
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
+impl<T: Unit> ToRaw for Vector4<T> {
+    type Raw = <T::Scalar as Scalar>::Vec4;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Vector4<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Vector4<T> {
+    /// By-ref conversion from `Self::Raw`.
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    /// By-ref mutable conversion from `Self::Raw`.
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
     }
 }
 
@@ -479,6 +804,12 @@ where
     T: Unit,
     T::Scalar: SignedScalar,
 {
+    /// All negative one.
+    pub const NEG_ONE: Self = Vector2 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::NEG_ONE,
+    };
+
     /// (-1, 0)
     pub const NEG_X: Self = Vector2 {
         x: T::Scalar::NEG_ONE,
@@ -514,6 +845,11 @@ impl<T: Unit> Vector3<T> {
     /// The unit axes.
     pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
 
+    crate::forward_to_raw!(
+        #[doc = "Select components from two instances based on a mask."]
+        pub fn select(mask: glam::BVec3, a: Self, b: Self) -> Self;
+    );
+
     /// Select components of this vector and return a new vector containing
     /// those components.
     #[inline]
@@ -539,6 +875,13 @@ where
     T: Unit,
     T::Scalar: SignedScalar,
 {
+    /// All negative one.
+    pub const NEG_ONE: Self = Vector3 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::NEG_ONE,
+    };
+
     /// (-1, 0, 0)
     pub const NEG_X: Self = Vector3 {
         x: T::Scalar::NEG_ONE,
@@ -561,8 +904,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     /// Create from SIMD-aligned [`glam::Vec3A`].
     ///
@@ -587,8 +929,7 @@ where
 
 impl<T> From<glam::Vec3A> for Vector3<T>
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     fn from(v: glam::Vec3A) -> Self {
         Self::from_raw(v.into())
@@ -597,8 +938,7 @@ where
 
 impl<T> From<Vector3<T>> for glam::Vec3A
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     fn from(v: Vector3<T>) -> Self {
         v.to_raw().into()
@@ -645,6 +985,11 @@ impl<T: Unit> Vector4<T> {
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize, const W: usize>(&self) -> Self {
         self.swizzle4::<X, Y, Z, W>()
     }
+
+    crate::forward_to_raw!(
+        #[doc = "Select components from two instances based on a mask."]
+        pub fn select(mask: glam::BVec4, a: Self, b: Self) -> Self;
+    );
 }
 
 impl<T> Vector4<T>
@@ -652,6 +997,14 @@ where
     T: Unit,
     T::Scalar: SignedScalar,
 {
+    /// All negative one.
+    pub const NEG_ONE: Self = Vector4 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::NEG_ONE,
+        w: T::Scalar::NEG_ONE,
+    };
+
     /// (-1, 0, 0, 0)
     pub const NEG_X: Self = Vector4 {
         x: T::Scalar::NEG_ONE,
@@ -682,7 +1035,11 @@ where
     };
 }
 
-impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Vector3<T>> for glam::Quat {
+impl<T> Mul<Vector3<T>> for glam::Quat
+where
+    T: Unit<Scalar = f32>,
+    T::Scalar: FloatScalar<Vec3f = glam::Vec3>,
+{
     type Output = Vector3<T>;
 
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
@@ -690,7 +1047,11 @@ impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Vector3<T>> for glam::Quat {
     }
 }
 
-impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Vector3<T>> for glam::DQuat {
+impl<T> Mul<Vector3<T>> for glam::DQuat
+where
+    T: Unit<Scalar = f64>,
+    T::Scalar: FloatScalar<Vec3f = glam::DVec3>,
+{
     type Output = Vector3<T>;
 
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
@@ -836,6 +1197,7 @@ mod tests {
 
     #[test]
     fn arithmetic() {
+        use core::ops::{Add, Div, Sub};
         check_splat_ints!(2, div(1), 2);
         check_splat_ints!(10, div(2), 5);
         check_splat!(2.0, mul(2.5), 2.0 * 2.5);
@@ -918,12 +1280,12 @@ mod tests {
         assert!(!v4.is_finite());
         assert_eq!(
             v4.is_nan_mask(),
-            glam::BVec4A::new(false, false, true, false)
+            glam::BVec4::new(false, false, true, false)
         );
 
-        assert!(Vec2::nan().is_nan());
-        assert!(Vec3::nan().is_nan());
-        assert!(Vec4::nan().is_nan());
+        assert!(Vec2::NAN.is_nan());
+        assert!(Vec3::NAN.is_nan());
+        assert!(Vec4::NAN.is_nan());
 
         // Replace NaNs with zeroes.
         let v = Vec4::select(v4.is_nan_mask(), Vec4::ZERO, v4);
@@ -1056,12 +1418,12 @@ mod tests {
         let gt = a.cmpgt(b);
         let ge = a.cmpge(b);
 
-        assert_eq!(eq, glam::BVec4A::new(false, true, false, false));
-        assert_eq!(ne, glam::BVec4A::new(true, false, true, true));
-        assert_eq!(lt, glam::BVec4A::new(true, false, false, false));
-        assert_eq!(le, glam::BVec4A::new(true, true, false, false));
-        assert_eq!(gt, glam::BVec4A::new(false, false, true, true));
-        assert_eq!(ge, glam::BVec4A::new(false, true, true, true));
+        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
+        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
+        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
+        assert_eq!(le, glam::BVec4::new(true, true, false, false));
+        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
+        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
 
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);

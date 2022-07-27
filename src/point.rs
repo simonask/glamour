@@ -9,7 +9,10 @@
 //! points yields a vector, while subtracting a vector from a point yields
 //! another point.
 
-use crate::{traits::Lerp, Scalar, Unit, UnitTypes, Vector2, Vector3, Vector4};
+use crate::{
+    bindings::prelude::*, scalar::FloatScalar, AsRaw, FromRawRef, Scalar, ToRaw, Unit, Vector2,
+    Vector3, Vector4,
+};
 use core::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
 /// 2D point.
@@ -67,6 +70,108 @@ pub struct Point4<T: Unit = f32> {
     pub w: T::Scalar,
 }
 
+impl<T: Unit> ToRaw for Point2<T> {
+    type Raw = <T::Scalar as Scalar>::Vec2;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Point2<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Point2<T> {
+    /// By-ref conversion from `Self::Raw`.
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    /// By-ref mutable conversion from `Self::Raw`.
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
+impl<T: Unit> ToRaw for Point3<T> {
+    type Raw = <T::Scalar as Scalar>::Vec3;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Point3<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Point3<T> {
+    /// By-ref conversion from `Self::Raw`.
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    /// By-ref mutable conversion from `Self::Raw`.
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
+impl<T: Unit> ToRaw for Point4<T> {
+    type Raw = <T::Scalar as Scalar>::Vec4;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Point4<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Point4<T> {
+    /// By-ref conversion from `Self::Raw`.
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    /// By-ref mutable conversion from `Self::Raw`.
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
 crate::impl_common!(Point2 {
     x: T::Scalar,
     y: T::Scalar
@@ -87,9 +192,234 @@ crate::impl_vector_common!(Point2 [2] => Vec2 { x, y });
 crate::impl_vector_common!(Point3 [3] => Vec3 { x, y, z });
 crate::impl_vector_common!(Point4 [4] => Vec4 { x, y, z, w });
 
-crate::impl_glam_conversion!(Point2, 2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
-crate::impl_glam_conversion!(Point3, 3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
-crate::impl_glam_conversion!(Point4, 4 [f32 => glam::Vec4, f64 => glam::DVec4, i32 => glam::IVec4, u32 => glam::UVec4]);
+impl<T: Unit> Point2<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+    };
+
+    /// New point.
+    pub const fn new(x: T::Scalar, y: T::Scalar) -> Self {
+        Point2 { x, y }
+    }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 2]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 2];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec2;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
+}
+
+impl<T> Point2<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec2;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
+}
+
+impl<T: Unit> Point3<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+    };
+
+    /// New point.
+    pub fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar) -> Self {
+        Point3 { x, y, z }
+    }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 3]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 3];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec3;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
+}
+
+impl<T> Point3<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec3;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
+}
+
+impl<T: Unit> Point4<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+        w: T::Scalar::ONE,
+    };
+
+    /// New point.
+    pub fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar, w: T::Scalar) -> Self {
+        Point4 { x, y, z, w }
+    }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 4]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 4];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec4;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec4;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
+}
+
+impl<T> Point4<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec4;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
+}
+
+crate::impl_glam_conversion!(Point2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
+crate::impl_glam_conversion!(Point3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
+crate::impl_glam_conversion!(Point4 [f32 => glam::Vec4, f64 => glam::DVec4, i32 => glam::IVec4, u32 => glam::UVec4]);
 
 macro_rules! impl_point {
     ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident, $vector_type:ident) => {
@@ -182,17 +512,6 @@ macro_rules! impl_point {
                 self + by
             }
         }
-
-        impl<T> Lerp<T::Primitive> for $base_type_name<T>
-        where
-            T: crate::UnitTypes,
-            T::$vec_ty: Lerp<T::Primitive>,
-        {
-            #[inline]
-            fn lerp(self, end: Self, t: T::Primitive) -> Self {
-                Self::from_raw(self.to_raw().lerp(end.to_raw(), t))
-            }
-        }
     };
 }
 
@@ -202,8 +521,7 @@ impl_point!(Point4 [4] => Vec4, Vector4);
 
 impl<T> Point3<T>
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     /// Create from SIMD-aligned [`glam::Vec3A`].
     ///
@@ -228,8 +546,7 @@ where
 
 impl<T> From<glam::Vec3A> for Point3<T>
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     fn from(v: glam::Vec3A) -> Self {
         Self::from_raw(v.into())
@@ -238,15 +555,18 @@ where
 
 impl<T> From<Point3<T>> for glam::Vec3A
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     fn from(v: Point3<T>) -> Self {
         v.to_raw().into()
     }
 }
 
-impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Point3<T>> for glam::Quat {
+impl<T> Mul<Point3<T>> for glam::Quat
+where
+    T: Unit<Scalar = f32>,
+    T::Scalar: FloatScalar<Vec3f = glam::Vec3>,
+{
     type Output = Point3<T>;
 
     fn mul(self, rhs: Point3<T>) -> Self::Output {
@@ -254,7 +574,11 @@ impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Point3<T>> for glam::Quat {
     }
 }
 
-impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Point3<T>> for glam::DQuat {
+impl<T> Mul<Point3<T>> for glam::DQuat
+where
+    T: Unit<Scalar = f64>,
+    T::Scalar: FloatScalar<Vec3f = glam::DVec3>,
+{
     type Output = Point3<T>;
 
     fn mul(self, rhs: Point3<T>) -> Self::Output {

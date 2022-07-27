@@ -3,9 +3,9 @@
 use approx::AbsDiffEq;
 
 use crate::{
-    bindings::VectorFloat,
-    traits::{Contains, Intersection, Lerp, Union},
-    Box2, Point2, Scalar, Size2, Unit, UnitTypes, Vector2,
+    scalar::FloatScalar,
+    traits::{Contains, Intersection, Union},
+    Box2, Point2, Scalar, Size2, Unit, Vector2,
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
@@ -24,12 +24,20 @@ crate::impl_common!(Rect {
     size: Size2<T>
 });
 
-impl<T: UnitTypes> Rect<T> {
+impl<T: Unit> Rect<T> {
     /// Zero rect (origin = 0.0, size = 0.0).
     pub const ZERO: Self = Rect {
         origin: Point2::ZERO,
         size: Size2::ZERO,
     };
+
+    /// New Rect from origin/size.
+    pub fn new(origin: impl Into<Point2<T>>, size: impl Into<Size2<T>>) -> Rect<T> {
+        Rect {
+            origin: origin.into(),
+            size: size.into(),
+        }
+    }
 
     /// Rect at (0.0, 0.0) with `size`.
     #[inline]
@@ -192,14 +200,17 @@ impl<T: UnitTypes> Rect<T> {
             && self.origin.x.is_finite()
             && self.origin.y.is_finite())
     }
+}
 
+impl<T> Rect<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
     /// True if the rect only contains finite and non-NaN coordinates.
     #[inline]
     #[must_use]
-    pub fn is_finite(&self) -> bool
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn is_finite(&self) -> bool {
         self.origin.is_finite() && self.size.is_finite()
     }
 
@@ -217,10 +228,7 @@ impl<T: UnitTypes> Rect<T> {
     /// ```
     #[inline]
     #[must_use]
-    pub fn round(self) -> Self
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn round(self) -> Self {
         Rect {
             origin: self.origin.round(),
             size: self.size.round(),
@@ -243,10 +251,7 @@ impl<T: UnitTypes> Rect<T> {
     /// ```
     #[inline]
     #[must_use]
-    pub fn round_in(self) -> Self
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn round_in(self) -> Self {
         Rect {
             origin: self.origin.ceil(),
             size: self.size.floor(),
@@ -267,13 +272,20 @@ impl<T: UnitTypes> Rect<T> {
     /// ```
     #[inline]
     #[must_use]
-    pub fn round_out(self) -> Self
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn round_out(self) -> Self {
         Rect {
             origin: self.origin.floor(),
             size: self.size.ceil(),
+        }
+    }
+
+    /// Linear interpolation between two rects.
+    #[inline]
+    #[must_use]
+    pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
+        Rect {
+            origin: self.origin.lerp(other.origin, t),
+            size: self.size.lerp(other.size, t),
         }
     }
 }
@@ -430,7 +442,10 @@ impl<T: Unit> Intersection<Box2<T>> for Rect<T> {
     }
 }
 
-impl<T: Unit> Union<Rect<T>> for Rect<T> {
+impl<T> Union<Rect<T>> for Rect<T>
+where
+    T: Unit,
+{
     type Union = Rect<T>;
 
     #[inline]
@@ -447,20 +462,6 @@ impl<T: Unit> Union<Rect<T>> for Rect<T> {
         let max = (&self).max().max((&other).max());
         let size = (max - origin).to_size();
 
-        Rect { origin, size }
-    }
-}
-
-impl<T: Unit> Lerp<<T::Scalar as Scalar>::Primitive> for Rect<T>
-where
-    Point2<T>: Lerp<<T::Scalar as Scalar>::Primitive>,
-    Size2<T>: Lerp<<T::Scalar as Scalar>::Primitive>,
-{
-    #[inline]
-    #[must_use]
-    fn lerp(self, end: Self, t: <T::Scalar as Scalar>::Primitive) -> Self {
-        let origin = self.origin.lerp(end.origin, t);
-        let size = self.size.lerp(end.size, t);
         Rect { origin, size }
     }
 }
@@ -721,8 +722,6 @@ mod tests {
 
     #[test]
     fn lerp() {
-        use super::Lerp;
-
         let src = RectF::new((0.0, 0.0), (1.0, 1.0));
         let dst = RectF::new((1.0, 1.0), (2.0, 2.0));
         assert_eq!(

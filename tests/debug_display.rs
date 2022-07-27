@@ -1,4 +1,4 @@
-use glamour::prelude::*;
+use glamour::{prelude::*, Unit};
 
 struct BufWriter<'a> {
     buffer: &'a mut [u8],
@@ -207,13 +207,5 @@ fn angle_debug() {
     assert_eq!(
         write_buf(&mut buffer, format_args!("{:?}", Angle::from_radians(1.0))),
         "Angle(1.00000)"
-    );
-
-    assert_eq!(
-        write_buf(
-            &mut buffer,
-            format_args!("{:?}", Vector3::<Angle>::splat(Angle::PI))
-        ),
-        "Vector3<Angle> { x: Angle(π), y: Angle(π), z: Angle(π) }"
     );
 }

@@ -6,10 +6,8 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, 
 use num_traits::{Float, NumAssignOps};
 
 use crate::{
-    bindings::{Primitive, PrimitiveMatrices, Quat},
-    scalar::SignedScalar,
-    traits::marker::PodValue,
-    Scalar, Unit, Vector2, Vector3, Vector4,
+    bindings::Quat, prelude::*, scalar::FloatScalar, traits::marker::PodValue, Scalar, Unit,
+    Vector3,
 };
 
 /// Angle in radians.
@@ -76,6 +74,38 @@ macro_rules! impl_float_angle_consts {
     };
 }
 
+impl<T> ToRaw for Angle<T> {
+    type Raw = T;
+
+    fn to_raw(self) -> Self::Raw {
+        self.radians
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        Angle { radians: raw }
+    }
+}
+
+impl<T> AsRaw for Angle<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        &self.radians
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        &mut self.radians
+    }
+}
+
+impl<T: Pod> FromRawRef for Angle<T> {
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
 impl_float_angle_consts!(f32);
 impl_float_angle_consts!(f64);
 
@@ -110,7 +140,7 @@ pub trait FloatAngleExt: num_traits::Float + AngleConsts + PodValue {
 impl FloatAngleExt for f32 {}
 impl FloatAngleExt for f64 {}
 
-impl<T: Primitive + AngleConsts> core::fmt::Debug for Angle<T> {
+impl<T: Scalar + AngleConsts> core::fmt::Debug for Angle<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         use core::fmt::Write;
         f.write_str("Angle(")?;
@@ -143,30 +173,11 @@ impl<T: Primitive + AngleConsts> core::fmt::Debug for Angle<T> {
 unsafe impl<T: Zeroable> Zeroable for Angle<T> {}
 unsafe impl<T: Pod> Pod for Angle<T> {}
 
-impl<T> Scalar for Angle<T>
-where
-    T: Primitive + AngleConsts,
-{
-    type Primitive = T;
-
-    const ZERO: Self = Angle { radians: T::ZERO };
-    const ONE: Self = Angle { radians: T::ONE };
-}
-
-impl<T> SignedScalar for Angle<T>
-where
-    T: Primitive + AngleConsts + SignedScalar,
-{
-    const NEG_ONE: Self = Angle {
-        radians: T::NEG_ONE,
-    };
-}
-
 impl<T> Unit for Angle<T>
 where
-    T: Primitive + AngleConsts,
+    T: Scalar + AngleConsts,
 {
-    type Scalar = Angle<T>;
+    type Scalar = T;
 
     fn name() -> Option<&'static str> {
         Some("Angle")
@@ -347,22 +358,6 @@ macro_rules! forward_op_scalar {
                 }
             }
         }
-
-        forward_op_scalar_vector!($trait_name, $op, Vector2);
-        forward_op_scalar_vector!($trait_name, $op, Vector3);
-        forward_op_scalar_vector!($trait_name, $op, Vector4);
-    };
-}
-
-macro_rules! forward_op_scalar_vector {
-    ($trait_name:ident, $op:ident, $vector:ident) => {
-        impl<T: Float + Primitive + AngleConsts> $trait_name<$vector<T>> for $vector<Angle<T>> {
-            type Output = $vector<Angle<T>>;
-
-            fn $op(self, rhs: $vector<T>) -> Self {
-                Self::from_untyped(self.to_untyped().$op(rhs.to_untyped()))
-            }
-        }
     };
 }
 
@@ -371,20 +366,6 @@ macro_rules! forward_op_scalar_assign {
         impl<T: Float + NumAssignOps> $trait_name<T> for Angle<T> {
             fn $op(&mut self, rhs: T) {
                 self.radians.$op(rhs);
-            }
-        }
-
-        forward_op_scalar_assign_vector!($trait_name, $op, Vector2);
-        forward_op_scalar_assign_vector!($trait_name, $op, Vector3);
-        forward_op_scalar_assign_vector!($trait_name, $op, Vector4);
-    };
-}
-
-macro_rules! forward_op_scalar_assign_vector {
-    ($trait_name:ident, $op:ident, $vector:ident) => {
-        impl<T: Float + Primitive + AngleConsts> $trait_name<$vector<T>> for $vector<Angle<T>> {
-            fn $op(&mut self, rhs: $vector<T>) {
-                self.as_raw_mut().$op(rhs.to_raw());
             }
         }
     };
@@ -428,7 +409,7 @@ forward_op_self_assign!(AddAssign, add_assign);
 forward_op_self_assign!(SubAssign, sub_assign);
 forward_op_self_assign!(RemAssign, rem_assign);
 
-impl<T: Primitive + Div> Div<Angle<T>> for Angle<T> {
+impl<T: Div<Output = T>> Div<Angle<T>> for Angle<T> {
     type Output = T;
 
     fn div(self, rhs: Angle<T>) -> Self::Output {
@@ -465,7 +446,7 @@ impl<T: AngleConsts> AngleConsts for Angle<T> {
 
 impl<T> Angle<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
 {
     /// Create quaternion from this angle and an axis vector.
     #[inline]
@@ -485,8 +466,6 @@ mod tests {
     use super::*;
 
     type Angle = super::Angle<f32>;
-    type AngleVec = Vector4<Angle>;
-    type Vec4 = Vector4<f32>;
 
     #[test]
     fn forward_to_float() {
@@ -559,121 +538,6 @@ mod tests {
         let _: f32 = a.to_raw();
         let _: f32 = a.to_radians();
         let _: Angle = 1.0.into();
-    }
-
-    #[test]
-    fn angle_vec() {
-        let mut vec = AngleVec::splat(Angle::PI);
-        vec *= Vec4::splat(2.0);
-        assert_eq!(vec, (Angle::TAU, Angle::TAU, Angle::TAU, Angle::TAU));
-    }
-
-    #[test]
-    fn angle_vector_cast() {
-        let mut vec = AngleVec::splat(Angle::PI);
-        let _: &glam::Vec4 = vec.as_raw();
-        let _: &mut glam::Vec4 = vec.as_raw_mut();
-        let _: glam::Vec4 = vec.to_raw();
-        let _: &Vec4 = vec.as_untyped();
-        let _: &mut Vec4 = vec.as_untyped_mut();
-        let _: Vec4 = vec.to_untyped();
-        let _: &[Angle] = vec.as_ref();
-        let _: &mut [Angle] = vec.as_mut();
-        let _: &[Angle; 4] = vec.as_ref();
-        let _: &mut [Angle; 4] = vec.as_mut();
-        let _: Angle = vec.const_get::<0>();
-        let _: AngleVec = vec.swizzle::<3, 2, 1, 0>();
-        let _: AngleVec = -vec;
-        let _: AngleVec = vec % vec;
-        let _: AngleVec = vec * 2.0;
-
-        assert_eq!(vec[0], Angle::PI);
-    }
-
-    #[test]
-    fn forwarded() {
-        assert_eq!(Angle::PI.to_degrees(), f32::PI.to_degrees());
-        assert_eq!(Angle::PI.sin(), f32::PI.sin());
-        assert_eq!(Angle::PI.cos(), f32::PI.cos());
-        assert_eq!(Angle::PI.tan(), f32::PI.tan());
-        assert_eq!(Angle::PI.sin_cos(), f32::PI.sin_cos());
-
-        assert_eq!(
-            Angle::PI.min(Angle::CIRCLE).to_radians(),
-            f32::PI.min(2.0 * f32::PI)
-        );
-        assert_eq!(
-            Angle::PI.max(Angle::CIRCLE).to_radians(),
-            f32::PI.max(2.0 * f32::PI)
-        );
-
-        assert_eq!((Angle::PI * 2.0).to_radians(), f32::PI * 2.0);
-        assert_eq!((Angle::PI / 2.0).to_radians(), f32::PI / 2.0);
-        assert_eq!((Angle::PI % 2.0).to_radians(), f32::PI % 2.0);
-
-        assert_eq!(
-            (Vector2::<Angle>::splat(Angle::PI) * Vector2::<f32>::splat(2.0)).to_untyped(),
-            Vector2::splat(f32::PI * 2.0)
-        );
-        assert_eq!(
-            (Vector3::<Angle>::splat(Angle::PI) / Vector3::<f32>::splat(2.0)).to_untyped(),
-            Vector3::splat(f32::PI / 2.0)
-        );
-        assert_eq!(
-            (Vector4::<Angle>::splat(Angle::PI) % Vector4::<f32>::splat(2.0)).to_untyped(),
-            Vector4::splat(f32::PI % 2.0)
-        );
-
-        let a = Angle::PI;
-        let (mut a, mut b, mut c) = (a, a, a);
-        a *= 2.0;
-        b /= 2.0;
-        c %= 2.0;
-        assert_eq!(a.to_radians(), f32::PI * 2.0);
-        assert_eq!(b.to_radians(), f32::PI / 2.0);
-        assert_eq!(c.to_radians(), f32::PI % 2.0);
-
-        let a = Angle::PI;
-        let abc = (
-            Vector2::<Angle>::splat(a),
-            Vector3::<Angle>::splat(a),
-            Vector4::<Angle>::splat(a),
-        );
-        let (two_a, two_b, two_c) = (
-            Vector2::<f32>::splat(2.0),
-            Vector3::<f32>::splat(2.0),
-            Vector4::<f32>::splat(2.0),
-        );
-        {
-            let (mut a, mut b, mut c) = abc;
-            a *= two_a;
-            b *= two_b;
-            c *= two_c;
-            assert_eq!(Vector2::<f32>::splat(f32::PI * 2.0), a.to_untyped());
-            assert_eq!(Vector3::<f32>::splat(f32::PI * 2.0), b.to_untyped());
-            assert_eq!(Vector4::<f32>::splat(f32::PI * 2.0), c.to_untyped());
-        }
-        {
-            let (mut a, mut b, mut c) = abc;
-            a /= two_a;
-            b /= two_b;
-            c /= two_c;
-            assert_eq!(Vector2::<f32>::splat(f32::PI / 2.0), a.to_untyped());
-            assert_eq!(Vector3::<f32>::splat(f32::PI / 2.0), b.to_untyped());
-            assert_eq!(Vector4::<f32>::splat(f32::PI / 2.0), c.to_untyped());
-        }
-        {
-            let (mut a, mut b, mut c) = abc;
-            a %= two_a;
-            b %= two_b;
-            c %= two_c;
-            assert_eq!(Vector2::<f32>::splat(f32::PI % 2.0), a.to_untyped());
-            assert_eq!(Vector3::<f32>::splat(f32::PI % 2.0), b.to_untyped());
-            assert_eq!(Vector4::<f32>::splat(f32::PI % 2.0), c.to_untyped());
-        }
-
-        let two: f32 = Angle::CIRCLE / Angle::PI;
-        assert_abs_diff_eq!(two, 2.0);
     }
 
     #[test]

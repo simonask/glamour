@@ -1,8 +1,9 @@
 //! Size vectors
 
-use crate::{traits::Lerp, Scalar, Unit, Vector2, Vector3};
-
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use crate::{
+    bindings::prelude::*, scalar::FloatScalar, AsRaw, FromRawRef, Scalar, ToRaw, Unit, Vector2,
+    Vector3,
+};
 
 /// 2D size.
 #[repr(C)]
@@ -28,10 +29,77 @@ pub struct Size3<T: Unit = f32> {
     pub depth: T::Scalar,
 }
 
+impl<T: Unit> ToRaw for Size2<T> {
+    type Raw = <T::Scalar as Scalar>::Vec2;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Size2<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Size2<T> {
+    /// By-ref conversion from `Self::Raw`.
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    /// By-ref mutable conversion from `Self::Raw`.
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
+impl<T: Unit> ToRaw for Size3<T> {
+    type Raw = <T::Scalar as Scalar>::Vec3;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Size3<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> FromRawRef for Size3<T> {
+    fn from_raw_ref(raw: &Self::Raw) -> &Self {
+        bytemuck::cast_ref(raw)
+    }
+
+    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
+        bytemuck::cast_mut(raw)
+    }
+}
+
 crate::impl_common!(Size2 {
     width: T::Scalar,
     height: T::Scalar
 });
+
 crate::impl_common!(Size3 {
     width: T::Scalar,
     height: T::Scalar,
@@ -46,42 +114,8 @@ crate::impl_vector_common!(Size3 [3] => Vec3 {
     depth
 });
 
-crate::impl_glam_conversion!(Size2, 2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
-crate::impl_glam_conversion!(Size3, 3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
-
-crate::impl_scaling!(Size2, 2 [f32, f64, i32, u32]);
-crate::impl_scaling!(Size3, 3 [f32, f64, i32, u32]);
-
 macro_rules! impl_size {
     ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $vector_type:ident) => {
-        impl<T: Unit> Add for $base_type_name<T> {
-            type Output = Self;
-
-            fn add(self, other: Self) -> Self {
-                Self::from_raw(self.to_raw() + other.to_raw())
-            }
-        }
-
-        impl<T: Unit> Sub for $base_type_name<T> {
-            type Output = Self;
-
-            fn sub(self, other: Self) -> Self {
-                Self::from_raw(self.to_raw() - other.to_raw())
-            }
-        }
-
-        impl<T: Unit> AddAssign for $base_type_name<T> {
-            fn add_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() += rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> SubAssign for $base_type_name<T> {
-            fn sub_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() -= rhs.to_raw();
-            }
-        }
-
         impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
             #[inline]
             fn from(vec: $vector_type<T>) -> Self {
@@ -121,35 +155,197 @@ macro_rules! impl_size {
                 bytemuck::cast_mut(self)
             }
         }
-
-        impl<T> Lerp<T::Primitive> for $base_type_name<T>
-        where
-            T: crate::UnitTypes,
-            T::$vec_ty: Lerp<T::Primitive>,
-        {
-            #[inline]
-            fn lerp(self, end: Self, t: T::Primitive) -> Self {
-                Self::from_raw(self.to_raw().lerp(end.to_raw(), t))
-            }
-        }
     };
 }
 
 impl_size!(Size2 [2] => Vec2, Vector2);
 impl_size!(Size3 [3] => Vec3, Vector3);
 
-impl<T: crate::UnitTypes> Size2<T> {
+crate::impl_glam_conversion!(Size2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
+crate::impl_glam_conversion!(Size3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
+
+crate::forward_op_to_raw!(Size2, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Size3, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Size2, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Size3, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Size2, Mul<T::Scalar>::mul -> Self);
+crate::forward_op_to_raw!(Size3, Mul<T::Scalar>::mul -> Self);
+crate::forward_op_to_raw!(Size2, Div<T::Scalar>::div -> Self);
+crate::forward_op_to_raw!(Size3, Div<T::Scalar>::div -> Self);
+crate::forward_op_to_raw!(Size2, Rem<T::Scalar>::rem -> Self);
+crate::forward_op_to_raw!(Size3, Rem<T::Scalar>::rem -> Self);
+
+crate::forward_op_assign_to_raw!(Size2, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Size3, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Size2, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Size3, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Size2, MulAssign<T::Scalar>::mul_assign);
+crate::forward_op_assign_to_raw!(Size3, MulAssign<T::Scalar>::mul_assign);
+crate::forward_op_assign_to_raw!(Size2, DivAssign<T::Scalar>::div_assign);
+crate::forward_op_assign_to_raw!(Size3, DivAssign<T::Scalar>::div_assign);
+crate::forward_op_assign_to_raw!(Size2, RemAssign<T::Scalar>::rem_assign);
+crate::forward_op_assign_to_raw!(Size3, RemAssign<T::Scalar>::rem_assign);
+
+impl<T: Unit> Size2<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        width: T::Scalar::ZERO,
+        height: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        width: T::Scalar::ONE,
+        height: T::Scalar::ONE,
+    };
+
+    /// New size.
+    pub fn new(width: T::Scalar, height: T::Scalar) -> Self {
+        Self { width, height }
+    }
+
     /// Calculate the area.
     pub fn area(&self) -> T::Scalar {
-        T::Scalar::from_raw(self.width.to_raw() * self.height.to_raw())
+        self.width * self.height
     }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 2]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 2];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec2;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec2;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
 }
 
-impl<T: crate::UnitTypes> Size3<T> {
+impl<T> Size2<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec2;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
+}
+
+impl<T: Unit> Size3<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        width: T::Scalar::ZERO,
+        height: T::Scalar::ZERO,
+        depth: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        width: T::Scalar::ONE,
+        height: T::Scalar::ONE,
+        depth: T::Scalar::ONE,
+    };
+
+    /// New size.
+    pub fn new(width: T::Scalar, height: T::Scalar, depth: T::Scalar) -> Self {
+        Self {
+            width,
+            height,
+            depth,
+        }
+    }
+
     /// Calculate the volume.
     pub fn volume(&self) -> T::Scalar {
-        T::Scalar::from_raw(self.width.to_raw() * self.height.to_raw() * self.depth.to_raw())
+        self.width * self.height * self.depth
     }
+
+    crate::forward_all_to_raw!(
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; 3]) -> Self;
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; 3];
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self;
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> glam::BVec3;
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> glam::BVec3;
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self;
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self;
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar;
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar;
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self;
+    );
+}
+
+impl<T> Size3<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_all_to_raw!(
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool;
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool;
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> glam::BVec3;
+        #[doc = "Round all components up."]
+        pub fn ceil(self) -> Self;
+        #[doc = "Round all components down."]
+        pub fn floor(self) -> Self;
+        #[doc = "Round all components."]
+        pub fn round(self) -> Self;
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+    );
 }
 
 #[cfg(test)]

@@ -13,15 +13,13 @@
 use core::ops::Mul;
 
 use crate::{
-    bindings::{
-        Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4,
-        PrimitiveMatrices,
-    },
-    unit::UnitMatrices,
-    Angle, Point2, Point3, Vector2, Vector3, Vector4,
+    bindings::{Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4},
+    prelude::*,
+    scalar::FloatScalar,
+    Angle, Point2, Point3, Scalar, Unit, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{cast, cast_mut, cast_ref, Pod, Zeroable};
+use bytemuck::{cast_mut, cast_ref, Pod, Zeroable};
 
 /// 2x2 column-major matrix.
 ///
@@ -48,6 +46,28 @@ pub struct Matrix2<T> {
 unsafe impl<T: Zeroable> Zeroable for Matrix2<T> {}
 unsafe impl<T: Pod> Pod for Matrix2<T> {}
 
+impl<T: FloatScalar> ToRaw for Matrix2<T> {
+    type Raw = T::Mat2;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: FloatScalar> AsRaw for Matrix2<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
 /// 3x3 column-major matrix.
 ///
 /// Bitwise compatible with [`glam::Mat3`] / [`glam::DMat3`].
@@ -71,6 +91,28 @@ pub struct Matrix3<T> {
 
 unsafe impl<T: Zeroable> Zeroable for Matrix3<T> {}
 unsafe impl<T: Pod> Pod for Matrix3<T> {}
+
+impl<T: FloatScalar> ToRaw for Matrix3<T> {
+    type Raw = T::Mat3;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: FloatScalar> AsRaw for Matrix3<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
 
 /// 4x4 column-major matrix.
 ///
@@ -109,11 +151,33 @@ pub struct Matrix4<T> {
 unsafe impl<T: Zeroable> Zeroable for Matrix4<T> {}
 unsafe impl<T: Pod> Pod for Matrix4<T> {}
 
+impl<T: FloatScalar> ToRaw for Matrix4<T> {
+    type Raw = T::Mat4;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: FloatScalar> AsRaw for Matrix4<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
 macro_rules! impl_matrix {
     ($base_type_name:ident < $dimensions:literal > => $mat_name:ident [ $axis_vector_ty:ident ]) => {
         impl<T> $base_type_name<T>
         where
-            T: PrimitiveMatrices,
+            T: FloatScalar,
         {
             #[doc = "Create from rows with implicit conversion."]
             #[inline]
@@ -133,20 +197,6 @@ macro_rules! impl_matrix {
                 U: Into<$axis_vector_ty<T>>,
             {
                 bytemuck::cast(rows.map(Into::into))
-            }
-
-            #[doc = "Get the underlying `glam` matrix."]
-            #[inline]
-            #[must_use]
-            pub fn to_raw(self) -> T::$mat_name {
-                cast(self)
-            }
-
-            #[doc = "Create from underlying `glam` matrix."]
-            #[inline]
-            #[must_use]
-            pub fn from_raw(raw: T::$mat_name) -> Self {
-                cast(raw)
             }
 
             #[doc = "Cast to `glam` matrix."]
@@ -226,7 +276,7 @@ macro_rules! impl_matrix {
             #[must_use]
             pub fn is_invertible(&self) -> bool {
                 let d = self.determinant();
-                d != T::ZERO && crate::Scalar::is_finite(d)
+                d != T::ZERO && num_traits::Float::is_finite(d)
             }
 
             #[doc = "Return the inverse matrix."]
@@ -277,7 +327,7 @@ macro_rules! impl_matrix {
 
         impl<T> Default for $base_type_name<T>
         where
-            T: PrimitiveMatrices,
+            T: FloatScalar,
         {
             #[inline]
             fn default() -> Self {
@@ -287,7 +337,7 @@ macro_rules! impl_matrix {
 
         impl<T> core::fmt::Debug for $base_type_name<T>
         where
-            T: PrimitiveMatrices,
+            T: FloatScalar,
         {
             fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::fmt::Result {
                 let mut list = fmt.debug_list();
@@ -302,7 +352,7 @@ macro_rules! impl_matrix {
 
 impl<T> Matrix2<T>
 where
-    T: PrimitiveMatrices,
+    T: Scalar,
 {
     /// All zeroes.
     pub const ZERO: Self = Self {
@@ -311,13 +361,7 @@ where
         m21: T::ZERO,
         m22: T::ZERO,
     };
-    /// All NaNs.
-    pub const NAN: Self = Self {
-        m11: T::NAN,
-        m12: T::NAN,
-        m21: T::NAN,
-        m22: T::NAN,
-    };
+
     /// Identity matrix
     ///
     /// #### Example
@@ -332,6 +376,19 @@ where
         m12: T::ZERO,
         m21: T::ZERO,
         m22: T::ONE,
+    };
+}
+
+impl<T> Matrix2<T>
+where
+    T: FloatScalar,
+{
+    /// All NaNs.
+    pub const NAN: Self = Self {
+        m11: T::NAN,
+        m12: T::NAN,
+        m21: T::NAN,
+        m22: T::NAN,
     };
 
     /// Create from diagonal.
@@ -484,7 +541,7 @@ where
 
 impl<T> Matrix3<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
 {
     /// All zeroes.
     pub const ZERO: Self = Self {
@@ -570,11 +627,8 @@ where
     #[inline]
     #[must_use]
     pub fn from_cols(x_axis: Vector3<T>, y_axis: Vector3<T>, z_axis: Vector3<T>) -> Self {
-        Self::from_raw(T::Mat3::from_cols(
-            x_axis.to_raw(),
-            y_axis.to_raw(),
-            z_axis.to_raw(),
-        ))
+        let mat3 = T::Mat3::from_cols(x_axis.to_raw(), y_axis.to_raw(), z_axis.to_raw());
+        Self::from_raw(mat3)
     }
 
     /// Create from row vectors.
@@ -755,7 +809,7 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub fn transform_point<U: UnitMatrices<Vec2 = T::Vec2>>(&self, point: Point2<U>) -> Point2<U> {
+    pub fn transform_point<U: Unit<Scalar = T>>(&self, point: Point2<U>) -> Point2<U> {
         Point2::from_raw(self.as_raw().transform_point2(point.to_raw()))
     }
 
@@ -765,10 +819,7 @@ where
     /// [`glam::DMat3::transform_vector2()`] (depending on the scalar).
     #[inline]
     #[must_use]
-    pub fn transform_vector<U: UnitMatrices<Vec2 = T::Vec2>>(
-        &self,
-        vector: Vector2<U>,
-    ) -> Vector2<U> {
+    pub fn transform_vector<U: Unit<Scalar = T>>(&self, vector: Vector2<U>) -> Vector2<U> {
         Vector2::from_raw(self.as_raw().transform_vector2(vector.to_raw()))
     }
 }
@@ -859,7 +910,7 @@ impl From<Matrix4<f64>> for glam::DMat4 {
 
 impl<T> Mul for Matrix2<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
 {
     type Output = Self;
 
@@ -868,9 +919,9 @@ where
     }
 }
 
-impl<T> Mul<Vector2<T>> for Matrix2<T::Primitive>
+impl<T> Mul<Vector2<T>> for Matrix2<T::Scalar>
 where
-    T: UnitMatrices,
+    T: FloatScalar,
 {
     type Output = Vector2<T>;
 
@@ -881,7 +932,7 @@ where
 
 impl<T> Mul for Matrix3<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
 {
     type Output = Matrix3<T>;
 
@@ -892,9 +943,10 @@ where
     }
 }
 
-impl<T> Mul<Vector3<T>> for Matrix3<T::Primitive>
+impl<T> Mul<Vector3<T>> for Matrix3<T::Scalar>
 where
-    T: UnitMatrices,
+    T: Unit,
+    T::Scalar: FloatScalar,
 {
     type Output = Vector3<T>;
 
@@ -905,9 +957,10 @@ where
     }
 }
 
-impl<T> Mul<Vector4<T>> for Matrix4<T::Primitive>
+impl<T> Mul<Vector4<T>> for Matrix4<T::Scalar>
 where
-    T: UnitMatrices,
+    T: Unit,
+    T::Scalar: FloatScalar,
 {
     type Output = Vector4<T>;
 
@@ -920,7 +973,7 @@ where
 
 impl<T> Matrix4<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
 {
     /// All zeroes.
     pub const ZERO: Self = Self {
@@ -1134,7 +1187,7 @@ where
         translation: Vector3<T>,
     ) -> Self {
         use crate::bindings::Quat;
-        let quat = <T as PrimitiveMatrices>::Quat::from_axis_angle(axis.to_raw(), angle.radians);
+        let quat = <T as FloatScalar>::Quat::from_axis_angle(axis.to_raw(), angle.radians);
         Self::from_raw(T::Mat4::from_scale_rotation_translation(
             scale.to_raw(),
             quat,
@@ -1311,10 +1364,7 @@ where
     /// [`glam::DMat4::transform_vector3()`] (depending on the scalar).
     #[inline]
     #[must_use]
-    pub fn transform_vector<U: UnitMatrices<Vec3 = T::Vec3>>(
-        &self,
-        vector: Vector3<U>,
-    ) -> Vector3<U> {
+    pub fn transform_vector<U: Unit<Scalar = T>>(&self, vector: Vector3<U>) -> Vector3<U> {
         Vector3::from_raw(self.as_raw().transform_vector3(vector.to_raw()))
     }
 
@@ -1326,14 +1376,14 @@ where
     /// [`glam::DMat4::project_point3()`] (depending on the scalar).
     #[inline]
     #[must_use]
-    pub fn project_point<U: UnitMatrices<Vec3 = T::Vec3>>(&self, point: Point3<U>) -> Point3<U> {
+    pub fn project_point<U: Unit<Scalar = T>>(&self, point: Point3<U>) -> Point3<U> {
         Point3::from_raw(self.as_raw().project_point3(point.to_raw()))
     }
 }
 
 impl<T> Mul for Matrix4<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
 {
     type Output = Matrix4<T>;
 
@@ -1350,7 +1400,7 @@ impl_matrix!(Matrix4 <4> => Mat4 [Vector4]);
 
 impl<T> AbsDiffEq for Matrix2<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -1370,7 +1420,7 @@ where
 
 impl<T> RelativeEq for Matrix2<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -1400,7 +1450,7 @@ where
 
 impl<T> UlpsEq for Matrix2<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
@@ -1418,7 +1468,7 @@ where
 
 impl<T> AbsDiffEq for Matrix3<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -1438,7 +1488,7 @@ where
 
 impl<T> RelativeEq for Matrix3<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -1468,7 +1518,7 @@ where
 
 impl<T> UlpsEq for Matrix3<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {
@@ -1486,7 +1536,7 @@ where
 
 impl<T> AbsDiffEq for Matrix4<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     type Epsilon = T::Epsilon;
@@ -1506,7 +1556,7 @@ where
 
 impl<T> RelativeEq for Matrix4<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     fn default_max_relative() -> Self::Epsilon {
@@ -1536,7 +1586,7 @@ where
 
 impl<T> UlpsEq for Matrix4<T>
 where
-    T: PrimitiveMatrices,
+    T: FloatScalar,
     T::Epsilon: Clone,
 {
     fn default_max_ulps() -> u32 {

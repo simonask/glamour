@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Removed
+- The `Primitive` trait is removed, as `Scalar` is no longer directly
+  customizable. The rationale is that it introduced more complexity than it was
+  worth.
+
+### Breaking Changes
+- Major trait reorganization. The `Scalar` trait is no longer customizable.
+- `Angle<T>` can no longer appear as the component type of a vector.
+
+### Internal changes
+- Major refactoring of traits and macros. It should be way easier to grok the
+  code.
+
 ## [0.4.1] - 2022-07-26
 ### Added
 - Conversion to/from glam 0.20.0 types (gated behind the `glam_0_20` feature).

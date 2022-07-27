@@ -1,6 +1,6 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
-use glamour::{prelude::*, traits::marker::PodValue, Lerp};
+use glamour::{prelude::*, traits::marker::PodValue, Unit};
 
 //
 // A whole bunch of traits that exist to check if a type implements its
@@ -38,7 +38,7 @@ trait AssertVectorLike<Unit>:
 
 trait AssertEq: Eq {}
 
-trait AssertFloatVectorLike<T>: AssertVectorLike<T> + Lerp<T> + RelativeEq + UlpsEq {}
+trait AssertFloatVectorLike<T>: AssertVectorLike<T> + RelativeEq + UlpsEq {}
 
 trait AssertPointLike<Unit, DiffType>:
     Sub<Self, Output = DiffType> + Add<DiffType, Output = Self> + Sized
