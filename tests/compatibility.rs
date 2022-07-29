@@ -144,7 +144,7 @@ fn cast_to_glam_by_reference() {
     let mut upoint2 = Point2::<u32>::new(1u32, 2u32);
     let mut upoint3 = Point3::<u32>::new(1u32, 2u32, 3u32);
     let mut upoint4 = Point4::<u32>::new(1u32, 2u32, 3u32, 4u32);
-    
+
     let mut size2 = Size2::<f32>::new(1.0, 2.0);
     let mut size3 = Size3::<f32>::new(1.0, 2.0, 3.0);
     let mut dsize2 = Size2::<f64>::new(1.0, 2.0);

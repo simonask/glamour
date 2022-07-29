@@ -1478,13 +1478,10 @@ mod serde_tests {
     use super::*;
 
     #[test]
-    fn serde_rect() {
+    fn serde_vector() {
         let vec = Vector4::<f32>::new(10.0, 20.0, 30.0, 40.0);
         let serialized = serde_json::to_string(&vec).unwrap();
-        assert_eq!(
-            serialized,
-            r#"{"x":10.0,"y":20.0,"z":30.0,"w":40.0}"#
-        );
+        assert_eq!(serialized, r#"{"x":10.0,"y":20.0,"z":30.0,"w":40.0}"#);
         let deserialized: Vector4<f32> = serde_json::from_str(&serialized).unwrap();
         assert_eq!(vec, deserialized);
     }
