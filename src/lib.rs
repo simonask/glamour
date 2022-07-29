@@ -14,6 +14,7 @@
 pub mod docs;
 
 mod angle;
+#[doc(hidden)]
 pub mod bindings;
 mod r#box;
 mod matrix;
