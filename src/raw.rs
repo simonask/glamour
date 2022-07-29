@@ -131,3 +131,19 @@ where
         raw.map(T::from_raw)
     }
 }
+
+impl<A, B> ToRaw for (A, B)
+where
+    A: ToRaw,
+    B: ToRaw,
+{
+    type Raw = (A::Raw, B::Raw);
+
+    fn to_raw(self) -> Self::Raw {
+        (self.0.to_raw(), self.1.to_raw())
+    }
+
+    fn from_raw((a, b): Self::Raw) -> Self {
+        (A::from_raw(a), B::from_raw(b))
+    }
+}

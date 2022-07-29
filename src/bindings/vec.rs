@@ -24,6 +24,7 @@ pub trait Vector:
     + DivAssign<Self>
     + Rem<Self, Output = Self>
     + RemAssign<Self>
+    + for<'a> core::iter::Sum<&'a Self>
 {
     /// The component type of this `glam` vector.
     type Scalar: Scalar;
@@ -67,41 +68,67 @@ macro_rules! impl_signed_vector {
 }
 
 pub trait FloatVector: SignedVector {
+    fn ceil(self) -> Self;
+    fn clamp_length_max(self, min: Self::Scalar) -> Self;
+    fn clamp_length_min(self, min: Self::Scalar) -> Self;
+    fn clamp_length(self, min: Self::Scalar, max: Self::Scalar) -> Self;
+    fn distance_squared(self, other: Self) -> Self::Scalar;
+    fn distance(self, other: Self) -> Self::Scalar;
+    fn exp(self) -> Self;
+    fn floor(self) -> Self;
+    fn fract(self) -> Self;
     fn is_finite(self) -> bool;
     fn is_nan(self) -> bool;
-    fn ceil(self) -> Self;
-    fn floor(self) -> Self;
-    fn round(self) -> Self;
-    fn normalize(self) -> Self;
-    fn normalize_or_zero(self) -> Self;
     fn is_normalized(self) -> bool;
-    fn length(self) -> Self::Scalar;
+    fn length_recip(self) -> Self::Scalar;
     fn length_squared(self) -> Self::Scalar;
-    fn exp(self) -> Self;
-    fn powf(self, n: Self::Scalar) -> Self;
-    fn recip(self) -> Self;
-    fn mul_add(self, a: Self, b: Self) -> Self;
+    fn length(self) -> Self::Scalar;
     fn lerp(self, rhs: Self, s: Self::Scalar) -> Self;
+    fn mul_add(self, a: Self, b: Self) -> Self;
+    fn normalize_or_zero(self) -> Self;
+    fn normalize(self) -> Self;
+    fn powf(self, n: Self::Scalar) -> Self;
+    fn project_onto_normalized(self, other: Self) -> Self;
+    fn project_onto(self, other: Self) -> Self;
+    fn recip(self) -> Self;
+    fn reject_from_normalized(self, other: Self) -> Self;
+    fn reject_from(self, other: Self) -> Self;
+    fn round(self) -> Self;
+    fn try_normalize(self) -> Option<Self>;
+    fn write_to_slice(self, slice: &mut [Self::Scalar]);
 }
 
 macro_rules! impl_float_vector {
     ($glam_ty:ty, $scalar:ty) => {
         impl FloatVector for $glam_ty {
+            forward_impl!($glam_ty => fn ceil(self) -> Self);
+            forward_impl!($glam_ty => fn clamp_length_max(self, min: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn clamp_length_min(self, min: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn clamp_length(self, min: Self::Scalar, max: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn distance_squared(self, other: Self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn distance(self, other: Self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn exp(self) -> Self);
+            forward_impl!($glam_ty => fn floor(self) -> Self);
+            forward_impl!($glam_ty => fn fract(self) -> Self);
             forward_impl!($glam_ty => fn is_finite(self) -> bool);
             forward_impl!($glam_ty => fn is_nan(self) -> bool);
-            forward_impl!($glam_ty => fn ceil(self) -> Self);
-            forward_impl!($glam_ty => fn floor(self) -> Self);
-            forward_impl!($glam_ty => fn round(self) -> Self);
-            forward_impl!($glam_ty => fn normalize(self) -> Self);
-            forward_impl!($glam_ty => fn normalize_or_zero(self) -> Self);
             forward_impl!($glam_ty => fn is_normalized(self) -> bool);
-            forward_impl!($glam_ty => fn length(self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn length_recip(self) -> Self::Scalar);
             forward_impl!($glam_ty => fn length_squared(self) -> Self::Scalar);
-            forward_impl!($glam_ty => fn exp(self) -> Self);
-            forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
-            forward_impl!($glam_ty => fn recip(self) -> Self);
-            forward_impl!($glam_ty => fn mul_add(self, a: Self, b: Self) -> Self);
+            forward_impl!($glam_ty => fn length(self) -> Self::Scalar);
             forward_impl!($glam_ty => fn lerp(self, rhs: Self, s: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn mul_add(self, a: Self, b: Self) -> Self);
+            forward_impl!($glam_ty => fn normalize_or_zero(self) -> Self);
+            forward_impl!($glam_ty => fn normalize(self) -> Self);
+            forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn project_onto_normalized(self, other: Self) -> Self);
+            forward_impl!($glam_ty => fn project_onto(self, other: Self) -> Self);
+            forward_impl!($glam_ty => fn recip(self) -> Self);
+            forward_impl!($glam_ty => fn reject_from_normalized(self, other: Self) -> Self);
+            forward_impl!($glam_ty => fn reject_from(self, other: Self) -> Self);
+            forward_impl!($glam_ty => fn round(self) -> Self);
+            forward_impl!($glam_ty => fn try_normalize(self) -> Option<Self>);
+            forward_impl!($glam_ty => fn write_to_slice(self, slice: &mut [Self::Scalar]) -> ());
         }
     };
 }
@@ -211,6 +238,9 @@ pub trait FloatVector2: SignedVector2 + FloatVector {
 pub trait FloatVector3: Vector3 + FloatVector {
     fn is_nan_mask(self) -> glam::BVec3;
     fn angle_between(self, rhs: Self) -> Self::Scalar;
+    fn any_orthogonal_vector(&self) -> Self;
+    fn any_orthonormal_vector(&self) -> Self;
+    fn any_orthonormal_pair(&self) -> (Self, Self);
 }
 
 pub trait FloatVector4: Vector4 + FloatVector {
@@ -336,10 +366,16 @@ impl FloatVector2 for glam::DVec2 {
 impl FloatVector3 for glam::Vec3 {
     forward_impl!(glam::Vec3 => fn is_nan_mask(self) -> glam::BVec3);
     forward_impl!(glam::Vec3 => fn angle_between(self, other: Self) -> f32);
+    forward_impl!(glam::Vec3 => fn any_orthogonal_vector(&self) -> Self);
+    forward_impl!(glam::Vec3 => fn any_orthonormal_vector(&self) -> Self);
+    forward_impl!(glam::Vec3 => fn any_orthonormal_pair(&self) -> (Self, Self));
 }
 impl FloatVector3 for glam::DVec3 {
     forward_impl!(glam::DVec3 => fn is_nan_mask(self) -> glam::BVec3);
     forward_impl!(glam::DVec3 => fn angle_between(self, other: Self) -> f64);
+    forward_impl!(glam::DVec3 => fn any_orthogonal_vector(&self) -> Self);
+    forward_impl!(glam::DVec3 => fn any_orthonormal_vector(&self) -> Self);
+    forward_impl!(glam::DVec3 => fn any_orthonormal_pair(&self) -> (Self, Self));
 }
 impl FloatVector4 for glam::Vec4 {
     #[inline]

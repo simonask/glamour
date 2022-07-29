@@ -9,7 +9,7 @@
 //! transparently.
 
 use core::iter::Sum;
-use core::ops::{Add, Mul};
+use core::ops::Mul;
 
 use crate::scalar::SignedScalar;
 use crate::{
@@ -111,6 +111,105 @@ pub struct Vector4<T: Unit = f32> {
 unsafe impl<T: Unit> bytemuck::Zeroable for Vector4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> bytemuck::Pod for Vector4<T> {}
+
+macro_rules! vector_interface {
+    ($point_ty:ident $(, $size_ty:ident)?) => {
+        #[doc = "Instantiate from point."]
+        #[inline]
+        #[must_use]
+        pub fn from_point(point: $point_ty<T>) -> Self {
+            bytemuck::cast(point)
+        }
+
+        #[doc = "Convert to point."]
+        #[inline]
+        #[must_use]
+        pub fn to_point(self) -> $point_ty<T> {
+            bytemuck::cast(self)
+        }
+
+        #[doc = "Reinterpret as point."]
+        #[inline]
+        #[must_use]
+        pub fn as_point(&self) -> &$point_ty<T> {
+            bytemuck::cast_ref(self)
+        }
+
+        #[doc = "Reinterpret as point."]
+        #[inline]
+        #[must_use]
+        pub fn as_point_mut(&mut self) -> &mut $point_ty<T> {
+            bytemuck::cast_mut(self)
+        }
+
+        $(
+            #[doc = "Instantiate from size."]
+            #[inline]
+            #[must_use]
+            pub fn from_size(size: $size_ty<T>) -> Self {
+                bytemuck::cast(size)
+            }
+
+            #[doc = "Convert to size."]
+            #[inline]
+            #[must_use]
+            pub fn to_size(self) -> $size_ty<T> {
+                bytemuck::cast(self)
+            }
+
+            #[doc = "Reinterpret as size."]
+            #[inline]
+            #[must_use]
+            pub fn as_size(&self) -> &$size_ty<T> {
+                bytemuck::cast_ref(self)
+            }
+
+            #[doc = "Reinterpret as size."]
+            #[inline]
+            #[must_use]
+            pub fn as_size_mut(&mut self) -> &mut $size_ty<T> {
+                bytemuck::cast_mut(self)
+            }
+        )*
+
+        #[doc = "Select two components from this vector and return a 2D vector made from"]
+        #[doc = "those components."]
+        #[inline]
+        #[must_use]
+        pub fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
+            [self.const_get::<X>(), self.const_get::<Y>()].into()
+        }
+
+        #[doc = "Select three components from this vector and return a 3D vector made from"]
+        #[doc = "those components."]
+        #[inline]
+        #[must_use]
+        pub fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
+            [
+                self.const_get::<X>(),
+                self.const_get::<Y>(),
+                self.const_get::<Z>(),
+            ]
+            .into()
+        }
+
+        #[doc = "Select four components from this vector and return a 4D vector made from"]
+        #[doc = "those components."]
+        #[inline]
+        #[must_use]
+        pub fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
+            &self,
+        ) -> Vector4<T> {
+            [
+                self.const_get::<X>(),
+                self.const_get::<Y>(),
+                self.const_get::<Z>(),
+                self.const_get::<W>(),
+            ]
+            .into()
+        }
+    };
+}
 
 crate::forward_op_to_raw!(Vector2, Add<Self>::add -> Self);
 crate::forward_op_to_raw!(Vector3, Add<Self>::add -> Self);
@@ -286,6 +385,8 @@ impl<T: Unit> Vector2<T> {
     pub fn swizzle<const X: usize, const Y: usize>(&self) -> Self {
         self.swizzle2::<X, Y>()
     }
+
+    vector_interface!(Point2, Size2);
 }
 
 impl<T> Vector2<T>
@@ -415,6 +516,8 @@ impl<T: Unit> Vector3<T> {
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize>(&self) -> Self {
         self.swizzle3::<X, Y, Z>()
     }
+
+    vector_interface!(Point3, Size3);
 }
 
 impl<T> Vector3<T>
@@ -435,6 +538,12 @@ where
     crate::forward_to_raw!(
         #[doc = "Angle between this and another vector."]
         pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
+        #[doc = "See (e.g.) [`glam::Vec3::any_orthogonal_vector()`]."]
+        pub fn any_orthogonal_vector(&self) -> Self;
+        #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_vector()`]."]
+        pub fn any_orthonormal_vector(&self) -> Self;
+        #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_pair()`]."]
+        pub fn any_orthonormal_pair(&self) -> (Self, Self);
     );
 }
 
@@ -585,6 +694,8 @@ impl<T: Unit> Vector4<T> {
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize, const W: usize>(&self) -> Self {
         self.swizzle4::<X, Y, Z, W>()
     }
+
+    vector_interface!(Point4);
 }
 
 impl<T> Vector4<T>
@@ -654,174 +765,39 @@ where
     );
 }
 
-macro_rules! impl_vector {
-    ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $point_ty:ident $(, $size_ty:ident)?) => {
-        impl<T: Unit> $base_type_name<T> {
-            #[doc = "Multiply all components of this vector with a scalar value."]
-            #[doc = ""]
-            #[doc = "This exists as a method because `Mul<T::Scalar>` cannot be implemented"]
-            #[doc = "for all `Vector<T>` (but it is implemented for all `Vector<T>` where `T:"]
-            #[doc = "Unit<Scalar = f32>` etc.)."]
-            #[doc = ""]
-            #[doc = "This is equivalent to `self * Self::splat(scalar)`."]
-            #[inline]
-            #[must_use]
-            pub fn mul_scalar(self, scalar: T::Scalar) -> Self {
-                self * Self::splat(scalar)
-            }
-
-            #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except division."]
-            #[inline]
-            #[must_use]
-            pub fn div_scalar(self, scalar: T::Scalar) -> Self {
-                self / Self::splat(scalar)
-            }
-
-            #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except remainder."]
-            #[inline]
-            #[must_use]
-            pub fn rem_scalar(self, scalar: T::Scalar) -> Self {
-                self % Self::splat(scalar)
-            }
-
-            #[doc = "Instantiate from point."]
-            #[inline]
-            #[must_use]
-            pub fn from_point(point: $point_ty<T>) -> Self {
-                bytemuck::cast(point)
-            }
-
-            #[doc = "Convert to point."]
-            #[inline]
-            #[must_use]
-            pub fn to_point(self) -> $point_ty<T> {
-                bytemuck::cast(self)
-            }
-
-            #[doc = "Reinterpret as point."]
-            #[inline]
-            #[must_use]
-            pub fn as_point(&self) -> &$point_ty<T> {
-                bytemuck::cast_ref(self)
-            }
-
-            #[doc = "Reinterpret as point."]
-            #[inline]
-            #[must_use]
-            pub fn as_point_mut(&mut self) -> &mut $point_ty<T> {
-                bytemuck::cast_mut(self)
-            }
-
-            $(
-                #[doc = "Instantiate from size."]
-                #[inline]
-                #[must_use]
-                pub fn from_size(size: $size_ty<T>) -> Self {
-                    bytemuck::cast(size)
-                }
-
-                #[doc = "Convert to size."]
-                #[inline]
-                #[must_use]
-                pub fn to_size(self) -> $size_ty<T> {
-                    bytemuck::cast(self)
-                }
-
-                #[doc = "Reinterpret as size."]
-                #[inline]
-                #[must_use]
-                pub fn as_size(&self) -> &$size_ty<T> {
-                    bytemuck::cast_ref(self)
-                }
-
-                #[doc = "Reinterpret as size."]
-                #[inline]
-                #[must_use]
-                pub fn as_size_mut(&mut self) -> &mut $size_ty<T> {
-                    bytemuck::cast_mut(self)
-                }
-            )*
-
-            #[doc = "Select two components from this vector and return a 2D vector made from"]
-            #[doc = "those components."]
-            #[inline]
-            #[must_use]
-            pub fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
-                [self.const_get::<X>(), self.const_get::<Y>()].into()
-            }
-
-            #[doc = "Select three components from this vector and return a 3D vector made from"]
-            #[doc = "those components."]
-            #[inline]
-            #[must_use]
-            pub fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
-                [
-                    self.const_get::<X>(),
-                    self.const_get::<Y>(),
-                    self.const_get::<Z>(),
-                ]
-                .into()
-            }
-
-            #[doc = "Select four components from this vector and return a 4D vector made from"]
-            #[doc = "those components."]
-            #[inline]
-            #[must_use]
-            pub fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
-                &self,
-            ) -> Vector4<T> {
-                [
-                    self.const_get::<X>(),
-                    self.const_get::<Y>(),
-                    self.const_get::<Z>(),
-                    self.const_get::<W>(),
-                ]
-                .into()
-            }
-        }
-
-        impl<T: Unit> Sum for $base_type_name<T> {
-            #[must_use]
-            fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-                iter.fold(Self::ZERO, Add::add)
-            }
-        }
-    };
-}
-
-impl_vector!(Vector2 [2] => Vec2, Point2, Size2);
-impl_vector!(Vector3 [3] => Vec3, Point3, Size3);
-impl_vector!(Vector4 [4] => Vec4, Point4);
-
 impl<T: Unit> ToRaw for Vector2<T> {
     type Raw = <T::Scalar as Scalar>::Vec2;
 
+    #[inline]
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
 
+    #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
 }
 
 impl<T: Unit> AsRaw for Vector2<T> {
+    #[inline]
     fn as_raw(&self) -> &Self::Raw {
         bytemuck::cast_ref(self)
     }
 
+    #[inline]
     fn as_raw_mut(&mut self) -> &mut Self::Raw {
         bytemuck::cast_mut(self)
     }
 }
 
 impl<T: Unit> FromRawRef for Vector2<T> {
-    /// By-ref conversion from `Self::Raw`.
+    #[inline]
     fn from_raw_ref(raw: &Self::Raw) -> &Self {
         bytemuck::cast_ref(raw)
     }
 
-    /// By-ref mutable conversion from `Self::Raw`.
+    #[inline]
     fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
         bytemuck::cast_mut(raw)
     }
@@ -830,32 +806,36 @@ impl<T: Unit> FromRawRef for Vector2<T> {
 impl<T: Unit> ToRaw for Vector3<T> {
     type Raw = <T::Scalar as Scalar>::Vec3;
 
+    #[inline]
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
 
+    #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
 }
 
 impl<T: Unit> AsRaw for Vector3<T> {
+    #[inline]
     fn as_raw(&self) -> &Self::Raw {
         bytemuck::cast_ref(self)
     }
 
+    #[inline]
     fn as_raw_mut(&mut self) -> &mut Self::Raw {
         bytemuck::cast_mut(self)
     }
 }
 
 impl<T: Unit> FromRawRef for Vector3<T> {
-    /// By-ref conversion from `Self::Raw`.
+    #[inline]
     fn from_raw_ref(raw: &Self::Raw) -> &Self {
         bytemuck::cast_ref(raw)
     }
 
-    /// By-ref mutable conversion from `Self::Raw`.
+    #[inline]
     fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
         bytemuck::cast_mut(raw)
     }
@@ -864,32 +844,36 @@ impl<T: Unit> FromRawRef for Vector3<T> {
 impl<T: Unit> ToRaw for Vector4<T> {
     type Raw = <T::Scalar as Scalar>::Vec4;
 
+    #[inline]
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
 
+    #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
 }
 
 impl<T: Unit> AsRaw for Vector4<T> {
+    #[inline]
     fn as_raw(&self) -> &Self::Raw {
         bytemuck::cast_ref(self)
     }
 
+    #[inline]
     fn as_raw_mut(&mut self) -> &mut Self::Raw {
         bytemuck::cast_mut(self)
     }
 }
 
 impl<T: Unit> FromRawRef for Vector4<T> {
-    /// By-ref conversion from `Self::Raw`.
+    #[inline]
     fn from_raw_ref(raw: &Self::Raw) -> &Self {
         bytemuck::cast_ref(raw)
     }
 
-    /// By-ref mutable conversion from `Self::Raw`.
+    #[inline]
     fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
         bytemuck::cast_mut(raw)
     }
@@ -899,6 +883,7 @@ impl<T> From<glam::Vec3A> for Vector3<T>
 where
     T: Unit<Scalar = f32>,
 {
+    #[inline]
     fn from(v: glam::Vec3A) -> Self {
         Self::from_raw(v.into())
     }
@@ -908,6 +893,7 @@ impl<T> From<Vector3<T>> for glam::Vec3A
 where
     T: Unit<Scalar = f32>,
 {
+    #[inline]
     fn from(v: Vector3<T>) -> Self {
         v.to_raw().into()
     }
@@ -920,6 +906,7 @@ where
 {
     type Output = Vector3<T>;
 
+    #[inline]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
         Vector3::from_raw(self * rhs.to_raw())
     }
@@ -932,8 +919,39 @@ where
 {
     type Output = Vector3<T>;
 
+    #[inline]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
         Vector3::from_raw(self * rhs.to_raw())
+    }
+}
+
+impl<'a, T: Unit> Sum<&'a Vector2<T>> for Vector2<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).sum())
+    }
+}
+
+impl<'a, T: Unit> Sum<&'a Vector3<T>> for Vector3<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).sum())
+    }
+}
+
+impl<'a, T: Unit> Sum<&'a Vector4<T>> for Vector4<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).sum())
     }
 }
 
@@ -1104,7 +1122,7 @@ mod tests {
         let b: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let d: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
-        let sum: Vector4<f32> = [a, b, c, d].into_iter().sum();
+        let sum: Vector4<f32> = [a, b, c, d].iter().sum();
         assert_eq!(sum, (4.0, 8.0, 12.0, 16.0));
     }
 
@@ -1236,14 +1254,6 @@ mod tests {
 
         {
             let x: Vec4 = (1.0, 2.0, 3.0, 4.0).into();
-
-            let a = x.mul_scalar(2.0);
-            let b = x.div_scalar(2.0);
-            let c = x.rem_scalar(2.0);
-
-            assert_eq!(a, (2.0, 4.0, 6.0, 8.0));
-            assert_eq!(b, (0.5, 1.0, 1.5, 2.0));
-            assert_eq!(c, (1.0, 0.0, 1.0, 0.0));
 
             let mut a = x;
             let mut b = x;

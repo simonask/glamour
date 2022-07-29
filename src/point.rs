@@ -86,6 +86,54 @@ unsafe impl<T: Unit> bytemuck::Zeroable for Point4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> bytemuck::Pod for Point4<T> {}
 
+macro_rules! point_interface {
+    ($base_type_name:ident, $vector_type:ident) => {
+        /// Convert a vector to a point as-is.
+        #[inline]
+        pub fn from_vector(vec: $vector_type<T>) -> Self {
+            vec.into()
+        }
+
+        /// Cast this point as-is to a vector.
+        #[inline]
+        pub fn to_vector(self) -> $vector_type<T> {
+            self.into()
+        }
+
+        #[doc = "Reinterpret as vector."]
+        #[inline]
+        pub fn as_vector(&self) -> &$vector_type<T> {
+            bytemuck::cast_ref(self)
+        }
+
+        #[doc = "Reinterpret as vector."]
+        #[inline]
+        pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
+            bytemuck::cast_mut(self)
+        }
+
+        /// Translate this point by vector.
+        ///
+        /// Equivalent to `self + by`.
+        #[inline]
+        #[must_use]
+        pub fn translate(self, by: $vector_type<T>) -> Self {
+            self + by
+        }
+    };
+}
+
+macro_rules! float_point_interface {
+    () => {
+        crate::forward_to_raw!(
+            #[doc = "Distance"]
+            pub fn distance(self, other: Self) -> T::Scalar;
+            #[doc = "Distance squared"]
+            pub fn distance_squared(self, other: Self) -> T::Scalar;
+        );
+    };
+}
+
 crate::forward_op_to_raw!(Point2, Add<Vector2<T>>::add -> Self);
 crate::forward_op_to_raw!(Point3, Add<Vector3<T>>::add -> Self);
 crate::forward_op_to_raw!(Point4, Add<Vector4<T>>::add -> Self);
@@ -290,6 +338,8 @@ impl<T: Unit> Point2<T> {
         y: T::Scalar
     });
     crate::array_interface!(2);
+
+    point_interface!(Point2, Vector2);
 }
 
 impl<T> Point2<T>
@@ -298,6 +348,7 @@ where
     T::Scalar: FloatScalar,
 {
     crate::forward_float_ops!(glam::BVec2);
+    float_point_interface!();
 }
 
 impl<T: Unit> Point3<T> {
@@ -333,6 +384,8 @@ impl<T: Unit> Point3<T> {
         z: T::Scalar
     });
     crate::array_interface!(3);
+
+    point_interface!(Point3, Vector3);
 }
 
 impl<T> Point3<T>
@@ -341,6 +394,7 @@ where
     T::Scalar: FloatScalar,
 {
     crate::forward_float_ops!(glam::BVec3);
+    float_point_interface!();
 }
 
 impl<T: Unit> Point4<T> {
@@ -380,6 +434,8 @@ impl<T: Unit> Point4<T> {
         w: T::Scalar
     });
     crate::array_interface!(4);
+
+    point_interface!(Point4, Vector4);
 }
 
 impl<T> Point4<T>
@@ -388,50 +444,8 @@ where
     T::Scalar: FloatScalar,
 {
     crate::forward_float_ops!(glam::BVec4);
+    float_point_interface!();
 }
-
-macro_rules! impl_point {
-    ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident, $vector_type:ident) => {
-        impl<T: Unit> $base_type_name<T> {
-            /// Convert a vector to a point as-is.
-            #[inline]
-            pub fn from_vector(vec: $vector_type<T>) -> Self {
-                vec.into()
-            }
-
-            /// Cast this point as-is to a vector.
-            #[inline]
-            pub fn to_vector(self) -> $vector_type<T> {
-                self.into()
-            }
-
-            #[doc = "Reinterpret as vector."]
-            #[inline]
-            pub fn as_vector(&self) -> &$vector_type<T> {
-                bytemuck::cast_ref(self)
-            }
-
-            #[doc = "Reinterpret as vector."]
-            #[inline]
-            pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
-                bytemuck::cast_mut(self)
-            }
-
-            /// Translate this point by vector.
-            ///
-            /// Equivalent to `self + by`.
-            #[inline]
-            #[must_use]
-            pub fn translate(self, by: $vector_type<T>) -> Self {
-                self + by
-            }
-        }
-    };
-}
-
-impl_point!(Point2 [2] => Vec2, Vector2);
-impl_point!(Point3 [3] => Vec3, Vector3);
-impl_point!(Point4 [4] => Vec4, Vector4);
 
 impl<T> Point3<T>
 where
