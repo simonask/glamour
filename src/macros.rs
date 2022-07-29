@@ -270,6 +270,8 @@ macro_rules! forward_float_vector_ops {
             pub fn length(self) -> T::Scalar;
             #[doc = "Squared length of the vector"]
             pub fn length_squared(self) -> T::Scalar;
+            #[doc = "Reciprocal length of the vector"]
+            pub fn length_recip(self) -> T::Scalar;
             #[doc = "e^self by component"]
             pub fn exp(self) -> Self;
             #[doc = "self^n by component"]
