@@ -14,7 +14,7 @@ use crate::{
     scalar::{FloatScalar, SignedScalar},
     AsRaw, FromRawRef, Scalar, ToRaw, Unit, Vector2, Vector3, Vector4,
 };
-use core::ops::{Add, AddAssign, Mul, Sub, SubAssign};
+use core::ops::Mul;
 
 /// 2D point.
 ///

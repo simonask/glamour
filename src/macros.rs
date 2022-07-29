@@ -1,3 +1,5 @@
+#![allow(clippy::doc_markdown)]
+
 /// Define methods and provide implementations that forward to the method of the
 /// same name on the type's `<Self as ToRaw>::Raw` type, converting all
 /// arguments and the return value through `ToRaw`.
