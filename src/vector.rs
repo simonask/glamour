@@ -442,6 +442,11 @@ where
         pub fn signum(self) -> Self;
         #[doc = "Get the perpendicular vector."]
         pub fn perp(self) -> Self;
+        #[doc(alias = "wedge")]
+        #[doc(alias = "cross")]
+        #[doc(alias = "determinant")]
+        #[doc = "Perpendicular dot product"]
+        pub fn perp_dot(self, other: Self) -> T::Scalar;
     );
 }
 
@@ -544,6 +549,8 @@ where
         pub fn any_orthonormal_vector(&self) -> Self;
         #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_pair()`]."]
         pub fn any_orthonormal_pair(&self) -> (Self, Self);
+        #[doc = "Cross product"]
+        pub fn cross(self, other: Self) -> Self;
     );
 }
 

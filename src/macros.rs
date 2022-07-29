@@ -278,6 +278,12 @@ macro_rules! forward_float_vector_ops {
             pub fn recip(self) -> Self;
             #[doc = "self * a + b"]
             pub fn mul_add(self, a: Self, b: Self) -> Self;
+            #[doc = "Clamp length"]
+            pub fn clamp_length(self, min: T::Scalar, max: T::Scalar) -> Self;
+            #[doc = "Clamp length"]
+            pub fn clamp_length_min(self, min: T::Scalar) -> Self;
+            #[doc = "Clamp length"]
+            pub fn clamp_length_max(self, max: T::Scalar) -> Self;
         }
     };
 }
