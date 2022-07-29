@@ -16,6 +16,11 @@ pub struct Size2<T: Unit = f32> {
     pub height: T::Scalar,
 }
 
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Pod for Size2<T> {}
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Size2<T> {}
+
 /// 3D size.
 #[repr(C)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
@@ -28,6 +33,11 @@ pub struct Size3<T: Unit = f32> {
     /// Depth
     pub depth: T::Scalar,
 }
+
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Pod for Size3<T> {}
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Size3<T> {}
 
 impl<T: Unit> ToRaw for Size2<T> {
     type Raw = <T::Scalar as Scalar>::Vec2;
@@ -95,23 +105,37 @@ impl<T: Unit> FromRawRef for Size3<T> {
     }
 }
 
-crate::impl_common!(Size2 {
+crate::derive_standard_traits!(Size2 {
     width: T::Scalar,
     height: T::Scalar
 });
-
-crate::impl_common!(Size3 {
+crate::derive_standard_traits!(Size3 {
     width: T::Scalar,
     height: T::Scalar,
     depth: T::Scalar
 });
 
-crate::impl_vector_common!(Size2 [2] => Vec2 { width, height });
+crate::derive_array_conversion_traits!(Size2, 2);
+crate::derive_array_conversion_traits!(Size3, 3);
 
-crate::impl_vector_common!(Size3 [3] => Vec3 {
-    width,
-    height,
-    depth
+crate::derive_tuple_conversion_traits!(Size2 {
+    width: T::Scalar,
+    height: T::Scalar
+});
+crate::derive_tuple_conversion_traits!(Size3 {
+    width: T::Scalar,
+    height: T::Scalar,
+    depth: T::Scalar
+});
+
+crate::derive_glam_conversion_traits!(Size2 {
+    width: T::Scalar,
+    height: T::Scalar
+});
+crate::derive_glam_conversion_traits!(Size3 {
+    width: T::Scalar,
+    height: T::Scalar,
+    depth: T::Scalar
 });
 
 macro_rules! impl_size {
@@ -161,9 +185,6 @@ macro_rules! impl_size {
 impl_size!(Size2 [2] => Vec2, Vector2);
 impl_size!(Size3 [3] => Vec3, Vector3);
 
-crate::impl_glam_conversion!(Size2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
-crate::impl_glam_conversion!(Size3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
-
 crate::forward_op_to_raw!(Size2, Add<Self>::add -> Self);
 crate::forward_op_to_raw!(Size3, Add<Self>::add -> Self);
 crate::forward_op_to_raw!(Size2, Sub<Self>::sub -> Self);
@@ -204,41 +225,23 @@ impl<T: Unit> Size2<T> {
         Self { width, height }
     }
 
+    crate::forward_constructors!(2);
+    crate::forward_comparison!(glam::BVec2);
+
+    crate::casting_interface!(Size2 {
+        width: T::Scalar,
+        height: T::Scalar
+    });
+    crate::tuple_interface!(Size2 {
+        width: T::Scalar,
+        height: T::Scalar
+    });
+    crate::array_interface!(2);
+
     /// Calculate the area.
     pub fn area(&self) -> T::Scalar {
         self.width * self.height
     }
-
-    crate::forward_all_to_raw!(
-        #[doc = "Instantiate from array."]
-        pub fn from_array(array: [T::Scalar; 2]) -> Self;
-        #[doc = "Convert to array."]
-        pub fn to_array(self) -> [T::Scalar; 2];
-        #[doc = "Instance with all components set to `scalar`."]
-        pub fn splat(scalar: T::Scalar) -> Self;
-        #[doc = "Return a mask with the result of a component-wise equals comparison."]
-        pub fn cmpeq(self, other: Self) -> glam::BVec2;
-        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
-        pub fn cmpne(self, other: Self) -> glam::BVec2;
-        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
-        pub fn cmpge(self, other: Self) -> glam::BVec2;
-        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
-        pub fn cmpgt(self, other: Self) -> glam::BVec2;
-        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
-        pub fn cmple(self, other: Self) -> glam::BVec2;
-        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
-        pub fn cmplt(self, other: Self) -> glam::BVec2;
-        #[doc = "Minimum by component."]
-        pub fn min(self, other: Self) -> Self;
-        #[doc = "Maximum by component."]
-        pub fn max(self, other: Self) -> Self;
-        #[doc = "Horizontal minimum (smallest component)."]
-        pub fn min_element(self) -> T::Scalar;
-        #[doc = "Horizontal maximum (largest component)."]
-        pub fn max_element(self) -> T::Scalar;
-        #[doc = "Component-wise clamp."]
-        pub fn clamp(self, min: Self, max: Self) -> Self;
-    );
 }
 
 impl<T> Size2<T>
@@ -246,7 +249,7 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
-    crate::forward_all_to_raw!(
+    crate::forward_to_raw!(
         #[doc = "True if all components are non-infinity and non-NaN."]
         pub fn is_finite(&self) -> bool;
         #[doc = "True if any component is NaN."]
@@ -288,41 +291,25 @@ impl<T: Unit> Size3<T> {
         }
     }
 
+    crate::forward_constructors!(3);
+    crate::forward_comparison!(glam::BVec3);
+
+    crate::casting_interface!(Size3 {
+        width: T::Scalar,
+        height: T::Scalar,
+        depth: T::Scalar
+    });
+    crate::tuple_interface!(Size3 {
+        width: T::Scalar,
+        height: T::Scalar,
+        depth: T::Scalar
+    });
+    crate::array_interface!(3);
+
     /// Calculate the volume.
     pub fn volume(&self) -> T::Scalar {
         self.width * self.height * self.depth
     }
-
-    crate::forward_all_to_raw!(
-        #[doc = "Instantiate from array."]
-        pub fn from_array(array: [T::Scalar; 3]) -> Self;
-        #[doc = "Convert to array."]
-        pub fn to_array(self) -> [T::Scalar; 3];
-        #[doc = "Instance with all components set to `scalar`."]
-        pub fn splat(scalar: T::Scalar) -> Self;
-        #[doc = "Return a mask with the result of a component-wise equals comparison."]
-        pub fn cmpeq(self, other: Self) -> glam::BVec3;
-        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
-        pub fn cmpne(self, other: Self) -> glam::BVec3;
-        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
-        pub fn cmpge(self, other: Self) -> glam::BVec3;
-        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
-        pub fn cmpgt(self, other: Self) -> glam::BVec3;
-        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
-        pub fn cmple(self, other: Self) -> glam::BVec3;
-        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
-        pub fn cmplt(self, other: Self) -> glam::BVec3;
-        #[doc = "Minimum by component."]
-        pub fn min(self, other: Self) -> Self;
-        #[doc = "Maximum by component."]
-        pub fn max(self, other: Self) -> Self;
-        #[doc = "Horizontal minimum (smallest component)."]
-        pub fn min_element(self) -> T::Scalar;
-        #[doc = "Horizontal maximum (largest component)."]
-        pub fn max_element(self) -> T::Scalar;
-        #[doc = "Component-wise clamp."]
-        pub fn clamp(self, min: Self, max: Self) -> Self;
-    );
 }
 
 impl<T> Size3<T>
@@ -330,7 +317,7 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
-    crate::forward_all_to_raw!(
+    crate::forward_to_raw!(
         #[doc = "True if all components are non-infinity and non-NaN."]
         pub fn is_finite(&self) -> bool;
         #[doc = "True if any component is NaN."]

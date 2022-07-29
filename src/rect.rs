@@ -19,7 +19,16 @@ pub struct Rect<T: Unit = f32> {
     pub size: Size2<T>,
 }
 
-crate::impl_common!(Rect {
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`
+unsafe impl<T: Unit> bytemuck::Pod for Rect<T> {}
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`
+unsafe impl<T: Unit> bytemuck::Zeroable for Rect<T> {}
+
+crate::derive_standard_traits!(Rect {
+    origin: Point2<T>,
+    size: Size2<T>
+});
+crate::derive_tuple_conversion_traits!(Rect {
     origin: Point2<T>,
     size: Size2<T>
 });
@@ -38,6 +47,15 @@ impl<T: Unit> Rect<T> {
             size: size.into(),
         }
     }
+
+    crate::casting_interface!(Rect {
+        origin: Point2<T>,
+        size: Size2<T>
+    });
+    crate::tuple_interface!(Rect {
+        origin: Point2<T>,
+        size: Size2<T>
+    });
 
     /// Rect at (0.0, 0.0) with `size`.
     #[inline]
@@ -224,7 +242,7 @@ where
     /// # use glamour::prelude::*;
     /// let r = Rect::<f32>::new((0.51, 0.49), (0.51, 0.49));
     /// let r = r.round();
-    /// assert_eq!(r, ((1.0, 0.0), (1.0, 0.0)));
+    /// assert_eq!(r, Rect::<f32>::new((1.0, 0.0), (1.0, 0.0)));
     /// ```
     #[inline]
     #[must_use]

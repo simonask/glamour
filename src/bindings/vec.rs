@@ -52,7 +52,7 @@ macro_rules! impl_vector {
     };
 }
 
-pub trait SignedVector: Vector {
+pub trait SignedVector: Vector + core::ops::Neg<Output = Self> {
     fn signum(self) -> Self;
     fn abs(self) -> Self;
 }
@@ -116,10 +116,11 @@ pub trait Vector2: Vector {
     fn cmple(self, other: Self) -> glam::BVec2;
     fn cmplt(self, other: Self) -> glam::BVec2;
     fn select(mask: glam::BVec2, if_true: Self, if_false: Self) -> Self;
+    fn extend(self, z: Self::Scalar) -> <Self::Scalar as Scalar>::Vec3;
 }
 
 macro_rules! impl_vector2 {
-    ($glam_ty:ty) => {
+    ($glam_ty:ty, $vec3_ty:ty) => {
         impl Vector2 for $glam_ty {
             forward_impl!($glam_ty => fn from_array(array: [Self::Scalar; 2]) -> Self);
             forward_impl!($glam_ty => fn to_array(&self) -> [Self::Scalar; 2]);
@@ -130,6 +131,7 @@ macro_rules! impl_vector2 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec2);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec2);
             forward_impl!($glam_ty => fn select(mask: glam::BVec2, if_true: Self, if_false: Self) -> Self);
+            forward_impl!($glam_ty => fn extend(self, z: Self::Scalar) -> $vec3_ty);
         }
     };
 }
@@ -144,11 +146,12 @@ pub trait Vector3: Vector {
     fn cmple(self, other: Self) -> glam::BVec3;
     fn cmplt(self, other: Self) -> glam::BVec3;
     fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self;
+    fn extend(self, w: Self::Scalar) -> <Self::Scalar as Scalar>::Vec4;
     fn cross(self, other: Self) -> Self;
 }
 
 macro_rules! impl_vector3 {
-    ($glam_ty:ty) => {
+    ($glam_ty:ty, $vec4_ty:ty) => {
         impl Vector3 for $glam_ty {
             forward_impl!($glam_ty => fn from_array(array: [Self::Scalar; 3]) -> Self);
             forward_impl!($glam_ty => fn to_array(&self) -> [Self::Scalar; 3]);
@@ -160,6 +163,7 @@ macro_rules! impl_vector3 {
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec3);
             forward_impl!($glam_ty => fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self);
             forward_impl!($glam_ty => fn cross(self, other: Self) -> Self);
+            forward_impl!($glam_ty => fn extend(self, w: Self::Scalar) -> $vec4_ty);
         }
     };
 }
@@ -226,15 +230,15 @@ impl_vector!(glam::UVec2, u32);
 impl_vector!(glam::UVec3, u32);
 impl_vector!(glam::UVec4, u32);
 
-impl_vector2!(glam::Vec2);
-impl_vector2!(glam::DVec2);
-impl_vector2!(glam::IVec2);
-impl_vector2!(glam::UVec2);
+impl_vector2!(glam::Vec2, glam::Vec3);
+impl_vector2!(glam::DVec2, glam::DVec3);
+impl_vector2!(glam::IVec2, glam::IVec3);
+impl_vector2!(glam::UVec2, glam::UVec3);
 
-impl_vector3!(glam::Vec3);
-impl_vector3!(glam::DVec3);
-impl_vector3!(glam::IVec3);
-impl_vector3!(glam::UVec3);
+impl_vector3!(glam::Vec3, glam::Vec4);
+impl_vector3!(glam::DVec3, glam::DVec4);
+impl_vector3!(glam::IVec3, glam::IVec4);
+impl_vector3!(glam::UVec3, glam::UVec4);
 
 // Note: glam::Vec4 uses BVec4A instead of BVec4, so we provide a manual impl.
 //

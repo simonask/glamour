@@ -40,7 +40,8 @@ pub trait FromRawRef: ToRaw {
     fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self;
 }
 
-macro_rules! impl_primitive {
+// For types where Self == Self::Raw.
+macro_rules! impl_identity {
     ($t:ty) => {
         impl ToRaw for $t {
             type Raw = $t;
@@ -76,29 +77,15 @@ macro_rules! impl_primitive {
     };
 }
 
-impl_primitive!(f32);
-impl_primitive!(f64);
-impl_primitive!(i32);
-impl_primitive!(u32);
-impl_primitive!(bool);
-impl_primitive!(glam::BVec2);
-impl_primitive!(glam::BVec3);
-impl_primitive!(glam::BVec4);
-
-impl<T, const N: usize> ToRaw for [T; N]
-where
-    T: ToRaw,
-{
-    type Raw = [T::Raw; N];
-
-    fn to_raw(self) -> Self::Raw {
-        self.map(T::to_raw)
-    }
-
-    fn from_raw(raw: Self::Raw) -> Self {
-        raw.map(T::from_raw)
-    }
-}
+impl_identity!(());
+impl_identity!(f32);
+impl_identity!(f64);
+impl_identity!(i32);
+impl_identity!(u32);
+impl_identity!(bool);
+impl_identity!(glam::BVec2);
+impl_identity!(glam::BVec3);
+impl_identity!(glam::BVec4);
 
 impl<'a, T> ToRaw for &'a T
 where
@@ -127,5 +114,20 @@ where
 
     fn from_raw(raw: Self::Raw) -> Self {
         T::from_raw_mut(raw)
+    }
+}
+
+impl<T, const N: usize> ToRaw for [T; N]
+where
+    T: ToRaw,
+{
+    type Raw = [T::Raw; N];
+
+    fn to_raw(self) -> Self::Raw {
+        self.map(T::to_raw)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        raw.map(T::from_raw)
     }
 }

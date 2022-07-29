@@ -2063,7 +2063,7 @@ mod tests {
         let mat4 = DMat4::from_scale((2.0, 2.0, 2.0).into());
 
         assert_eq!(mat2 * v2, mat2.transform_vector(v2));
-        assert_eq!(mat3 * v3, mat3.transform_vector(v2).to_3d(3.0));
+        assert_eq!(mat3 * v3, mat3.transform_vector(v2).extend(3.0));
         assert_eq!(mat4 * v4, DVec4::new(2.0, 4.0, 6.0, 4.0));
     }
 

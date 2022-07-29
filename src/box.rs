@@ -19,10 +19,10 @@ pub struct Box2<T: Unit = f32> {
     pub max: Point2<T>,
 }
 
-crate::impl_common!(Box2 {
-    min: Point2<T>,
-    max: Point2<T>
-});
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Pod for Box2<T> {}
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Box2<T> {}
 
 /// 3D axis-aligned box.
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
@@ -35,7 +35,25 @@ pub struct Box3<T: Unit = f32> {
     pub max: Point3<T>,
 }
 
-crate::impl_common!(Box3 {
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Pod for Box3<T> {}
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Box3<T> {}
+
+crate::derive_standard_traits!(Box2 {
+    min: Point2<T>,
+    max: Point2<T>
+});
+crate::derive_standard_traits!(Box3 {
+    min: Point3<T>,
+    max: Point3<T>
+});
+
+crate::derive_tuple_conversion_traits!(Box2 {
+    min: Point2<T>,
+    max: Point2<T>
+});
+crate::derive_tuple_conversion_traits!(Box3 {
     min: Point3<T>,
     max: Point3<T>
 });
@@ -54,6 +72,15 @@ impl<T: Unit> Box2<T> {
             max: max.into(),
         }
     }
+
+    crate::casting_interface!(Box2 {
+        min: Point2<T>,
+        max: Point2<T>
+    });
+    crate::tuple_interface!(Box2 {
+        min: Point2<T>,
+        max: Point2<T>
+    });
 
     /// Create from [`Rect`].
     ///
@@ -250,6 +277,31 @@ impl<T: Unit> Box2<T> {
     pub fn area(&self) -> T::Scalar {
         self.size().area()
     }
+}
+
+impl<T: Unit> Box3<T> {
+    /// Zero-sized box.
+    pub const ZERO: Self = Self {
+        min: Point3::ZERO,
+        max: Point3::ZERO,
+    };
+
+    /// New 2D box from min/max coordinates.
+    pub fn new(min: impl Into<Point3<T>>, max: impl Into<Point3<T>>) -> Self {
+        Box3 {
+            min: min.into(),
+            max: max.into(),
+        }
+    }
+
+    crate::casting_interface!(Box3 {
+        min: Point3<T>,
+        max: Point3<T>
+    });
+    crate::tuple_interface!(Box3 {
+        min: Point3<T>,
+        max: Point3<T>
+    });
 }
 
 impl<T: Unit> From<Box2<T>> for Rect<T> {
