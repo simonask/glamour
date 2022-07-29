@@ -284,6 +284,8 @@ macro_rules! forward_float_vector_ops {
             pub fn clamp_length_min(self, min: T::Scalar) -> Self;
             #[doc = "Clamp length"]
             pub fn clamp_length_max(self, max: T::Scalar) -> Self;
+            #[doc = "fract()"]
+            pub fn fract(self) -> Self;
         }
     };
 }
