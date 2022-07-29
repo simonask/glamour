@@ -199,6 +199,11 @@ macro_rules! forward_constructors {
             #[doc = "Instance with all components set to `scalar`."]
             pub fn splat(scalar: T::Scalar) -> Self;
         }
+
+        #[doc = "Write all components to slice."]
+        pub fn write_to_slice(self, slice: &mut [T::Scalar]) {
+            self.to_raw().write_to_slice(slice);
+        }
     };
 }
 
@@ -264,6 +269,8 @@ macro_rules! forward_float_vector_ops {
             pub fn normalize(self) -> Self;
             #[doc = "Normalize the vector, returning zero if the length was already (very close to) zero."]
             pub fn normalize_or_zero(self) -> Self;
+            #[doc = "Normalize the vector, returning `None` if the length was already (very close to) zero."]
+            pub fn try_normalize(self) -> Option<Self>;
             #[doc = "True if the vector is normalized."]
             pub fn is_normalized(self) -> bool;
             #[doc = "Length of the vector"]
@@ -288,6 +295,14 @@ macro_rules! forward_float_vector_ops {
             pub fn clamp_length_max(self, max: T::Scalar) -> Self;
             #[doc = "fract()"]
             pub fn fract(self) -> Self;
+            #[doc = "See (e.g.) [`glam::Vec2::project_onto()`]"]
+            pub fn project_onto(self, other: Self) -> Self;
+            #[doc = "See (e.g.) [`glam::Vec2::reject_from()`]"]
+            pub fn reject_from(self, other: Self) -> Self;
+            #[doc = "See (e.g.) [`glam::Vec2::project_onto_normalized()`]"]
+            pub fn project_onto_normalized(self, other: Self) -> Self;
+            #[doc = "See (e.g.) [`glam::Vec2::reject_from_normalized()`]"]
+            pub fn reject_from_normalized(self, other: Self) -> Self;
         }
     };
 }

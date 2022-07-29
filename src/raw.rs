@@ -147,3 +147,18 @@ where
         (A::from_raw(a), B::from_raw(b))
     }
 }
+
+impl<T> ToRaw for Option<T>
+where
+    T: ToRaw,
+{
+    type Raw = Option<T::Raw>;
+
+    fn to_raw(self) -> Self::Raw {
+        self.map(T::to_raw)
+    }
+
+    fn from_raw(raw: Self::Raw) -> Self {
+        raw.map(T::from_raw)
+    }
+}

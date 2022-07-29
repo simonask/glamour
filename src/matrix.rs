@@ -2,13 +2,7 @@
 //!
 //! Matrices do not have a [`Unit`](crate::Unit), because their values do not
 //! necessarily have a clear logical meaning in the context of any particular
-//! unit.
-//!
-//! Similarly, matrices do not use [`Scalar`](crate::Unit). A matrix of "angle"
-//! components is not really meaningful.
-//!
-//! Instead, they are based on fundamental floating-point
-//! [primitive](crate::bindings::Primitive) scalars (`f32` or `f64`).
+//! unit. Instead, they just use `Scalar`.
 
 use core::ops::Mul;
 

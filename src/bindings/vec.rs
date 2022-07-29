@@ -36,6 +36,7 @@ pub trait Vector:
     fn min_element(self) -> Self::Scalar;
     fn max_element(self) -> Self::Scalar;
     fn dot(self, other: Self) -> Self::Scalar;
+    fn write_to_slice(self, slice: &mut [Self::Scalar]);
 }
 
 macro_rules! impl_vector {
@@ -49,6 +50,7 @@ macro_rules! impl_vector {
             forward_impl!($glam_ty => fn min_element(self) -> Self::Scalar);
             forward_impl!($glam_ty => fn max_element(self) -> Self::Scalar);
             forward_impl!($glam_ty => fn dot(self, other: Self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn write_to_slice(self, slice: &mut [Self::Scalar]) -> ());
         }
     };
 }
@@ -95,7 +97,6 @@ pub trait FloatVector: SignedVector {
     fn reject_from(self, other: Self) -> Self;
     fn round(self) -> Self;
     fn try_normalize(self) -> Option<Self>;
-    fn write_to_slice(self, slice: &mut [Self::Scalar]);
 }
 
 macro_rules! impl_float_vector {
@@ -128,7 +129,6 @@ macro_rules! impl_float_vector {
             forward_impl!($glam_ty => fn reject_from(self, other: Self) -> Self);
             forward_impl!($glam_ty => fn round(self) -> Self);
             forward_impl!($glam_ty => fn try_normalize(self) -> Option<Self>);
-            forward_impl!($glam_ty => fn write_to_slice(self, slice: &mut [Self::Scalar]) -> ());
         }
     };
 }
