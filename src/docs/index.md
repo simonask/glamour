@@ -54,7 +54,7 @@ more verbose.
 
 To solve this, we add some extra information to user-defined `Unit`s. Any unit
 is associated with a [`Scalar`](crate::Scalar) type indicating the
-component type of the vector, typically one of the primitive types supported by
+component type of the vector, which is one of the primitive types supported by
 `glam`: `f32`, `f64`, `i32`, or `u32`. The type of scalar determines which
 `glam` vector type is used for arithmetic in the vector type with that unit.
 
@@ -66,8 +66,6 @@ component type of the vector, typically one of the primitive types supported by
 | `i32`      | [`IVec2`][glam_ivec2] | [`IVec3`][glam_ivec3] | [`IVec4`][glam_ivec4] |
 | `u32`      | [`UVec2`][glam_uvec2] | [`UVec3`][glam_uvec3] | [`UVec4`][glam_uvec4] |
 
-The mapping to vector types also works for custom scalar values, through the
-[`Scalar`](crate::Scalar) trait.
 
 [glam_vec2]: glam::Vec2
 [glam_vec3]: glam::Vec3

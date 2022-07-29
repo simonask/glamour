@@ -28,12 +28,8 @@ allow you to easily drop down to plain `glam` when needed.
    traits to be derived).
 2. Implement [`Unit`] for that struct. [`Unit::Scalar`] determines the primitive
    type used in vector components.
-3. The scalar must be `f32`, `f64`, `i32`, or `u32` (or bitwise compatible with
-   one of them)[^custom_scalar].
+3. The scalar must be `f32`, `f64`, `i32`, or `u32`.
 4. The basic primitive scalars are also units in their own right ("untyped").
-
-[^custom_scalar]: You can use a custom scalar type by implementing [`Scalar`].
-  [`Angle<T>`] is an example of a generic custom scalar.
 
 ##### Example
 
