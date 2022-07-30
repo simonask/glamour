@@ -223,6 +223,11 @@ impl<T: Unit> Size2<T> {
     });
     crate::array_interface!(2);
 
+    crate::forward_to_raw!(
+        #[doc = "Extend with depth component to [`Size3`]."]
+        pub fn extend(self, depth: T::Scalar) -> Size3<T>;
+    );
+
     /// Calculate the area.
     pub fn area(&self) -> T::Scalar {
         self.width * self.height
@@ -290,6 +295,11 @@ impl<T: Unit> Size3<T> {
         depth: T::Scalar
     });
     crate::array_interface!(3);
+
+    crate::forward_to_raw!(
+        #[doc = "Truncate to [`Size2`]."]
+        pub fn truncate(self) -> Size2<T>;
+    );
 
     /// Calculate the volume.
     pub fn volume(&self) -> T::Scalar {

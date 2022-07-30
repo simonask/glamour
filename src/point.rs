@@ -302,6 +302,11 @@ impl<T: Unit> Point2<T> {
     });
     crate::array_interface!(2);
 
+    crate::forward_to_raw!(
+        #[doc = "Extend with z-component to [`Point3`]."]
+        pub fn extend(self, z: T::Scalar) -> Point3<T>;
+    );
+
     point_interface!(Point2, Vector2);
 }
 
@@ -347,6 +352,13 @@ impl<T: Unit> Point3<T> {
         z: T::Scalar
     });
     crate::array_interface!(3);
+
+    crate::forward_to_raw!(
+        #[doc = "Extend with w-component to [`Point4`]."]
+        pub fn extend(self, w: T::Scalar) -> Point4<T>;
+        #[doc = "Truncate to [`Point2`]."]
+        pub fn truncate(self) -> Point2<T>;
+    );
 
     point_interface!(Point3, Vector3);
 }
@@ -397,6 +409,11 @@ impl<T: Unit> Point4<T> {
         w: T::Scalar
     });
     crate::array_interface!(4);
+
+    crate::forward_to_raw!(
+        #[doc = "Truncate to [`Point3`]."]
+        pub fn truncate(self) -> Point3<T>;
+    );
 
     point_interface!(Point4, Vector4);
 }

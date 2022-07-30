@@ -174,11 +174,12 @@ pub trait Vector3: Vector {
     fn cmplt(self, other: Self) -> glam::BVec3;
     fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self;
     fn extend(self, w: Self::Scalar) -> <Self::Scalar as Scalar>::Vec4;
+    fn truncate(self) -> <Self::Scalar as Scalar>::Vec2;
     fn cross(self, other: Self) -> Self;
 }
 
 macro_rules! impl_vector3 {
-    ($glam_ty:ty, $vec4_ty:ty) => {
+    ($glam_ty:ty, $vec2_ty:ty, $vec4_ty:ty) => {
         impl Vector3 for $glam_ty {
             forward_impl!($glam_ty => fn from_array(array: [Self::Scalar; 3]) -> Self);
             forward_impl!($glam_ty => fn to_array(&self) -> [Self::Scalar; 3]);
@@ -191,6 +192,7 @@ macro_rules! impl_vector3 {
             forward_impl!($glam_ty => fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self);
             forward_impl!($glam_ty => fn cross(self, other: Self) -> Self);
             forward_impl!($glam_ty => fn extend(self, w: Self::Scalar) -> $vec4_ty);
+            forward_impl!($glam_ty => fn truncate(self) -> $vec2_ty);
         }
     };
 }
@@ -205,10 +207,11 @@ pub trait Vector4: Vector {
     fn cmple(self, other: Self) -> glam::BVec4;
     fn cmplt(self, other: Self) -> glam::BVec4;
     fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self;
+    fn truncate(self) -> <Self::Scalar as Scalar>::Vec3;
 }
 
 macro_rules! impl_vector4 {
-    ($glam_ty:ty) => {
+    ($glam_ty:ty, $vec3_ty:ty) => {
         impl Vector4 for $glam_ty {
             forward_impl!($glam_ty => fn from_array(array: [Self::Scalar; 4]) -> Self);
             forward_impl!($glam_ty => fn to_array(&self) -> [Self::Scalar; 4]);
@@ -219,6 +222,7 @@ macro_rules! impl_vector4 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec4);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec4);
             forward_impl!($glam_ty => fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self);
+            forward_impl!($glam_ty => fn truncate(self) -> $vec3_ty);
         }
     };
 }
@@ -265,17 +269,17 @@ impl_vector2!(glam::DVec2, glam::DVec3);
 impl_vector2!(glam::IVec2, glam::IVec3);
 impl_vector2!(glam::UVec2, glam::UVec3);
 
-impl_vector3!(glam::Vec3, glam::Vec4);
-impl_vector3!(glam::DVec3, glam::DVec4);
-impl_vector3!(glam::IVec3, glam::IVec4);
-impl_vector3!(glam::UVec3, glam::UVec4);
+impl_vector3!(glam::Vec3, glam::Vec2, glam::Vec4);
+impl_vector3!(glam::DVec3, glam::DVec2, glam::DVec4);
+impl_vector3!(glam::IVec3, glam::IVec2, glam::IVec4);
+impl_vector3!(glam::UVec3, glam::UVec2, glam::UVec4);
 
 // Note: glam::Vec4 uses BVec4A instead of BVec4, so we provide a manual impl.
 //
 // See https://github.com/bitshifter/glam-rs/issues/306.
-impl_vector4!(glam::DVec4);
-impl_vector4!(glam::IVec4);
-impl_vector4!(glam::UVec4);
+impl_vector4!(glam::DVec4, glam::DVec3);
+impl_vector4!(glam::IVec4, glam::IVec3);
+impl_vector4!(glam::UVec4, glam::UVec3);
 
 impl_signed_vector!(glam::Vec2);
 impl_signed_vector!(glam::Vec3);
@@ -334,6 +338,8 @@ impl Vector4 for glam::Vec4 {
     fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self {
         <glam::Vec4>::select(bvec4_to_bvec4a(mask), if_true, if_false)
     }
+
+    forward_impl!(glam::Vec4 => fn truncate(self) -> glam::Vec3);
 }
 
 impl SignedVector2 for glam::Vec2 {
