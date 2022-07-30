@@ -40,7 +40,7 @@ pub use scalar::Scalar;
 pub use size::{Size2, Size3};
 pub use transform::{Transform2, Transform3, TransformMap};
 pub use unit::Unit;
-pub use vector::{Vector2, Vector3, Vector4, Swizzle};
+pub use vector::{Swizzle, Vector2, Vector3, Vector4};
 
 mod macros;
 use macros::*;
@@ -55,8 +55,8 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use super::{
         Angle, AngleConsts as _, AsRaw, Box2, Box3, FloatAngleExt as _, Matrix2, Matrix3, Matrix4,
-        Point2, Point3, Point4, Rect, Scalar as _, Size2, Size3, ToRaw, Unit, Vector2, Vector3,
-        Vector4, Swizzle as _,
+        Point2, Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, ToRaw, Unit,
+        Vector2, Vector3, Vector4,
     };
     #[doc(no_inline)]
     pub use super::{Transform2, Transform3, TransformMap as _};
