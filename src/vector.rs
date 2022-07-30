@@ -171,42 +171,39 @@ macro_rules! vector_interface {
                 bytemuck::cast_mut(self)
             }
         )*
+    };
+}
 
-        #[doc = "Select two components from this vector and return a 2D vector made from"]
-        #[doc = "those components."]
-        #[inline]
-        #[must_use]
-        pub fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
-            [self.const_get::<X>(), self.const_get::<Y>()].into()
-        }
+macro_rules! implement_swizzle {
+    ($base_type_name:ident) => {
+        impl<T: Unit> Swizzle<T> for $base_type_name<T> {
+            #[inline]
+            fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
+                [self.const_get::<X>(), self.const_get::<Y>()].into()
+            }
 
-        #[doc = "Select three components from this vector and return a 3D vector made from"]
-        #[doc = "those components."]
-        #[inline]
-        #[must_use]
-        pub fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
-            [
-                self.const_get::<X>(),
-                self.const_get::<Y>(),
-                self.const_get::<Z>(),
-            ]
-            .into()
-        }
+            #[inline]
+            fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
+                [
+                    self.const_get::<X>(),
+                    self.const_get::<Y>(),
+                    self.const_get::<Z>(),
+                ]
+                .into()
+            }
 
-        #[doc = "Select four components from this vector and return a 4D vector made from"]
-        #[doc = "those components."]
-        #[inline]
-        #[must_use]
-        pub fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
-            &self,
-        ) -> Vector4<T> {
-            [
-                self.const_get::<X>(),
-                self.const_get::<Y>(),
-                self.const_get::<Z>(),
-                self.const_get::<W>(),
-            ]
-            .into()
+            #[inline]
+            fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
+                &self,
+            ) -> Vector4<T> {
+                [
+                    self.const_get::<X>(),
+                    self.const_get::<Y>(),
+                    self.const_get::<Z>(),
+                    self.const_get::<W>(),
+                ]
+                .into()
+            }
         }
     };
 }
@@ -324,6 +321,10 @@ crate::derive_glam_conversion_traits!(Vector4 {
     z: T::Scalar,
     w: T::Scalar
 });
+
+implement_swizzle!(Vector2);
+implement_swizzle!(Vector3);
+implement_swizzle!(Vector4);
 
 impl<T: Unit> Vector2<T> {
     /// All zeroes.
