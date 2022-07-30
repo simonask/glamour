@@ -26,20 +26,6 @@ pub trait AsRaw: ToRaw {
     fn as_raw_mut(&mut self) -> &mut Self::Raw;
 }
 
-/// Reference conversion from glam types.
-///
-/// This is only one-way conversion, because the alignment of `Self::Raw` could
-/// be larger than `Self` for some types.
-///
-/// See also [`AsRaw`].
-pub trait FromRawRef: ToRaw {
-    /// By-ref conversion from `Self::Raw`.
-    fn from_raw_ref(raw: &Self::Raw) -> &Self;
-
-    /// By-ref mutable conversion from `Self::Raw`.
-    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self;
-}
-
 // For types where Self == Self::Raw.
 macro_rules! impl_identity {
     ($t:ty) => {
@@ -64,16 +50,6 @@ macro_rules! impl_identity {
                 self
             }
         }
-
-        impl FromRawRef for $t {
-            fn from_raw_ref(raw: &Self::Raw) -> &Self {
-                raw
-            }
-
-            fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
-                raw
-            }
-        }
     };
 }
 
@@ -87,35 +63,35 @@ impl_identity!(glam::BVec2);
 impl_identity!(glam::BVec3);
 impl_identity!(glam::BVec4);
 
-impl<'a, T> ToRaw for &'a T
-where
-    T: AsRaw + FromRawRef,
-{
-    type Raw = &'a T::Raw;
+// impl<'a, T> ToRaw for &'a T
+// where
+//     T: AsRaw + FromRawRef,
+// {
+//     type Raw = &'a T::Raw;
 
-    fn to_raw(self) -> Self::Raw {
-        self.as_raw()
-    }
+//     fn to_raw(self) -> Self::Raw {
+//         self.as_raw()
+//     }
 
-    fn from_raw(raw: Self::Raw) -> Self {
-        T::from_raw_ref(raw)
-    }
-}
+//     fn from_raw(raw: Self::Raw) -> Self {
+//         T::from_raw_ref(raw)
+//     }
+// }
 
-impl<'a, T> ToRaw for &'a mut T
-where
-    T: AsRaw + FromRawRef,
-{
-    type Raw = &'a mut T::Raw;
+// impl<'a, T> ToRaw for &'a mut T
+// where
+//     T: AsRaw + FromRawRef,
+// {
+//     type Raw = &'a mut T::Raw;
 
-    fn to_raw(self) -> Self::Raw {
-        self.as_raw_mut()
-    }
+//     fn to_raw(self) -> Self::Raw {
+//         self.as_raw_mut()
+//     }
 
-    fn from_raw(raw: Self::Raw) -> Self {
-        T::from_raw_mut(raw)
-    }
-}
+//     fn from_raw(raw: Self::Raw) -> Self {
+//         T::from_raw_mut(raw)
+//     }
+// }
 
 impl<T, const N: usize> ToRaw for [T; N]
 where

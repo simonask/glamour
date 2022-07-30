@@ -1,5 +1,5 @@
 use crate::traits::marker::PodValue;
-use crate::{bindings, AsRaw, FromRawRef, ToRaw};
+use crate::{bindings, AsRaw, ToRaw};
 
 /// All types that can serve as components of a SIMD type in [`glam`].
 ///
@@ -32,7 +32,7 @@ pub trait Scalar:
     // `Pod` as well.
     PodValue
     + PartialOrd
-    + ToRaw<Raw = Self> + AsRaw + FromRawRef
+    + ToRaw<Raw = Self> + AsRaw
     + core::fmt::Display
 
     + crate::Unit<Scalar = Self>

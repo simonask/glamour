@@ -54,7 +54,7 @@ pub use traits::{Contains, Intersection, Union};
 pub mod prelude {
     #[doc(no_inline)]
     pub use super::{
-        Angle, AngleConsts as _, AsRaw, Box2, Box3, FloatAngleExt as _, FromRawRef, Matrix2,
+        Angle, AngleConsts as _, AsRaw, Box2, Box3, FloatAngleExt as _, Matrix2,
         Matrix3, Matrix4, Point2, Point3, Point4, Rect, Scalar as _, Size2, Size3, ToRaw, Unit,
         Vector2, Vector3, Vector4,
     };

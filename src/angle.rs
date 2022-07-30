@@ -93,16 +93,6 @@ impl<T> AsRaw for Angle<T> {
     }
 }
 
-impl<T: Pod> FromRawRef for Angle<T> {
-    fn from_raw_ref(raw: &Self::Raw) -> &Self {
-        bytemuck::cast_ref(raw)
-    }
-
-    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
-        bytemuck::cast_mut(raw)
-    }
-}
-
 impl_float_angle_consts!(f32);
 impl_float_angle_consts!(f64);
 

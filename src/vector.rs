@@ -15,7 +15,7 @@ use crate::scalar::SignedScalar;
 use crate::{
     bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
-use crate::{Angle, AsRaw, FromRawRef, ToRaw};
+use crate::{Angle, AsRaw, ToRaw};
 
 /// Vector swizzling by const generics.
 ///
@@ -798,18 +798,6 @@ impl<T: Unit> AsRaw for Vector2<T> {
     }
 }
 
-impl<T: Unit> FromRawRef for Vector2<T> {
-    #[inline]
-    fn from_raw_ref(raw: &Self::Raw) -> &Self {
-        bytemuck::cast_ref(raw)
-    }
-
-    #[inline]
-    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
-        bytemuck::cast_mut(raw)
-    }
-}
-
 impl<T: Unit> ToRaw for Vector3<T> {
     type Raw = <T::Scalar as Scalar>::Vec3;
 
@@ -836,18 +824,6 @@ impl<T: Unit> AsRaw for Vector3<T> {
     }
 }
 
-impl<T: Unit> FromRawRef for Vector3<T> {
-    #[inline]
-    fn from_raw_ref(raw: &Self::Raw) -> &Self {
-        bytemuck::cast_ref(raw)
-    }
-
-    #[inline]
-    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
-        bytemuck::cast_mut(raw)
-    }
-}
-
 impl<T: Unit> ToRaw for Vector4<T> {
     type Raw = <T::Scalar as Scalar>::Vec4;
 
@@ -871,18 +847,6 @@ impl<T: Unit> AsRaw for Vector4<T> {
     #[inline]
     fn as_raw_mut(&mut self) -> &mut Self::Raw {
         bytemuck::cast_mut(self)
-    }
-}
-
-impl<T: Unit> FromRawRef for Vector4<T> {
-    #[inline]
-    fn from_raw_ref(raw: &Self::Raw) -> &Self {
-        bytemuck::cast_ref(raw)
-    }
-
-    #[inline]
-    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
-        bytemuck::cast_mut(raw)
     }
 }
 

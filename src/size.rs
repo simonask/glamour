@@ -1,7 +1,7 @@
 //! Size vectors
 
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, AsRaw, FromRawRef, Scalar, ToRaw, Unit, Vector2,
+    bindings::prelude::*, scalar::FloatScalar, AsRaw, Scalar, ToRaw, Unit, Vector2,
     Vector3,
 };
 
@@ -65,20 +65,6 @@ impl<T: Unit> AsRaw for Size2<T> {
     }
 }
 
-impl<T: Unit> FromRawRef for Size2<T> {
-    /// By-ref conversion from `Self::Raw`.
-    #[inline]
-    fn from_raw_ref(raw: &Self::Raw) -> &Self {
-        bytemuck::cast_ref(raw)
-    }
-
-    /// By-ref mutable conversion from `Self::Raw`.
-    #[inline]
-    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
-        bytemuck::cast_mut(raw)
-    }
-}
-
 impl<T: Unit> ToRaw for Size3<T> {
     type Raw = <T::Scalar as Scalar>::Vec3;
 
@@ -102,18 +88,6 @@ impl<T: Unit> AsRaw for Size3<T> {
     #[inline]
     fn as_raw_mut(&mut self) -> &mut Self::Raw {
         bytemuck::cast_mut(self)
-    }
-}
-
-impl<T: Unit> FromRawRef for Size3<T> {
-    #[inline]
-    fn from_raw_ref(raw: &Self::Raw) -> &Self {
-        bytemuck::cast_ref(raw)
-    }
-
-    #[inline]
-    fn from_raw_mut(raw: &mut Self::Raw) -> &mut Self {
-        bytemuck::cast_mut(raw)
     }
 }
 
