@@ -124,8 +124,9 @@ macro_rules! point_interface {
 }
 
 macro_rules! float_point_interface {
-    () => {
+    ($see_also_doc_ty:ty) => {
         crate::forward_to_raw!(
+            $see_also_doc_ty =>
             #[doc = "Distance"]
             pub fn distance(self, other: Self) -> T::Scalar;
             #[doc = "Distance squared"]
@@ -290,8 +291,8 @@ impl<T: Unit> Point2<T> {
         Point2 { x, y }
     }
 
-    crate::forward_constructors!(2);
-    crate::forward_comparison!(glam::BVec2);
+    crate::forward_constructors!(2, glam::Vec2);
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
     crate::casting_interface!(Point2 {
         x: T::Scalar,
         y: T::Scalar
@@ -303,6 +304,7 @@ impl<T: Unit> Point2<T> {
     crate::array_interface!(2);
 
     crate::forward_to_raw!(
+        glam::Vec2 =>
         #[doc = "Extend with z-component to [`Point3`]."]
         pub fn extend(self, z: T::Scalar) -> Point3<T>;
     );
@@ -315,8 +317,8 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
-    crate::forward_float_ops!(glam::BVec2);
-    float_point_interface!();
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
+    float_point_interface!(glam::Vec2);
 }
 
 impl<T: Unit> Point3<T> {
@@ -339,8 +341,8 @@ impl<T: Unit> Point3<T> {
         Point3 { x, y, z }
     }
 
-    crate::forward_constructors!(3);
-    crate::forward_comparison!(glam::BVec3);
+    crate::forward_constructors!(3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
     crate::casting_interface!(Point3 {
         x: T::Scalar,
         y: T::Scalar,
@@ -354,6 +356,7 @@ impl<T: Unit> Point3<T> {
     crate::array_interface!(3);
 
     crate::forward_to_raw!(
+        glam::Vec3 =>
         #[doc = "Extend with w-component to [`Point4`]."]
         pub fn extend(self, w: T::Scalar) -> Point4<T>;
         #[doc = "Truncate to [`Point2`]."]
@@ -368,8 +371,8 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
-    crate::forward_float_ops!(glam::BVec3);
-    float_point_interface!();
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
+    float_point_interface!(glam::Vec3);
 }
 
 impl<T: Unit> Point4<T> {
@@ -394,8 +397,8 @@ impl<T: Unit> Point4<T> {
         Point4 { x, y, z, w }
     }
 
-    crate::forward_constructors!(4);
-    crate::forward_comparison!(glam::BVec4);
+    crate::forward_constructors!(4, glam::Vec4);
+    crate::forward_comparison!(glam::BVec4, glam::Vec4);
     crate::casting_interface!(Point4 {
         x: T::Scalar,
         y: T::Scalar,
@@ -411,6 +414,7 @@ impl<T: Unit> Point4<T> {
     crate::array_interface!(4);
 
     crate::forward_to_raw!(
+        glam::Vec4 =>
         #[doc = "Truncate to [`Point3`]."]
         pub fn truncate(self) -> Point3<T>;
     );
@@ -423,8 +427,8 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
-    crate::forward_float_ops!(glam::BVec4);
-    float_point_interface!();
+    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
+    float_point_interface!(glam::Vec4);
 }
 
 impl<T> Point3<T>

@@ -10,7 +10,7 @@ use core::{fmt::Debug, marker::PhantomData};
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, Pod, Zeroable};
 
-use crate::{scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3, Unit, Vector2, Vector3};
+use crate::{scalar::FloatScalar, ToRaw, bindings::prelude::*, Angle, Matrix3, Matrix4, Point2, Point3, Unit, Vector2, Vector3};
 
 /// 2D transform represented as a 3x3 column-major matrix.
 ///
@@ -493,7 +493,7 @@ where
     #[inline]
     #[must_use]
     pub fn inverse(&self) -> Transform2<Dst, Src> {
-        Transform2::from_matrix_unchecked(self.matrix.inverse_unchecked())
+        Transform2::from_matrix_unchecked(self.matrix.inverse())
     }
 }
 
@@ -728,10 +728,10 @@ where
         angle: Angle<Src::Scalar>,
         translation: Vector3<Src>,
     ) -> Self {
+        let rotation = <Src::Scalar as FloatScalar>::Quat::from_axis_angle(axis.to_raw(), angle.to_raw());
         Self::from_matrix_unchecked(Matrix4::from_scale_rotation_translation(
             scale.to_untyped(),
-            axis.to_untyped(),
-            angle,
+            rotation,
             translation.to_untyped(),
         ))
     }
@@ -762,7 +762,7 @@ where
     #[inline]
     #[must_use]
     pub fn inverse(&self) -> Transform3<Dst, Src> {
-        Transform3::from_matrix_unchecked(self.matrix.inverse_unchecked())
+        Transform3::from_matrix_unchecked(self.matrix.inverse())
     }
 }
 

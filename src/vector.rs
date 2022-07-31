@@ -359,8 +359,8 @@ impl<T: Unit> Vector2<T> {
         Self { x, y }
     }
 
-    crate::forward_constructors!(2);
-    crate::forward_comparison!(glam::BVec2);
+    crate::forward_constructors!(2, glam::Vec2);
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
 
     crate::casting_interface!(Vector2 {
         x: T::Scalar,
@@ -373,6 +373,7 @@ impl<T: Unit> Vector2<T> {
     crate::array_interface!(2);
 
     crate::forward_to_raw!(
+        glam::Vec2 =>
         #[doc = "Dot product"]
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Extend with z-component to [`Vector3`]."]
@@ -401,10 +402,11 @@ where
         y: <T::Scalar as FloatScalar>::NAN,
     };
 
-    crate::forward_float_ops!(glam::BVec2);
-    crate::forward_float_vector_ops!();
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
+    crate::forward_float_vector_ops!(glam::Vec2);
 
     crate::forward_to_raw!(
+        glam::Vec2 =>
         #[doc = "Return `(sin(angle), cos(angle)`."]
         pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar>;
         #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
@@ -437,6 +439,7 @@ where
     };
 
     crate::forward_to_raw!(
+        glam::Vec2 =>
         #[doc = "Turn all components positive."]
         pub fn abs(self) -> Self;
         #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
@@ -493,8 +496,8 @@ impl<T: Unit> Vector3<T> {
         Self { x, y, z }
     }
 
-    crate::forward_constructors!(3);
-    crate::forward_comparison!(glam::BVec3);
+    crate::forward_constructors!(3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
 
     crate::casting_interface!(Vector3 {
         x: T::Scalar,
@@ -509,6 +512,7 @@ impl<T: Unit> Vector3<T> {
     crate::array_interface!(3);
 
     crate::forward_to_raw!(
+        glam::Vec3 =>
         #[doc = "Dot product"]
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Extend with w-component to [`Vector4`]."]
@@ -538,10 +542,11 @@ where
         z: <T::Scalar as FloatScalar>::NAN,
     };
 
-    crate::forward_float_ops!(glam::BVec3);
-    crate::forward_float_vector_ops!();
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
+    crate::forward_float_vector_ops!(glam::Vec3);
 
     crate::forward_to_raw!(
+        glam::Vec3 =>
         #[doc = "Angle between this and another vector."]
         pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
         #[doc = "See (e.g.) [`glam::Vec3::any_orthogonal_vector()`]."]
@@ -587,6 +592,7 @@ where
     };
 
     crate::forward_to_raw!(
+        glam::Vec3 =>
         #[doc = "Turn all components positive."]
         pub fn abs(self) -> Self;
         #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
@@ -673,8 +679,8 @@ impl<T: Unit> Vector4<T> {
         Self { x, y, z, w }
     }
 
-    crate::forward_constructors!(4);
-    crate::forward_comparison!(glam::BVec4);
+    crate::forward_constructors!(4, glam::Vec4);
+    crate::forward_comparison!(glam::BVec4, glam::Vec4);
 
     crate::casting_interface!(Vector4 {
         x: T::Scalar,
@@ -691,6 +697,7 @@ impl<T: Unit> Vector4<T> {
     crate::array_interface!(4);
 
     crate::forward_to_raw!(
+        glam::Vec4 =>
         #[doc = "Dot product"]
         pub fn dot(self, other: Self) -> T::Scalar;
     );
@@ -719,8 +726,8 @@ where
         w: <T::Scalar as FloatScalar>::NAN,
     };
 
-    crate::forward_float_ops!(glam::BVec4);
-    crate::forward_float_vector_ops!();
+    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
+    crate::forward_float_vector_ops!(glam::Vec4);
 }
 
 impl<T> Vector4<T>
@@ -766,6 +773,7 @@ where
     };
 
     crate::forward_to_raw!(
+        glam::Vec4 =>
         #[doc = "Turn all components positive."]
         pub fn abs(self) -> Self;
         #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]

@@ -13,7 +13,7 @@ use crate::{
     Angle, Point2, Point3, Scalar, Unit, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{cast_mut, cast_ref, Pod, Zeroable};
+use bytemuck::{Pod, Zeroable};
 
 /// 2x2 column-major matrix.
 ///
@@ -193,41 +193,6 @@ macro_rules! impl_matrix {
                 bytemuck::cast(rows.map(Into::into))
             }
 
-            #[doc = "Cast to `glam` matrix."]
-            #[inline]
-            #[must_use]
-            pub fn as_raw(&self) -> &T::$mat_name {
-                cast_ref(self)
-            }
-
-            #[doc = "Cast to `glam` matrix."]
-            #[inline]
-            #[must_use]
-            pub fn as_raw_mut(&mut self) -> &mut T::$mat_name {
-                cast_mut(self)
-            }
-
-            #[doc = "Get column vector at `index`."]
-            #[inline]
-            #[must_use]
-            pub fn col(&self, index: usize) -> $axis_vector_ty<T> {
-                $axis_vector_ty::from_raw(self.as_raw().col(index))
-            }
-
-            #[doc = "Get mutable reference to column vector at `index`."]
-            #[inline]
-            #[must_use]
-            pub fn col_mut(&mut self, index: usize) -> &mut $axis_vector_ty<T> {
-                &mut self.as_cols_mut()[index]
-            }
-
-            #[doc = "Get row vector at `index`."]
-            #[inline]
-            #[must_use]
-            pub fn row(&self, index: usize) -> $axis_vector_ty<T> {
-                $axis_vector_ty::from_raw(self.as_raw().row(index))
-            }
-
             #[doc = "Get column vectors."]
             #[inline]
             #[must_use]
@@ -273,25 +238,14 @@ macro_rules! impl_matrix {
                 d != T::ZERO && num_traits::Float::is_finite(d)
             }
 
-            #[doc = "Return the inverse matrix."]
-            #[doc = ""]
-            #[doc = "If the matrix is not invertible, this returns an invalid matrix."]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Mat3::inverse()`]."]
-            #[inline]
-            #[must_use]
-            pub fn inverse_unchecked(&self) -> Self {
-                Self::from_raw(self.as_raw().inverse())
-            }
-
             #[doc = "Return the inverse matrix, if invertible."]
             #[doc = ""]
             #[doc = "If the matrix is not invertible, this returns `None`."]
             #[inline]
             #[must_use]
-            pub fn inverse(&self) -> Option<Self> {
+            pub fn try_inverse(&self) -> Option<Self> {
                 if self.is_invertible() {
-                    Some(self.inverse_unchecked())
+                    Some(self.inverse())
                 } else {
                     None
                 }
@@ -385,54 +339,31 @@ where
         m22: T::NAN,
     };
 
-    /// Create from diagonal.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// assert_eq!(Matrix2::from_diagonal(Vector2::<f32>::ONE), Matrix2::IDENTITY);
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_diagonal(Vector2 { x, y }: Vector2<T>) -> Self {
-        Matrix2 {
-            m11: x,
-            m22: y,
-            ..Self::ZERO
-        }
-    }
-
-    /// Create from column vectors.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    ///
-    /// let m = Matrix2::<f32>::from_cols(vec2!(0.0, 1.0), vec2!(2.0, 3.0));
-    /// assert_eq!(m.col(0), (0.0, 1.0));
-    /// assert_eq!(m.col(1), (2.0, 3.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_cols(x_axis: Vector2<T>, y_axis: Vector2<T>) -> Self {
-        Self::from_raw(T::Mat2::from_cols(x_axis.to_raw(), y_axis.to_raw()))
-    }
-
-    /// Create from row vectors.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    ///
-    /// let m = Matrix2::<f32>::from_rows(vec2!(0.0, 1.0), vec2!(2.0, 3.0));
-    /// assert_eq!(m.col(0), (0.0, 2.0));
-    /// assert_eq!(m.col(1), (1.0, 3.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_rows(x_axis: Vector2<T>, y_axis: Vector2<T>) -> Self {
-        Self::from_cols(x_axis, y_axis).transpose()
-    }
+    crate::forward_to_raw!(
+        glam::Mat2 =>
+        #[doc = "Get column."]
+        pub fn col(&self, index: usize) -> Vector2<T>;
+        #[doc = "Get row."]
+        pub fn row(&self, index: usize) -> Vector2<T>;
+        #[doc = "Matrix from columns."]
+        pub fn from_cols(x_axis: Vector2<T>, y_axis: Vector2<T>) -> Self;
+        #[doc = "Matrix from diagonal."]
+        pub fn from_diagonal(diagonal: Vector2<T>) -> Self;
+        #[doc = "Rotation matrix."]
+        pub fn from_angle(angle: Angle<T>) -> Self;
+        #[doc = "Matrix from (non-uniform) scale and angle."]
+        pub fn from_scale_angle(scale: Vector2<T>, angle: Angle<T>) -> Self;
+        #[doc = "Matrix2 from [`Matrix3`]"]
+        pub fn from_mat3(mat3: Matrix3<T>) -> Self;
+        #[doc = "Inverse matrix"]
+        pub fn inverse(&self) -> Self;
+        #[doc = "Multiplies two 2x2 matrices."]
+        pub fn mul_mat2(&self, other: &Self) -> Self;
+        #[doc = "Adds two 2x2 matrices."]
+        pub fn add_mat2(&self, other: &Self) -> Self;
+        #[doc = "Subtracts two 2x2 matrices."]
+        pub fn sub_mat2(&self, other: &Self) -> Self;
+    );
 
     /// Scaling matrix.
     ///
@@ -446,51 +377,7 @@ where
     #[inline]
     #[must_use]
     pub fn from_scale(scale: Vector2<T>) -> Self {
-        Self::from_raw(T::Mat2::from_scale_angle(scale.to_raw(), T::ZERO))
-    }
-
-    /// Rotation matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// # use approx::*;
-    /// let theta = Angle::from_degrees(90.0);
-    /// let matrix = Matrix2::<f32>::from_angle(theta);
-    /// assert_abs_diff_eq!(matrix.row(0), vec2!(0.0, -1.0));
-    /// assert_abs_diff_eq!(matrix.row(1), vec2!(1.0,  0.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_angle(angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat2::from_angle(angle.radians))
-    }
-
-    /// Create from 3x3 matrix, discarding the third row and column.
-    ///
-    /// ### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let m3 = Matrix3::<f32>::from_cols(
-    ///     vec3!(1.0, 2.0, 3.0),
-    ///     vec3!(4.0, 5.0, 6.0),
-    ///     vec3!(7.0, 8.0, 9.0),
-    /// );
-    /// let m2 = Matrix2::<f32>::from_cols(
-    ///     vec2!(1.0, 2.0),
-    ///     vec2!(4.0, 5.0),
-    /// );
-    /// assert_eq!(Matrix2::from_mat3(m3), m2);
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_mat3(mat3: Matrix3<T>) -> Matrix2<T> {
-        Matrix2 {
-            m11: mat3.m11,
-            m12: mat3.m12,
-            m21: mat3.m21,
-            m22: mat3.m22,
-        }
+        Self::from_scale_angle(scale, Angle::<T>::default())
     }
 
     /// Transform 2D point.
@@ -583,209 +470,41 @@ where
         m33: T::ONE,
     };
 
-    /// Create from diagonal.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// assert_eq!(
-    ///     Matrix3::from_diagonal(Vector3::<f32>::ONE),
-    ///     Matrix3::IDENTITY
-    /// );
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_diagonal(Vector3 { x, y, z }: Vector3<T>) -> Self {
-        Matrix3 {
-            m11: x,
-            m22: y,
-            m33: z,
-            ..Self::ZERO
-        }
-    }
-
-    /// Create from column vectors.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    ///
-    /// let m = Matrix3::<f32>::from_cols(
-    ///     vec3!(0.0, 1.0, 2.0),
-    ///     vec3!(3.0, 4.0, 5.0),
-    ///     vec3!(6.0, 7.0, 8.0));
-    /// assert_eq!(m.col(0), (0.0, 1.0, 2.0));
-    /// assert_eq!(m.col(1), (3.0, 4.0, 5.0));
-    /// assert_eq!(m.col(2), (6.0, 7.0, 8.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_cols(x_axis: Vector3<T>, y_axis: Vector3<T>, z_axis: Vector3<T>) -> Self {
-        let mat3 = T::Mat3::from_cols(x_axis.to_raw(), y_axis.to_raw(), z_axis.to_raw());
-        Self::from_raw(mat3)
-    }
-
-    /// Create from row vectors.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    ///
-    /// let m = Matrix3::<f32>::from_rows(
-    ///     vec3!(0.0, 1.0, 2.0),
-    ///     vec3!(3.0, 4.0, 5.0),
-    ///     vec3!(6.0, 7.0, 8.0));
-    /// assert_eq!(m.col(0), (0.0, 3.0, 6.0));
-    /// assert_eq!(m.col(1), (1.0, 4.0, 7.0));
-    /// assert_eq!(m.col(2), (2.0, 5.0, 8.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_rows(x_axis: Vector3<T>, y_axis: Vector3<T>, z_axis: Vector3<T>) -> Self {
-        Self::from_cols(x_axis, y_axis, z_axis).transpose()
-    }
-
-    /// Scaling matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let matrix = Matrix3::<f32>::from_scale((2.0, 3.0).into());
-    /// assert_eq!(matrix.row(0), vec3!(2.0, 0.0, 0.0));
-    /// assert_eq!(matrix.row(1), vec3!(0.0, 3.0, 0.0));
-    /// assert_eq!(matrix.row(2), vec3!(0.0, 0.0, 1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_scale(scale: Vector2<T>) -> Self {
-        Self::from_raw(T::Mat3::from_scale(scale.to_raw()))
-    }
-
-    /// Rotation matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// # use approx::*;
-    /// let theta = Angle::from_degrees(90.0);
-    /// let matrix = Matrix3::<f32>::from_angle(theta);
-    /// assert_abs_diff_eq!(matrix.row(0), vec3!(0.0, -1.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(1), vec3!(1.0,  0.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(2), vec3!(0.0,  0.0, 1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_angle(angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat3::from_angle(angle.radians))
-    }
-
-    /// Translation matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// # use approx::*;
-    /// let matrix = Matrix3::<f32>::from_translation((10.0, 20.0).into());
-    /// assert_abs_diff_eq!(matrix.row(0), vec3!(1.0, 0.0, 10.0));
-    /// assert_abs_diff_eq!(matrix.row(1), vec3!(0.0, 1.0, 20.0));
-    /// assert_abs_diff_eq!(matrix.row(2), vec3!(0.0, 0.0,  1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_translation(translation: Vector2<T>) -> Self {
-        Self::from_raw(T::Mat3::from_translation(translation.to_raw()))
-    }
-
-    /// Scaling, rotation, and translation matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// # use approx::*;
-    /// let matrix = Matrix3::<f64>::from_scale_angle_translation(
-    ///     (2.0, 3.0).into(),
-    ///     Angle::from_degrees(90.0),
-    ///     (10.0, 20.0).into(),
-    /// );
-    /// assert_abs_diff_eq!(matrix.row(0), vec3!(0.0, -3.0, 10.0));
-    /// assert_abs_diff_eq!(matrix.row(1), vec3!(2.0,  0.0, 20.0));
-    /// assert_abs_diff_eq!(matrix.row(2), vec3!(0.0,  0.0,  1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_scale_angle_translation(
-        scale: Vector2<T>,
-        angle: Angle<T>,
-        translation: Vector2<T>,
-    ) -> Self {
-        Self::from_raw(T::Mat3::from_scale_angle_translation(
-            scale.to_raw(),
-            angle.radians,
-            translation.to_raw(),
-        ))
-    }
-
-    /// Create affine transformation matrix from the given 2x2 matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let m2 = Matrix2::<f32>::from_cols(
-    ///     vec2!(1.0, 2.0),
-    ///     vec2!(3.0, 4.0),
-    /// );
-    /// let m3 = Matrix3::<f32>::from_cols(
-    ///     vec3!(1.0, 2.0, 0.0),
-    ///     vec3!(3.0, 4.0, 0.0),
-    ///     vec3!(0.0, 0.0, 1.0),
-    /// );
-    /// assert_eq!(Matrix3::from_mat2(m2), m3);
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_mat2(mat2: Matrix2<T>) -> Self {
-        Matrix3 {
-            m11: mat2.m11,
-            m12: mat2.m12,
-            m21: mat2.m21,
-            m22: mat2.m22,
-            ..Self::IDENTITY
-        }
-    }
-
-    /// Create from 4x4 matrix, discarding the fourth row and column.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let m4 = Matrix4::<f32>::from_cols(
-    ///     vec4!( 1.0,  2.0,  3.0,  4.0),
-    ///     vec4!( 5.0,  6.0,  7.0,  8.0),
-    ///     vec4!( 9.0, 10.0, 11.0, 12.0),
-    ///     vec4!(13.0, 14.0, 15.0, 16.0),
-    /// );
-    /// let m3 = Matrix3::<f32>::from_cols(
-    ///     vec3!( 1.0,  2.0,  3.0),
-    ///     vec3!( 5.0,  6.0,  7.0),
-    ///     vec3!( 9.0, 10.0, 11.0),
-    /// );
-    /// assert_eq!(Matrix3::from_mat4(m4), m3);
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_mat4(mat4: Matrix4<T>) -> Self {
-        Matrix3 {
-            m11: mat4.m11,
-            m12: mat4.m12,
-            m13: mat4.m13,
-            m21: mat4.m21,
-            m22: mat4.m22,
-            m23: mat4.m23,
-            m31: mat4.m31,
-            m32: mat4.m32,
-            m33: mat4.m33,
-        }
-    }
+    crate::forward_to_raw!(
+        glam::Mat3 =>
+        #[doc = "Get column."]
+        pub fn col(&self, index: usize) -> Vector3<T>;
+        #[doc = "Get row."]
+        pub fn row(&self, index: usize) -> Vector3<T>;
+        #[doc = "Matrix from columns."]
+        pub fn from_cols(x_axis: Vector3<T>, y_axis: Vector3<T>, z_axis: Vector3<T>) -> Self;
+        #[doc = "Matrix from diagonal."]
+        pub fn from_diagonal(diagonal: Vector3<T>) -> Self;
+        #[doc = "Affine 2D rotation matrix."]
+        pub fn from_angle(angle: Angle<T>) -> Self;
+        #[doc = "2D non-uniform scaling matrix."]
+        pub fn from_scale(scale: Vector2<T>) -> Self;
+        #[doc = "2D affine transformation matrix."]
+        pub fn from_scale_angle_translation(
+            scale: Vector2<T>,
+            angle: Angle<T>,
+            translation: Vector2<T>
+        ) -> Self;
+        #[doc = "2D translation matrix."]
+        pub fn from_translation(translation: Vector2<T>) -> Self;
+        #[doc = "Matrix3 from [`Matrix2`]"]
+        pub fn from_mat2(mat2: Matrix2<T>) -> Self;
+        #[doc = "Matrix3 from [`Matrix4`]"]
+        pub fn from_mat4(mat4: Matrix4<T>) -> Self;
+        #[doc = "Inverse matrix"]
+        pub fn inverse(&self) -> Self;
+        #[doc = "Multiplies two 3x3 matrices."]
+        pub fn mul_mat3(&self, other: &Self) -> Self;
+        #[doc = "Adds two 3x3 matrices."]
+        pub fn add_mat3(&self, other: &Self) -> Self;
+        #[doc = "Subtracts two 3x3 matrices."]
+        pub fn sub_mat3(&self, other: &Self) -> Self;
+    );
 
     /// Transform 2D point.
     ///
@@ -1037,307 +756,99 @@ where
         m44: T::ONE,
     };
 
-    /// Create from diagonal.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// assert_eq!(
-    ///     Matrix4::from_diagonal(Vector4::<f32>::ONE),
-    ///     Matrix4::IDENTITY
-    /// );
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_diagonal(Vector4 { x, y, z, w }: Vector4<T>) -> Self {
-        Matrix4 {
-            m11: x,
-            m22: y,
-            m33: z,
-            m44: w,
-            ..Self::ZERO
-        }
-    }
-
-    /// Create from column vectors.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    ///
-    /// let _m = Matrix4::<f32>::from_cols(
-    ///     vec4!( 0.0,  1.0,  2.0,  3.0),
-    ///     vec4!( 4.0,  5.0,  6.0,  7.0),
-    ///     vec4!( 8.0,  9.0, 10.0, 11.0),
-    ///     vec4!(12.0, 13.0, 14.0, 15.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_cols(
-        x_axis: Vector4<T>,
-        y_axis: Vector4<T>,
-        z_axis: Vector4<T>,
-        w_axis: Vector4<T>,
-    ) -> Self {
-        Self::from_raw(T::Mat4::from_cols(
-            x_axis.to_raw(),
-            y_axis.to_raw(),
-            z_axis.to_raw(),
-            w_axis.to_raw(),
-        ))
-    }
-
-    /// Create from row vectors.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    ///
-    /// let m = Matrix4::<f32>::from_rows(
-    ///     vec4!( 0.0,  1.0,  2.0,  3.0),
-    ///     vec4!( 4.0,  5.0,  6.0,  7.0),
-    ///     vec4!( 8.0,  9.0, 10.0, 11.0),
-    ///     vec4!(12.0, 13.0, 14.0, 15.0));
-    /// assert_eq!(m.col(0), (0.0, 4.0,  8.0, 12.0));
-    /// assert_eq!(m.col(1), (1.0, 5.0,  9.0, 13.0));
-    /// assert_eq!(m.col(2), (2.0, 6.0, 10.0, 14.0));
-    /// assert_eq!(m.col(3), (3.0, 7.0, 11.0, 15.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_rows(
-        x_axis: Vector4<T>,
-        y_axis: Vector4<T>,
-        z_axis: Vector4<T>,
-        w_axis: Vector4<T>,
-    ) -> Self {
-        Self::from_cols(x_axis, y_axis, z_axis, w_axis).transpose()
-    }
-
-    /// Scaling matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let matrix = Matrix4::<f32>::from_scale((2.0, 3.0, 4.0).into());
-    /// assert_eq!(matrix.row(0), (2.0, 0.0, 0.0, 0.0));
-    /// assert_eq!(matrix.row(1), (0.0, 3.0, 0.0, 0.0));
-    /// assert_eq!(matrix.row(2), (0.0, 0.0, 4.0, 0.0));
-    /// assert_eq!(matrix.row(3), (0.0, 0.0, 0.0, 1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_scale(scale: Vector3<T>) -> Self {
-        Self::from_raw(T::Mat4::from_scale(scale.to_raw()))
-    }
-
-    /// Rotation matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// # use approx::*;
-    /// let theta = Angle::from_degrees(90.0);
-    /// let matrix = Matrix4::<f32>::from_axis_angle(Vector3::Z, theta);
-    /// assert_abs_diff_eq!(matrix.row(0), vec4!(0.0, -1.0, 0.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(1), vec4!(1.0,  0.0, 0.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(2), vec4!(0.0,  0.0, 1.0, 0.0));
-    /// assert_abs_diff_eq!(matrix.row(3), vec4!(0.0,  0.0, 0.0, 1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_axis_angle(axis: Vector3<T>, angle: Angle<T>) -> Self {
-        Self::from_raw(T::Mat4::from_axis_angle(axis.to_raw(), angle.radians))
-    }
-
-    /// Translation matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// # use approx::*;
-    /// let matrix = Matrix4::<f32>::from_translation((10.0, 20.0, 30.0).into());
-    /// assert_abs_diff_eq!(matrix.row(0), vec4!(1.0, 0.0, 0.0, 10.0));
-    /// assert_abs_diff_eq!(matrix.row(1), vec4!(0.0, 1.0, 0.0, 20.0));
-    /// assert_abs_diff_eq!(matrix.row(2), vec4!(0.0, 0.0, 1.0, 30.0));
-    /// assert_abs_diff_eq!(matrix.row(3), vec4!(0.0, 0.0, 0.0,  1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_translation(translation: Vector3<T>) -> Self {
-        Self::from_raw(T::Mat4::from_translation(translation.to_raw()))
-    }
-
-    /// Scaling, rotation, and translation matrix.
-    ///
-    /// Note: This internally converts `axis` and `angle` to a quaternion and
-    /// calls [`glam::Mat4::from_scale_rotation_translation()`].
-    #[inline]
-    #[must_use]
-    pub fn from_scale_rotation_translation(
-        scale: Vector3<T>,
-        axis: Vector3<T>,
-        angle: Angle<T>,
-        translation: Vector3<T>,
-    ) -> Self {
-        use crate::bindings::Quat;
-        let quat = <T as FloatScalar>::Quat::from_axis_angle(axis.to_raw(), angle.radians);
-        Self::from_raw(T::Mat4::from_scale_rotation_translation(
-            scale.to_raw(),
-            quat,
-            translation.to_raw(),
-        ))
-    }
-
-    /// Creates an affine transformation matrix from the given 3x3 linear transformation matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let m3 = Matrix3::<f32>::from_cols(
-    ///     vec3!(1.0, 2.0, 3.0),
-    ///     vec3!(4.0, 5.0, 6.0),
-    ///     vec3!(7.0, 8.0, 9.0),
-    /// );
-    /// let m4 = Matrix4::<f32>::from_cols(
-    ///     vec4!(1.0, 2.0, 3.0, 0.0),
-    ///     vec4!(4.0, 5.0, 6.0, 0.0),
-    ///     vec4!(7.0, 8.0, 9.0, 0.0),
-    ///     vec4!(0.0, 0.0, 0.0, 1.0),
-    /// );
-    /// assert_eq!(Matrix4::from_mat3(m3), m4);
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_mat3(mat3: Matrix3<T>) -> Self {
-        Matrix4 {
-            m11: mat3.m11,
-            m12: mat3.m12,
-            m13: mat3.m13,
-            m21: mat3.m21,
-            m22: mat3.m22,
-            m23: mat3.m23,
-            m31: mat3.m31,
-            m32: mat3.m32,
-            m33: mat3.m33,
-            ..Self::IDENTITY
-        }
-    }
-
-    /// See [`glam::Mat4::look_at_lh()`] or [`glam::DMat4::look_at_lh()`].
-    pub fn look_at_lh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self {
-        Self::from_raw(T::Mat4::look_at_lh(
-            eye.to_raw(),
-            center.to_raw(),
-            up.to_raw(),
-        ))
-    }
-
-    /// See [`glam::Mat4::look_at_rh()`] or [`glam::DMat4::look_at_rh()`].
-    pub fn look_at_rh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self {
-        Self::from_raw(T::Mat4::look_at_rh(
-            eye.to_raw(),
-            center.to_raw(),
-            up.to_raw(),
-        ))
-    }
-
-    /// See [`glam::Mat4::perspective_rh_gl()`] or
-    /// [`glam::DMat4::perspective_rh_gl()`].
-    pub fn perspective_rh_gl(fov_y_radians: T, aspect_ratio: T, z_near: T, z_far: T) -> Self {
-        Self::from_raw(T::Mat4::perspective_rh_gl(
-            fov_y_radians,
-            aspect_ratio,
-            z_near,
-            z_far,
-        ))
-    }
-
-    /// See [`glam::Mat4::perspective_lh()`] or
-    /// [`glam::DMat4::perspective_lh()`].
-    pub fn perspective_lh(fov_y_radians: T, aspect_ratio: T, z_near: T, z_far: T) -> Self {
-        Self::from_raw(T::Mat4::perspective_lh(
-            fov_y_radians,
-            aspect_ratio,
-            z_near,
-            z_far,
-        ))
-    }
-
-    /// See [`glam::Mat4::perspective_rh()`] or
-    /// [`glam::DMat4::perspective_rh()`].
-    pub fn perspective_rh(fov_y_radians: T, aspect_ratio: T, z_near: T, z_far: T) -> Self {
-        Self::from_raw(T::Mat4::perspective_rh(
-            fov_y_radians,
-            aspect_ratio,
-            z_near,
-            z_far,
-        ))
-    }
-
-    /// See [`glam::Mat4::perspective_infinite_lh()`] or
-    /// [`glam::DMat4::perspective_infinite_lh()`].
-    pub fn perspective_infinite_lh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
-        Self::from_raw(T::Mat4::perspective_infinite_lh(
-            fov_y_radians,
-            aspect_ratio,
-            z_near,
-        ))
-    }
-
-    /// See [`glam::Mat4::perspective_infinite_reverse_lh()`] or
-    /// [`glam::DMat4::perspective_infinite_reverse_lh()`].
-    pub fn perspective_infinite_reverse_lh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
-        Self::from_raw(T::Mat4::perspective_infinite_reverse_lh(
-            fov_y_radians,
-            aspect_ratio,
-            z_near,
-        ))
-    }
-
-    /// See [`glam::Mat4::perspective_infinite_rh()`] or
-    /// [`glam::DMat4::perspective_infinite_rh()`].
-    pub fn perspective_infinite_rh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
-        Self::from_raw(T::Mat4::perspective_infinite_rh(
-            fov_y_radians,
-            aspect_ratio,
-            z_near,
-        ))
-    }
-
-    /// See [`glam::Mat4::perspective_infinite_reverse_rh()`] or
-    /// [`glam::DMat4::perspective_infinite_reverse_rh()`].
-    pub fn perspective_infinite_reverse_rh(fov_y_radians: T, aspect_ratio: T, z_near: T) -> Self {
-        Self::from_raw(T::Mat4::perspective_infinite_reverse_rh(
-            fov_y_radians,
-            aspect_ratio,
-            z_near,
-        ))
-    }
-
-    /// See [`glam::Mat4::orthographic_rh_gl()`] or
-    /// [`glam::DMat4::orthographic_rh_gl()`].
-    pub fn orthographic_rh_gl(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
-        Self::from_raw(T::Mat4::orthographic_rh_gl(
-            left, right, bottom, top, near, far,
-        ))
-    }
-
-    /// See [`glam::Mat4::orthographic_lh()`] or
-    /// [`glam::DMat4::orthographic_lh()`].
-    pub fn orthographic_lh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
-        Self::from_raw(T::Mat4::orthographic_lh(
-            left, right, bottom, top, near, far,
-        ))
-    }
-
-    /// See [`glam::Mat4::orthographic_rh()`] or
-    /// [`glam::DMat4::orthographic_rh()`].
-    pub fn orthographic_rh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
-        Self::from_raw(T::Mat4::orthographic_rh(
-            left, right, bottom, top, near, far,
-        ))
-    }
+    crate::forward_to_raw!(
+        glam::Mat4 =>
+        #[doc = "Get column."]
+        pub fn col(&self, index: usize) -> Vector4<T>;
+        #[doc = "Get row."]
+        pub fn row(&self, index: usize) -> Vector4<T>;
+        #[doc = "Matrix from columns."]
+        pub fn from_cols(
+            x_axis: Vector4<T>,
+            y_axis: Vector4<T>,
+            z_axis: Vector4<T>,
+            w_axis: Vector4<T>
+        ) -> Self;
+        #[doc = "Matrix from diagonal."]
+        pub fn from_diagonal(diagonal: Vector4<T>) -> Self;
+        #[doc = "Affine 2D rotation matrix."]
+        pub fn from_angle(angle: Angle<T>) -> Self;
+        #[doc = "Affine 3D rotation matrix."]
+        pub fn from_axis_angle(axis: Vector3<T>, angle: Angle<T>) -> Self;
+        #[doc = "Scaling matrix."]
+        pub fn from_scale(scale: Vector3<T>) -> Self;
+        #[doc = "3D affine transformation matrix."]
+        pub fn from_rotation_translation(rotation: T::Quat, translation: Vector3<T>) -> Self;
+        #[doc = "3D translation matrix."]
+        pub fn from_translation(translation: Vector3<T>) -> Self;
+        #[doc = "3D affine transformation matrix."]
+        pub fn from_scale_rotation_translation(
+            scale: Vector3<T>,
+            rotation: T::Quat,
+            translation: Vector3<T>
+        ) -> Self;
+        #[doc = "Rotation matrix."]
+        pub fn from_quat(quat: T::Quat) -> Self;
+        #[doc = "Matrix4 from [`Matrix3`]"]
+        pub fn from_mat3(mat3: Matrix3<T>) -> Self;
+        #[doc = "Inverse matrix"]
+        pub fn inverse(&self) -> Self;
+        #[doc = "Multiplies two 4x4 matrices."]
+        pub fn mul_mat4(&self, other: &Self) -> Self;
+        #[doc = "Adds two 4x4 matrices."]
+        pub fn add_mat4(&self, other: &Self) -> Self;
+        #[doc = "Subtracts two 4x4 matrices."]
+        pub fn sub_mat4(&self, other: &Self) -> Self;
+        #[doc = ""]
+        pub fn look_at_lh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self;
+        #[doc = ""]
+        pub fn look_at_rh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self;
+        #[doc = ""]
+        pub fn perspective_rh_gl(
+            fov_y_radians: Angle<T>,
+            aspect_ratio: T,
+            z_near: T,
+            z_far: T
+        ) -> Self;
+        #[doc = ""]
+        pub fn perspective_lh(
+            fov_y_radians: Angle<T>,
+            aspect_ratio: T,
+            z_near: T,
+            z_far: T
+        ) -> Self;
+        #[doc = ""]
+        pub fn perspective_rh(
+            fov_y_radians: Angle<T>,
+            aspect_ratio: T,
+            z_near: T,
+            z_far: T
+        ) -> Self;
+        #[doc = ""]
+        pub fn perspective_infinite_lh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T)
+        -> Self;
+        #[doc = ""]
+        pub fn perspective_infinite_reverse_lh(
+            fov_y_radians: Angle<T>,
+            aspect_ratio: T,
+            z_near: T
+        ) -> Self;
+        #[doc = ""]
+        pub fn perspective_infinite_rh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T)
+        -> Self;
+        #[doc = ""]
+        pub fn perspective_infinite_reverse_rh(
+            fov_y_radians: Angle<T>,
+            aspect_ratio: T,
+            z_near: T
+        ) -> Self;
+        #[doc = ""]
+        pub fn orthographic_rh_gl(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
+        #[doc = ""]
+        pub fn orthographic_lh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
+        #[doc = ""]
+        pub fn orthographic_rh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
+    );
 
     /// Transform 3D point.
     ///
@@ -1783,7 +1294,11 @@ mod tests {
             let translation = Vec3::new(5.0, 6.0, 7.0);
 
             assert_abs_diff_eq!(
-                Mat4::from_scale_rotation_translation(scale, axis, angle, translation),
+                Mat4::from_scale_rotation_translation(
+                    scale,
+                    glam::Quat::from_axis_angle(axis.to_raw(), angle.to_raw()),
+                    translation
+                ),
                 Mat4::from_translation(translation)
                     * Mat4::from_axis_angle(axis, angle)
                     * Mat4::from_scale(scale),
@@ -1798,7 +1313,11 @@ mod tests {
             let translation = DVec3::new(5.0, 6.0, 7.0);
 
             assert_abs_diff_eq!(
-                DMat4::from_scale_rotation_translation(scale, axis, angle, translation),
+                DMat4::from_scale_rotation_translation(
+                    scale,
+                    glam::DQuat::from_axis_angle(axis.to_raw(), angle.to_raw()),
+                    translation
+                ),
                 DMat4::from_translation(translation)
                     * DMat4::from_axis_angle(axis, angle)
                     * DMat4::from_scale(scale),
@@ -1918,84 +1437,6 @@ mod tests {
             ),
             DMat4::IDENTITY
         );
-    }
-
-    #[test]
-    fn from_rows() {
-        assert_eq!(
-            Mat2::from_rows((1.0, 0.0).into(), (0.0, 1.0).into()),
-            Mat2::IDENTITY
-        );
-        assert_eq!(
-            Mat3::from_rows(
-                (1.0, 0.0, 0.0).into(),
-                (0.0, 1.0, 0.0).into(),
-                (0.0, 0.0, 1.0).into()
-            ),
-            Mat3::IDENTITY
-        );
-        assert_eq!(
-            Mat4::from_rows(
-                (1.0, 0.0, 0.0, 0.0).into(),
-                (0.0, 1.0, 0.0, 0.0).into(),
-                (0.0, 0.0, 1.0, 0.0).into(),
-                (0.0, 0.0, 0.0, 1.0).into()
-            ),
-            Mat4::IDENTITY
-        );
-
-        assert_eq!(
-            DMat2::from_rows((1.0, 0.0).into(), (0.0, 1.0).into()),
-            DMat2::IDENTITY
-        );
-        assert_eq!(
-            DMat3::from_rows(
-                (1.0, 0.0, 0.0).into(),
-                (0.0, 1.0, 0.0).into(),
-                (0.0, 0.0, 1.0).into()
-            ),
-            DMat3::IDENTITY
-        );
-        assert_eq!(
-            DMat4::from_rows(
-                (1.0, 0.0, 0.0, 0.0).into(),
-                (0.0, 1.0, 0.0, 0.0).into(),
-                (0.0, 0.0, 1.0, 0.0).into(),
-                (0.0, 0.0, 0.0, 1.0).into()
-            ),
-            DMat4::IDENTITY
-        );
-    }
-
-    #[test]
-    fn col_mut() {
-        let mut m2 = Mat2::IDENTITY;
-        let mut m3 = Mat3::IDENTITY;
-        let mut m4 = Mat4::IDENTITY;
-        let mut dm2 = DMat2::IDENTITY;
-        let mut dm3 = DMat3::IDENTITY;
-        let mut dm4 = DMat4::IDENTITY;
-
-        let _: &[Vec2; 2] = m2.as_cols();
-        let _: &[Vec3; 3] = m3.as_cols();
-        let _: &[Vec4; 4] = m4.as_cols();
-        let _: &[DVec2; 2] = dm2.as_cols();
-        let _: &[DVec3; 3] = dm3.as_cols();
-        let _: &[DVec4; 4] = dm4.as_cols();
-
-        m2.col_mut(0).set(1, 2.0);
-        m3.col_mut(0).set(1, 2.0);
-        m4.col_mut(0).set(1, 2.0);
-        dm2.col_mut(0).set(1, 2.0);
-        dm3.col_mut(0).set(1, 2.0);
-        dm4.col_mut(0).set(1, 2.0);
-
-        assert_eq!(m2.col(0), (1.0, 2.0));
-        assert_eq!(m3.col(0), (1.0, 2.0, 0.0));
-        assert_eq!(m4.col(0), (1.0, 2.0, 0.0, 0.0));
-        assert_eq!(dm2.col(0), (1.0, 2.0));
-        assert_eq!(dm3.col(0), (1.0, 2.0, 0.0));
-        assert_eq!(dm4.col(0), (1.0, 2.0, 0.0, 0.0));
     }
 
     #[test]
@@ -2156,9 +1597,9 @@ mod tests {
         assert!(!Mat2::NAN.is_invertible());
         assert!(!Mat3::NAN.is_invertible());
         assert!(!Mat4::NAN.is_invertible());
-        assert_eq!(Mat2::IDENTITY.inverse(), Some(Mat2::IDENTITY));
-        assert_eq!(Mat3::IDENTITY.inverse(), Some(Mat3::IDENTITY));
-        assert_eq!(Mat4::IDENTITY.inverse(), Some(Mat4::IDENTITY));
+        assert_eq!(Mat2::IDENTITY.try_inverse(), Some(Mat2::IDENTITY));
+        assert_eq!(Mat3::IDENTITY.try_inverse(), Some(Mat3::IDENTITY));
+        assert_eq!(Mat4::IDENTITY.try_inverse(), Some(Mat4::IDENTITY));
 
         assert!(DMat2::IDENTITY.is_invertible());
         assert!(DMat3::IDENTITY.is_invertible());
@@ -2169,16 +1610,14 @@ mod tests {
         assert!(!DMat2::NAN.is_invertible());
         assert!(!DMat3::NAN.is_invertible());
         assert!(!DMat4::NAN.is_invertible());
-        assert_eq!(DMat2::IDENTITY.inverse(), Some(DMat2::IDENTITY));
-        assert_eq!(DMat3::IDENTITY.inverse(), Some(DMat3::IDENTITY));
-        assert_eq!(DMat4::IDENTITY.inverse(), Some(DMat4::IDENTITY));
+        assert_eq!(DMat2::IDENTITY.try_inverse(), Some(DMat2::IDENTITY));
+        assert_eq!(DMat3::IDENTITY.try_inverse(), Some(DMat3::IDENTITY));
+        assert_eq!(DMat4::IDENTITY.try_inverse(), Some(DMat4::IDENTITY));
 
         {
             assert!(!Mat2::zeroed().is_invertible());
             assert!(!Mat2::from_cols(Vec2::ZERO, Vec2::ONE).is_invertible());
             assert!(!Mat2::from_cols(Vec2::ONE, Vec2::ZERO).is_invertible());
-            assert!(!Mat2::from_rows(Vec2::ZERO, Vec2::ONE).is_invertible());
-            assert!(!Mat2::from_rows(Vec2::ONE, Vec2::ZERO).is_invertible());
             assert!(Mat2::IDENTITY.is_invertible());
         }
         {
@@ -2186,9 +1625,6 @@ mod tests {
             assert!(!Mat3::from_cols(Vec3::ZERO, Vec3::ONE, Vec3::ONE).is_invertible());
             assert!(!Mat3::from_cols(Vec3::ONE, Vec3::ZERO, Vec3::ONE).is_invertible());
             assert!(!Mat3::from_cols(Vec3::ONE, Vec3::ONE, Vec3::ZERO).is_invertible());
-            assert!(!Mat3::from_rows(Vec3::ZERO, Vec3::ONE, Vec3::ONE).is_invertible());
-            assert!(!Mat3::from_rows(Vec3::ONE, Vec3::ZERO, Vec3::ONE).is_invertible());
-            assert!(!Mat3::from_rows(Vec3::ONE, Vec3::ONE, Vec3::ZERO).is_invertible());
             assert!(Mat3::IDENTITY.is_invertible());
         }
         {
@@ -2197,10 +1633,6 @@ mod tests {
             assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ZERO, Vec4::ONE, Vec4::ONE).is_invertible());
             assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ONE, Vec4::ZERO, Vec4::ONE).is_invertible());
             assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO).is_invertible());
-            assert!(!Mat4::from_rows(Vec4::ZERO, Vec4::ONE, Vec4::ONE, Vec4::ONE).is_invertible());
-            assert!(!Mat4::from_rows(Vec4::ONE, Vec4::ZERO, Vec4::ONE, Vec4::ONE).is_invertible());
-            assert!(!Mat4::from_rows(Vec4::ONE, Vec4::ONE, Vec4::ZERO, Vec4::ONE).is_invertible());
-            assert!(!Mat4::from_rows(Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO).is_invertible());
             assert!(Mat4::IDENTITY.is_invertible());
         }
     }
@@ -2250,31 +1682,31 @@ mod tests {
             )
         );
         assert_eq!(
-            Matrix4::<f32>::perspective_rh_gl(1.0, 2.0, 3.0, 4.0),
+            Matrix4::<f32>::perspective_rh_gl(Angle::new(1.0), 2.0, 3.0, 4.0),
             Matrix4::from_raw(glam::Mat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
-            Matrix4::<f32>::perspective_lh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::<f32>::perspective_lh(Angle::new(1.0), 2.0, 3.0, 4.0),
             Matrix4::from_raw(glam::Mat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
-            Matrix4::<f32>::perspective_rh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::<f32>::perspective_rh(Angle::new(1.0), 2.0, 3.0, 4.0),
             Matrix4::from_raw(glam::Mat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
-            Matrix4::<f32>::perspective_infinite_lh(1.0, 2.0, 3.0),
+            Matrix4::<f32>::perspective_infinite_lh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::Mat4::perspective_infinite_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
-            Matrix4::<f32>::perspective_infinite_reverse_lh(1.0, 2.0, 3.0),
+            Matrix4::<f32>::perspective_infinite_reverse_lh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::Mat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
-            Matrix4::<f32>::perspective_infinite_rh(1.0, 2.0, 3.0),
+            Matrix4::<f32>::perspective_infinite_rh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::Mat4::perspective_infinite_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(
-            Matrix4::<f32>::perspective_infinite_reverse_rh(1.0, 2.0, 3.0),
+            Matrix4::<f32>::perspective_infinite_reverse_rh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::Mat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(
@@ -2320,31 +1752,31 @@ mod tests {
             )
         );
         assert_eq!(
-            Matrix4::<f64>::perspective_rh_gl(1.0, 2.0, 3.0, 4.0),
+            Matrix4::<f64>::perspective_rh_gl(Angle::new(1.0), 2.0, 3.0, 4.0),
             Matrix4::from_raw(glam::DMat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
-            Matrix4::<f64>::perspective_lh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::<f64>::perspective_lh(Angle::new(1.0), 2.0, 3.0, 4.0),
             Matrix4::from_raw(glam::DMat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
-            Matrix4::<f64>::perspective_rh(1.0, 2.0, 3.0, 4.0),
+            Matrix4::<f64>::perspective_rh(Angle::new(1.0), 2.0, 3.0, 4.0),
             Matrix4::from_raw(glam::DMat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
-            Matrix4::<f64>::perspective_infinite_lh(1.0, 2.0, 3.0),
+            Matrix4::<f64>::perspective_infinite_lh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::DMat4::perspective_infinite_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
-            Matrix4::<f64>::perspective_infinite_reverse_lh(1.0, 2.0, 3.0),
+            Matrix4::<f64>::perspective_infinite_reverse_lh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::DMat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
-            Matrix4::<f64>::perspective_infinite_rh(1.0, 2.0, 3.0),
+            Matrix4::<f64>::perspective_infinite_rh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::DMat4::perspective_infinite_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(
-            Matrix4::<f64>::perspective_infinite_reverse_rh(1.0, 2.0, 3.0),
+            Matrix4::<f64>::perspective_infinite_reverse_rh(Angle::new(1.0), 2.0, 3.0),
             Matrix4::from_raw(glam::DMat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(

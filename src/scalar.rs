@@ -4,28 +4,6 @@ use crate::{bindings, AsRaw, ToRaw};
 /// All types that can serve as components of a SIMD type in [`glam`].
 ///
 /// This is implemented for `f32`, `f64`, `i32`, and `u32`.
-///
-/// All scalars must be representable by one of `f32`, `f64`, `i32`, or `u32`.
-/// However, all types that are bitwise compatible with one of those may be used
-/// as a scalar.
-///
-/// These are the things that you say when you implement `Scalar` for your
-/// custom unit:
-///
-/// - It is a [`Pod`](bytemuck::Pod) type.
-/// - It is bitwise compatible with its `Primitive` associated type (same size
-///   and alignment).
-/// - All bit patterns are valid values.
-/// - No new invariants are introduced by the type.
-/// - No conversion logic is required to turn `Primitive` into `Self` -
-///   reinterpreting the bits is enough.
-/// - Arithmetic operations on the scalar have the same effect as the equivalent
-///   operations on the `Primitive`. When the scalar is used in a vector type,
-///   the primitive operation will be used in vector math.
-///
-/// You can use a crate like
-/// [`derive_more`](https://docs.rs/derive_more/latest/derive_more) to derive
-/// the arithmetic operations in a convenient and less error-prone way.
 pub trait Scalar:
     // This bound is important because it implies `Pod`, which means that types
     // that are `#[repr(C)]` and only have `Scalar` members can safely implement
@@ -117,7 +95,8 @@ pub trait FloatScalar:
         Vec3 = Self::Vec3f,
         Vec4 = Self::Vec4f,
     >;
-    type Quat: bindings::Quat<Scalar = Self, Vec3 = Self::Vec3f, Vec4 = Self::Vec4f>;
+    type Quat: bindings::Quat<Scalar = Self, Vec3 = Self::Vec3f, Vec4 = Self::Vec4f>
+        + ToRaw<Raw = Self::Quat>;
     const NAN: Self;
 }
 

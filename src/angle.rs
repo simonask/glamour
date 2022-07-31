@@ -275,8 +275,15 @@ impl<T: Float> Angle<T> {
     /// Angle from radians.
     #[inline]
     #[must_use]
-    pub fn from_radians(radians: T) -> Self {
+    pub const fn new(radians: T) -> Self {
         Angle { radians }
+    }
+
+    /// Angle from radians.
+    #[inline]
+    #[must_use]
+    pub const fn from_radians(radians: T) -> Self {
+        Angle::new(radians)
     }
 
     /// Angle from degrees.
@@ -291,7 +298,7 @@ impl<T: Float> Angle<T> {
     /// Get this angle in radians.
     #[inline]
     #[must_use]
-    pub fn to_radians(self) -> T {
+    pub const fn to_radians(self) -> T {
         self.radians
     }
 

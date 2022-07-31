@@ -16,8 +16,6 @@ pub trait ToRaw: Sized {
 ///
 /// This is only one-way conversion, because the alignment of `Self` could be
 /// larger than `Self::Raw` for some types.
-///
-/// See also [`FromRawRef`].
 pub trait AsRaw: ToRaw {
     /// By-ref conversion to `Self::Raw`.
     fn as_raw(&self) -> &Self::Raw;
@@ -58,40 +56,29 @@ impl_identity!(f32);
 impl_identity!(f64);
 impl_identity!(i32);
 impl_identity!(u32);
+impl_identity!(usize);
+impl_identity!(isize);
 impl_identity!(bool);
 impl_identity!(glam::BVec2);
 impl_identity!(glam::BVec3);
 impl_identity!(glam::BVec4);
+impl_identity!(glam::Quat);
+impl_identity!(glam::DQuat);
 
-// impl<'a, T> ToRaw for &'a T
-// where
-//     T: AsRaw + FromRawRef,
-// {
-//     type Raw = &'a T::Raw;
+impl<'a, T> ToRaw for &'a T
+where
+    T: AsRaw,
+{
+    type Raw = &'a T::Raw;
 
-//     fn to_raw(self) -> Self::Raw {
-//         self.as_raw()
-//     }
+    fn to_raw(self) -> Self::Raw {
+        self.as_raw()
+    }
 
-//     fn from_raw(raw: Self::Raw) -> Self {
-//         T::from_raw_ref(raw)
-//     }
-// }
-
-// impl<'a, T> ToRaw for &'a mut T
-// where
-//     T: AsRaw + FromRawRef,
-// {
-//     type Raw = &'a mut T::Raw;
-
-//     fn to_raw(self) -> Self::Raw {
-//         self.as_raw_mut()
-//     }
-
-//     fn from_raw(raw: Self::Raw) -> Self {
-//         T::from_raw_mut(raw)
-//     }
-// }
+    fn from_raw(_: Self::Raw) -> Self {
+        panic!("ref from raw conversion unsupported")
+    }
+}
 
 impl<T, const N: usize> ToRaw for [T; N]
 where

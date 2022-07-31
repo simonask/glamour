@@ -210,8 +210,8 @@ impl<T: Unit> Size2<T> {
         Self { width, height }
     }
 
-    crate::forward_constructors!(2);
-    crate::forward_comparison!(glam::BVec2);
+    crate::forward_constructors!(2, glam::Vec2);
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
 
     crate::casting_interface!(Size2 {
         width: T::Scalar,
@@ -224,6 +224,7 @@ impl<T: Unit> Size2<T> {
     crate::array_interface!(2);
 
     crate::forward_to_raw!(
+        glam::Vec2 =>
         #[doc = "Extend with depth component to [`Size3`]."]
         pub fn extend(self, depth: T::Scalar) -> Size3<T>;
     );
@@ -239,22 +240,7 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
-    crate::forward_to_raw!(
-        #[doc = "True if all components are non-infinity and non-NaN."]
-        pub fn is_finite(&self) -> bool;
-        #[doc = "True if any component is NaN."]
-        pub fn is_nan(&self) -> bool;
-        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
-        pub fn is_nan_mask(&self) -> glam::BVec2;
-        #[doc = "Round all components up."]
-        pub fn ceil(self) -> Self;
-        #[doc = "Round all components down."]
-        pub fn floor(self) -> Self;
-        #[doc = "Round all components."]
-        pub fn round(self) -> Self;
-        #[doc = "Linear interpolation."]
-        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
-    );
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
 }
 
 impl<T: Unit> Size3<T> {
@@ -281,8 +267,8 @@ impl<T: Unit> Size3<T> {
         }
     }
 
-    crate::forward_constructors!(3);
-    crate::forward_comparison!(glam::BVec3);
+    crate::forward_constructors!(3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
 
     crate::casting_interface!(Size3 {
         width: T::Scalar,
@@ -297,6 +283,7 @@ impl<T: Unit> Size3<T> {
     crate::array_interface!(3);
 
     crate::forward_to_raw!(
+        glam::Vec3 =>
         #[doc = "Truncate to [`Size2`]."]
         pub fn truncate(self) -> Size2<T>;
     );
@@ -312,22 +299,7 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
-    crate::forward_to_raw!(
-        #[doc = "True if all components are non-infinity and non-NaN."]
-        pub fn is_finite(&self) -> bool;
-        #[doc = "True if any component is NaN."]
-        pub fn is_nan(&self) -> bool;
-        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
-        pub fn is_nan_mask(&self) -> glam::BVec3;
-        #[doc = "Round all components up."]
-        pub fn ceil(self) -> Self;
-        #[doc = "Round all components down."]
-        pub fn floor(self) -> Self;
-        #[doc = "Round all components."]
-        pub fn round(self) -> Self;
-        #[doc = "Linear interpolation."]
-        pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
-    );
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
 }
 
 #[cfg(test)]

@@ -5,6 +5,7 @@
 /// arguments and the return value through `ToRaw`.
 macro_rules! forward_to_raw {
     (
+        $see_also_doc_ty:ty =>
         $(
             $(#[
                 $($attr:meta),*
@@ -20,6 +21,7 @@ macro_rules! forward_to_raw {
         $(
             crate::forward_to_raw_impl!(
                 $(#[$($attr),*])*
+                #[doc = concat!("See [`", stringify!($see_also_doc_ty), "::", stringify!($fn_name), "()`].")]
                 $visibility fn $fn_name($($args)*) $(-> $ret_ty)*;
             );
         )*
@@ -32,7 +34,7 @@ macro_rules! forward_to_raw_impl {
         $visibility:vis
         fn $fn_name:ident (
             self
-            $(, $arg_name:ident: $arg_ty:ty)*
+            $(, $arg_name:ident: $arg_ty:ty)* $(,)?
         ) -> $ret_ty:ty;
     ) => {
         #[inline]
@@ -49,14 +51,14 @@ macro_rules! forward_to_raw_impl {
         $visibility:vis
         fn $fn_name:ident (
             &self
-            $(, $arg_name:ident: $arg_ty:ty)*
+            $(, $arg_name:ident: $arg_ty:ty)*  $(,)?
         ) -> $ret_ty:ty;
     ) => {
         #[inline]
         #[must_use]
         $(#[$($attr),*])*
         $visibility
-        fn $fn_name(&self, $(arg_name: $arg_ty),*) -> $ret_ty {
+        fn $fn_name(&self, $($arg_name: $arg_ty),*) -> $ret_ty {
             <$ret_ty>::from_raw(self.as_raw().$fn_name($($arg_name.to_raw()),*))
         }
     };
@@ -66,7 +68,7 @@ macro_rules! forward_to_raw_impl {
         $visibility:vis
         fn $fn_name:ident (
             &mut self
-            $(, $arg_name:ident: $arg_ty:ty)*
+            $(, $arg_name:ident: $arg_ty:ty)*  $(,)?
         ) -> $ret_ty:ty;
     ) => {
         #[inline]
@@ -83,7 +85,7 @@ macro_rules! forward_to_raw_impl {
         $visibility:vis
         fn $fn_name:ident (
             &mut self
-            $(, $arg_name:ident: $arg_ty:ty)*
+            $(, $arg_name:ident: $arg_ty:ty)*  $(,)?
         );
     ) => {
         #[inline]
@@ -98,7 +100,7 @@ macro_rules! forward_to_raw_impl {
         $(#[$($attr:meta),*])*
         $visibility:vis
         fn $fn_name:ident(
-            $($arg_name:ident: $arg_ty:ty),*
+            $($arg_name:ident: $arg_ty:ty),* $(,)?
         ) -> $ret_ty:ty;
     ) => {
         #[inline]
@@ -190,8 +192,9 @@ macro_rules! forward_neg_to_raw {
 
 /// from_array, splat, etc.
 macro_rules! forward_constructors {
-    ($dimensions:literal) => {
+    ($dimensions:literal, $see_also_doc_ty:ty) => {
         crate::forward_to_raw! {
+            $see_also_doc_ty =>
             #[doc = "Instantiate from array."]
             pub fn from_array(array: [T::Scalar; $dimensions]) -> Self;
             #[doc = "Convert to array."]
@@ -209,8 +212,9 @@ macro_rules! forward_constructors {
 
 /// cmpeq etc.
 macro_rules! forward_comparison {
-    ($mask:ty) => {
+    ($mask:ty, $see_also_doc_ty:ty) => {
         crate::forward_to_raw! {
+            $see_also_doc_ty =>
             #[doc = "Return a mask with the result of a component-wise equals comparison."]
             pub fn cmpeq(self, other: Self) -> $mask;
             #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
@@ -241,8 +245,9 @@ macro_rules! forward_comparison {
 
 /// is_finite, round, ceil, etc.
 macro_rules! forward_float_ops {
-    ($mask:ty) => {
+    ($mask:ty, $see_also_doc_ty:ty) => {
         crate::forward_to_raw! {
+            $see_also_doc_ty =>
             #[doc = "True if all components are non-infinity and non-NaN."]
             pub fn is_finite(&self) -> bool;
             #[doc = "True if any component is NaN."]
@@ -263,8 +268,9 @@ macro_rules! forward_float_ops {
 
 /// normalize, length, etc.
 macro_rules! forward_float_vector_ops {
-    () => {
+    ($see_also_doc_ty:ty) => {
         crate::forward_to_raw! {
+            $see_also_doc_ty =>
             #[doc = "Normalize the vector. Undefined results in the vector's length is (very close to) zero."]
             pub fn normalize(self) -> Self;
             #[doc = "Normalize the vector, returning zero if the length was already (very close to) zero."]
