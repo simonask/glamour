@@ -94,7 +94,6 @@ where
     }
 }
 
-
 impl<T, const N: usize> FromRaw for [T; N]
 where
     T: FromRaw,
@@ -116,7 +115,10 @@ where
     }
 }
 
-impl<A, B> FromRaw for (A, B) where A: FromRaw, B: FromRaw
+impl<A, B> FromRaw for (A, B)
+where
+    A: FromRaw,
+    B: FromRaw,
 {
     fn from_raw((a, b): Self::Raw) -> Self {
         (A::from_raw(a), B::from_raw(b))
@@ -134,7 +136,10 @@ where
     }
 }
 
-impl<T> FromRaw for Option<T> where T: FromRaw {
+impl<T> FromRaw for Option<T>
+where
+    T: FromRaw,
+{
     fn from_raw(raw: Self::Raw) -> Self {
         raw.map(T::from_raw)
     }

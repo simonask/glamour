@@ -1,7 +1,8 @@
 //! Size vectors
 
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, AsRaw, Scalar, ToRaw, FromRaw, Unit, Vector2, Vector3,
+    bindings::prelude::*, scalar::FloatScalar, AsRaw, FromRaw, Scalar, ToRaw, Unit, Vector2,
+    Vector3,
 };
 
 /// 2D size.

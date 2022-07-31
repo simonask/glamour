@@ -12,7 +12,7 @@
 use crate::{
     bindings::prelude::*,
     scalar::{FloatScalar, SignedScalar},
-    AsRaw, Scalar, ToRaw, Unit, Vector2, Vector3, Vector4, FromRaw
+    AsRaw, FromRaw, Scalar, ToRaw, Unit, Vector2, Vector3, Vector4,
 };
 use core::ops::Mul;
 

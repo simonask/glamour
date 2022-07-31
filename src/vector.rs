@@ -15,7 +15,7 @@ use crate::scalar::SignedScalar;
 use crate::{
     bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
-use crate::{Angle, AsRaw, ToRaw, FromRaw};
+use crate::{Angle, AsRaw, FromRaw, ToRaw};
 
 /// Vector swizzling by const generics.
 ///

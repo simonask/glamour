@@ -1,5 +1,5 @@
 use crate::traits::marker::PodValue;
-use crate::{bindings, AsRaw, ToRaw, FromRaw};
+use crate::{bindings, AsRaw, FromRaw, ToRaw};
 
 /// All types that can serve as components of a SIMD type in [`glam`].
 ///
