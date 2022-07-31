@@ -78,18 +78,10 @@ The relevant traits are:
   supertraits of `SimdVec`.
 - [`Matrix`](crate::bindings::Matrix) - describing all `glam` matrix
   types.
-- [`Primitive`](crate::bindings::Primitive) - describes how to map from a
-  primitive to a `glam` vector type of the desired size.
-- [`PrimitiveMatrices`](crate::bindings::PrimitiveMatrices) - describes how to map
-  from a primitive to a `glam` matrix type of the desired size.
-- [`Scalar`](crate::Scalar) - describes which primitive to use for a
-  scalar. This will only be different from `Primitive` when using a newtype -
-  normally the primitive itself is the scalar.
+- [`Scalar`](crate::Scalar) - one of the primitive types supported by glam
+  (`f32`, `f64`, `i32`, `u32`).
 - [`Unit`](crate::Unit) - describes which scalar to use for a particular
   logical unit.
-
-Since all of this genericity creates quite the soup of associated types and
-trait bounds, the [`UnitTypes`](crate::UnitTypes) trait exists as a shorthand.
 
 Public types use the shorthand in trait bounds whenever possible.
 
@@ -167,4 +159,4 @@ impl<T: Unit> Mul<T::Scalar> for Vector4<T> {
 
 There is no way to solve this generically at the moment. The upside is that it
 is typically only a problem in generic code. `Mul<f32>` etc. can indeed be
-implemented for all `Vector4<T>` where `T::Scalar: Scalar<Primitive = f32>`.
+implemented for all `Vector4<T>` where `T: Unit<Scalar = f32>` etc.

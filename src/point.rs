@@ -9,8 +9,12 @@
 //! points yields a vector, while subtracting a vector from a point yields
 //! another point.
 
-use crate::{traits::Lerp, Scalar, Unit, UnitTypes, Vector2, Vector3, Vector4};
-use core::ops::{Add, AddAssign, Mul, Sub, SubAssign};
+use crate::{
+    bindings::prelude::*,
+    scalar::{FloatScalar, SignedScalar},
+    AsRaw, FromRaw, Scalar, ToRaw, Unit, Vector2, Vector3, Vector4,
+};
+use core::ops::Mul;
 
 /// 2D point.
 ///
@@ -24,6 +28,11 @@ pub struct Point2<T: Unit = f32> {
     /// Y coordinate
     pub y: T::Scalar,
 }
+
+/// SAFETY: `T::Scalar` is `Zeroable`, and `Point2` is `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Point2<T> {}
+/// SAFETY: `T::Scalar` is `Pod`.
+unsafe impl<T: Unit> bytemuck::Pod for Point2<T> {}
 
 /// 3D point.
 ///
@@ -40,6 +49,11 @@ pub struct Point3<T: Unit = f32> {
     /// Z coordinate
     pub z: T::Scalar,
 }
+
+/// SAFETY: `T::Scalar` is `Zeroable`, and `Point3` is `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Point3<T> {}
+/// SAFETY: `T::Scalar` is `Pod`.
+unsafe impl<T: Unit> bytemuck::Pod for Point3<T> {}
 
 /// 4D point.
 ///
@@ -67,143 +81,366 @@ pub struct Point4<T: Unit = f32> {
     pub w: T::Scalar,
 }
 
-crate::impl_common!(Point2 {
+/// SAFETY: `T::Scalar` is `Zeroable`, and `Point4` is `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Point4<T> {}
+/// SAFETY: `T::Scalar` is `Pod`.
+unsafe impl<T: Unit> bytemuck::Pod for Point4<T> {}
+
+macro_rules! point_interface {
+    ($base_type_name:ident, $vector_type:ident) => {
+        /// Convert a vector to a point as-is.
+        #[inline]
+        pub fn from_vector(vec: $vector_type<T>) -> Self {
+            vec.into()
+        }
+
+        /// Cast this point as-is to a vector.
+        #[inline]
+        pub fn to_vector(self) -> $vector_type<T> {
+            self.into()
+        }
+
+        #[doc = "Reinterpret as vector."]
+        #[inline]
+        pub fn as_vector(&self) -> &$vector_type<T> {
+            bytemuck::cast_ref(self)
+        }
+
+        #[doc = "Reinterpret as vector."]
+        #[inline]
+        pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
+            bytemuck::cast_mut(self)
+        }
+
+        /// Translate this point by vector.
+        ///
+        /// Equivalent to `self + by`.
+        #[inline]
+        #[must_use]
+        pub fn translate(self, by: $vector_type<T>) -> Self {
+            self + by
+        }
+    };
+}
+
+macro_rules! float_point_interface {
+    ($see_also_doc_ty:ty) => {
+        crate::forward_to_raw!(
+            $see_also_doc_ty =>
+            #[doc = "Distance"]
+            pub fn distance(self, other: Self) -> T::Scalar;
+            #[doc = "Distance squared"]
+            pub fn distance_squared(self, other: Self) -> T::Scalar;
+        );
+    };
+}
+
+crate::forward_op_to_raw!(Point2, Add<Vector2<T>>::add -> Self);
+crate::forward_op_to_raw!(Point3, Add<Vector3<T>>::add -> Self);
+crate::forward_op_to_raw!(Point4, Add<Vector4<T>>::add -> Self);
+crate::forward_op_to_raw!(Point2, Sub<Vector2<T>>::sub -> Self);
+crate::forward_op_to_raw!(Point3, Sub<Vector3<T>>::sub -> Self);
+crate::forward_op_to_raw!(Point4, Sub<Vector4<T>>::sub -> Self);
+crate::forward_op_to_raw!(Point2, Sub<Self>::sub -> Vector2<T>);
+crate::forward_op_to_raw!(Point3, Sub<Self>::sub -> Vector3<T>);
+crate::forward_op_to_raw!(Point4, Sub<Self>::sub -> Vector4<T>);
+
+crate::forward_neg_to_raw!(Point2);
+crate::forward_neg_to_raw!(Point3);
+crate::forward_neg_to_raw!(Point4);
+
+crate::forward_op_assign_to_raw!(Point2, AddAssign<Vector2<T>>::add_assign);
+crate::forward_op_assign_to_raw!(Point3, AddAssign<Vector3<T>>::add_assign);
+crate::forward_op_assign_to_raw!(Point4, AddAssign<Vector4<T>>::add_assign);
+crate::forward_op_assign_to_raw!(Point2, SubAssign<Vector2<T>>::sub_assign);
+crate::forward_op_assign_to_raw!(Point3, SubAssign<Vector3<T>>::sub_assign);
+crate::forward_op_assign_to_raw!(Point4, SubAssign<Vector4<T>>::sub_assign);
+
+crate::derive_standard_traits!(Point2 {
     x: T::Scalar,
     y: T::Scalar
 });
-crate::impl_common!(Point3 {
+crate::derive_standard_traits!(Point3 {
     x: T::Scalar,
     y: T::Scalar,
     z: T::Scalar
 });
-crate::impl_common!(Point4 {
+crate::derive_standard_traits!(Point4 {
     x: T::Scalar,
     y: T::Scalar,
     z: T::Scalar,
     w: T::Scalar
 });
 
-crate::impl_vector_common!(Point2 [2] => Vec2 { x, y });
-crate::impl_vector_common!(Point3 [3] => Vec3 { x, y, z });
-crate::impl_vector_common!(Point4 [4] => Vec4 { x, y, z, w });
+crate::derive_array_conversion_traits!(Point2, 2);
+crate::derive_array_conversion_traits!(Point3, 3);
+crate::derive_array_conversion_traits!(Point4, 4);
 
-crate::impl_glam_conversion!(Point2, 2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
-crate::impl_glam_conversion!(Point3, 3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
-crate::impl_glam_conversion!(Point4, 4 [f32 => glam::Vec4, f64 => glam::DVec4, i32 => glam::IVec4, u32 => glam::UVec4]);
+crate::derive_tuple_conversion_traits!(Point2 {
+    x: T::Scalar,
+    y: T::Scalar
+});
+crate::derive_tuple_conversion_traits!(Point3 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar
+});
+crate::derive_tuple_conversion_traits!(Point4 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar,
+    w: T::Scalar
+});
 
-macro_rules! impl_point {
-    ($base_type_name:ident [$dimensions:literal] => $vec_ty:ident, $vector_type:ident) => {
-        impl<T: Unit> Sub for $base_type_name<T> {
-            type Output = $vector_type<T>;
+crate::derive_glam_conversion_traits!(Point2 {
+    x: T::Scalar,
+    y: T::Scalar
+});
+crate::derive_glam_conversion_traits!(Point3 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar
+});
+crate::derive_glam_conversion_traits!(Point4 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar,
+    w: T::Scalar
+});
 
-            #[inline]
-            fn sub(self, other: Self) -> Self::Output {
-                $vector_type::<T>::from_raw(self.to_raw() - other.to_raw())
-            }
-        }
+impl<T: Unit> ToRaw for Point2<T> {
+    type Raw = <T::Scalar as Scalar>::Vec2;
 
-        impl<T: Unit> Add<$vector_type<T>> for $base_type_name<T> {
-            type Output = Self;
-
-            #[inline]
-            fn add(self, other: $vector_type<T>) -> Self {
-                Self::from_raw(self.to_raw() + other.to_raw())
-            }
-        }
-
-        impl<T: Unit> Sub<$vector_type<T>> for $base_type_name<T> {
-            type Output = Self;
-
-            #[inline]
-            fn sub(self, other: $vector_type<T>) -> Self {
-                Self::from_raw(self.to_raw() - other.to_raw())
-            }
-        }
-
-        impl<T: Unit> AddAssign<$vector_type<T>> for $base_type_name<T> {
-            #[inline]
-            fn add_assign(&mut self, vector: $vector_type<T>) {
-                *self.as_raw_mut() += vector.to_raw();
-            }
-        }
-
-        impl<T: Unit> SubAssign<$vector_type<T>> for $base_type_name<T> {
-            #[inline]
-            fn sub_assign(&mut self, vector: $vector_type<T>) {
-                *self.as_raw_mut() -= vector.to_raw();
-            }
-        }
-
-        impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
-            #[inline]
-            fn from(vec: $vector_type<T>) -> Self {
-                Self::from_raw(vec.to_raw())
-            }
-        }
-
-        impl<T: Unit> From<$base_type_name<T>> for $vector_type<T> {
-            #[inline]
-            fn from(point: $base_type_name<T>) -> Self {
-                Self::from_raw(point.to_raw())
-            }
-        }
-
-        impl<T: Unit> $base_type_name<T> {
-            /// Convert a vector to a point as-is.
-            #[inline]
-            pub fn from_vector(vec: $vector_type<T>) -> Self {
-                vec.into()
-            }
-
-            /// Cast this point as-is to a vector.
-            #[inline]
-            pub fn to_vector(self) -> $vector_type<T> {
-                self.into()
-            }
-
-            #[doc = "Reinterpret as vector."]
-            #[inline]
-            pub fn as_vector(&self) -> &$vector_type<T> {
-                bytemuck::cast_ref(self)
-            }
-
-            #[doc = "Reinterpret as vector."]
-            #[inline]
-            pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
-                bytemuck::cast_mut(self)
-            }
-
-            /// Translate this point by vector.
-            ///
-            /// Equivalent to `self + by`.
-            #[inline]
-            #[must_use]
-            pub fn translate(self, by: $vector_type<T>) -> Self {
-                self + by
-            }
-        }
-
-        impl<T> Lerp<T::Primitive> for $base_type_name<T>
-        where
-            T: crate::UnitTypes,
-            T::$vec_ty: Lerp<T::Primitive>,
-        {
-            #[inline]
-            fn lerp(self, end: Self, t: T::Primitive) -> Self {
-                Self::from_raw(self.to_raw().lerp(end.to_raw(), t))
-            }
-        }
-    };
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
 }
 
-impl_point!(Point2 [2] => Vec2, Vector2);
-impl_point!(Point3 [3] => Vec3, Vector3);
-impl_point!(Point4 [4] => Vec4, Vector4);
+impl<T: Unit> FromRaw for Point2<T> {
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Point2<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> ToRaw for Point3<T> {
+    type Raw = <T::Scalar as Scalar>::Vec3;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+}
+
+impl<T: Unit> FromRaw for Point3<T> {
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Point3<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> ToRaw for Point4<T> {
+    type Raw = <T::Scalar as Scalar>::Vec4;
+
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+}
+
+impl<T: Unit> FromRaw for Point4<T> {
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Point4<T> {
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> Point2<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+    };
+
+    /// New point.
+    pub const fn new(x: T::Scalar, y: T::Scalar) -> Self {
+        Point2 { x, y }
+    }
+
+    crate::forward_constructors!(2, glam::Vec2);
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
+    crate::casting_interface!(Point2 {
+        x: T::Scalar,
+        y: T::Scalar
+    });
+    crate::tuple_interface!(Point2 {
+        x: T::Scalar,
+        y: T::Scalar
+    });
+    crate::array_interface!(2);
+
+    crate::forward_to_raw!(
+        glam::Vec2 =>
+        #[doc = "Extend with z-component to [`Point3`]."]
+        pub fn extend(self, z: T::Scalar) -> Point3<T>;
+    );
+
+    point_interface!(Point2, Vector2);
+}
+
+impl<T> Point2<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
+    float_point_interface!(glam::Vec2);
+}
+
+impl<T: Unit> Point3<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+    };
+
+    /// New point.
+    pub fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar) -> Self {
+        Point3 { x, y, z }
+    }
+
+    crate::forward_constructors!(3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
+    crate::casting_interface!(Point3 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar
+    });
+    crate::tuple_interface!(Point3 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar
+    });
+    crate::array_interface!(3);
+
+    crate::forward_to_raw!(
+        glam::Vec3 =>
+        #[doc = "Extend with w-component to [`Point4`]."]
+        pub fn extend(self, w: T::Scalar) -> Point4<T>;
+        #[doc = "Truncate to [`Point2`]."]
+        pub fn truncate(self) -> Point2<T>;
+    );
+
+    point_interface!(Point3, Vector3);
+}
 
 impl<T> Point3<T>
 where
     T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
+    float_point_interface!(glam::Vec3);
+}
+
+impl<T: Unit> Point4<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+        w: T::Scalar::ONE,
+    };
+
+    /// New point.
+    pub fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar, w: T::Scalar) -> Self {
+        Point4 { x, y, z, w }
+    }
+
+    crate::forward_constructors!(4, glam::Vec4);
+    crate::forward_comparison!(glam::BVec4, glam::Vec4);
+    crate::casting_interface!(Point4 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar,
+        w: T::Scalar
+    });
+    crate::tuple_interface!(Point4 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar,
+        w: T::Scalar
+    });
+    crate::array_interface!(4);
+
+    crate::forward_to_raw!(
+        glam::Vec4 =>
+        #[doc = "Truncate to [`Point3`]."]
+        pub fn truncate(self) -> Point3<T>;
+    );
+
+    point_interface!(Point4, Vector4);
+}
+
+impl<T> Point4<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
+    float_point_interface!(glam::Vec4);
+}
+
+impl<T> Point3<T>
+where
+    T: Unit<Scalar = f32>,
 {
     /// Create from SIMD-aligned [`glam::Vec3A`].
     ///
@@ -228,8 +465,7 @@ where
 
 impl<T> From<glam::Vec3A> for Point3<T>
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     fn from(v: glam::Vec3A) -> Self {
         Self::from_raw(v.into())
@@ -238,15 +474,18 @@ where
 
 impl<T> From<Point3<T>> for glam::Vec3A
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     fn from(v: Point3<T>) -> Self {
         v.to_raw().into()
     }
 }
 
-impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Point3<T>> for glam::Quat {
+impl<T> Mul<Point3<T>> for glam::Quat
+where
+    T: Unit<Scalar = f32>,
+    T::Scalar: FloatScalar<Vec3f = glam::Vec3>,
+{
     type Output = Point3<T>;
 
     fn mul(self, rhs: Point3<T>) -> Self::Output {
@@ -254,11 +493,56 @@ impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Point3<T>> for glam::Quat {
     }
 }
 
-impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Point3<T>> for glam::DQuat {
+impl<T> Mul<Point3<T>> for glam::DQuat
+where
+    T: Unit<Scalar = f64>,
+    T::Scalar: FloatScalar<Vec3f = glam::DVec3>,
+{
     type Output = Point3<T>;
 
     fn mul(self, rhs: Point3<T>) -> Self::Output {
         Point3::from_raw(self * rhs.to_raw())
+    }
+}
+
+impl<T: Unit> From<Vector2<T>> for Point2<T> {
+    fn from(vec: Vector2<T>) -> Point2<T> {
+        Self::from_raw(vec.to_raw())
+    }
+}
+
+impl<T: Unit> From<Vector3<T>> for Point3<T> {
+    #[inline]
+    fn from(vec: Vector3<T>) -> Point3<T> {
+        Self::from_raw(vec.to_raw())
+    }
+}
+
+impl<T: Unit> From<Vector4<T>> for Point4<T> {
+    #[inline]
+    fn from(vec: Vector4<T>) -> Point4<T> {
+        Self::from_raw(vec.to_raw())
+    }
+}
+
+impl<T: Unit> From<Point2<T>> for Vector2<T> {
+    #[inline]
+    fn from(point: Point2<T>) -> Vector2<T> {
+        Self::from_raw(point.to_raw())
+    }
+}
+
+impl<T: Unit> From<Point3<T>> for Vector3<T> {
+    #[inline]
+    fn from(point: Point3<T>) -> Vector3<T> {
+        Self::from_raw(point.to_raw())
+    }
+}
+
+impl<T: Unit> From<Point4<T>> for Vector4<T> {
+    #[inline]
+    fn from(point: Point4<T>) -> Vector4<T> {
+        Self::from_raw(point.to_raw())
     }
 }
 

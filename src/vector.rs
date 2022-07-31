@@ -9,16 +9,36 @@
 //! transparently.
 
 use core::iter::Sum;
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
+use core::ops::Mul;
 
-use crate::bindings::VectorFloat2;
 use crate::scalar::SignedScalar;
 use crate::{
-    bindings::{Vector, VectorFloat},
-    traits::Lerp,
-    Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
+    bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
-use crate::{Angle, UnitTypes};
+use crate::{Angle, AsRaw, FromRaw, ToRaw};
+
+/// Vector swizzling by const generics.
+///
+/// For GLSL-like swizzling, see [`glam::Vec2Swizzles`], [`glam::Vec3Swizzles`],
+/// or [`glam::Vec4Swizzles`].
+pub trait Swizzle<T: Unit> {
+    #[doc = "Select two components from this vector and return a 2D vector made from"]
+    #[doc = "those components."]
+    #[must_use]
+    fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T>;
+
+    #[doc = "Select three components from this vector and return a 3D vector made from"]
+    #[doc = "those components."]
+    #[must_use]
+    fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T>;
+
+    #[doc = "Select four components from this vector and return a 4D vector made from"]
+    #[doc = "those components."]
+    #[must_use]
+    fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
+        &self,
+    ) -> Vector4<T>;
+}
 
 /// 2D vector.
 ///
@@ -35,6 +55,11 @@ pub struct Vector2<T: Unit = f32> {
     pub y: T::Scalar,
 }
 
+/// SAFETY: `T::Scalar` is `Zeroable`, and `Vector2` is `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Vector2<T> {}
+/// SAFETY: `T::Scalar` is `Pod`.
+unsafe impl<T: Unit> bytemuck::Pod for Vector2<T> {}
+
 /// 3D vector.
 ///
 /// Alignment: Same as the scalar (so not 16 bytes). If you really need 16-byte
@@ -50,6 +75,11 @@ pub struct Vector3<T: Unit = f32> {
     /// Z coordinate
     pub z: T::Scalar,
 }
+
+/// SAFETY: `T::Scalar` is `Zeroable`, and `Vector3` is `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Vector3<T> {}
+/// SAFETY: `T::Scalar` is `Pod`.
+unsafe impl<T: Unit> bytemuck::Pod for Vector3<T> {}
 
 /// 4D vector.
 ///
@@ -77,142 +107,83 @@ pub struct Vector4<T: Unit = f32> {
     pub w: T::Scalar,
 }
 
-crate::impl_common!(Vector2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::impl_common!(Vector3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::impl_common!(Vector4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
+/// SAFETY: `T::Scalar` is `Zeroable`, and `Vector2` is `#[repr(C)]`.
+unsafe impl<T: Unit> bytemuck::Zeroable for Vector4<T> {}
+/// SAFETY: `T::Scalar` is `Pod`.
+unsafe impl<T: Unit> bytemuck::Pod for Vector4<T> {}
 
-crate::impl_vector_common!(Vector2 [2] => Vec2 { x, y });
-crate::impl_vector_common!(Vector3 [3] => Vec3 { x, y, z });
-crate::impl_vector_common!(Vector4 [4] => Vec4 { x, y, z, w });
+macro_rules! vector_interface {
+    ($point_ty:ident $(, $size_ty:ident)?) => {
+        #[doc = "Instantiate from point."]
+        #[inline]
+        #[must_use]
+        pub fn from_point(point: $point_ty<T>) -> Self {
+            bytemuck::cast(point)
+        }
 
-crate::impl_glam_conversion!(Vector2, 2 [f32 => glam::Vec2, f64 => glam::DVec2, i32 => glam::IVec2, u32 => glam::UVec2]);
-crate::impl_glam_conversion!(Vector3, 3 [f32 => glam::Vec3, f64 => glam::DVec3, i32 => glam::IVec3, u32 => glam::UVec3]);
-crate::impl_glam_conversion!(Vector4, 4 [f32 => glam::Vec4, f64 => glam::DVec4, i32 => glam::IVec4, u32 => glam::UVec4]);
+        #[doc = "Convert to point."]
+        #[inline]
+        #[must_use]
+        pub fn to_point(self) -> $point_ty<T> {
+            bytemuck::cast(self)
+        }
 
-crate::impl_scaling!(Vector2, 2 [f32, f64, i32, u32]);
-crate::impl_scaling!(Vector3, 3 [f32, f64, i32, u32]);
-crate::impl_scaling!(Vector4, 4 [f32, f64, i32, u32]);
+        #[doc = "Reinterpret as point."]
+        #[inline]
+        #[must_use]
+        pub fn as_point(&self) -> &$point_ty<T> {
+            bytemuck::cast_ref(self)
+        }
 
-macro_rules! impl_vector {
-    ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $point_ty:ident $(, $size_ty:ident)?) => {
-        impl<T: Unit> $base_type_name<T> {
-            #[doc = "Multiply all components of this vector with a scalar value."]
-            #[doc = ""]
-            #[doc = "This exists as a method because `Mul<T::Scalar>` cannot be implemented"]
-            #[doc = "for all `Vector<T>` (but it is implemented for all `Vector<T>` where `T:"]
-            #[doc = "Unit<Scalar = f32>` etc.)."]
-            #[doc = ""]
-            #[doc = "This is equivalent to `self * Self::splat(scalar)`."]
+        #[doc = "Reinterpret as point."]
+        #[inline]
+        #[must_use]
+        pub fn as_point_mut(&mut self) -> &mut $point_ty<T> {
+            bytemuck::cast_mut(self)
+        }
+
+        $(
+            #[doc = "Instantiate from size."]
             #[inline]
             #[must_use]
-            pub fn mul_scalar(self, scalar: T::Scalar) -> Self {
-                self * Self::splat(scalar)
+            pub fn from_size(size: $size_ty<T>) -> Self {
+                bytemuck::cast(size)
             }
 
-            #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except division."]
+            #[doc = "Convert to size."]
             #[inline]
             #[must_use]
-            pub fn div_scalar(self, scalar: T::Scalar) -> Self {
-                self / Self::splat(scalar)
-            }
-
-            #[doc = "Same notes as [`mul_scalar()`](Self::mul_scalar()), except remainder."]
-            #[inline]
-            #[must_use]
-            pub fn rem_scalar(self, scalar: T::Scalar) -> Self {
-                self % Self::splat(scalar)
-            }
-
-            #[doc = "Dot product."]
-            #[inline]
-            #[must_use]
-            pub fn dot(self, other: Self) -> T::Scalar {
-                T::Scalar::from_raw(self.to_raw().dot(other.to_raw()))
-            }
-
-            #[doc = "Instantiate from point."]
-            #[inline]
-            #[must_use]
-            pub fn from_point(point: $point_ty<T>) -> Self {
-                bytemuck::cast(point)
-            }
-
-            #[doc = "Convert to point."]
-            #[inline]
-            #[must_use]
-            pub fn to_point(self) -> $point_ty<T> {
+            pub fn to_size(self) -> $size_ty<T> {
                 bytemuck::cast(self)
             }
 
-            #[doc = "Reinterpret as point."]
+            #[doc = "Reinterpret as size."]
             #[inline]
             #[must_use]
-            pub fn as_point(&self) -> &$point_ty<T> {
+            pub fn as_size(&self) -> &$size_ty<T> {
                 bytemuck::cast_ref(self)
             }
 
-            #[doc = "Reinterpret as point."]
+            #[doc = "Reinterpret as size."]
             #[inline]
             #[must_use]
-            pub fn as_point_mut(&mut self) -> &mut $point_ty<T> {
+            pub fn as_size_mut(&mut self) -> &mut $size_ty<T> {
                 bytemuck::cast_mut(self)
             }
+        )*
+    };
+}
 
-            $(
-                #[doc = "Instantiate from size."]
-                #[inline]
-                #[must_use]
-                pub fn from_size(size: $size_ty<T>) -> Self {
-                    bytemuck::cast(size)
-                }
-
-                #[doc = "Convert to size."]
-                #[inline]
-                #[must_use]
-                pub fn to_size(self) -> $size_ty<T> {
-                    bytemuck::cast(self)
-                }
-
-                #[doc = "Reinterpret as size."]
-                #[inline]
-                #[must_use]
-                pub fn as_size(&self) -> &$size_ty<T> {
-                    bytemuck::cast_ref(self)
-                }
-
-                #[doc = "Reinterpret as size."]
-                #[inline]
-                #[must_use]
-                pub fn as_size_mut(&mut self) -> &mut $size_ty<T> {
-                    bytemuck::cast_mut(self)
-                }
-            )*
-
-            #[doc = "Select two components from this vector and return a 2D vector made from"]
-            #[doc = "those components."]
+macro_rules! implement_swizzle {
+    ($base_type_name:ident) => {
+        impl<T: Unit> Swizzle<T> for $base_type_name<T> {
             #[inline]
-            #[must_use]
-            pub fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
+            fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
                 [self.const_get::<X>(), self.const_get::<Y>()].into()
             }
 
-            #[doc = "Select three components from this vector and return a 3D vector made from"]
-            #[doc = "those components."]
             #[inline]
-            #[must_use]
-            pub fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
+            fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
                 [
                     self.const_get::<X>(),
                     self.const_get::<Y>(),
@@ -221,11 +192,8 @@ macro_rules! impl_vector {
                 .into()
             }
 
-            #[doc = "Select four components from this vector and return a 4D vector made from"]
-            #[doc = "those components."]
             #[inline]
-            #[must_use]
-            pub fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
+            fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
                 &self,
             ) -> Vector4<T> {
                 [
@@ -237,183 +205,140 @@ macro_rules! impl_vector {
                 .into()
             }
         }
-
-        impl<T> $base_type_name<T>
-        where
-            T: UnitTypes,
-            T::$vec_ty: VectorFloat<$dimensions, Scalar = T::Primitive>,
-        {
-            #[doc = "Normalize the vector."]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec4::normalize()`]."]
-            #[must_use]
-            #[inline]
-            pub fn normalize(&self) -> Self {
-                Self::from_raw(self.to_raw().normalize())
-            }
-
-            #[doc = "Normalize the vector if possible, else returns a zero vector."]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec4::normalize_or_zero()`]."]
-            #[must_use]
-            #[inline]
-            pub fn normalize_or_zero(&self) -> Self {
-                Self::from_raw(self.to_raw().normalize_or_zero())
-            }
-
-            #[doc = "Returns whether `self` is length 1.0 or not"]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec4::normalize()`]."]
-            #[must_use]
-            #[inline]
-            pub fn is_normalized(self) -> bool {
-                self.as_raw().is_normalized()
-            }
-
-            #[doc = "Get the length of the vector"]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec3::length()]."]
-            #[must_use]
-            #[inline]
-            pub fn length(&self) -> T::Primitive {
-                T::Primitive::from_raw(self.as_raw().length())
-            }
-
-            #[doc = "Get the squared length of the vector"]
-            #[doc = ""]
-            #[doc = "See (e.g.) [`glam::Vec3::length_squared()]."]
-            #[must_use]
-            #[inline]
-            pub fn length_squared(&self) -> T::Primitive {
-                T::Primitive::from_raw(self.as_raw().length_squared())
-            }
-
-            #[doc = "Returns a vector containing `e^self` (the exponential function) for each element of `self`."]
-            #[inline]
-            #[must_use]
-            pub fn exp(self) -> Self {
-                Self::from_raw(self.to_raw().exp())
-            }
-            #[doc = "Returns a vector containing each element of `self` raised to the power of `n`."]
-            #[inline]
-            #[must_use]
-            pub fn powf(self, n: T::Scalar) -> Self {
-                Self::from_raw(self.to_raw().powf(n.to_raw()))
-            }
-            #[doc = "Returns a vector containing the reciprocal `1.0/n` of each element of `self`."]
-            #[inline]
-            #[must_use]
-            pub fn recip(self) -> Self {
-                Self::from_raw(self.to_raw().recip())
-            }
-            #[doc = "Fused multiply-add. Computes `(self * a) + b` element-wise with only one rounding error, yielding a more accurate result than an unfused multiply-add."]
-            #[inline]
-            #[must_use]
-            pub fn mul_add(self, a: Self, b: Self) -> Self {
-                Self::from_raw(self.to_raw().mul_add(a.to_raw(), b.to_raw()))
-            }
-        }
-
-        impl<T: Unit> Add<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn add(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() + rhs.to_raw())
-            }
-        }
-        impl<T: Unit> Sub<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn sub(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() - rhs.to_raw())
-            }
-        }
-        impl<T: Unit> Mul<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn mul(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() * rhs.to_raw())
-            }
-        }
-        impl<T: Unit> Div<Self> for $base_type_name<T> {
-            type Output = Self;
-
-            #[must_use]
-            fn div(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() / rhs.to_raw())
-            }
-        }
-
-        impl<T: Unit> AddAssign for $base_type_name<T> {
-            fn add_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() += rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> SubAssign for $base_type_name<T> {
-            fn sub_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() -= rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> MulAssign for $base_type_name<T> {
-            fn mul_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() *= rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> DivAssign for $base_type_name<T> {
-            fn div_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() /= rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> Rem for $base_type_name<T> {
-            type Output = Self;
-
-            #[inline]
-            #[must_use]
-            fn rem(self, rhs: Self) -> Self::Output {
-                Self::from_raw(self.to_raw() % rhs.to_raw())
-            }
-        }
-
-        impl<T: Unit> RemAssign for $base_type_name<T> {
-            #[inline]
-            fn rem_assign(&mut self, rhs: Self) {
-                *self.as_raw_mut() %= rhs.to_raw();
-            }
-        }
-
-        impl<T: Unit> Sum for $base_type_name<T> {
-            #[must_use]
-            fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-                iter.fold(Self::ZERO, Add::add)
-            }
-        }
-
-        impl<T> Lerp<T::Primitive> for $base_type_name<T>
-        where
-            T: UnitTypes,
-            T::$vec_ty: Lerp<T::Primitive>,
-        {
-            #[inline]
-            #[must_use]
-            fn lerp(self, end: Self, t: T::Primitive) -> Self {
-                Self::from_raw(self.to_raw().lerp(end.to_raw(), t.to_raw()))
-            }
-        }
     };
 }
 
-impl_vector!(Vector2 [2] => Vec2, Point2, Size2);
-impl_vector!(Vector3 [3] => Vec3, Point3, Size3);
-impl_vector!(Vector4 [4] => Vec4, Point4);
+crate::forward_op_to_raw!(Vector2, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Vector3, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Vector4, Add<Self>::add -> Self);
+crate::forward_op_to_raw!(Vector2, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Vector3, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Vector4, Sub<Self>::sub -> Self);
+crate::forward_op_to_raw!(Vector2, Mul<Self>::mul -> Self);
+crate::forward_op_to_raw!(Vector3, Mul<Self>::mul -> Self);
+crate::forward_op_to_raw!(Vector4, Mul<Self>::mul -> Self);
+crate::forward_op_to_raw!(Vector2, Div<Self>::div -> Self);
+crate::forward_op_to_raw!(Vector3, Div<Self>::div -> Self);
+crate::forward_op_to_raw!(Vector4, Div<Self>::div -> Self);
+crate::forward_op_to_raw!(Vector2, Rem<Self>::rem -> Self);
+crate::forward_op_to_raw!(Vector3, Rem<Self>::rem -> Self);
+crate::forward_op_to_raw!(Vector4, Rem<Self>::rem -> Self);
+
+crate::forward_neg_to_raw!(Vector2);
+crate::forward_neg_to_raw!(Vector3);
+crate::forward_neg_to_raw!(Vector4);
+
+crate::forward_op_to_raw!(Vector2, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::forward_op_to_raw!(Vector3, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::forward_op_to_raw!(Vector4, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::forward_op_to_raw!(Vector2, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::forward_op_to_raw!(Vector3, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::forward_op_to_raw!(Vector4, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::forward_op_to_raw!(Vector2, Rem<[f32, f64, i32, u32]>::rem -> Self);
+crate::forward_op_to_raw!(Vector3, Rem<[f32, f64, i32, u32]>::rem -> Self);
+crate::forward_op_to_raw!(Vector4, Rem<[f32, f64, i32, u32]>::rem -> Self);
+
+crate::forward_op_assign_to_raw!(Vector2, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Vector3, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Vector4, AddAssign<Self>::add_assign);
+crate::forward_op_assign_to_raw!(Vector2, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector3, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector4, SubAssign<Self>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector2, MulAssign<Self>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector3, MulAssign<Self>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector4, MulAssign<Self>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector2, DivAssign<Self>::div_assign);
+crate::forward_op_assign_to_raw!(Vector3, DivAssign<Self>::div_assign);
+crate::forward_op_assign_to_raw!(Vector4, DivAssign<Self>::div_assign);
+crate::forward_op_assign_to_raw!(Vector2, RemAssign<Self>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector3, RemAssign<Self>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector4, RemAssign<Self>::rem_assign);
+
+crate::forward_op_assign_to_raw!(Vector2, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::forward_op_assign_to_raw!(Vector3, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::forward_op_assign_to_raw!(Vector4, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::forward_op_assign_to_raw!(Vector2, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector3, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector4, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::forward_op_assign_to_raw!(Vector2, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector3, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector4, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::forward_op_assign_to_raw!(Vector2, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::forward_op_assign_to_raw!(Vector3, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::forward_op_assign_to_raw!(Vector4, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::forward_op_assign_to_raw!(Vector2, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector3, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+crate::forward_op_assign_to_raw!(Vector4, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+
+crate::derive_standard_traits!(Vector2 {
+    x: T::Scalar,
+    y: T::Scalar
+});
+crate::derive_standard_traits!(Vector3 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar
+});
+crate::derive_standard_traits!(Vector4 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar,
+    w: T::Scalar
+});
+
+crate::derive_array_conversion_traits!(Vector2, 2);
+crate::derive_array_conversion_traits!(Vector3, 3);
+crate::derive_array_conversion_traits!(Vector4, 4);
+
+crate::derive_tuple_conversion_traits!(Vector2 {
+    x: T::Scalar,
+    y: T::Scalar
+});
+crate::derive_tuple_conversion_traits!(Vector3 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar
+});
+crate::derive_tuple_conversion_traits!(Vector4 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar,
+    w: T::Scalar
+});
+
+crate::derive_glam_conversion_traits!(Vector2 {
+    x: T::Scalar,
+    y: T::Scalar
+});
+crate::derive_glam_conversion_traits!(Vector3 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar
+});
+crate::derive_glam_conversion_traits!(Vector4 {
+    x: T::Scalar,
+    y: T::Scalar,
+    z: T::Scalar,
+    w: T::Scalar
+});
+
+implement_swizzle!(Vector2);
+implement_swizzle!(Vector3);
+implement_swizzle!(Vector4);
 
 impl<T: Unit> Vector2<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+    };
+
     /// Unit vector in the direction of the X axis.
     pub const X: Self = Vector2 {
         x: T::Scalar::ONE,
@@ -429,6 +354,32 @@ impl<T: Unit> Vector2<T> {
     /// The unit axes.
     pub const AXES: [Self; 2] = [Self::X, Self::Y];
 
+    /// New vector.
+    pub const fn new(x: T::Scalar, y: T::Scalar) -> Self {
+        Self { x, y }
+    }
+
+    crate::forward_constructors!(2, glam::Vec2);
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
+
+    crate::casting_interface!(Vector2 {
+        x: T::Scalar,
+        y: T::Scalar
+    });
+    crate::tuple_interface!(Vector2 {
+        x: T::Scalar,
+        y: T::Scalar
+    });
+    crate::array_interface!(2);
+
+    crate::forward_to_raw!(
+        glam::Vec2 =>
+        #[doc = "Dot product"]
+        pub fn dot(self, other: Self) -> T::Scalar;
+        #[doc = "Extend with z-component to [`Vector3`]."]
+        pub fn extend(self, z: T::Scalar) -> Vector3<T>;
+    );
+
     /// Select components of this vector and return a new vector containing
     /// those components.
     #[inline]
@@ -437,41 +388,32 @@ impl<T: Unit> Vector2<T> {
         self.swizzle2::<X, Y>()
     }
 
-    /// Convert this `Vector2` to a [`Vector3`](Vector3) with `z` component.
-    #[must_use]
-    pub fn to_3d(self, z: T::Scalar) -> Vector3<T> {
-        Vector3 {
-            x: self.x,
-            y: self.y,
-            z,
-        }
-    }
+    vector_interface!(Point2, Size2);
 }
 
 impl<T> Vector2<T>
 where
-    T: UnitTypes,
-    T::Vec2: VectorFloat2,
+    T: Unit,
+    T::Scalar: FloatScalar,
 {
-    /// Return `(sin(angle), cos(angle))`.
-    ///
-    /// See [`glam::Vec2::from_angle()`] and [`glam::DVec2::from_angle()`].
-    #[must_use]
-    pub fn from_angle(angle: Angle<T::Primitive>) -> Vector2<T::Primitive> {
-        let angle = angle.radians;
-        Vector2::from_raw(<T::Vec2 as VectorFloat2>::from_angle(angle))
-    }
+    /// All NaN.
+    pub const NAN: Self = Vector2 {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+    };
 
-    /// Rotate by a vector containing `(sin(angle), cos(angle))`.
-    ///
-    /// See [`glam::Vec2::rotate()`] and [`glam::DVec2::rotate()`].
-    #[must_use]
-    pub fn rotate(self, rotation: Vector2<T::Primitive>) -> Self {
-        Self::from_raw(<T::Vec2 as VectorFloat2>::rotate(
-            self.to_raw(),
-            rotation.to_raw(),
-        ))
-    }
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
+    crate::forward_float_vector_ops!(glam::Vec2);
+
+    crate::forward_to_raw!(
+        glam::Vec2 =>
+        #[doc = "Return `(sin(angle), cos(angle)`."]
+        pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar>;
+        #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
+        pub fn rotate(self, rotation: Vector2<T::Scalar>) -> Self;
+        #[doc = "Angle between this and another vector."]
+        pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
+    );
 }
 
 impl<T> Vector2<T>
@@ -479,6 +421,12 @@ where
     T: Unit,
     T::Scalar: SignedScalar,
 {
+    /// All negative one.
+    pub const NEG_ONE: Self = Vector2 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::NEG_ONE,
+    };
+
     /// (-1, 0)
     pub const NEG_X: Self = Vector2 {
         x: T::Scalar::NEG_ONE,
@@ -489,9 +437,38 @@ where
         x: T::Scalar::ZERO,
         y: T::Scalar::NEG_ONE,
     };
+
+    crate::forward_to_raw!(
+        glam::Vec2 =>
+        #[doc = "Turn all components positive."]
+        pub fn abs(self) -> Self;
+        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
+        pub fn signum(self) -> Self;
+        #[doc = "Get the perpendicular vector."]
+        pub fn perp(self) -> Self;
+        #[doc(alias = "wedge")]
+        #[doc(alias = "cross")]
+        #[doc(alias = "determinant")]
+        #[doc = "Perpendicular dot product"]
+        pub fn perp_dot(self, other: Self) -> T::Scalar;
+    );
 }
 
 impl<T: Unit> Vector3<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+    };
+
     /// Unit vector in the direction of the X axis.
     pub const X: Self = Self {
         x: T::Scalar::ONE,
@@ -514,6 +491,34 @@ impl<T: Unit> Vector3<T> {
     /// The unit axes.
     pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
 
+    /// New vector.
+    pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar) -> Self {
+        Self { x, y, z }
+    }
+
+    crate::forward_constructors!(3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
+
+    crate::casting_interface!(Vector3 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar
+    });
+    crate::tuple_interface!(Vector3 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar
+    });
+    crate::array_interface!(3);
+
+    crate::forward_to_raw!(
+        glam::Vec3 =>
+        #[doc = "Dot product"]
+        pub fn dot(self, other: Self) -> T::Scalar;
+        #[doc = "Extend with w-component to [`Vector4`]."]
+        pub fn extend(self, w: T::Scalar) -> Vector4<T>;
+    );
+
     /// Select components of this vector and return a new vector containing
     /// those components.
     #[inline]
@@ -522,16 +527,37 @@ impl<T: Unit> Vector3<T> {
         self.swizzle3::<X, Y, Z>()
     }
 
-    /// Convert to [`Vector4`] with `w` component.
-    #[must_use]
-    pub fn to_4d(self, w: T::Scalar) -> Vector4<T> {
-        Vector4 {
-            x: self.x,
-            y: self.y,
-            z: self.z,
-            w,
-        }
-    }
+    vector_interface!(Point3, Size3);
+}
+
+impl<T> Vector3<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    /// All NaN.
+    pub const NAN: Self = Vector3 {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+        z: <T::Scalar as FloatScalar>::NAN,
+    };
+
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
+    crate::forward_float_vector_ops!(glam::Vec3);
+
+    crate::forward_to_raw!(
+        glam::Vec3 =>
+        #[doc = "Angle between this and another vector."]
+        pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
+        #[doc = "See (e.g.) [`glam::Vec3::any_orthogonal_vector()`]."]
+        pub fn any_orthogonal_vector(&self) -> Self;
+        #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_vector()`]."]
+        pub fn any_orthonormal_vector(&self) -> Self;
+        #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_pair()`]."]
+        pub fn any_orthonormal_pair(&self) -> (Self, Self);
+        #[doc = "Cross product"]
+        pub fn cross(self, other: Self) -> Self;
+    );
 }
 
 impl<T> Vector3<T>
@@ -539,6 +565,13 @@ where
     T: Unit,
     T::Scalar: SignedScalar,
 {
+    /// All negative one.
+    pub const NEG_ONE: Self = Vector3 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::NEG_ONE,
+    };
+
     /// (-1, 0, 0)
     pub const NEG_X: Self = Vector3 {
         x: T::Scalar::NEG_ONE,
@@ -557,12 +590,19 @@ where
         y: T::Scalar::ZERO,
         z: T::Scalar::NEG_ONE,
     };
+
+    crate::forward_to_raw!(
+        glam::Vec3 =>
+        #[doc = "Turn all components positive."]
+        pub fn abs(self) -> Self;
+        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
+        pub fn signum(self) -> Self;
+    );
 }
 
 impl<T> Vector3<T>
 where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
+    T: Unit<Scalar = f32>,
 {
     /// Create from SIMD-aligned [`glam::Vec3A`].
     ///
@@ -585,27 +625,23 @@ where
     }
 }
 
-impl<T> From<glam::Vec3A> for Vector3<T>
-where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
-{
-    fn from(v: glam::Vec3A) -> Self {
-        Self::from_raw(v.into())
-    }
-}
-
-impl<T> From<Vector3<T>> for glam::Vec3A
-where
-    T: Unit,
-    T::Scalar: Scalar<Primitive = f32>,
-{
-    fn from(v: Vector3<T>) -> Self {
-        v.to_raw().into()
-    }
-}
-
 impl<T: Unit> Vector4<T> {
+    /// All zeroes.
+    pub const ZERO: Self = Self {
+        x: T::Scalar::ZERO,
+        y: T::Scalar::ZERO,
+        z: T::Scalar::ZERO,
+        w: T::Scalar::ZERO,
+    };
+
+    /// All ones.
+    pub const ONE: Self = Self {
+        x: T::Scalar::ONE,
+        y: T::Scalar::ONE,
+        z: T::Scalar::ONE,
+        w: T::Scalar::ONE,
+    };
+
     /// Unit vector in the direction of the X axis.
     pub const X: Self = Self {
         x: T::Scalar::ONE,
@@ -638,6 +674,34 @@ impl<T: Unit> Vector4<T> {
     /// The unit axes.
     pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
 
+    /// New vector.
+    pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar, w: T::Scalar) -> Self {
+        Self { x, y, z, w }
+    }
+
+    crate::forward_constructors!(4, glam::Vec4);
+    crate::forward_comparison!(glam::BVec4, glam::Vec4);
+
+    crate::casting_interface!(Vector4 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar,
+        w: T::Scalar
+    });
+    crate::tuple_interface!(Vector4 {
+        x: T::Scalar,
+        y: T::Scalar,
+        z: T::Scalar,
+        w: T::Scalar
+    });
+    crate::array_interface!(4);
+
+    crate::forward_to_raw!(
+        glam::Vec4 =>
+        #[doc = "Dot product"]
+        pub fn dot(self, other: Self) -> T::Scalar;
+    );
+
     /// Select components of this vector and return a new vector containing
     /// those components.
     #[inline]
@@ -645,6 +709,25 @@ impl<T: Unit> Vector4<T> {
     pub fn swizzle<const X: usize, const Y: usize, const Z: usize, const W: usize>(&self) -> Self {
         self.swizzle4::<X, Y, Z, W>()
     }
+
+    vector_interface!(Point4);
+}
+
+impl<T> Vector4<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
+    /// All NaN.
+    pub const NAN: Self = Vector4 {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+        z: <T::Scalar as FloatScalar>::NAN,
+        w: <T::Scalar as FloatScalar>::NAN,
+    };
+
+    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
+    crate::forward_float_vector_ops!(glam::Vec4);
 }
 
 impl<T> Vector4<T>
@@ -652,6 +735,14 @@ where
     T: Unit,
     T::Scalar: SignedScalar,
 {
+    /// All negative one.
+    pub const NEG_ONE: Self = Vector4 {
+        x: T::Scalar::NEG_ONE,
+        y: T::Scalar::NEG_ONE,
+        z: T::Scalar::NEG_ONE,
+        w: T::Scalar::NEG_ONE,
+    };
+
     /// (-1, 0, 0, 0)
     pub const NEG_X: Self = Vector4 {
         x: T::Scalar::NEG_ONE,
@@ -680,21 +771,173 @@ where
         z: T::Scalar::ZERO,
         w: T::Scalar::NEG_ONE,
     };
+
+    crate::forward_to_raw!(
+        glam::Vec4 =>
+        #[doc = "Turn all components positive."]
+        pub fn abs(self) -> Self;
+        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
+        pub fn signum(self) -> Self;
+    );
 }
 
-impl<T: UnitTypes<Vec3 = glam::Vec3>> Mul<Vector3<T>> for glam::Quat {
+impl<T: Unit> ToRaw for Vector2<T> {
+    type Raw = <T::Scalar as Scalar>::Vec2;
+
+    #[inline]
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+}
+
+impl<T: Unit> FromRaw for Vector2<T> {
+    #[inline]
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Vector2<T> {
+    #[inline]
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    #[inline]
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> ToRaw for Vector3<T> {
+    type Raw = <T::Scalar as Scalar>::Vec3;
+
+    #[inline]
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+}
+
+impl<T: Unit> FromRaw for Vector3<T> {
+    #[inline]
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Vector3<T> {
+    #[inline]
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    #[inline]
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T: Unit> ToRaw for Vector4<T> {
+    type Raw = <T::Scalar as Scalar>::Vec4;
+
+    #[inline]
+    fn to_raw(self) -> Self::Raw {
+        bytemuck::cast(self)
+    }
+}
+
+impl<T: Unit> FromRaw for Vector4<T> {
+    #[inline]
+    fn from_raw(raw: Self::Raw) -> Self {
+        bytemuck::cast(raw)
+    }
+}
+
+impl<T: Unit> AsRaw for Vector4<T> {
+    #[inline]
+    fn as_raw(&self) -> &Self::Raw {
+        bytemuck::cast_ref(self)
+    }
+
+    #[inline]
+    fn as_raw_mut(&mut self) -> &mut Self::Raw {
+        bytemuck::cast_mut(self)
+    }
+}
+
+impl<T> From<glam::Vec3A> for Vector3<T>
+where
+    T: Unit<Scalar = f32>,
+{
+    #[inline]
+    fn from(v: glam::Vec3A) -> Self {
+        Self::from_raw(v.into())
+    }
+}
+
+impl<T> From<Vector3<T>> for glam::Vec3A
+where
+    T: Unit<Scalar = f32>,
+{
+    #[inline]
+    fn from(v: Vector3<T>) -> Self {
+        v.to_raw().into()
+    }
+}
+
+impl<T> Mul<Vector3<T>> for glam::Quat
+where
+    T: Unit<Scalar = f32>,
+    T::Scalar: FloatScalar<Vec3f = glam::Vec3>,
+{
     type Output = Vector3<T>;
 
+    #[inline]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
         Vector3::from_raw(self * rhs.to_raw())
     }
 }
 
-impl<T: UnitTypes<Vec3 = glam::DVec3>> Mul<Vector3<T>> for glam::DQuat {
+impl<T> Mul<Vector3<T>> for glam::DQuat
+where
+    T: Unit<Scalar = f64>,
+    T::Scalar: FloatScalar<Vec3f = glam::DVec3>,
+{
     type Output = Vector3<T>;
 
+    #[inline]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
         Vector3::from_raw(self * rhs.to_raw())
+    }
+}
+
+impl<'a, T: Unit> Sum<&'a Vector2<T>> for Vector2<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).sum())
+    }
+}
+
+impl<'a, T: Unit> Sum<&'a Vector3<T>> for Vector3<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).sum())
+    }
+}
+
+impl<'a, T: Unit> Sum<&'a Vector4<T>> for Vector4<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).sum())
     }
 }
 
@@ -836,6 +1079,7 @@ mod tests {
 
     #[test]
     fn arithmetic() {
+        use core::ops::{Add, Div, Sub};
         check_splat_ints!(2, div(1), 2);
         check_splat_ints!(10, div(2), 5);
         check_splat!(2.0, mul(2.5), 2.0 * 2.5);
@@ -864,7 +1108,7 @@ mod tests {
         let b: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let d: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
-        let sum: Vector4<f32> = [a, b, c, d].into_iter().sum();
+        let sum: Vector4<f32> = [a, b, c, d].iter().sum();
         assert_eq!(sum, (4.0, 8.0, 12.0, 16.0));
     }
 
@@ -918,12 +1162,12 @@ mod tests {
         assert!(!v4.is_finite());
         assert_eq!(
             v4.is_nan_mask(),
-            glam::BVec4A::new(false, false, true, false)
+            glam::BVec4::new(false, false, true, false)
         );
 
-        assert!(Vec2::nan().is_nan());
-        assert!(Vec3::nan().is_nan());
-        assert!(Vec4::nan().is_nan());
+        assert!(Vec2::NAN.is_nan());
+        assert!(Vec3::NAN.is_nan());
+        assert!(Vec4::NAN.is_nan());
 
         // Replace NaNs with zeroes.
         let v = Vec4::select(v4.is_nan_mask(), Vec4::ZERO, v4);
@@ -972,12 +1216,12 @@ mod tests {
     #[test]
     fn to_3d() {
         let v = Vec2 { x: 3.0, y: 4.0 };
-        assert_eq!(v.to_3d(2.0), crate::vec3!(3.0, 4.0, 2.0));
+        assert_eq!(v.extend(2.0), crate::vec3!(3.0, 4.0, 2.0));
     }
 
     #[test]
     fn to_4d() {
-        assert_eq!(Vec3::Z.to_4d(2.0), Vec4::new(0.0, 0.0, 1.0, 2.0));
+        assert_eq!(Vec3::Z.extend(2.0), Vec4::new(0.0, 0.0, 1.0, 2.0));
     }
 
     #[test]
@@ -996,14 +1240,6 @@ mod tests {
 
         {
             let x: Vec4 = (1.0, 2.0, 3.0, 4.0).into();
-
-            let a = x.mul_scalar(2.0);
-            let b = x.div_scalar(2.0);
-            let c = x.rem_scalar(2.0);
-
-            assert_eq!(a, (2.0, 4.0, 6.0, 8.0));
-            assert_eq!(b, (0.5, 1.0, 1.5, 2.0));
-            assert_eq!(c, (1.0, 0.0, 1.0, 0.0));
 
             let mut a = x;
             let mut b = x;
@@ -1056,12 +1292,12 @@ mod tests {
         let gt = a.cmpgt(b);
         let ge = a.cmpge(b);
 
-        assert_eq!(eq, glam::BVec4A::new(false, true, false, false));
-        assert_eq!(ne, glam::BVec4A::new(true, false, true, true));
-        assert_eq!(lt, glam::BVec4A::new(true, false, false, false));
-        assert_eq!(le, glam::BVec4A::new(true, true, false, false));
-        assert_eq!(gt, glam::BVec4A::new(false, false, true, true));
-        assert_eq!(ge, glam::BVec4A::new(false, true, true, true));
+        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
+        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
+        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
+        assert_eq!(le, glam::BVec4::new(true, true, false, false));
+        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
+        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
 
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
@@ -1213,5 +1449,19 @@ mod tests {
         let a: Vector3<F32> = vec3!(20.0, 30.0, 1.0);
         let b: Vector3<F32> = mat * a;
         assert_eq!(b, (20.0, 30.0, 1.0));
+    }
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use super::*;
+
+    #[test]
+    fn serde_vector() {
+        let vec = Vector4::<f32>::new(10.0, 20.0, 30.0, 40.0);
+        let serialized = serde_json::to_string(&vec).unwrap();
+        assert_eq!(serialized, r#"{"x":10.0,"y":20.0,"z":30.0,"w":40.0}"#);
+        let deserialized: Vector4<f32> = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(vec, deserialized);
     }
 }

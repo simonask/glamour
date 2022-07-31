@@ -14,6 +14,7 @@
 pub mod docs;
 
 mod angle;
+#[doc(hidden)]
 pub mod bindings;
 mod r#box;
 mod matrix;
@@ -24,6 +25,7 @@ mod size;
 pub mod traits;
 
 mod compat;
+mod raw;
 mod transform;
 mod unit;
 mod vector;
@@ -32,33 +34,35 @@ pub use angle::{Angle, AngleConsts, FloatAngleExt};
 pub use matrix::{Matrix2, Matrix3, Matrix4};
 pub use point::{Point2, Point3, Point4};
 pub use r#box::{Box2, Box3};
+pub use raw::*;
 pub use rect::Rect;
 pub use scalar::Scalar;
 pub use size::{Size2, Size3};
 pub use transform::{Transform2, Transform3, TransformMap};
-pub use unit::{Unit, UnitTypes};
-pub use vector::{Vector2, Vector3, Vector4};
+pub use unit::Unit;
+pub use vector::{Swizzle, Vector2, Vector3, Vector4};
 
 mod macros;
 use macros::*;
 
 #[doc(no_inline)]
-pub use traits::{Contains, Intersection, Lerp, Union};
+pub use traits::{Contains, Intersection, Union};
 
 /// Convenience glob import.
 ///
-/// All traits are imported anonymously, except [`Unit`] and [`Scalar`].
+/// All traits are imported anonymously, except [`Unit`].
 pub mod prelude {
     #[doc(no_inline)]
     pub use super::{
-        Angle, AngleConsts as _, Box2, Box3, FloatAngleExt as _, Matrix2, Matrix3, Matrix4, Point2,
-        Point3, Point4, Rect, Scalar, Size2, Size3, Unit, Vector2, Vector3, Vector4,
+        Angle, AngleConsts as _, AsRaw, Box2, Box3, FloatAngleExt as _, FromRaw, Matrix2, Matrix3,
+        Matrix4, Point2, Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, ToRaw,
+        Unit, Vector2, Vector3, Vector4,
     };
     #[doc(no_inline)]
     pub use super::{Transform2, Transform3, TransformMap as _};
 
     #[doc(no_inline)]
-    pub use super::traits::{Contains as _, Intersection as _, Lerp as _, Union as _};
+    pub use super::traits::{Contains as _, Intersection as _, Union as _};
 
     #[doc(no_inline)]
     pub use super::{point, point2, point3, point4, size, size2, size3, vec2, vec3, vec4, vector};

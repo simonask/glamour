@@ -1,3 +1,7 @@
+#![allow(missing_docs, clippy::return_self_not_must_use)]
+
+use crate::scalar::{FloatScalar, Scalar};
+
 use super::*;
 
 /// Trait describing a glam N x N matrix type.
@@ -17,12 +21,10 @@ pub trait Matrix:
     + Neg<Output = Self>
     + AbsDiffEq<Epsilon = <Self::Scalar as AbsDiffEq>::Epsilon>
 {
-    type Scalar: PrimitiveMatrices<Vec2 = Self::Vec2, Vec3 = Self::Vec3, Vec4 = Self::Vec4>
-        + Float
-        + AbsDiffEq;
-    type Vec2: Vector<2, Scalar = Self::Scalar>;
-    type Vec3: Vector<3, Scalar = Self::Scalar>;
-    type Vec4: Vector<4, Scalar = Self::Scalar>;
+    type Scalar: FloatScalar<Vec2f = Self::Vec2, Vec3f = Self::Vec3, Vec4f = Self::Vec4> + AbsDiffEq;
+    type Vec2: FloatVector2<Scalar = Self::Scalar>;
+    type Vec3: FloatVector3<Scalar = Self::Scalar>;
+    type Vec4: FloatVector4<Scalar = Self::Scalar>;
 
     #[must_use]
     fn is_nan(&self) -> bool;
@@ -47,6 +49,11 @@ pub trait Matrix2: Matrix + Mul<Self::Vec2, Output = Self::Vec2> {
     fn row(&self, index: usize) -> Self::Vec2;
     fn from_scale_angle(vector: Self::Vec2, angle: Self::Scalar) -> Self;
     fn from_angle(angle: Self::Scalar) -> Self;
+    fn from_mat3(mat3: <Self::Scalar as FloatScalar>::Mat3) -> Self;
+    fn from_diagonal(diagonal: Self::Vec2) -> Self;
+    fn mul_mat2(&self, other: &Self) -> Self;
+    fn add_mat2(&self, other: &Self) -> Self;
+    fn sub_mat2(&self, other: &Self) -> Self;
 }
 
 /// Primitive 3x3 matrix.
@@ -67,6 +74,12 @@ pub trait Matrix3: Matrix + Mul<Self::Vec3, Output = Self::Vec3> {
         angle: Self::Scalar,
         translation: Self::Vec2,
     ) -> Self;
+    fn from_diagonal(diagonal: Self::Vec3) -> Self;
+    fn from_mat2(mat2: <Self::Scalar as FloatScalar>::Mat2) -> Self;
+    fn from_mat4(mat4: <Self::Scalar as FloatScalar>::Mat4) -> Self;
+    fn mul_mat3(&self, other: &Self) -> Self;
+    fn add_mat3(&self, other: &Self) -> Self;
+    fn sub_mat3(&self, other: &Self) -> Self;
 }
 
 /// Primitive 4x4 matrix.
@@ -91,7 +104,7 @@ pub trait Matrix4: Matrix + Mul<Self::Vec4, Output = Self::Vec4> {
     fn from_translation(translation: Self::Vec3) -> Self;
     fn from_scale_rotation_translation(
         scale: Self::Vec3,
-        axis: <Self::Scalar as PrimitiveMatrices>::Quat,
+        axis: <Self::Scalar as FloatScalar>::Quat,
         translation: Self::Vec3,
     ) -> Self;
     fn look_at_lh(eye: Self::Vec3, center: Self::Vec3, up: Self::Vec3) -> Self;
@@ -158,15 +171,26 @@ pub trait Matrix4: Matrix + Mul<Self::Vec4, Output = Self::Vec4> {
         near: Self::Scalar,
         far: Self::Scalar,
     ) -> Self;
+
+    fn from_diagonal(diagonal: Self::Vec4) -> Self;
+    fn from_rotation_translation(
+        rotation: <Self::Scalar as FloatScalar>::Quat,
+        translation: Self::Vec3,
+    ) -> Self;
+    fn from_quat(quat: <Self::Scalar as FloatScalar>::Quat) -> Self;
+    fn from_mat3(mat3: <Self::Scalar as FloatScalar>::Mat3) -> Self;
+    fn mul_mat4(&self, other: &Self) -> Self;
+    fn add_mat4(&self, other: &Self) -> Self;
+    fn sub_mat4(&self, other: &Self) -> Self;
 }
 
 macro_rules! impl_matrix {
     ($scalar:ty, $glam_ty:ty) => {
         impl Matrix for $glam_ty {
             type Scalar = $scalar;
-            type Vec2 = <$scalar as Primitive>::Vec2;
-            type Vec3 = <$scalar as Primitive>::Vec3;
-            type Vec4 = <$scalar as Primitive>::Vec4;
+            type Vec2 = <$scalar as Scalar>::Vec2;
+            type Vec3 = <$scalar as Scalar>::Vec3;
+            type Vec4 = <$scalar as Scalar>::Vec4;
 
             forward_impl!($glam_ty => fn is_nan(&self) -> bool);
             forward_impl!($glam_ty => fn is_finite(&self) -> bool);
@@ -189,8 +213,13 @@ impl Matrix2 for glam::Mat2 {
     forward_impl!(glam::Mat2 => fn mul_vec2(&self, vec: glam::Vec2) -> glam::Vec2);
     forward_impl!(glam::Mat2 => fn col(&self, index: usize) -> glam::Vec2);
     forward_impl!(glam::Mat2 => fn row(&self, index: usize) -> glam::Vec2);
+    forward_impl!(glam::Mat2 => fn from_mat3(mat3: <Self::Scalar as FloatScalar>::Mat3) -> Self);
     forward_impl!(glam::Mat2 => fn from_scale_angle(vector: glam::Vec2, angle: f32) -> Self);
     forward_impl!(glam::Mat2 => fn from_angle(angle: f32) -> Self);
+    forward_impl!(glam::Mat2 => fn from_diagonal(diagonal: Self::Vec2) -> Self);
+    forward_impl!(glam::Mat2 => fn mul_mat2(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat2 => fn add_mat2(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat2 => fn sub_mat2(&self, other: &Self) -> Self);
 }
 
 impl Matrix2 for glam::DMat2 {
@@ -198,8 +227,13 @@ impl Matrix2 for glam::DMat2 {
     forward_impl!(glam::DMat2 => fn mul_vec2(&self, vec: glam::DVec2) -> glam::DVec2);
     forward_impl!(glam::DMat2 => fn col(&self, index: usize) -> glam::DVec2);
     forward_impl!(glam::DMat2 => fn row(&self, index: usize) -> glam::DVec2);
+    forward_impl!(glam::DMat2 => fn from_mat3(mat3: <Self::Scalar as FloatScalar>::Mat3) -> Self);
     forward_impl!(glam::DMat2 => fn from_scale_angle(vector: glam::DVec2, angle: f64) -> Self);
     forward_impl!(glam::DMat2 => fn from_angle(angle: f64) -> Self);
+    forward_impl!(glam::DMat2 => fn from_diagonal(diagonal: Self::Vec2) -> Self);
+    forward_impl!(glam::DMat2 => fn mul_mat2(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat2 => fn add_mat2(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat2 => fn sub_mat2(&self, other: &Self) -> Self);
 }
 
 impl Matrix3 for glam::Mat3 {
@@ -211,6 +245,12 @@ impl Matrix3 for glam::Mat3 {
     forward_impl!(glam::Mat3 => fn from_scale(vector: glam::Vec2) -> Self);
     forward_impl!(glam::Mat3 => fn from_angle(angle: f32) -> Self);
     forward_impl!(glam::Mat3 => fn from_translation(translation: glam::Vec2) -> Self);
+    forward_impl!(glam::Mat3 => fn from_diagonal(diagonal: Self::Vec3) -> Self);
+    forward_impl!(glam::Mat3 => fn from_mat2(mat2: <Self::Scalar as FloatScalar>::Mat2) -> Self);
+    forward_impl!(glam::Mat3 => fn from_mat4(mat4: <Self::Scalar as FloatScalar>::Mat4) -> Self);
+    forward_impl!(glam::Mat3 => fn mul_mat3(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat3 => fn add_mat3(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat3 => fn sub_mat3(&self, other: &Self) -> Self);
 
     forward_impl!(glam::Mat3 => fn from_scale_angle_translation(
         scale: glam::Vec2,
@@ -228,6 +268,12 @@ impl Matrix3 for glam::DMat3 {
     forward_impl!(glam::DMat3 => fn from_scale(vector: glam::DVec2) -> Self);
     forward_impl!(glam::DMat3 => fn from_angle(angle: f64) -> Self);
     forward_impl!(glam::DMat3 => fn from_translation(translation: glam::DVec2) -> Self);
+    forward_impl!(glam::DMat3 => fn from_diagonal(diagonal: Self::Vec3) -> Self);
+    forward_impl!(glam::DMat3 => fn from_mat2(mat2: <Self::Scalar as FloatScalar>::Mat2) -> Self);
+    forward_impl!(glam::DMat3 => fn from_mat4(mat4: <Self::Scalar as FloatScalar>::Mat4) -> Self);
+    forward_impl!(glam::DMat3 => fn mul_mat3(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat3 => fn add_mat3(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat3 => fn sub_mat3(&self, other: &Self) -> Self);
 
     forward_impl!(glam::DMat3 => fn from_scale_angle_translation(
         scale: glam::DVec2,
@@ -272,6 +318,17 @@ impl Matrix4 for glam::Mat4 {
     ) -> Self);
     forward_impl!(glam::Mat4 => fn orthographic_lh(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self);
     forward_impl!(glam::Mat4 => fn orthographic_rh(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self);
+
+    forward_impl!(glam::Mat4 => fn from_diagonal(diagonal: Self::Vec4) -> Self);
+    forward_impl!(glam::Mat4 => fn from_rotation_translation(
+        rotation: <Self::Scalar as FloatScalar>::Quat,
+        translation: Self::Vec3
+    ) -> Self);
+    forward_impl!(glam::Mat4 => fn from_quat(quat: <Self::Scalar as FloatScalar>::Quat) -> Self);
+    forward_impl!(glam::Mat4 => fn from_mat3(mat3: <Self::Scalar as FloatScalar>::Mat3) -> Self);
+    forward_impl!(glam::Mat4 => fn mul_mat4(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat4 => fn add_mat4(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat4 => fn sub_mat4(&self, other: &Self) -> Self);
 }
 
 impl Matrix4 for glam::DMat4 {
@@ -310,4 +367,15 @@ impl Matrix4 for glam::DMat4 {
     ) -> Self);
     forward_impl!(glam::DMat4 => fn orthographic_lh(left: f64, right: f64, bottom: f64, top: f64, near: f64, far: f64) -> Self);
     forward_impl!(glam::DMat4 => fn orthographic_rh(left: f64, right: f64, bottom: f64, top: f64, near: f64, far: f64) -> Self);
+
+    forward_impl!(glam::DMat4 => fn from_diagonal(diagonal: Self::Vec4) -> Self);
+    forward_impl!(glam::DMat4 => fn from_rotation_translation(
+        rotation: <Self::Scalar as FloatScalar>::Quat,
+        translation: Self::Vec3
+    ) -> Self);
+    forward_impl!(glam::DMat4 => fn from_quat(quat: <Self::Scalar as FloatScalar>::Quat) -> Self);
+    forward_impl!(glam::DMat4 => fn from_mat3(mat3: <Self::Scalar as FloatScalar>::Mat3) -> Self);
+    forward_impl!(glam::DMat4 => fn mul_mat4(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat4 => fn add_mat4(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat4 => fn sub_mat4(&self, other: &Self) -> Self);
 }

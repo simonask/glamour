@@ -3,9 +3,9 @@
 use approx::AbsDiffEq;
 
 use crate::{
-    bindings::VectorFloat,
-    traits::{Contains, Intersection, Lerp, Union},
-    Box2, Point2, Scalar, Size2, Unit, UnitTypes, Vector2,
+    scalar::FloatScalar,
+    traits::{Contains, Intersection, Union},
+    Box2, Point2, Scalar, Size2, Unit, Vector2,
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
@@ -19,17 +19,43 @@ pub struct Rect<T: Unit = f32> {
     pub size: Size2<T>,
 }
 
-crate::impl_common!(Rect {
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`
+unsafe impl<T: Unit> bytemuck::Pod for Rect<T> {}
+/// SAFETY: All members are `Pod`, and we are `#[repr(C)]`
+unsafe impl<T: Unit> bytemuck::Zeroable for Rect<T> {}
+
+crate::derive_standard_traits!(Rect {
+    origin: Point2<T>,
+    size: Size2<T>
+});
+crate::derive_tuple_conversion_traits!(Rect {
     origin: Point2<T>,
     size: Size2<T>
 });
 
-impl<T: UnitTypes> Rect<T> {
+impl<T: Unit> Rect<T> {
     /// Zero rect (origin = 0.0, size = 0.0).
     pub const ZERO: Self = Rect {
         origin: Point2::ZERO,
         size: Size2::ZERO,
     };
+
+    /// New Rect from origin/size.
+    pub fn new(origin: impl Into<Point2<T>>, size: impl Into<Size2<T>>) -> Rect<T> {
+        Rect {
+            origin: origin.into(),
+            size: size.into(),
+        }
+    }
+
+    crate::casting_interface!(Rect {
+        origin: Point2<T>,
+        size: Size2<T>
+    });
+    crate::tuple_interface!(Rect {
+        origin: Point2<T>,
+        size: Size2<T>
+    });
 
     /// Rect at (0.0, 0.0) with `size`.
     #[inline]
@@ -192,14 +218,17 @@ impl<T: UnitTypes> Rect<T> {
             && self.origin.x.is_finite()
             && self.origin.y.is_finite())
     }
+}
 
+impl<T> Rect<T>
+where
+    T: Unit,
+    T::Scalar: FloatScalar,
+{
     /// True if the rect only contains finite and non-NaN coordinates.
     #[inline]
     #[must_use]
-    pub fn is_finite(&self) -> bool
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn is_finite(&self) -> bool {
         self.origin.is_finite() && self.size.is_finite()
     }
 
@@ -213,14 +242,11 @@ impl<T: UnitTypes> Rect<T> {
     /// # use glamour::prelude::*;
     /// let r = Rect::<f32>::new((0.51, 0.49), (0.51, 0.49));
     /// let r = r.round();
-    /// assert_eq!(r, ((1.0, 0.0), (1.0, 0.0)));
+    /// assert_eq!(r, Rect::<f32>::new((1.0, 0.0), (1.0, 0.0)));
     /// ```
     #[inline]
     #[must_use]
-    pub fn round(self) -> Self
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn round(self) -> Self {
         Rect {
             origin: self.origin.round(),
             size: self.size.round(),
@@ -243,10 +269,7 @@ impl<T: UnitTypes> Rect<T> {
     /// ```
     #[inline]
     #[must_use]
-    pub fn round_in(self) -> Self
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn round_in(self) -> Self {
         Rect {
             origin: self.origin.ceil(),
             size: self.size.floor(),
@@ -267,13 +290,20 @@ impl<T: UnitTypes> Rect<T> {
     /// ```
     #[inline]
     #[must_use]
-    pub fn round_out(self) -> Self
-    where
-        T::Vec2: VectorFloat<2, Scalar = T::Primitive>,
-    {
+    pub fn round_out(self) -> Self {
         Rect {
             origin: self.origin.floor(),
             size: self.size.ceil(),
+        }
+    }
+
+    /// Linear interpolation between two rects.
+    #[inline]
+    #[must_use]
+    pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
+        Rect {
+            origin: self.origin.lerp(other.origin, t),
+            size: self.size.lerp(other.size, t),
         }
     }
 }
@@ -430,7 +460,10 @@ impl<T: Unit> Intersection<Box2<T>> for Rect<T> {
     }
 }
 
-impl<T: Unit> Union<Rect<T>> for Rect<T> {
+impl<T> Union<Rect<T>> for Rect<T>
+where
+    T: Unit,
+{
     type Union = Rect<T>;
 
     #[inline]
@@ -447,20 +480,6 @@ impl<T: Unit> Union<Rect<T>> for Rect<T> {
         let max = (&self).max().max((&other).max());
         let size = (max - origin).to_size();
 
-        Rect { origin, size }
-    }
-}
-
-impl<T: Unit> Lerp<<T::Scalar as Scalar>::Primitive> for Rect<T>
-where
-    Point2<T>: Lerp<<T::Scalar as Scalar>::Primitive>,
-    Size2<T>: Lerp<<T::Scalar as Scalar>::Primitive>,
-{
-    #[inline]
-    #[must_use]
-    fn lerp(self, end: Self, t: <T::Scalar as Scalar>::Primitive) -> Self {
-        let origin = self.origin.lerp(end.origin, t);
-        let size = self.size.lerp(end.size, t);
         Rect { origin, size }
     }
 }
@@ -721,8 +740,6 @@ mod tests {
 
     #[test]
     fn lerp() {
-        use super::Lerp;
-
         let src = RectF::new((0.0, 0.0), (1.0, 1.0));
         let dst = RectF::new((1.0, 1.0), (2.0, 2.0));
         assert_eq!(
@@ -769,5 +786,22 @@ mod tests {
         let (origin, size) = r.to_tuple();
         assert_eq!(origin, (10, 10));
         assert_eq!(size, (20, 20));
+    }
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use super::*;
+
+    #[test]
+    fn serde_rect() {
+        let rect = Rect::<f32>::new((10.0, 20.0), (30.0, 40.0));
+        let serialized = serde_json::to_string(&rect).unwrap();
+        assert_eq!(
+            serialized,
+            r#"{"origin":{"x":10.0,"y":20.0},"size":{"width":30.0,"height":40.0}}"#
+        );
+        let deserialized: Rect<f32> = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(rect, deserialized);
     }
 }

@@ -6,25 +6,30 @@
 //! **CAUTION:** Everything in this module should be considered effectively
 //! private.
 
-use core::fmt::{Debug, Display};
 use core::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
 
 use approx::AbsDiffEq;
-use num_traits::Float;
 
 use crate::traits::marker::PodValue;
 
 mod matrix;
-mod primitive;
 mod quat;
 mod vec;
 
 pub use matrix::*;
-pub use primitive::*;
 pub use quat::*;
 pub use vec::*;
+
+/// Convenience import for binding traits.
+pub mod prelude {
+    pub use super::{
+        FloatVector as _, FloatVector2 as _, FloatVector3 as _, FloatVector4 as _, Quat as _,
+        SignedVector as _, SignedVector2 as _, Vector as _, Vector2 as _, Vector3 as _,
+        Vector4 as _,
+    };
+}
 
 macro_rules! forward_impl {
     ($base:ty => fn $name:ident ( &self $(, $arg:ident : $arg_ty:ty)*) -> $ret:ty) => {
