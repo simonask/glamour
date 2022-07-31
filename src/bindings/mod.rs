@@ -25,9 +25,9 @@ pub use vec::*;
 /// Convenience import for binding traits.
 pub mod prelude {
     pub use super::{
-        FloatVector as _, FloatVector2 as _, FloatVector3 as _, FloatVector4 as _,
+        FloatVector as _, FloatVector2 as _, FloatVector3 as _, FloatVector4 as _, Quat as _,
         SignedVector as _, SignedVector2 as _, Vector as _, Vector2 as _, Vector3 as _,
-        Vector4 as _, Quat as _,
+        Vector4 as _,
     };
 }
 
