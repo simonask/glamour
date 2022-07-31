@@ -12,7 +12,7 @@
 use crate::{
     bindings::prelude::*,
     scalar::{FloatScalar, SignedScalar},
-    AsRaw, Scalar, ToRaw, Unit, Vector2, Vector3, Vector4,
+    AsRaw, Scalar, ToRaw, Unit, Vector2, Vector3, Vector4, FromRaw
 };
 use core::ops::Mul;
 
@@ -214,7 +214,9 @@ impl<T: Unit> ToRaw for Point2<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Point2<T> {
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
@@ -236,7 +238,9 @@ impl<T: Unit> ToRaw for Point3<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Point3<T> {
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
@@ -251,13 +255,16 @@ impl<T: Unit> AsRaw for Point3<T> {
         bytemuck::cast_mut(self)
     }
 }
+
 impl<T: Unit> ToRaw for Point4<T> {
     type Raw = <T::Scalar as Scalar>::Vec4;
 
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Point4<T> {
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }

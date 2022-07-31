@@ -171,7 +171,6 @@ pub trait Matrix4: Matrix + Mul<Self::Vec4, Output = Self::Vec4> {
     ) -> Self;
 
     fn from_diagonal(diagonal: Self::Vec4) -> Self;
-    fn from_angle(angle: Self::Scalar) -> Self;
     fn from_rotation_translation(
         rotation: <Self::Scalar as FloatScalar>::Quat,
         translation: Self::Vec3,
@@ -319,7 +318,6 @@ impl Matrix4 for glam::Mat4 {
     forward_impl!(glam::Mat4 => fn orthographic_rh(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self);
 
     forward_impl!(glam::Mat4 => fn from_diagonal(diagonal: Self::Vec4) -> Self);
-    forward_impl!(glam::Mat4 => fn from_angle(angle: Self::Scalar) -> Self);
     forward_impl!(glam::Mat4 => fn from_rotation_translation(
         rotation: <Self::Scalar as FloatScalar>::Quat,
         translation: Self::Vec3
@@ -369,7 +367,6 @@ impl Matrix4 for glam::DMat4 {
     forward_impl!(glam::DMat4 => fn orthographic_rh(left: f64, right: f64, bottom: f64, top: f64, near: f64, far: f64) -> Self);
 
     forward_impl!(glam::DMat4 => fn from_diagonal(diagonal: Self::Vec4) -> Self);
-    forward_impl!(glam::DMat4 => fn from_angle(angle: Self::Scalar) -> Self);
     forward_impl!(glam::DMat4 => fn from_rotation_translation(
         rotation: <Self::Scalar as FloatScalar>::Quat,
         translation: Self::Vec3

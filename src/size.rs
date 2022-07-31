@@ -1,7 +1,7 @@
 //! Size vectors
 
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, AsRaw, Scalar, ToRaw, Unit, Vector2, Vector3,
+    bindings::prelude::*, scalar::FloatScalar, AsRaw, Scalar, ToRaw, FromRaw, Unit, Vector2, Vector3,
 };
 
 /// 2D size.
@@ -45,7 +45,9 @@ impl<T: Unit> ToRaw for Size2<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Size2<T> {
     #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
@@ -71,7 +73,9 @@ impl<T: Unit> ToRaw for Size3<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Size3<T> {
     #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)

@@ -1,4 +1,4 @@
-/// By-value conversion to/from glam types.
+/// By-value conversion to glam types.
 ///
 /// This trait imposes no alignment requirements.
 pub trait ToRaw: Sized {
@@ -7,7 +7,12 @@ pub trait ToRaw: Sized {
 
     /// By-value conversion to `Self::Raw`.
     fn to_raw(self) -> Self::Raw;
+}
 
+/// By-value conversion from glam types.
+///
+/// This trait imposes no alignment requirements.
+pub trait FromRaw: ToRaw {
     /// By-value conversion from `Self::Raw`.
     fn from_raw(raw: Self::Raw) -> Self;
 }
@@ -33,7 +38,9 @@ macro_rules! impl_identity {
             fn to_raw(self) -> Self::Raw {
                 self
             }
+        }
 
+        impl FromRaw for $t {
             fn from_raw(raw: Self::Raw) -> Self {
                 raw
             }
@@ -74,10 +81,6 @@ where
     fn to_raw(self) -> Self::Raw {
         self.as_raw()
     }
-
-    fn from_raw(_: Self::Raw) -> Self {
-        panic!("ref from raw conversion unsupported")
-    }
 }
 
 impl<T, const N: usize> ToRaw for [T; N]
@@ -89,7 +92,13 @@ where
     fn to_raw(self) -> Self::Raw {
         self.map(T::to_raw)
     }
+}
 
+
+impl<T, const N: usize> FromRaw for [T; N]
+where
+    T: FromRaw,
+{
     fn from_raw(raw: Self::Raw) -> Self {
         raw.map(T::from_raw)
     }
@@ -105,7 +114,10 @@ where
     fn to_raw(self) -> Self::Raw {
         (self.0.to_raw(), self.1.to_raw())
     }
+}
 
+impl<A, B> FromRaw for (A, B) where A: FromRaw, B: FromRaw
+{
     fn from_raw((a, b): Self::Raw) -> Self {
         (A::from_raw(a), B::from_raw(b))
     }
@@ -120,7 +132,9 @@ where
     fn to_raw(self) -> Self::Raw {
         self.map(T::to_raw)
     }
+}
 
+impl<T> FromRaw for Option<T> where T: FromRaw {
     fn from_raw(raw: Self::Raw) -> Self {
         raw.map(T::from_raw)
     }

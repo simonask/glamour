@@ -46,7 +46,9 @@ impl<T: FloatScalar> ToRaw for Matrix2<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: FloatScalar> FromRaw for Matrix2<T> {
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
@@ -92,7 +94,9 @@ impl<T: FloatScalar> ToRaw for Matrix3<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: FloatScalar> FromRaw for Matrix3<T> {
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
@@ -151,7 +155,9 @@ impl<T: FloatScalar> ToRaw for Matrix4<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: FloatScalar> FromRaw for Matrix4<T> {
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
     }
@@ -771,8 +777,6 @@ where
         ) -> Self;
         #[doc = "Matrix from diagonal."]
         pub fn from_diagonal(diagonal: Vector4<T>) -> Self;
-        #[doc = "Affine 2D rotation matrix."]
-        pub fn from_angle(angle: Angle<T>) -> Self;
         #[doc = "Affine 3D rotation matrix."]
         pub fn from_axis_angle(axis: Vector3<T>, angle: Angle<T>) -> Self;
         #[doc = "Scaling matrix."]

@@ -15,7 +15,7 @@ use crate::scalar::SignedScalar;
 use crate::{
     bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
 };
-use crate::{Angle, AsRaw, ToRaw};
+use crate::{Angle, AsRaw, ToRaw, FromRaw};
 
 /// Vector swizzling by const generics.
 ///
@@ -788,7 +788,9 @@ impl<T: Unit> ToRaw for Vector2<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Vector2<T> {
     #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
@@ -814,7 +816,9 @@ impl<T: Unit> ToRaw for Vector3<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Vector3<T> {
     #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)
@@ -840,7 +844,9 @@ impl<T: Unit> ToRaw for Vector4<T> {
     fn to_raw(self) -> Self::Raw {
         bytemuck::cast(self)
     }
+}
 
+impl<T: Unit> FromRaw for Vector4<T> {
     #[inline]
     fn from_raw(raw: Self::Raw) -> Self {
         bytemuck::cast(raw)

@@ -77,7 +77,9 @@ impl<T> ToRaw for Angle<T> {
     fn to_raw(self) -> Self::Raw {
         self.radians
     }
+}
 
+impl<T> FromRaw for Angle<T> {
     fn from_raw(raw: Self::Raw) -> Self {
         Angle { radians: raw }
     }
