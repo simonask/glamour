@@ -1,3 +1,5 @@
+#![allow(missing_docs, clippy::return_self_not_must_use)]
+
 use crate::scalar::{FloatScalar, Scalar};
 
 use super::*;
