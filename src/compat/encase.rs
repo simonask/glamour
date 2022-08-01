@@ -1,5 +1,3 @@
-#![cfg_attr(coverage, no_coverage)]
-
 use crate::{
     scalar::FloatScalar, AsRaw, FromRaw, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Scalar,
     Size2, Size3, ToRaw, Unit, Vector2, Vector3, Vector4,
@@ -36,6 +34,7 @@ macro_rules! impl_encase_vector {
             T::Scalar: VectorScalar,
         {
             #[inline]
+            #[cfg_attr(coverage, no_coverage)]
             fn as_ref_parts(&self) -> &[T::Scalar; $arity] {
                 self.as_array()
             }
@@ -47,6 +46,7 @@ macro_rules! impl_encase_vector {
             T::Scalar: VectorScalar,
         {
             #[inline]
+            #[cfg_attr(coverage, no_coverage)]
             fn as_mut_parts(&mut self) -> &mut [T::Scalar; $arity] {
                 self.as_array_mut()
             }
@@ -58,6 +58,7 @@ macro_rules! impl_encase_vector {
             T::Scalar: VectorScalar,
         {
             #[inline]
+            #[cfg_attr(coverage, no_coverage)]
             fn from_parts(parts: [T::Scalar; $arity]) -> Self {
                 Self::from_array(parts)
             }
@@ -69,6 +70,7 @@ macro_rules! impl_encase_vector {
             <T::Scalar as Scalar>::$raw_name: CreateFrom,
         {
             #[inline]
+            #[cfg_attr(coverage, no_coverage)]
             fn create_from<B>(reader: &mut Reader<B>) -> Self
             where
                 B: BufferRef,
@@ -85,6 +87,7 @@ macro_rules! impl_encase_vector {
             <T::Scalar as Scalar>::$raw_name: ReadFrom,
         {
             #[inline]
+            #[cfg_attr(coverage, no_coverage)]
             fn read_from<B>(&mut self, reader: &mut Reader<B>)
             where
                 B: BufferRef,
@@ -99,6 +102,7 @@ macro_rules! impl_encase_vector {
             <T::Scalar as Scalar>::$raw_name: WriteInto,
         {
             #[inline]
+            #[cfg_attr(coverage, no_coverage)]
             fn write_into<B>(&self, writer: &mut Writer<B>)
             where
                 B: BufferMut,
@@ -133,6 +137,7 @@ macro_rules! impl_encase_matrix {
             T: FloatScalar + MatrixScalar,
             T::$raw_name: FromMatrixParts<T, $n, $n>,
         {
+            #[cfg_attr(coverage, no_coverage)]
             fn from_parts(parts: [[T; $n]; $n]) -> Self {
                 Self::from_raw(<<Self as ToRaw>::Raw>::from_parts(parts))
             }
@@ -143,6 +148,7 @@ macro_rules! impl_encase_matrix {
             T: FloatScalar + MatrixScalar,
             T::$raw_name: AsRefMatrixParts<T, $n, $n>,
         {
+            #[cfg_attr(coverage, no_coverage)]
             fn as_ref_parts(&self) -> &[[T; $n]; $n] {
                 self.as_raw().as_ref_parts()
             }
@@ -153,6 +159,7 @@ macro_rules! impl_encase_matrix {
             T: FloatScalar + MatrixScalar,
             T::$raw_name: AsMutMatrixParts<T, $n, $n>,
         {
+            #[cfg_attr(coverage, no_coverage)]
             fn as_mut_parts(&mut self) -> &mut [[T; $n]; $n] {
                 self.as_raw_mut().as_mut_parts()
             }
@@ -163,6 +170,7 @@ macro_rules! impl_encase_matrix {
             T: FloatScalar + MatrixScalar,
             T::$raw_name: CreateFrom,
         {
+            #[cfg_attr(coverage, no_coverage)]
             #[inline]
             fn create_from<B>(reader: &mut Reader<B>) -> Self
             where
@@ -179,6 +187,7 @@ macro_rules! impl_encase_matrix {
             T: FloatScalar + MatrixScalar,
             T::$raw_name: ReadFrom,
         {
+            #[cfg_attr(coverage, no_coverage)]
             #[inline]
             fn read_from<B>(&mut self, reader: &mut Reader<B>)
             where
@@ -193,6 +202,7 @@ macro_rules! impl_encase_matrix {
             T: FloatScalar + MatrixScalar,
             T::$raw_name: WriteInto,
         {
+            #[cfg_attr(coverage, no_coverage)]
             #[inline]
             fn write_into<B>(&self, writer: &mut Writer<B>)
             where
