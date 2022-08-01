@@ -67,7 +67,10 @@ let vector_raw: &glam::Vec4 = vector.as_raw();
   duplicate dependency on `glam`: One at the currently targeted version
   (0.21.x), and one at glam 0.20.0.
 - `bevy_0_7_0`: Enables the `glam_0_20` feature, which is needed to perform
-  conversions to/from the math types exposed by Bevy 0.7.
+  conversions to/from the math types exposed by Bevy 0.7. This flag is not
+  needed when using Bevy 0.8.
+- `encase`: Enables implementations of [`encase::ShaderType`] for vector and
+  matrix types, which enables them for use in GPU shaders.
 
 # Advantages
 
