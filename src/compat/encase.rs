@@ -1,3 +1,5 @@
+#![cfg_attr(coverage, no_coverage)]
+
 use crate::{
     scalar::FloatScalar, AsRaw, FromRaw, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Scalar,
     Size2, Size3, ToRaw, Unit, Vector2, Vector3, Vector4,
