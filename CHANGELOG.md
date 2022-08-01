@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Almost 100% of the glam vector and matrix APIs are covered.
 - Added doc links to glam equivalents for almost all methods.
 - Conversion to/from glam types formalized in `ToRaw`/`FromRaw` traits.
+- Feature gate `encase`, which enables implementations of [`encase`] traits for
+  all types. This allows host-sharing of `glamour` types with WGSL shaders.
 
 ### Removed
 - The `Primitive` trait is removed, as `Scalar` is no longer directly
