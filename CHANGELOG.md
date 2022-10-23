@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Conversion to/from glam types formalized in `ToRaw`/`FromRaw` traits.
 - Feature gate `encase`, which enables implementations of [`encase`] traits for
   all types. This allows host-sharing of `glamour` types with WGSL shaders.
+- `Box2`/`Box3` rounding (in, out, normal).
 
 ### Removed
 - The `Primitive` trait is removed, as `Scalar` is no longer directly
@@ -23,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced `Lerp` trait with regular methods.
 - Removed `UnitTypes` helper traits. Method availability can be determined by
   `Unit::Scalar` bounds.
+
+### Bugfixes
+- `Rect::round_out()` now converts to `Box2` before rounding, which gives
+  correct results.
 
 ### Internal changes
 - Major simplification of traits and macros. It should be way easier to grok the
