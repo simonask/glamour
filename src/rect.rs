@@ -255,7 +255,9 @@ where
 
     /// Round all coordinates towards the center of the rect.
     ///
-    /// `origin` is rounded up, and `size` is rounded down.
+    /// This function needs to convert the rect to a [`Box2`] before rounding,
+    /// which loses both performance and precision. Use [`Box2`] if you need to
+    /// perform this operation frequently.
     ///
     /// Note: This may create an empty rect from a non-empty rect.
     ///
@@ -265,18 +267,19 @@ where
     /// # use glamour::prelude::*;
     /// let r = Rect::<f32>::new((0.51, 0.49), (1.51, 1.49));
     /// let r = r.round_in();
-    /// assert_eq!(r, Rect::<f32>::new((1.0, 1.0), (1.0, 1.0)));
+    /// assert_eq!(r, Rect::<f32>::new((1.0, 1.0), (1.0, 0.0)));
     /// ```
     #[inline]
     #[must_use]
     pub fn round_in(self) -> Self {
-        Rect {
-            origin: self.origin.ceil(),
-            size: self.size.floor(),
-        }
+        self.to_box2().round_in().to_rect()
     }
 
     /// Round all coordinates away from the center of the rect.
+    ///
+    /// This function needs to convert the rect to a [`Box2`] before rounding,
+    /// which loses both performance and precision. Use [`Box2`] if you need to
+    /// perform this operation frequently.
     ///
     /// Note: As opposed to [`Rect::round()`] and [`Rect::round_in()`], this
     /// will not create an empty rect from a non-empty rect.
@@ -286,15 +289,12 @@ where
     /// # use glamour::prelude::*;
     /// let r = Rect::<f32>::new((0.51, 0.49), (1.51, 1.49));
     /// let r = r.round_out();
-    /// assert_eq!(r, Rect::new((0.0, 0.0), (2.0, 2.0)));
+    /// assert_eq!(r, Rect::new((0.0, 0.0), (3.0, 2.0)));
     /// ```
     #[inline]
     #[must_use]
     pub fn round_out(self) -> Self {
-        Rect {
-            origin: self.origin.floor(),
-            size: self.size.ceil(),
-        }
+        self.to_box2().round_out().to_rect()
     }
 
     /// Linear interpolation between two rects.
@@ -786,6 +786,21 @@ mod tests {
         let (origin, size) = r.to_tuple();
         assert_eq!(origin, (10, 10));
         assert_eq!(size, (20, 20));
+    }
+
+    #[test]
+    fn round_out() {
+        let rect = RectF::new((0.8, 0.8), (0.1, 0.1)).round_out();
+        assert_eq!(rect.origin, (0.0, 0.0));
+        assert_eq!(rect.size, (1.0, 1.0));
+
+        let rect = RectF::new((0.8, 0.8), (0.3, 0.3)).round_out();
+        assert_eq!(rect.origin, (0.0, 0.0));
+        assert_eq!(rect.size, (2.0, 2.0));
+
+        let rect = RectF::new((0.1, 0.1), (0.3, 0.3)).round_out();
+        assert_eq!(rect.origin, (0.0, 0.0));
+        assert_eq!(rect.size, (1.0, 1.0));
     }
 }
 

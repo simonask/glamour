@@ -430,6 +430,72 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
+    /// Round coordinates to the nearest integer.
+    ///
+    /// Note: This function makes no attempt to avoid creating "degenerate"
+    /// boxes, where `min >= max`.
+    ///
+    /// ### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let b = Box2::<f32>::new((0.3, 0.3), (2.7, 2.7));
+    /// let rounded = b.round();
+    /// assert_eq!(rounded.min, (0.0, 0.0));
+    /// assert_eq!(rounded.max, (3.0, 3.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn round(self) -> Self {
+        Box2 {
+            min: self.min.round(),
+            max: self.max.round(),
+        }
+    }
+
+    /// Round towards from the center of the box.
+    ///
+    /// Note: This function makes no attempt to avoid creating "degenerate"
+    /// boxes, where `min >= max`.
+    ///
+    /// ### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let b = Box2::<f32>::new((0.3, 0.3), (2.7, 2.7));
+    /// let rounded = b.round_in();
+    /// assert_eq!(rounded.min, (1.0, 1.0));
+    /// assert_eq!(rounded.max, (2.0, 2.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn round_in(self) -> Self {
+        Box2 {
+            min: self.min.ceil(),
+            max: self.max.floor(),
+        }
+    }
+
+    /// Round away from the center of the box.
+    ///
+    /// Note: This function can only create "degenerate" boxes (where min >=
+    /// max) if the box was already degenerate.
+    ///
+    /// ### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let b = Box2::<f32>::new((0.7, 0.7), (1.4, 1.4));
+    /// let rounded = b.round_out();
+    /// assert_eq!(rounded.min, (0.0, 0.0));
+    /// assert_eq!(rounded.max, (2.0, 2.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn round_out(self) -> Self {
+        Box2 {
+            min: self.min.floor(),
+            max: self.max.ceil(),
+        }
+    }
+
     /// Linear interpolation between boxes.
     #[must_use]
     pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
@@ -444,6 +510,72 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
+    /// Round coordinates to the nearest integer.
+    ///
+    /// Note: This function makes no attempt to avoid creating "degenerate"
+    /// boxes, where `min >= max`.
+    ///
+    /// ### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let b = Box3::<f32>::new((0.3, 0.3, 0.3), (2.7, 2.7, 2.7));
+    /// let rounded = b.round();
+    /// assert_eq!(rounded.min, (0.0, 0.0, 0.0));
+    /// assert_eq!(rounded.max, (3.0, 3.0, 3.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn round(self) -> Self {
+        Box3 {
+            min: self.min.round(),
+            max: self.max.round(),
+        }
+    }
+
+    /// Round towards from the center of the box.
+    ///
+    /// Note: This function makes no attempt to avoid creating "degenerate"
+    /// boxes, where `min >= max`.
+    ///
+    /// ### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let b = Box3::<f32>::new((0.3, 0.3, 0.3), (2.7, 2.7, 2.7));
+    /// let rounded = b.round_in();
+    /// assert_eq!(rounded.min, (1.0, 1.0, 1.0));
+    /// assert_eq!(rounded.max, (2.0, 2.0, 2.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn round_in(self) -> Self {
+        Box3 {
+            min: self.min.ceil(),
+            max: self.max.floor(),
+        }
+    }
+
+    /// Round away from the center of the box.
+    ///
+    /// Note: This function can only create "degenerate" boxes (where min >=
+    /// max) if the box was already degenerate.
+    ///
+    /// ### Example
+    /// ```rust
+    /// # use glamour::prelude::*;
+    /// let b = Box3::<f32>::new((0.7, 0.7, 0.7), (1.4, 1.4, 1.4));
+    /// let rounded = b.round_out();
+    /// assert_eq!(rounded.min, (0.0, 0.0, 0.0));
+    /// assert_eq!(rounded.max, (2.0, 2.0, 2.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn round_out(self) -> Self {
+        Box3 {
+            min: self.min.floor(),
+            max: self.max.ceil(),
+        }
+    }
+
     /// Linear interpolation between boxes.
     #[must_use]
     pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
