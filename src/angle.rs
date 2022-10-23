@@ -12,7 +12,7 @@ use crate::{
 
 /// Angle in radians.
 #[repr(transparent)]
-#[derive(Clone, Copy, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Angle<T = f32> {
     /// Angle in radians.

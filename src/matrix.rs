@@ -27,7 +27,7 @@ use bytemuck::{Pod, Zeroable};
     ),
     repr(C, align(16))
 )]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix2<T> {
@@ -70,7 +70,7 @@ impl<T: FloatScalar> AsRaw for Matrix2<T> {
 ///
 /// Alignment: Same as `T`.
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix3<T> {
@@ -124,7 +124,7 @@ impl<T: FloatScalar> AsRaw for Matrix3<T> {
     ),
     repr(C, align(16))
 )]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 pub struct Matrix4<T> {

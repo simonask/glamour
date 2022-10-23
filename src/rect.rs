@@ -477,7 +477,7 @@ where
         }
 
         let origin = self.origin.min(other.origin);
-        let max = (&self).max().max((&other).max());
+        let max = self.max().max(other.max());
         let size = (max - origin).to_size();
 
         Rect { origin, size }
