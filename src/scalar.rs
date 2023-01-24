@@ -1,3 +1,5 @@
+use core::ops::{BitAnd, BitOr, BitXor, Not};
+
 use crate::traits::marker::PodValue;
 use crate::{bindings, AsRaw, FromRaw, ToRaw};
 
@@ -26,13 +28,32 @@ pub trait Scalar:
 {
     /// The underlying 2D vector type for this scalar ([`glam::Vec2`],
     /// [`glam::DVec2`], [`glam::IVec2`], or [`glam::UVec2`]).
-    type Vec2: bindings::Vector2<Scalar = Self>;
+    type Vec2: bindings::Vector2<Scalar = Self, Mask = Self::BVec2>;
     /// The underlying 3D vector type for this scalar ([`glam::Vec3`],
     /// [`glam::DVec3`], [`glam::IVec3`], or [`glam::UVec3`]).
-    type Vec3: bindings::Vector3<Scalar = Self>;
+    type Vec3: bindings::Vector3<Scalar = Self, Mask = Self::BVec3>;
     /// The underlying 4D vector type for this scalar ([`glam::Vec4`],
     /// [`glam::DVec4`], [`glam::IVec4`], or [`glam::UVec4`]).
-    type Vec4: bindings::Vector4<Scalar = Self>;
+    type Vec4: bindings::Vector4<Scalar = Self, Mask = Self::BVec4>;
+
+    /// The bitmask used for comparison of 2D vectors of this type.
+    type BVec2: BitAnd<Output = Self::BVec2>
+    + BitOr<Output = Self::BVec2>
+    + Not<Output = Self::BVec2>
+    + BitXor<Output = Self::BVec2>
+    + FromRaw<Raw = Self::BVec2>;
+    /// The bitmask used for comparison of 3D vectors of this type.
+    type BVec3: BitAnd<Output = Self::BVec3>
+    + BitOr<Output = Self::BVec3>
+    + Not<Output = Self::BVec3>
+    + BitXor<Output = Self::BVec3>
+    + FromRaw<Raw = Self::BVec3>;
+    /// The bitmask used for comparison of 4D vectors of this type.
+    type BVec4: BitAnd<Output = Self::BVec4>
+    + BitOr<Output = Self::BVec4>
+    + Not<Output = Self::BVec4>
+    + BitXor<Output = Self::BVec4>
+    + FromRaw<Raw = Self::BVec4>;
 
     /// Zero.
     const ZERO: Self;
@@ -62,9 +83,9 @@ pub trait Scalar:
 /// Signed scalar types (`i32`, `f32`, `f64`).
 pub trait SignedScalar: Scalar<Vec2 = Self::Vec2s, Vec3 = Self::Vec3s, Vec4 = Self::Vec4s> {
     const NEG_ONE: Self;
-    type Vec2s: bindings::SignedVector2<Scalar = Self>;
-    type Vec3s: bindings::SignedVector<Scalar = Self>;
-    type Vec4s: bindings::SignedVector<Scalar = Self>;
+    type Vec2s: bindings::SignedVector2<Scalar = Self, Mask = Self::BVec2>;
+    type Vec3s: bindings::SignedVector<Scalar = Self, Mask = Self::BVec3>;
+    type Vec4s: bindings::SignedVector<Scalar = Self, Mask = Self::BVec4>;
 }
 
 pub trait FloatScalar:
@@ -73,9 +94,9 @@ pub trait FloatScalar:
     + approx::RelativeEq<Epsilon = Self>
     + approx::UlpsEq<Epsilon = Self>
 {
-    type Vec2f: bindings::FloatVector2<Scalar = Self>;
-    type Vec3f: bindings::FloatVector3<Scalar = Self>;
-    type Vec4f: bindings::FloatVector4<Scalar = Self>;
+    type Vec2f: bindings::FloatVector2<Scalar = Self, Mask = Self::BVec2>;
+    type Vec3f: bindings::FloatVector3<Scalar = Self, Mask = Self::BVec3>;
+    type Vec4f: bindings::FloatVector4<Scalar = Self, Mask = Self::BVec4>;
 
     type Mat2: bindings::Matrix2<
         Scalar = Self,
@@ -107,6 +128,19 @@ impl Scalar for f32 {
     type Vec2 = glam::Vec2;
     type Vec3 = glam::Vec3;
     type Vec4 = glam::Vec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+
+    #[cfg(not(all(
+        target_feature = "sse2",
+        not(any(feature = "core-simd", feature = "scalar-math"))
+    )))]
+    type BVec4 = glam::BVec4;
+    #[cfg(all(
+        target_feature = "sse2",
+        not(any(feature = "core-simd", feature = "scalar-math"))
+    ))]
+    type BVec4 = glam::BVec4A;
 
     fn is_finite(self) -> bool {
         num_traits::Float::is_finite(self)
@@ -140,6 +174,9 @@ impl Scalar for f64 {
     type Vec2 = glam::DVec2;
     type Vec3 = glam::DVec3;
     type Vec4 = glam::DVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
 
     fn is_finite(self) -> bool {
         num_traits::Float::is_finite(self)
@@ -173,6 +210,9 @@ impl Scalar for i32 {
     type Vec2 = glam::IVec2;
     type Vec3 = glam::IVec3;
     type Vec4 = glam::IVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
 
     fn is_finite(self) -> bool {
         true
@@ -194,6 +234,9 @@ impl Scalar for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
 
     fn is_finite(self) -> bool {
         true
