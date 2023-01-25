@@ -258,9 +258,6 @@ impl_vector3!(glam::DVec3, glam::DVec2, glam::DVec4);
 impl_vector3!(glam::IVec3, glam::IVec2, glam::IVec4);
 impl_vector3!(glam::UVec3, glam::UVec2, glam::UVec4);
 
-// Note: glam::Vec4 uses BVec4A instead of BVec4, so we provide a manual impl.
-//
-// See https://github.com/bitshifter/glam-rs/issues/306.
 impl_vector4!(glam::DVec4, glam::DVec3);
 impl_vector4!(glam::IVec4, glam::IVec3);
 impl_vector4!(glam::UVec4, glam::UVec3);

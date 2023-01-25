@@ -131,16 +131,25 @@ impl Scalar for f32 {
     type BVec2 = glam::BVec2;
     type BVec3 = glam::BVec3;
 
-    #[cfg(not(all(
-        target_feature = "sse2",
-        not(any(feature = "core-simd", feature = "scalar-math"))
-    )))]
-    type BVec4 = glam::BVec4;
     #[cfg(all(
-        target_feature = "sse2",
-        not(any(feature = "core-simd", feature = "scalar-math"))
+        any(
+            target_feature = "sse2",
+            target_feature = "simd128",
+            feature = "core-simd"
+        ),
+        not(feature = "scalar-math"),
     ))]
     type BVec4 = glam::BVec4A;
+
+    #[cfg(not(all(
+        any(
+            target_feature = "sse2",
+            target_feature = "simd128",
+            feature = "core-simd"
+        ),
+        not(feature = "scalar-math"),
+    )))]
+    type BVec4 = glam::BVec4;
 
     fn is_finite(self) -> bool {
         num_traits::Float::is_finite(self)

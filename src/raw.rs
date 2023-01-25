@@ -71,8 +71,12 @@ impl_identity!(glam::BVec3);
 impl_identity!(glam::BVec4);
 
 #[cfg(all(
-    target_feature = "sse2",
-    not(any(feature = "core-simd", feature = "scalar-math"))
+    any(
+        target_feature = "sse2",
+        target_feature = "simd128",
+        feature = "core-simd"
+    ),
+    not(feature = "scalar-math"),
 ))]
 impl_identity!(glam::BVec4A);
 
