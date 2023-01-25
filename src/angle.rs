@@ -153,7 +153,7 @@ impl<T: Scalar + AngleConsts> core::fmt::Debug for Angle<T> {
         } else if r == T::FRAG_PI_8 {
             f.write_str("π/8")?;
         } else {
-            write!(f, "{:0.5}", r)?;
+            write!(f, "{r:0.5}")?;
         }
         f.write_char(')')
     }

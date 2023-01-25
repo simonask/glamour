@@ -15,7 +15,7 @@ categories = ["game-development", "mathematics", "graphics", "no-std"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-glam = { version = "0.21.1", default-features = false, features = [
+glam = { version = "0.22.0", default-features = false, features = [
     "bytemuck",
     "approx",
 ] }
@@ -33,30 +33,23 @@ version = "^0.5"
 package = "mint"
 optional = true
 
-[dependencies.glam_0_20]
-version = "0.20.0"
-package = "glam"
-optional = true
-
 [dependencies.encase]
-version = "0.3.0"
+version = "0.4.1"
 features = ["glam"]
 optional = true
 
 [features]
 default = ["std"]
 std = ["glam/std", "num-traits/std"]
-scalar-math = ["glam/scalar-math", "glam_0_20?/scalar-math"]
+scalar-math = ["glam/scalar-math"]
 serde = ["dep:serde", "glam/serde"]
+core-simd = ["glam/core-simd"]
 
 # Enable conversions to `mint` types
 mint = ["dep:mint", "glam/mint"]
 
-# Enable conversions to `bevy` 0.7.x math types (which uses glam 0.20.0).
-bevy_0_7_0 = ["glam_0_20"]
-
 # Required for compiling without `std`.
-libm = ["glam/libm", "num-traits/libm", "glam_0_20?/libm"]
+libm = ["glam/libm", "num-traits/libm"]
 
 [dev-dependencies]
 euclid = "^0.22"

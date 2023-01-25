@@ -360,7 +360,10 @@ impl<T: Unit> Vector2<T> {
     }
 
     crate::forward_constructors!(2, glam::Vec2);
-    crate::forward_comparison!(glam::BVec2, glam::Vec2);
+    crate::forward_comparison!(
+        <<T::Scalar as Scalar>::Vec2 as crate::bindings::Vector>::Mask,
+        glam::Vec2
+    );
 
     crate::casting_interface!(Vector2 {
         x: T::Scalar,
@@ -402,7 +405,10 @@ where
         y: <T::Scalar as FloatScalar>::NAN,
     };
 
-    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
+    crate::forward_float_ops!(
+        <<T::Scalar as Scalar>::Vec2 as crate::bindings::Vector>::Mask,
+        glam::Vec2
+    );
     crate::forward_float_vector_ops!(glam::Vec2);
 
     crate::forward_to_raw!(
@@ -497,7 +503,10 @@ impl<T: Unit> Vector3<T> {
     }
 
     crate::forward_constructors!(3, glam::Vec3);
-    crate::forward_comparison!(glam::BVec3, glam::Vec3);
+    crate::forward_comparison!(
+        <<T::Scalar as Scalar>::Vec3 as crate::bindings::Vector>::Mask,
+        glam::Vec3
+    );
 
     crate::casting_interface!(Vector3 {
         x: T::Scalar,
@@ -542,7 +551,10 @@ where
         z: <T::Scalar as FloatScalar>::NAN,
     };
 
-    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
+    crate::forward_float_ops!(
+        <<T::Scalar as Scalar>::Vec3 as crate::bindings::Vector>::Mask,
+        glam::Vec3
+    );
     crate::forward_float_vector_ops!(glam::Vec3);
 
     crate::forward_to_raw!(
@@ -680,7 +692,10 @@ impl<T: Unit> Vector4<T> {
     }
 
     crate::forward_constructors!(4, glam::Vec4);
-    crate::forward_comparison!(glam::BVec4, glam::Vec4);
+    crate::forward_comparison!(
+        <<T::Scalar as Scalar>::Vec4 as crate::bindings::Vector>::Mask,
+        glam::Vec4
+    );
 
     crate::casting_interface!(Vector4 {
         x: T::Scalar,
@@ -726,7 +741,10 @@ where
         w: <T::Scalar as FloatScalar>::NAN,
     };
 
-    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
+    crate::forward_float_ops!(
+        <<T::Scalar as Scalar>::Vec4 as crate::bindings::Vector>::Mask,
+        glam::Vec4
+    );
     crate::forward_float_vector_ops!(glam::Vec4);
 }
 
@@ -1150,19 +1168,22 @@ mod tests {
         let v2 = Vec2::new(1.0, core::f32::NAN);
         assert!(v2.is_nan());
         assert!(!v2.is_finite());
-        assert_eq!(v2.is_nan_mask(), glam::BVec2::new(false, true));
+        assert_eq!(v2.is_nan_mask(), <f32 as Scalar>::BVec2::new(false, true));
 
         let v3 = Vec3::new(1.0, core::f32::NAN, 3.0);
         assert!(v3.is_nan());
         assert!(!v3.is_finite());
-        assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
+        assert_eq!(
+            v3.is_nan_mask(),
+            <f32 as Scalar>::BVec3::new(false, true, false)
+        );
 
         let v4 = Vec4::new(1.0, 2.0, core::f32::NAN, 4.0);
         assert!(v4.is_nan());
         assert!(!v4.is_finite());
         assert_eq!(
             v4.is_nan_mask(),
-            glam::BVec4::new(false, false, true, false)
+            <f32 as Scalar>::BVec4::new(false, false, true, false)
         );
 
         assert!(Vec2::NAN.is_nan());
@@ -1292,12 +1313,12 @@ mod tests {
         let gt = a.cmpgt(b);
         let ge = a.cmpge(b);
 
-        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
-        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
-        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
-        assert_eq!(le, glam::BVec4::new(true, true, false, false));
-        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
-        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
+        assert_eq!(eq, <f32 as Scalar>::BVec4::new(false, true, false, false));
+        assert_eq!(ne, <f32 as Scalar>::BVec4::new(true, false, true, true));
+        assert_eq!(lt, <f32 as Scalar>::BVec4::new(true, false, false, false));
+        assert_eq!(le, <f32 as Scalar>::BVec4::new(true, true, false, false));
+        assert_eq!(gt, <f32 as Scalar>::BVec4::new(false, false, true, true));
+        assert_eq!(ge, <f32 as Scalar>::BVec4::new(false, true, true, true));
 
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
@@ -1317,12 +1338,12 @@ mod tests {
         let gt = a.cmpgt(b);
         let ge = a.cmpge(b);
 
-        assert_eq!(eq, glam::BVec4::new(false, true, false, false));
-        assert_eq!(ne, glam::BVec4::new(true, false, true, true));
-        assert_eq!(lt, glam::BVec4::new(true, false, false, false));
-        assert_eq!(le, glam::BVec4::new(true, true, false, false));
-        assert_eq!(gt, glam::BVec4::new(false, false, true, true));
-        assert_eq!(ge, glam::BVec4::new(false, true, true, true));
+        assert_eq!(eq, <f64 as Scalar>::BVec4::new(false, true, false, false));
+        assert_eq!(ne, <f64 as Scalar>::BVec4::new(true, false, true, true));
+        assert_eq!(lt, <f64 as Scalar>::BVec4::new(true, false, false, false));
+        assert_eq!(le, <f64 as Scalar>::BVec4::new(true, true, false, false));
+        assert_eq!(gt, <f64 as Scalar>::BVec4::new(false, false, true, true));
+        assert_eq!(ge, <f64 as Scalar>::BVec4::new(false, true, true, true));
 
         assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
         assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);

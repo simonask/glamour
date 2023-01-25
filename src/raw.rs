@@ -69,6 +69,17 @@ impl_identity!(bool);
 impl_identity!(glam::BVec2);
 impl_identity!(glam::BVec3);
 impl_identity!(glam::BVec4);
+
+#[cfg(all(
+    any(
+        target_feature = "sse2",
+        target_feature = "simd128",
+        feature = "core-simd"
+    ),
+    not(feature = "scalar-math"),
+))]
+impl_identity!(glam::BVec4A);
+
 impl_identity!(glam::Quat);
 impl_identity!(glam::DQuat);
 
