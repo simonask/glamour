@@ -8,7 +8,6 @@ FEATURE_SETS=(
   "std"
   "std mint"
   "std serde"
-  "std serde core-simd"
   "std scalar-math"
   # no_std
   "libm mint"
