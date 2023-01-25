@@ -8,14 +8,11 @@ FEATURE_SETS=(
   "std"
   "std mint"
   "std serde"
-  "std glam_0_20 mint"
-  "std glam_0_20 scalar-math"
+  "std serde core-simd"
+  "std scalar-math"
   # no_std
-  "libm"
   "libm mint"
   "libm serde"
-  "libm glam_0_20 mint"
-  "libm glam_0_20 scalar-math"
 )
 
 rustc --version
