@@ -1,6 +1,6 @@
 [package]
 name = "glamour"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
@@ -15,7 +15,7 @@ categories = ["game-development", "mathematics", "graphics", "no-std"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-glam = { version = "0.22.0", default-features = false, features = [
+glam = { version = "0.23.0", default-features = false, features = [
     "bytemuck",
     "approx",
 ] }
@@ -34,7 +34,7 @@ package = "mint"
 optional = true
 
 [dependencies.encase]
-version = "0.4.1"
+version = "0.5.0"
 features = ["glam"]
 optional = true
 
