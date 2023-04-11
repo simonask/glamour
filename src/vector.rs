@@ -1471,6 +1471,39 @@ mod tests {
         let b: Vector3<F32> = mat * a;
         assert_eq!(b, (20.0, 30.0, 1.0));
     }
+
+    fn hash_one<T: core::hash::Hash, H: core::hash::BuildHasher>(
+        build_hasher: &H,
+        value: T,
+    ) -> u64 {
+        use core::hash::Hasher;
+        let mut h = build_hasher.build_hasher();
+        value.hash(&mut h);
+        h.finish()
+    }
+
+    #[derive(Default)]
+    struct PoorHasher(u64);
+
+    impl core::hash::Hasher for PoorHasher {
+        fn finish(&self) -> u64 {
+            self.0
+        }
+
+        fn write(&mut self, bytes: &[u8]) {
+            for byte in bytes {
+                self.0 = self.0.rotate_left(4) ^ *byte as u64;
+            }
+        }
+    }
+
+    #[test]
+    fn hash_equality() {
+        let hasher = core::hash::BuildHasherDefault::<PoorHasher>::default();
+        let h1 = hash_one(&hasher, Vector2::<i32> { x: 123, y: 456 });
+        let h2 = hash_one(&hasher, glam::IVec2::new(123, 456));
+        assert_eq!(h1, h2);
+    }
 }
 
 #[cfg(all(test, feature = "serde"))]

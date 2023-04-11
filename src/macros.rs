@@ -575,6 +575,19 @@ macro_rules! derive_standard_traits {
             T::Scalar: Eq
         {}
 
+        impl<T> core::hash::Hash for $base_type_name<T>
+        where
+            T: Unit,
+            T::Scalar: core::hash::Hash
+        {
+            fn hash<H>(&self, state: &mut H)
+            where
+                H: core::hash::Hasher
+            {
+                $(self.$fields.hash(state);)*
+            }
+        }
+
         impl<T: Unit> approx::AbsDiffEq<Self> for $base_type_name<T> {
             type Epsilon = <T::Scalar as approx::AbsDiffEq>::Epsilon;
 
