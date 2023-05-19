@@ -61,10 +61,10 @@ pub trait Scalar:
     const ONE: Self;
 
     /// Try casting to another scalar type.
-    /// 
+    ///
     /// The cast always succeeds if the scalars have the same underlying type
     /// (i.e., the same `Primitive` associated type).
-    /// 
+    ///
     /// The cast fails under the same conditions where
     /// `num_traits::NumCast::from()` fails.
     #[inline]
@@ -74,7 +74,7 @@ pub trait Scalar:
     }
 
     /// True if the number is not NaN and not infinity.
-    /// 
+    ///
     /// Always true for integer scalars.
     #[must_use]
     fn is_finite(self) -> bool;
@@ -236,6 +236,30 @@ impl SignedScalar for i32 {
     type Vec4s = glam::IVec4;
 }
 
+impl Scalar for i64 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    type Vec2 = glam::I64Vec2;
+    type Vec3 = glam::I64Vec3;
+    type Vec4 = glam::I64Vec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
+}
+
+impl SignedScalar for i64 {
+    const NEG_ONE: Self = -1;
+
+    type Vec2s = glam::I64Vec2;
+    type Vec3s = glam::I64Vec3;
+    type Vec4s = glam::I64Vec4;
+}
+
 impl Scalar for u32 {
     const ZERO: Self = 0;
     const ONE: Self = 1;
@@ -243,6 +267,22 @@ impl Scalar for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
+}
+
+impl Scalar for u64 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    type Vec2 = glam::U64Vec2;
+    type Vec3 = glam::U64Vec3;
+    type Vec4 = glam::U64Vec4;
     type BVec2 = glam::BVec2;
     type BVec3 = glam::BVec3;
     type BVec4 = glam::BVec4;

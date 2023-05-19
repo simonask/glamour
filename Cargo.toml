@@ -15,7 +15,11 @@ categories = ["game-development", "mathematics", "graphics", "no-std"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-glam = { version = "0.23.0", default-features = false, features = [
+# glam = { version = "0.24.0", default-features = false, features = [
+#     "bytemuck",
+#     "approx",
+# ] }
+glam = { git = "https://github.com/simonask/glam-rs.git", branch = "bytemuck-i64-u64", features = [
     "bytemuck",
     "approx",
 ] }

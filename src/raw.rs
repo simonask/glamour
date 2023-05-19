@@ -63,6 +63,8 @@ impl_identity!(f32);
 impl_identity!(f64);
 impl_identity!(i32);
 impl_identity!(u32);
+impl_identity!(i64);
+impl_identity!(u64);
 impl_identity!(usize);
 impl_identity!(isize);
 impl_identity!(bool);
