@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for `i64` and `u64` scalar types based on `glam::I64VecN` and `glam::U64VecN`.
 - Added `INFINITY` and `NEG_INFINITY` associated constants to vector types, and also added the missing `NAN` associated
   constant to `PointN` and `SizeN`.
+- Implemented `Borrow<glam::VecN>` for all vector types, and `Borrow<glamour::VectorN/PointN/SizeN>` for `glam` types.
+  This enables the interchangeable use of glamour/glam types in hash maps.
 
 ## [0.7.1] - 2023-04-11
 ### Added
