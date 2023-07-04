@@ -334,4 +334,13 @@ mod tests {
         );
         assert_eq!(1.0f64.try_cast::<f32>(), Some(1.0));
     }
+
+    #[test]
+    fn int_finite() {
+        // dummy tests for coverage
+        assert!(0i32.is_finite());
+        assert!(0u32.is_finite());
+        assert!(0i64.is_finite());
+        assert!(0u64.is_finite());
+    }
 }
