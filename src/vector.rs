@@ -404,6 +404,16 @@ where
         x: <T::Scalar as FloatScalar>::NAN,
         y: <T::Scalar as FloatScalar>::NAN,
     };
+    /// All positive infinity.
+    pub const INFINITY: Self = Vector2 {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Vector2 {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+    };
 
     crate::forward_float_ops!(
         <<T::Scalar as Scalar>::Vec2 as crate::bindings::Vector>::Mask,
@@ -549,6 +559,18 @@ where
         x: <T::Scalar as FloatScalar>::NAN,
         y: <T::Scalar as FloatScalar>::NAN,
         z: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Vector3 {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+        z: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Vector3 {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
     crate::forward_float_ops!(
@@ -739,6 +761,20 @@ where
         y: <T::Scalar as FloatScalar>::NAN,
         z: <T::Scalar as FloatScalar>::NAN,
         w: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Vector4 {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+        z: <T::Scalar as FloatScalar>::INFINITY,
+        w: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Vector4 {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        w: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
     crate::forward_float_ops!(

@@ -119,6 +119,8 @@ pub trait FloatScalar:
     type Quat: bindings::Quat<Scalar = Self, Vec3 = Self::Vec3f, Vec4 = Self::Vec4f>
         + ToRaw<Raw = Self::Quat>;
     const NAN: Self;
+    const INFINITY: Self;
+    const NEG_INFINITY: Self;
 }
 
 impl Scalar for f32 {
@@ -174,6 +176,8 @@ impl FloatScalar for f32 {
     type Mat4 = glam::Mat4;
     type Quat = glam::Quat;
     const NAN: Self = f32::NAN;
+    const INFINITY: Self = f32::INFINITY;
+    const NEG_INFINITY: Self = f32::NEG_INFINITY;
 }
 
 impl Scalar for f64 {
@@ -210,6 +214,8 @@ impl FloatScalar for f64 {
     type Mat4 = glam::DMat4;
     type Quat = glam::DQuat;
     const NAN: Self = f64::NAN;
+    const INFINITY: Self = f64::INFINITY;
+    const NEG_INFINITY: Self = f64::NEG_INFINITY;
 }
 
 impl Scalar for i32 {
