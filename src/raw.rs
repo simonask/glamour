@@ -157,3 +157,20 @@ where
         raw.map(T::from_raw)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn identity() {
+        let a = 123i32;
+        assert_eq!(a.to_raw(), a);
+        assert_eq!(i32::from_raw(a), a);
+        assert_eq!(Some(a).to_raw(), Some(a));
+        assert_eq!(Option::from_raw(Some(a)), Some(a));
+        assert_eq!((a, a).to_raw(), (a, a));
+        assert_eq!(<(i32, i32)>::from_raw((a, a)), (a, a));
+        assert_eq!(<&i32>::to_raw(&a), &a);
+    }
+}
