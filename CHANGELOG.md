@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented `Borrow<glam::VecN>` for all vector types, and `Borrow<glamour::VectorN/PointN/SizeN>` for `glam` types.
   This enables the interchangeable use of glamour/glam types in hash maps.
 
+### Breaking changes
+- Bumped `encase` dependency to 0.6.0.
+
 ## [0.7.1] - 2023-04-11
 ### Added
 - Implement `Hash` for integer-based types.
