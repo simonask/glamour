@@ -245,6 +245,22 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
+    /// All NaN.
+    pub const NAN: Self = Self {
+        width: <T::Scalar as FloatScalar>::NAN,
+        height: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Self {
+        width: <T::Scalar as FloatScalar>::INFINITY,
+        height: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Self {
+        width: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        height: <T::Scalar as FloatScalar>::NEG_INFINITY,
+    };
+
     crate::forward_float_ops!(<T::Scalar as Scalar>::BVec2, glam::Vec2);
 }
 
@@ -304,6 +320,25 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
+    /// All NaN.
+    pub const NAN: Self = Self {
+        width: <T::Scalar as FloatScalar>::NAN,
+        height: <T::Scalar as FloatScalar>::NAN,
+        depth: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Self {
+        width: <T::Scalar as FloatScalar>::INFINITY,
+        height: <T::Scalar as FloatScalar>::INFINITY,
+        depth: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Self {
+        width: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        height: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        depth: <T::Scalar as FloatScalar>::NEG_INFINITY,
+    };
+
     crate::forward_float_ops!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
 }
 

@@ -61,10 +61,10 @@ pub trait Scalar:
     const ONE: Self;
 
     /// Try casting to another scalar type.
-    /// 
+    ///
     /// The cast always succeeds if the scalars have the same underlying type
     /// (i.e., the same `Primitive` associated type).
-    /// 
+    ///
     /// The cast fails under the same conditions where
     /// `num_traits::NumCast::from()` fails.
     #[inline]
@@ -74,7 +74,7 @@ pub trait Scalar:
     }
 
     /// True if the number is not NaN and not infinity.
-    /// 
+    ///
     /// Always true for integer scalars.
     #[must_use]
     fn is_finite(self) -> bool;
@@ -119,6 +119,8 @@ pub trait FloatScalar:
     type Quat: bindings::Quat<Scalar = Self, Vec3 = Self::Vec3f, Vec4 = Self::Vec4f>
         + ToRaw<Raw = Self::Quat>;
     const NAN: Self;
+    const INFINITY: Self;
+    const NEG_INFINITY: Self;
 }
 
 impl Scalar for f32 {
@@ -174,6 +176,8 @@ impl FloatScalar for f32 {
     type Mat4 = glam::Mat4;
     type Quat = glam::Quat;
     const NAN: Self = f32::NAN;
+    const INFINITY: Self = f32::INFINITY;
+    const NEG_INFINITY: Self = f32::NEG_INFINITY;
 }
 
 impl Scalar for f64 {
@@ -210,6 +214,8 @@ impl FloatScalar for f64 {
     type Mat4 = glam::DMat4;
     type Quat = glam::DQuat;
     const NAN: Self = f64::NAN;
+    const INFINITY: Self = f64::INFINITY;
+    const NEG_INFINITY: Self = f64::NEG_INFINITY;
 }
 
 impl Scalar for i32 {
@@ -236,6 +242,30 @@ impl SignedScalar for i32 {
     type Vec4s = glam::IVec4;
 }
 
+impl Scalar for i64 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    type Vec2 = glam::I64Vec2;
+    type Vec3 = glam::I64Vec3;
+    type Vec4 = glam::I64Vec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
+}
+
+impl SignedScalar for i64 {
+    const NEG_ONE: Self = -1;
+
+    type Vec2s = glam::I64Vec2;
+    type Vec3s = glam::I64Vec3;
+    type Vec4s = glam::I64Vec4;
+}
+
 impl Scalar for u32 {
     const ZERO: Self = 0;
     const ONE: Self = 1;
@@ -243,6 +273,22 @@ impl Scalar for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
+    type BVec2 = glam::BVec2;
+    type BVec3 = glam::BVec3;
+    type BVec4 = glam::BVec4;
+
+    fn is_finite(self) -> bool {
+        true
+    }
+}
+
+impl Scalar for u64 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    type Vec2 = glam::U64Vec2;
+    type Vec3 = glam::U64Vec3;
+    type Vec4 = glam::U64Vec4;
     type BVec2 = glam::BVec2;
     type BVec3 = glam::BVec3;
     type BVec4 = glam::BVec4;
@@ -287,5 +333,14 @@ mod tests {
             Some(core::f32::NEG_INFINITY)
         );
         assert_eq!(1.0f64.try_cast::<f32>(), Some(1.0));
+    }
+
+    #[test]
+    fn int_finite() {
+        // dummy tests for coverage
+        assert!(0i32.is_finite());
+        assert!(0u32.is_finite());
+        assert!(0i64.is_finite());
+        assert!(0u64.is_finite());
     }
 }

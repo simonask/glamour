@@ -32,6 +32,8 @@ fn vector_debug() {
     let untyped_f32: Vector2<f32> = Vector2 { x: 123.0, y: 456.0 };
     let untyped_f64: Vector2<f64> = Vector2 { x: 123.0, y: 456.0 };
     let untyped_u32: Vector2<u32> = Vector2 { x: 123, y: 456 };
+    let untyped_u64: Vector2<u64> = Vector2 { x: 123, y: 456 };
+    let untyped_i64: Vector2<i64> = Vector2 { x: 123, y: 456 };
 
     assert_eq!(
         alloc::format!("{:?}", untyped_f32),
@@ -44,6 +46,14 @@ fn vector_debug() {
     assert_eq!(
         alloc::format!("{:?}", untyped_u32),
         "Vector2<u32> { x: 123, y: 456 }"
+    );
+    assert_eq!(
+        alloc::format!("{:?}", untyped_u64),
+        "Vector2<u64> { x: 123, y: 456 }"
+    );
+    assert_eq!(
+        alloc::format!("{:?}", untyped_i64),
+        "Vector2<i64> { x: 123, y: 456 }"
     );
 
     let untyped_i32: Vector2<i32> = Vector2 { x: 123, y: 456 };

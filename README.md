@@ -57,20 +57,14 @@ let vector_raw: &glam::Vec4 = vector.as_raw();
 # Feature gates
 
 - `std` - enables the `glam/std` feature. Enabled by default.
-- `libm` - required to compile with `no_std` (transitively enables
-  `glam/no_std`).
+- `libm` - required to compile with `no_std` (transitively enables `glam/no_std`).
 - `mint` - enables conversion to/from
   [`mint`](https://docs.rs/mint/latest/mint/) types.
-- `glam_0_20` - enables `Into`/`From` conversions to the glam 0.20 versions of
-  vector and matrix types. This is intended for interoperability with
-  significant ecosystems, such as Bevy 0.7. To be clear, this creates a
-  duplicate dependency on `glam`: One at the currently targeted version
-  (0.21.x), and one at glam 0.20.0.
-- `bevy_0_7_0`: Enables the `glam_0_20` feature, which is needed to perform
-  conversions to/from the math types exposed by Bevy 0.7. This flag is not
-  needed when using Bevy 0.8.
-- `encase`: Enables implementations of [`encase::ShaderType`] for vector and
-  matrix types, which enables them for use in GPU shaders.
+- `encase`: Enables implementations of [`encase::ShaderType`] for vector and matrix types, which enables them for use in
+  GPU shaders.
+- `scalar-math`: Don't use SIMD vector instructions, even if they are supported by the target architecture. Note that
+  this flag is required to run tests under Miri, due to vector instructions not being supported. Transitively enables
+  the `glam/scalar-math` feature.
 
 # Advantages
 

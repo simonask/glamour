@@ -327,6 +327,22 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
+    /// All NaN.
+    pub const NAN: Self = Self {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Self {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Self {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+    };
+
     crate::forward_float_ops!(<T::Scalar as Scalar>::BVec2, glam::Vec2);
     float_point_interface!(glam::Vec2);
 }
@@ -381,6 +397,25 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
+    /// All NaN.
+    pub const NAN: Self = Self {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+        z: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Self {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+        z: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Self {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
+    };
+
     crate::forward_float_ops!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
     float_point_interface!(glam::Vec3);
 }
@@ -437,6 +472,28 @@ where
     T: Unit,
     T::Scalar: FloatScalar,
 {
+    /// All NaN.
+    pub const NAN: Self = Self {
+        x: <T::Scalar as FloatScalar>::NAN,
+        y: <T::Scalar as FloatScalar>::NAN,
+        z: <T::Scalar as FloatScalar>::NAN,
+        w: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Self {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+        z: <T::Scalar as FloatScalar>::INFINITY,
+        w: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Self {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        w: <T::Scalar as FloatScalar>::NEG_INFINITY,
+    };
+
     crate::forward_float_ops!(<T::Scalar as Scalar>::BVec4, glam::Vec4);
     float_point_interface!(glam::Vec4);
 }

@@ -404,6 +404,16 @@ where
         x: <T::Scalar as FloatScalar>::NAN,
         y: <T::Scalar as FloatScalar>::NAN,
     };
+    /// All positive infinity.
+    pub const INFINITY: Self = Vector2 {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Vector2 {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+    };
 
     crate::forward_float_ops!(
         <<T::Scalar as Scalar>::Vec2 as crate::bindings::Vector>::Mask,
@@ -549,6 +559,18 @@ where
         x: <T::Scalar as FloatScalar>::NAN,
         y: <T::Scalar as FloatScalar>::NAN,
         z: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Vector3 {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+        z: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Vector3 {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
     crate::forward_float_ops!(
@@ -739,6 +761,20 @@ where
         y: <T::Scalar as FloatScalar>::NAN,
         z: <T::Scalar as FloatScalar>::NAN,
         w: <T::Scalar as FloatScalar>::NAN,
+    };
+    /// All positive infinity.
+    pub const INFINITY: Self = Vector4 {
+        x: <T::Scalar as FloatScalar>::INFINITY,
+        y: <T::Scalar as FloatScalar>::INFINITY,
+        z: <T::Scalar as FloatScalar>::INFINITY,
+        w: <T::Scalar as FloatScalar>::INFINITY,
+    };
+    /// All negative infinity.
+    pub const NEG_INFINITY: Self = Vector4 {
+        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        w: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
     crate::forward_float_ops!(
@@ -1472,6 +1508,63 @@ mod tests {
         assert_eq!(b, (20.0, 30.0, 1.0));
     }
 
+    #[test]
+    fn array_interface() {
+        let mut vec = Vector4::<i64>::new(1, 2, 3, 4);
+        assert_eq!(vec.get(0), 1);
+        assert_eq!(vec.get(1), 2);
+        assert_eq!(vec.get(2), 3);
+        assert_eq!(vec.get(3), 4);
+
+        let array_ref: &[i64; 4] = vec.as_ref();
+        assert_eq!(array_ref, &[1i64, 2, 3, 4]);
+
+        let array_mut: &mut [i64; 4] = vec.as_mut();
+        assert_eq!(array_mut, &[1i64, 2, 3, 4]);
+
+        let array: [i64; 4] = vec.into();
+        assert_eq!(array, [1i64, 2, 3, 4]);
+    }
+
+    #[test]
+    fn untyped_mut() {
+        let mut vec = Vector4::<I32>::new(1, 2, 3, 4);
+        let vec2: &mut Vector4<i32> = vec.as_untyped_mut();
+        vec2.y = 100;
+        assert_eq!(vec, [1, 100, 3, 4]);
+
+        let vec3: &mut Vector4<i32> = vec.cast_mut();
+        vec3.z = 100;
+        assert_eq!(vec, [1, 100, 100, 4]);
+    }
+
+    #[test]
+    fn glam_reference_conversion() {
+        use core::borrow::{Borrow, BorrowMut};
+
+        let mut vec = Vector4::<I32>::new(1, 2, 3, 4);
+
+        let vec1: &glam::IVec4 = vec.as_ref();
+        assert_eq!(*vec1, glam::IVec4::new(1, 2, 3, 4));
+
+        let vec2: &mut glam::IVec4 = vec.as_mut();
+        vec2.y = 100;
+        assert_eq!(vec, [1, 100, 3, 4]);
+
+        let vec3: &glam::IVec4 = vec.borrow();
+        assert_eq!(*vec3, glam::IVec4::new(1, 100, 3, 4));
+
+        let vec3a: &Vector4<I32> = vec3.borrow();
+        assert_eq!(*vec3a, [1, 100, 3, 4]);
+
+        let vec4: &mut glam::IVec4 = vec.borrow_mut();
+        vec4.z = 100;
+        assert_eq!(*vec4, glam::IVec4::new(1, 100, 100, 4));
+
+        let vec4a: &mut Vector4<I32> = vec4.borrow_mut();
+        assert_eq!(*vec4a, [1, 100, 100, 4]);
+    }
+
     fn hash_one<T: core::hash::Hash, H: core::hash::BuildHasher>(
         build_hasher: &H,
         value: T,
@@ -1503,6 +1596,13 @@ mod tests {
         let h1 = hash_one(&hasher, Vector2::<i32> { x: 123, y: 456 });
         let h2 = hash_one(&hasher, glam::IVec2::new(123, 456));
         assert_eq!(h1, h2);
+    }
+
+    #[test]
+    fn hash_map() {
+        let mut map = hashbrown::HashMap::<glam::IVec4, &'static str>::default();
+        map.insert(glam::IVec4::new(1, 2, 3, 4), "hello");
+        assert_eq!(map.get(&Vector4::<I32>::new(1, 2, 3, 4)), Some(&"hello"));
     }
 }
 

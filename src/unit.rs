@@ -69,3 +69,17 @@ impl Unit for u32 {
         Some("u32")
     }
 }
+
+impl Unit for i64 {
+    type Scalar = i64;
+    fn name() -> Option<&'static str> {
+        Some("i64")
+    }
+}
+
+impl Unit for u64 {
+    type Scalar = u64;
+    fn name() -> Option<&'static str> {
+        Some("u64")
+    }
+}

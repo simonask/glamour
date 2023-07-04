@@ -247,20 +247,32 @@ impl_vector!(glam::IVec4, i32, BVec4);
 impl_vector!(glam::UVec2, u32, BVec2);
 impl_vector!(glam::UVec3, u32, BVec3);
 impl_vector!(glam::UVec4, u32, BVec4);
+impl_vector!(glam::I64Vec2, i64, BVec2);
+impl_vector!(glam::I64Vec3, i64, BVec3);
+impl_vector!(glam::I64Vec4, i64, BVec4);
+impl_vector!(glam::U64Vec2, u64, BVec2);
+impl_vector!(glam::U64Vec3, u64, BVec3);
+impl_vector!(glam::U64Vec4, u64, BVec4);
 
 impl_vector2!(glam::Vec2, glam::Vec3);
 impl_vector2!(glam::DVec2, glam::DVec3);
 impl_vector2!(glam::IVec2, glam::IVec3);
 impl_vector2!(glam::UVec2, glam::UVec3);
+impl_vector2!(glam::I64Vec2, glam::I64Vec3);
+impl_vector2!(glam::U64Vec2, glam::U64Vec3);
 
 impl_vector3!(glam::Vec3, glam::Vec2, glam::Vec4);
 impl_vector3!(glam::DVec3, glam::DVec2, glam::DVec4);
 impl_vector3!(glam::IVec3, glam::IVec2, glam::IVec4);
 impl_vector3!(glam::UVec3, glam::UVec2, glam::UVec4);
+impl_vector3!(glam::I64Vec3, glam::I64Vec2, glam::I64Vec4);
+impl_vector3!(glam::U64Vec3, glam::U64Vec2, glam::U64Vec4);
 
 impl_vector4!(glam::DVec4, glam::DVec3);
 impl_vector4!(glam::IVec4, glam::IVec3);
 impl_vector4!(glam::UVec4, glam::UVec3);
+impl_vector4!(glam::I64Vec4, glam::I64Vec3);
+impl_vector4!(glam::U64Vec4, glam::U64Vec3);
 
 impl_signed_vector!(glam::Vec2);
 impl_signed_vector!(glam::Vec3);
@@ -271,6 +283,9 @@ impl_signed_vector!(glam::DVec4);
 impl_signed_vector!(glam::IVec2);
 impl_signed_vector!(glam::IVec3);
 impl_signed_vector!(glam::IVec4);
+impl_signed_vector!(glam::I64Vec2);
+impl_signed_vector!(glam::I64Vec3);
+impl_signed_vector!(glam::I64Vec4);
 
 impl_float_vector!(glam::Vec2, f32);
 impl_float_vector!(glam::Vec3, f32);
@@ -297,6 +312,10 @@ impl SignedVector2 for glam::DVec2 {
 impl SignedVector2 for glam::IVec2 {
     forward_impl!(glam::IVec2 => fn perp(self) -> Self);
     forward_impl!(glam::IVec2 => fn perp_dot(self, other: Self) -> Self::Scalar);
+}
+impl SignedVector2 for glam::I64Vec2 {
+    forward_impl!(glam::I64Vec2 => fn perp(self) -> Self);
+    forward_impl!(glam::I64Vec2 => fn perp_dot(self, other: Self) -> Self::Scalar);
 }
 
 impl FloatVector2 for glam::Vec2 {
