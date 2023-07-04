@@ -15,7 +15,7 @@ categories = ["game-development", "mathematics", "graphics", "no-std"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-glam = { version = "0.24.1", default-features = false, features = [
+glam = { version = ">=0.24.1", default-features = false, features = [
     "bytemuck",
     "approx",
 ] }
