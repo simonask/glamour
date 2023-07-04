@@ -699,20 +699,22 @@ macro_rules! derive_tuple_conversion_traits {
 
 macro_rules! derive_glam_conversion_traits {
     ($base_type_name:ident { $x:ident : $x_ty:ty, $y:ident : $y_ty:ty $(,)? }) => {
-        crate::derive_glam_conversion_traits!(@impl $base_type_name, glam::Vec2, glam::DVec2, glam::IVec2, glam::UVec2);
+        crate::derive_glam_conversion_traits!(@impl $base_type_name, glam::Vec2, glam::DVec2, glam::IVec2, glam::UVec2, glam::I64Vec2, glam::U64Vec2);
     };
     ($base_type_name:ident { $x:ident : $x_ty:ty, $y:ident : $y_ty:ty, $z:ident: $z_ty:ty $(,)? }) => {
-        crate::derive_glam_conversion_traits!(@impl $base_type_name, glam::Vec3, glam::DVec3, glam::IVec3, glam::UVec3);
+        crate::derive_glam_conversion_traits!(@impl $base_type_name, glam::Vec3, glam::DVec3, glam::IVec3, glam::UVec3, glam::I64Vec3, glam::U64Vec3);
     };
     ($base_type_name:ident { $x:ident : $x_ty:ty, $y:ident : $y_ty:ty, $z:ident: $z_ty:ty, $w:ident: $w_ty:ty $(,)? }) => {
-        crate::derive_glam_conversion_traits!(@impl $base_type_name, glam::Vec4, glam::DVec4, glam::IVec4, glam::UVec4);
+        crate::derive_glam_conversion_traits!(@impl $base_type_name, glam::Vec4, glam::DVec4, glam::IVec4, glam::UVec4, glam::I64Vec4, glam::U64Vec4);
     };
 
-    (@impl $base_type_name:ident, $glam_f32_ty:ty, $glam_f64_ty:ty, $glam_i32_ty:ty, $glam_u32_ty:ty) => {
+    (@impl $base_type_name:ident, $glam_f32_ty:ty, $glam_f64_ty:ty, $glam_i32_ty:ty, $glam_u32_ty:ty, $glam_i64_ty:ty, $glam_u64_ty:ty) => {
         crate::derive_glam_conversion_traits!(@impl2 $base_type_name, $glam_f32_ty, f32);
         crate::derive_glam_conversion_traits!(@impl2 $base_type_name, $glam_f64_ty, f64);
         crate::derive_glam_conversion_traits!(@impl2 $base_type_name, $glam_i32_ty, i32);
         crate::derive_glam_conversion_traits!(@impl2 $base_type_name, $glam_u32_ty, u32);
+        crate::derive_glam_conversion_traits!(@impl2 $base_type_name, $glam_i64_ty, i64);
+        crate::derive_glam_conversion_traits!(@impl2 $base_type_name, $glam_u64_ty, u64);
     };
     (@impl2 $base_type_name:ident, $glam_ty:ty, $scalar_ty:ty) => {
         impl<T> From<$base_type_name<T>> for $glam_ty
@@ -748,6 +750,40 @@ macro_rules! derive_glam_conversion_traits {
         {
             fn as_mut(&mut self) -> &mut $glam_ty {
                 self.as_raw_mut()
+            }
+        }
+
+        impl<T> core::borrow::Borrow<$glam_ty> for $base_type_name<T>
+        where
+            T: Unit<Scalar = $scalar_ty>
+        {
+            fn borrow(&self) -> &$glam_ty {
+                self.as_ref()
+            }
+        }
+        impl<T> core::borrow::BorrowMut<$glam_ty> for $base_type_name<T>
+        where
+            T: Unit<Scalar = $scalar_ty>
+        {
+            fn borrow_mut(&mut self) -> &mut $glam_ty {
+                self.as_mut()
+            }
+        }
+
+        impl<T> core::borrow::Borrow<$base_type_name<T>> for $glam_ty
+        where
+            T: Unit<Scalar = $scalar_ty>
+        {
+            fn borrow(&self) -> &$base_type_name<T> {
+                bytemuck::cast_ref(self)
+            }
+        }
+        impl<T> core::borrow::BorrowMut<$base_type_name<T>> for $glam_ty
+        where
+            T: Unit<Scalar = $scalar_ty>
+        {
+            fn borrow_mut(&mut self) -> &mut $base_type_name<T> {
+                bytemuck::cast_mut(self)
             }
         }
     };

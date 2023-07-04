@@ -1540,6 +1540,13 @@ mod tests {
         let h2 = hash_one(&hasher, glam::IVec2::new(123, 456));
         assert_eq!(h1, h2);
     }
+
+    #[test]
+    fn hash_map() {
+        let mut map = hashbrown::HashMap::<glam::IVec4, &'static str>::default();
+        map.insert(glam::IVec4::new(1, 2, 3, 4), "hello");
+        assert_eq!(map.get(&Vector4::<I32>::new(1, 2, 3, 4)), Some(&"hello"));
+    }
 }
 
 #[cfg(all(test, feature = "serde"))]
