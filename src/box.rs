@@ -876,6 +876,33 @@ mod tests {
     }
 
     #[test]
+    fn intersection_contained() {
+        let large = Box2::new((0.0, 0.0), (100.0, 100.0));
+        let small = Box2::new((10.0, 10.0), (90.0, 90.0));
+        assert!(large.intersects(&small));
+        assert!(small.intersects(&large));
+        assert_eq!(large.intersection(&small), Some(small));
+        assert_eq!(small.intersection(&large), Some(small));
+
+        let infinite = Box2::new(Point2::ZERO, Point2::INFINITY);
+        assert!(infinite.intersects(&small));
+        assert!(small.intersects(&infinite));
+        assert_eq!(infinite.intersection(&small), Some(small));
+        assert_eq!(small.intersection(&infinite), Some(small));
+    }
+
+    #[test]
+    fn intersection_partial() {
+        let large = Box2::new((0.0, 0.0), (100.0, 100.0));
+        let small = Box2::new((90.0, 10.0), (110.0, 20.0));
+        let expected = Box2::new((90.0, 10.0), (100.0, 20.0));
+        assert!(large.intersects(&small));
+        assert!(small.intersects(&large));
+        assert_eq!(large.intersection(&small), Some(expected));
+        assert_eq!(small.intersection(&large), Some(expected));
+    }
+
+    #[test]
     fn union() {
         let a = Box2 {
             min: (0.0, 0.0).into(),
