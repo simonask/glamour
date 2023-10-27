@@ -1,6 +1,6 @@
 [package]
 name = "glamour"
-version = "0.8.0"
+version = "0.8.1"
 edition = "2021"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
