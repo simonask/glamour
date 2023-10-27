@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Missing `truncate()` method for `Vector4`.
 
+### Fixes
+- Fix lints caught by newer version of clippy.
+
 ## [0.8.0] - 2023-07-04
 ### Added
 - Support for `i64` and `u64` scalar types based on `glam::I64VecN` and `glam::U64VecN`.

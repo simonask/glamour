@@ -55,19 +55,13 @@ pub trait TransformMap<T> {
 
 impl<Src: Unit, Dst: Unit> Clone for Transform2<Src, Dst> {
     fn clone(&self) -> Self {
-        Self {
-            matrix: self.matrix,
-            _marker: PhantomData,
-        }
+        *self
     }
 }
 
 impl<Src: Unit, Dst: Unit> Clone for Transform3<Src, Dst> {
     fn clone(&self) -> Self {
-        Transform3 {
-            matrix: self.matrix,
-            _marker: PhantomData,
-        }
+        *self
     }
 }
 
