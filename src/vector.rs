@@ -737,6 +737,8 @@ impl<T: Unit> Vector4<T> {
         glam::Vec4 =>
         #[doc = "Dot product"]
         pub fn dot(self, other: Self) -> T::Scalar;
+        #[doc = "Truncate to [`Vector3`]."]
+        pub fn truncate(self) -> Vector3<T>;
     );
 
     /// Select components of this vector and return a new vector containing
