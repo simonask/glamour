@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Missing `truncate()` method for `Vector3`.
 
+### Breaking changes
+- Bumped Minimum Supported Rust Version to 1.65.0. This is to simplify CI because
+  Criterion relies on a version of `regex` that only works with that version.
+
 ## [0.8.1] - 2023-10-27
 ### Added
 - Missing `truncate()` method for `Vector4`.
