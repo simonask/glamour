@@ -7,10 +7,10 @@
     clippy::module_name_repetitions,
     clippy::wildcard_imports
 )]
-#![cfg_attr(coverage, feature(no_coverage))]
+#![cfg_attr(coverage, feature(coverage_attribute))]
 
 #[cfg(doc)]
-#[cfg_attr(coverage, no_coverage)]
+#[cfg_attr(coverage, coverage(off))]
 pub mod docs;
 
 mod angle;
