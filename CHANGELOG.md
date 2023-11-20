@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Missing `truncate()` method for `Vector3`.
+- Implementation of `Product` for `Vector2`, `Vector3`, and `Vector4`.
 
 ### Breaking changes
 - Bumped Minimum Supported Rust Version to 1.65.0. This is to simplify CI because

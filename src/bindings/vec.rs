@@ -27,6 +27,7 @@ pub trait Vector:
     + Rem<Self, Output = Self>
     + RemAssign<Self>
     + for<'a> core::iter::Sum<&'a Self>
+    + for<'a> core::iter::Product<&'a Self>
 {
     /// The component type of this `glam` vector.
     type Scalar: Scalar;
