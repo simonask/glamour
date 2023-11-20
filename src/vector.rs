@@ -536,6 +536,8 @@ impl<T: Unit> Vector3<T> {
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Extend with w-component to [`Vector4`]."]
         pub fn extend(self, w: T::Scalar) -> Vector4<T>;
+        #[doc = "Truncate to [`Vector2`]."]
+        pub fn truncate(self) -> Vector2<T>;
     );
 
     /// Select components of this vector and return a new vector containing
