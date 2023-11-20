@@ -526,7 +526,7 @@ macro_rules! derive_standard_traits {
         impl<T: Unit> Clone for $base_type_name<T> {
             #[inline]
             #[must_use]
-            #[cfg_attr(coverage, no_coverage)]
+            #[cfg_attr(coverage, coverage(off))]
             fn clone(&self) -> Self {
                 *self
             }

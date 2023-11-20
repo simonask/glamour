@@ -594,6 +594,7 @@ mod tests {
     use super::*;
 
     type Box2 = super::Box2<f32>;
+    type Box3 = super::Box3<f32>;
     type IBox2 = super::Box2<i32>;
     type Rect = super::Rect<f32>;
 
@@ -942,6 +943,27 @@ mod tests {
             Box2 {
                 min: (1.0, 1.0).into(),
                 max: (2.0, 2.0).into(),
+            }
+        );
+    }
+
+    #[test]
+    fn lerp3() {
+        let a = Box3 {
+            min: (0.0, 0.0, 0.0).into(),
+            max: (1.0, 1.0, 1.0).into(),
+        };
+        let b = Box3 {
+            min: (2.0, 2.0, 2.0).into(),
+            max: (3.0, 3.0, 3.0).into(),
+        };
+
+        let c = a.lerp(b, 0.5);
+        assert_abs_diff_eq!(
+            c,
+            Box3 {
+                min: (1.0, 1.0, 1.0).into(),
+                max: (2.0, 2.0, 2.0).into(),
             }
         );
     }

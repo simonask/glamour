@@ -8,7 +8,7 @@
 //! points, but by temporarily converting to a vector, it can still be done
 //! transparently.
 
-use core::iter::Sum;
+use core::iter::{Product, Sum};
 use core::ops::Mul;
 
 use crate::scalar::SignedScalar;
@@ -536,6 +536,8 @@ impl<T: Unit> Vector3<T> {
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Extend with w-component to [`Vector4`]."]
         pub fn extend(self, w: T::Scalar) -> Vector4<T>;
+        #[doc = "Truncate to [`Vector2`]."]
+        pub fn truncate(self) -> Vector2<T>;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -997,6 +999,36 @@ impl<'a, T: Unit> Sum<&'a Vector4<T>> for Vector4<T> {
     }
 }
 
+impl<'a, T: Unit> Product<&'a Vector2<T>> for Vector2<T> {
+    #[inline]
+    fn product<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).product())
+    }
+}
+
+impl<'a, T: Unit> Product<&'a Vector3<T>> for Vector3<T> {
+    #[inline]
+    fn product<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).product())
+    }
+}
+
+impl<'a, T: Unit> Product<&'a Vector4<T>> for Vector4<T> {
+    #[inline]
+    fn product<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = &'a Self>,
+    {
+        Self::from_raw(iter.map(AsRaw::as_raw).product())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
@@ -1159,13 +1191,63 @@ mod tests {
     }
 
     #[test]
-    fn sum() {
+    fn sum2() {
+        let a: Vector2<f32> = vector!(1.0, 2.0);
+        let b: Vector2<f32> = vector!(1.0, 2.0);
+        let c: Vector2<f32> = vector!(1.0, 2.0);
+        let d: Vector2<f32> = vector!(1.0, 2.0);
+        let sum: Vector2<f32> = [a, b, c, d].iter().sum();
+        assert_eq!(sum, (4.0, 8.0));
+    }
+
+    #[test]
+    fn sum3() {
+        let a: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let b: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let c: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let d: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let sum: Vector3<f32> = [a, b, c, d].iter().sum();
+        assert_eq!(sum, (4.0, 8.0, 12.0));
+    }
+
+    #[test]
+    fn sum4() {
         let a: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let b: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let d: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let sum: Vector4<f32> = [a, b, c, d].iter().sum();
         assert_eq!(sum, (4.0, 8.0, 12.0, 16.0));
+    }
+
+    #[test]
+    fn product2() {
+        let a: Vector2<f32> = vector!(1.0, 2.0);
+        let b: Vector2<f32> = vector!(1.0, 2.0);
+        let c: Vector2<f32> = vector!(1.0, 2.0);
+        let d: Vector2<f32> = vector!(1.0, 2.0);
+        let product: Vector2<f32> = [a, b, c, d].iter().product();
+        assert_eq!(product, (1.0, 16.0));
+    }
+
+    #[test]
+    fn product3() {
+        let a: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let b: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let c: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let d: Vector3<f32> = vector!(1.0, 2.0, 3.0);
+        let product: Vector3<f32> = [a, b, c, d].iter().product();
+        assert_eq!(product, (1.0, 16.0, 81.0));
+    }
+
+    #[test]
+    fn product4() {
+        let a: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let b: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let d: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
+        let product: Vector4<f32> = [a, b, c, d].iter().product();
+        assert_eq!(product, (1.0, 16.0, 81.0, 256.0));
     }
 
     #[test]
