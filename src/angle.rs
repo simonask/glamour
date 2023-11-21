@@ -511,6 +511,10 @@ mod tests {
         let mut a = Angle::from_radians(3.0);
         a %= Angle::from_radians(2.0);
         assert_eq!(a, Angle::from_radians(1.0));
+        a *= 2.0;
+        assert_eq!(a, Angle::from_radians(2.0));
+        a /= 2.0;
+        assert_eq!(a, Angle::from_radians(1.0));
     }
 
     #[test]
