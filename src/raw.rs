@@ -164,7 +164,7 @@ mod tests {
 
     #[test]
     fn identity() {
-        let a = 123i32;
+        let mut a = 123i32;
         assert_eq!(a.to_raw(), a);
         assert_eq!(i32::from_raw(a), a);
         assert_eq!(Some(a).to_raw(), Some(a));
@@ -172,5 +172,7 @@ mod tests {
         assert_eq!((a, a).to_raw(), (a, a));
         assert_eq!(<(i32, i32)>::from_raw((a, a)), (a, a));
         assert_eq!(<&i32>::to_raw(&a), &a);
+        *a.as_raw_mut() = 456;
+        assert_eq!(a, 456);
     }
 }
