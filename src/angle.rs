@@ -14,6 +14,7 @@ use crate::{
 #[repr(transparent)]
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct Angle<T = f32> {
     /// Angle in radians.
     pub radians: T,

@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation of `Product` for `Vector2`, `Vector3`, and `Vector4`.
 
 ### Breaking changes
+- Added `#[serde(transparent)]` to `Angle`, changing its serialized representation to
+  just the scalar value.
 - Bumped Minimum Supported Rust Version to 1.65.0. This is to simplify CI because
   Criterion relies on a version of `regex` that only works with that version.
 
