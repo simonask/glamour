@@ -1606,8 +1606,11 @@ mod tests {
         let array_mut: &mut [i64; 4] = vec.as_mut();
         assert_eq!(array_mut, &[1i64, 2, 3, 4]);
 
-        let array: [i64; 4] = vec.into();
+        let mut array: [i64; 4] = vec.into();
         assert_eq!(array, [1i64, 2, 3, 4]);
+        vec.set(3, 5);
+        vec.write_to_slice(&mut array);
+        assert_eq!(array, [1i64, 2, 3, 5]);
     }
 
     #[test]

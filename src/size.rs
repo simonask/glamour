@@ -365,6 +365,10 @@ mod tests {
         let mut a: Size2<f32> = size!(100.0, 200.0);
         let _: &Vector2<f32> = a.as_vector();
         let _: &mut Vector2<f32> = a.as_vector_mut();
+
+        let mut b: Size3<f32> = size!(100.0, 200.0, 300.0);
+        let _: &Vector3<f32> = b.as_vector();
+        let _: &mut Vector3<f32> = b.as_vector_mut();
     }
 
     #[test]
