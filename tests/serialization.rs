@@ -278,4 +278,16 @@ mod serialization {
             Transform3::<f32, f32>::IDENTITY
         );
     }
+
+    #[test]
+    fn angle() {
+        assert_eq!(
+            serde_json::to_string(&Angle::from_radians(1.0)).unwrap(),
+            "1.0"
+        );
+        assert_eq!(
+            serde_json::from_str::<Angle<f32>>("1.0").unwrap(),
+            Angle::from_radians(1.0)
+        );
+    }
 }

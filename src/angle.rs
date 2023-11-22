@@ -480,6 +480,18 @@ mod tests {
     }
 
     #[test]
+    fn min_max() {
+        assert_eq!(
+            Angle::from_radians(1.0).max(Angle::from_radians(2.0)),
+            Angle::from_radians(2.0)
+        );
+        assert_eq!(
+            Angle::from_radians(1.0).min(Angle::from_radians(2.0)),
+            Angle::from_radians(1.0)
+        );
+    }
+
+    #[test]
     fn approx_comparison() {
         assert_eq!(Angle::PI, Angle::from_radians(f32::PI));
         assert_ne!(Angle::PI, Angle::CIRCLE);
@@ -529,6 +541,7 @@ mod tests {
         assert_abs_diff_eq!(quarter_circle, Angle::from_degrees(90.0));
         assert_ulps_eq!(quarter_circle, Angle::from_degrees(90.0));
         assert_relative_eq!(quarter_circle, Angle::from_degrees(90.0));
+        assert_eq!(Angle::from_degrees(90.0).to_degrees(), 90.0);
     }
 
     #[test]
