@@ -211,4 +211,43 @@ mod serialization {
             }
         );
     }
+
+    #[test]
+    fn matrix2() {
+        assert_eq!(
+            serde_json::to_string(&Matrix2::<f32>::IDENTITY).unwrap(),
+            r#"[1.0,0.0,0.0,1.0]"#
+        );
+        assert_eq!(
+            serde_json::from_str::<Matrix2<f32>>("[1.0,0.0,0.0,1.0]").unwrap(),
+            Matrix2::<f32>::IDENTITY
+        );
+    }
+
+    #[test]
+    fn matrix3() {
+        assert_eq!(
+            serde_json::to_string(&Matrix3::<f32>::IDENTITY).unwrap(),
+            r#"[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]"#
+        );
+        assert_eq!(
+            serde_json::from_str::<Matrix3<f32>>("[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]").unwrap(),
+            Matrix3::<f32>::IDENTITY
+        );
+    }
+
+    #[test]
+    fn matrix4() {
+        assert_eq!(
+            serde_json::to_string(&Matrix4::<f32>::IDENTITY).unwrap(),
+            r#"[1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0]"#
+        );
+        assert_eq!(
+            serde_json::from_str::<Matrix4<f32>>(
+                "[1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0]"
+            )
+            .unwrap(),
+            Matrix4::<f32>::IDENTITY
+        );
+    }
 }

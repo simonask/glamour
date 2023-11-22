@@ -21,7 +21,10 @@ use crate::{
 /// describes how to map between units.
 #[repr(C)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
+#[cfg_attr(
+    feature = "serde",
+    serde(bound = "Src::Scalar: FloatScalar, Dst: Unit<Scalar = Src::Scalar>")
+)]
 pub struct Transform2<Src: Unit, Dst: Unit> {
     /// Underlying matrix.
     pub matrix: Matrix3<Src::Scalar>,
@@ -35,7 +38,10 @@ pub struct Transform2<Src: Unit, Dst: Unit> {
 /// describes how to map between units.
 #[repr(C)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
+#[cfg_attr(
+    feature = "serde",
+    serde(bound = "Src::Scalar: FloatScalar, Dst: Unit<Scalar = Src::Scalar>")
+)]
 pub struct Transform3<Src: Unit, Dst: Unit> {
     /// Underlying matrix.
     pub matrix: Matrix4<Src::Scalar>,

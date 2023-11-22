@@ -20,25 +20,16 @@ use bytemuck::{Pod, Zeroable};
 /// Bitwise compatible with [`glam::Mat2`] / [`glam::DMat2`].
 ///
 /// Alignment: Always 16-byte aligned.
-#[cfg_attr(
-    any(
-        not(any(feature = "scalar-math", target_arch = "spirv")),
-        feature = "cuda"
-    ),
-    repr(C, align(16))
-)]
 #[derive(Clone, Copy, PartialEq, Eq)]
-#[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-pub struct Matrix2<T> {
-    pub m11: T,
-    pub m12: T,
-    pub m21: T,
-    pub m22: T,
-}
+#[cfg_attr(
+    feature = "serde",
+    serde(bound = "T: Scalar", from = "[T;4]", into = "[T;4]")
+)]
+pub struct Matrix2<T: Scalar>(Vector4<T>);
 
-unsafe impl<T: Zeroable> Zeroable for Matrix2<T> {}
-unsafe impl<T: Pod> Pod for Matrix2<T> {}
+unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
+unsafe impl<T: Scalar> Pod for Matrix2<T> {}
 
 impl<T: FloatScalar> ToRaw for Matrix2<T> {
     type Raw = T::Mat2;
@@ -73,20 +64,18 @@ impl<T: FloatScalar> AsRaw for Matrix2<T> {
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-pub struct Matrix3<T> {
-    pub m11: T,
-    pub m12: T,
-    pub m13: T,
-    pub m21: T,
-    pub m22: T,
-    pub m23: T,
-    pub m31: T,
-    pub m32: T,
-    pub m33: T,
+#[cfg_attr(
+    feature = "serde",
+    serde(bound = "T: FloatScalar", from = "[T;9]", into = "[T;9]")
+)]
+pub struct Matrix3<T: Scalar> {
+    pub x_axis: Vector3<T>,
+    pub y_axis: Vector3<T>,
+    pub z_axis: Vector3<T>,
 }
 
-unsafe impl<T: Zeroable> Zeroable for Matrix3<T> {}
-unsafe impl<T: Pod> Pod for Matrix3<T> {}
+unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
+unsafe impl<T: Scalar> Pod for Matrix3<T> {}
 
 impl<T: FloatScalar> ToRaw for Matrix3<T> {
     type Raw = T::Mat3;
@@ -117,37 +106,22 @@ impl<T: FloatScalar> AsRaw for Matrix3<T> {
 /// Bitwise compatible with [`glam::Mat4`] / [`glam::DMat4`].
 ///
 /// Alignment: Always 16-byte aligned.
-#[cfg_attr(
-    any(
-        not(any(feature = "scalar-math", target_arch = "spirv")),
-        feature = "cuda"
-    ),
-    repr(C, align(16))
-)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-pub struct Matrix4<T> {
-    pub m11: T,
-    pub m12: T,
-    pub m13: T,
-    pub m14: T,
-    pub m21: T,
-    pub m22: T,
-    pub m23: T,
-    pub m24: T,
-    pub m31: T,
-    pub m32: T,
-    pub m33: T,
-    pub m34: T,
-    pub m41: T,
-    pub m42: T,
-    pub m43: T,
-    pub m44: T,
+#[cfg_attr(
+    feature = "serde",
+    serde(bound = "T: FloatScalar", from = "[T;16]", into = "[T;16]")
+)]
+pub struct Matrix4<T: Scalar> {
+    pub x_axis: Vector4<T>,
+    pub y_axis: Vector4<T>,
+    pub z_axis: Vector4<T>,
+    pub w_axis: Vector4<T>,
 }
 
-unsafe impl<T: Zeroable> Zeroable for Matrix4<T> {}
-unsafe impl<T: Pod> Pod for Matrix4<T> {}
+unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}
+unsafe impl<T: Scalar> Pod for Matrix4<T> {}
 
 impl<T: FloatScalar> ToRaw for Matrix4<T> {
     type Raw = T::Mat4;
@@ -309,12 +283,7 @@ where
     T: Scalar,
 {
     /// All zeroes.
-    pub const ZERO: Self = Self {
-        m11: T::ZERO,
-        m12: T::ZERO,
-        m21: T::ZERO,
-        m22: T::ZERO,
-    };
+    pub const ZERO: Self = Self(Vector4::ZERO);
 
     /// Identity matrix
     ///
@@ -325,12 +294,7 @@ where
     /// assert_eq!(matrix.row(0), vec2!(1.0, 0.0));
     /// assert_eq!(matrix.row(1), vec2!(0.0, 1.0));
     /// ```
-    pub const IDENTITY: Self = Self {
-        m11: T::ONE,
-        m12: T::ZERO,
-        m21: T::ZERO,
-        m22: T::ONE,
-    };
+    pub const IDENTITY: Self = Self(vec4!(T::ONE, T::ZERO, T::ZERO, T::ONE));
 }
 
 impl<T> Matrix2<T>
@@ -338,12 +302,7 @@ where
     T: FloatScalar,
 {
     /// All NaNs.
-    pub const NAN: Self = Self {
-        m11: T::NAN,
-        m12: T::NAN,
-        m21: T::NAN,
-        m22: T::NAN,
-    };
+    pub const NAN: Self = Self(Vector4::NAN);
 
     crate::forward_to_raw!(
         glam::Mat2 =>
@@ -432,27 +391,15 @@ where
 {
     /// All zeroes.
     pub const ZERO: Self = Self {
-        m11: T::ZERO,
-        m12: T::ZERO,
-        m13: T::ZERO,
-        m21: T::ZERO,
-        m22: T::ZERO,
-        m23: T::ZERO,
-        m31: T::ZERO,
-        m32: T::ZERO,
-        m33: T::ZERO,
+        x_axis: Vector3::ZERO,
+        y_axis: Vector3::ZERO,
+        z_axis: Vector3::ZERO,
     };
     /// All NaNs.
     pub const NAN: Self = Self {
-        m11: T::NAN,
-        m12: T::NAN,
-        m13: T::NAN,
-        m21: T::NAN,
-        m23: T::NAN,
-        m22: T::NAN,
-        m31: T::NAN,
-        m32: T::NAN,
-        m33: T::NAN,
+        x_axis: Vector3::NAN,
+        y_axis: Vector3::NAN,
+        z_axis: Vector3::NAN,
     };
     /// Identity matrix
     ///
@@ -465,15 +412,9 @@ where
     /// assert_eq!(matrix.row(2), vec3!(0.0, 0.0, 1.0));
     /// ```
     pub const IDENTITY: Self = Self {
-        m11: T::ONE,
-        m12: T::ZERO,
-        m13: T::ZERO,
-        m21: T::ZERO,
-        m22: T::ONE,
-        m23: T::ZERO,
-        m31: T::ZERO,
-        m32: T::ZERO,
-        m33: T::ONE,
+        x_axis: Vector3::X,
+        y_axis: Vector3::Y,
+        z_axis: Vector3::Z,
     };
 
     crate::forward_to_raw!(
@@ -510,7 +451,14 @@ where
         pub fn add_mat3(&self, other: &Self) -> Self;
         #[doc = "Subtracts two 3x3 matrices."]
         pub fn sub_mat3(&self, other: &Self) -> Self;
+        #[doc = "Create a `[T; 9]` array storing the data in column-major order."]
+        pub fn to_cols_array(&self) -> [T; 9];
     );
+
+    #[doc = "Creates a 3x3 matrix from a [T; 9] array stored in column major order."]
+    pub fn from_cols_array(array: &[T; 9]) -> Self {
+        Self::from_raw(<Self as ToRaw>::Raw::from_cols_array(array))
+    }
 
     /// Transform 2D point.
     ///
@@ -555,6 +503,18 @@ impl From<Matrix2<f32>> for glam::Mat2 {
     }
 }
 
+impl<T: Scalar> From<[T; 4]> for Matrix2<T> {
+    fn from(value: [T; 4]) -> Matrix2<T> {
+        Matrix2(value.into())
+    }
+}
+
+impl<T: Scalar> From<Matrix2<T>> for [T; 4] {
+    fn from(value: Matrix2<T>) -> [T; 4] {
+        value.0.into()
+    }
+}
+
 impl From<glam::DMat2> for Matrix2<f64> {
     fn from(mat: glam::DMat2) -> Self {
         Self::from_raw(mat)
@@ -591,6 +551,18 @@ impl From<Matrix3<f32>> for glam::Mat3 {
     }
 }
 
+impl<T: FloatScalar> From<[T; 9]> for Matrix3<T> {
+    fn from(value: [T; 9]) -> Matrix3<T> {
+        Matrix3::from_cols_array(&value)
+    }
+}
+
+impl<T: FloatScalar> From<Matrix3<T>> for [T; 9] {
+    fn from(value: Matrix3<T>) -> [T; 9] {
+        value.to_cols_array()
+    }
+}
+
 impl From<glam::DMat3> for Matrix3<f64> {
     fn from(mat: glam::DMat3) -> Self {
         Self::from_raw(mat)
@@ -612,6 +584,18 @@ impl From<glam::Mat4> for Matrix4<f32> {
 impl From<Matrix4<f32>> for glam::Mat4 {
     fn from(mat: Matrix4<f32>) -> Self {
         mat.to_raw()
+    }
+}
+
+impl<T: FloatScalar> From<[T; 16]> for Matrix4<T> {
+    fn from(value: [T; 16]) -> Matrix4<T> {
+        Matrix4::from_cols_array(&value)
+    }
+}
+
+impl<T: FloatScalar> From<Matrix4<T>> for [T; 16] {
+    fn from(value: Matrix4<T>) -> [T; 16] {
+        value.to_cols_array()
     }
 }
 
@@ -696,41 +680,17 @@ where
 {
     /// All zeroes.
     pub const ZERO: Self = Self {
-        m11: T::ZERO,
-        m12: T::ZERO,
-        m13: T::ZERO,
-        m14: T::ZERO,
-        m21: T::ZERO,
-        m22: T::ZERO,
-        m23: T::ZERO,
-        m24: T::ZERO,
-        m31: T::ZERO,
-        m32: T::ZERO,
-        m33: T::ZERO,
-        m34: T::ZERO,
-        m41: T::ZERO,
-        m42: T::ZERO,
-        m43: T::ZERO,
-        m44: T::ZERO,
+        x_axis: Vector4::ZERO,
+        y_axis: Vector4::ZERO,
+        z_axis: Vector4::ZERO,
+        w_axis: Vector4::ZERO,
     };
     /// All NaNs.
     pub const NAN: Self = Self {
-        m11: T::NAN,
-        m12: T::NAN,
-        m13: T::NAN,
-        m14: T::NAN,
-        m21: T::NAN,
-        m22: T::NAN,
-        m23: T::NAN,
-        m24: T::NAN,
-        m31: T::NAN,
-        m32: T::NAN,
-        m33: T::NAN,
-        m34: T::NAN,
-        m41: T::NAN,
-        m42: T::NAN,
-        m43: T::NAN,
-        m44: T::NAN,
+        x_axis: Vector4::NAN,
+        y_axis: Vector4::NAN,
+        z_axis: Vector4::NAN,
+        w_axis: Vector4::NAN,
     };
     /// Identity matrix
     ///
@@ -744,22 +704,10 @@ where
     /// assert_eq!(matrix.row(3), (0.0, 0.0, 0.0, 1.0));
     /// ```
     pub const IDENTITY: Self = Self {
-        m11: T::ONE,
-        m12: T::ZERO,
-        m13: T::ZERO,
-        m14: T::ZERO,
-        m21: T::ZERO,
-        m22: T::ONE,
-        m23: T::ZERO,
-        m24: T::ZERO,
-        m31: T::ZERO,
-        m32: T::ZERO,
-        m33: T::ONE,
-        m34: T::ZERO,
-        m41: T::ZERO,
-        m42: T::ZERO,
-        m43: T::ZERO,
-        m44: T::ONE,
+        x_axis: Vector4::X,
+        y_axis: Vector4::Y,
+        z_axis: Vector4::Z,
+        w_axis: Vector4::W,
     };
 
     crate::forward_to_raw!(
@@ -852,7 +800,14 @@ where
         pub fn orthographic_lh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
         #[doc = ""]
         pub fn orthographic_rh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
+        #[doc = "Create a `[T; 16]` array storing the data in column-major order."]
+        pub fn to_cols_array(&self) -> [T; 16];
     );
+
+    #[doc = "Creates a 4x4 matrix from a [T; 16] array stored in column major order."]
+    pub fn from_cols_array(array: &[T; 16]) -> Self {
+        Self::from_raw(<Self as ToRaw>::Raw::from_cols_array(array))
+    }
 
     /// Transform 3D point.
     ///

@@ -54,6 +54,8 @@ pub trait Matrix2: Matrix + Mul<Self::Vec2, Output = Self::Vec2> {
     fn mul_mat2(&self, other: &Self) -> Self;
     fn add_mat2(&self, other: &Self) -> Self;
     fn sub_mat2(&self, other: &Self) -> Self;
+    fn to_cols_array(&self) -> [Self::Scalar; 4];
+    fn from_cols_array(array: &[Self::Scalar; 4]) -> Self;
 }
 
 /// Primitive 3x3 matrix.
@@ -80,6 +82,8 @@ pub trait Matrix3: Matrix + Mul<Self::Vec3, Output = Self::Vec3> {
     fn mul_mat3(&self, other: &Self) -> Self;
     fn add_mat3(&self, other: &Self) -> Self;
     fn sub_mat3(&self, other: &Self) -> Self;
+    fn to_cols_array(&self) -> [Self::Scalar; 9];
+    fn from_cols_array(array: &[Self::Scalar; 9]) -> Self;
 }
 
 /// Primitive 4x4 matrix.
@@ -182,6 +186,8 @@ pub trait Matrix4: Matrix + Mul<Self::Vec4, Output = Self::Vec4> {
     fn mul_mat4(&self, other: &Self) -> Self;
     fn add_mat4(&self, other: &Self) -> Self;
     fn sub_mat4(&self, other: &Self) -> Self;
+    fn to_cols_array(&self) -> [Self::Scalar; 16];
+    fn from_cols_array(array: &[Self::Scalar; 16]) -> Self;
 }
 
 macro_rules! impl_matrix {
@@ -220,6 +226,8 @@ impl Matrix2 for glam::Mat2 {
     forward_impl!(glam::Mat2 => fn mul_mat2(&self, other: &Self) -> Self);
     forward_impl!(glam::Mat2 => fn add_mat2(&self, other: &Self) -> Self);
     forward_impl!(glam::Mat2 => fn sub_mat2(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat2 => fn to_cols_array(&self) -> [f32; 4]);
+    forward_impl!(glam::Mat2 => fn from_cols_array(array: &[f32; 4]) -> Self);
 }
 
 impl Matrix2 for glam::DMat2 {
@@ -234,6 +242,8 @@ impl Matrix2 for glam::DMat2 {
     forward_impl!(glam::DMat2 => fn mul_mat2(&self, other: &Self) -> Self);
     forward_impl!(glam::DMat2 => fn add_mat2(&self, other: &Self) -> Self);
     forward_impl!(glam::DMat2 => fn sub_mat2(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat2 => fn to_cols_array(&self) -> [f64; 4]);
+    forward_impl!(glam::DMat2 => fn from_cols_array(array: &[f64; 4]) -> Self);
 }
 
 impl Matrix3 for glam::Mat3 {
@@ -251,6 +261,8 @@ impl Matrix3 for glam::Mat3 {
     forward_impl!(glam::Mat3 => fn mul_mat3(&self, other: &Self) -> Self);
     forward_impl!(glam::Mat3 => fn add_mat3(&self, other: &Self) -> Self);
     forward_impl!(glam::Mat3 => fn sub_mat3(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat3 => fn to_cols_array(&self) -> [f32; 9]);
+    forward_impl!(glam::Mat3 => fn from_cols_array(array: &[f32; 9]) -> Self);
 
     forward_impl!(glam::Mat3 => fn from_scale_angle_translation(
         scale: glam::Vec2,
@@ -274,6 +286,8 @@ impl Matrix3 for glam::DMat3 {
     forward_impl!(glam::DMat3 => fn mul_mat3(&self, other: &Self) -> Self);
     forward_impl!(glam::DMat3 => fn add_mat3(&self, other: &Self) -> Self);
     forward_impl!(glam::DMat3 => fn sub_mat3(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat3 => fn to_cols_array(&self) -> [f64; 9]);
+    forward_impl!(glam::DMat3 => fn from_cols_array(array: &[f64; 9]) -> Self);
 
     forward_impl!(glam::DMat3 => fn from_scale_angle_translation(
         scale: glam::DVec2,
@@ -329,6 +343,8 @@ impl Matrix4 for glam::Mat4 {
     forward_impl!(glam::Mat4 => fn mul_mat4(&self, other: &Self) -> Self);
     forward_impl!(glam::Mat4 => fn add_mat4(&self, other: &Self) -> Self);
     forward_impl!(glam::Mat4 => fn sub_mat4(&self, other: &Self) -> Self);
+    forward_impl!(glam::Mat4 => fn to_cols_array(&self) -> [f32; 16]);
+    forward_impl!(glam::Mat4 => fn from_cols_array(array: &[f32; 16]) -> Self);
 }
 
 impl Matrix4 for glam::DMat4 {
@@ -378,4 +394,6 @@ impl Matrix4 for glam::DMat4 {
     forward_impl!(glam::DMat4 => fn mul_mat4(&self, other: &Self) -> Self);
     forward_impl!(glam::DMat4 => fn add_mat4(&self, other: &Self) -> Self);
     forward_impl!(glam::DMat4 => fn sub_mat4(&self, other: &Self) -> Self);
+    forward_impl!(glam::DMat4 => fn to_cols_array(&self) -> [f64; 16]);
+    forward_impl!(glam::DMat4 => fn from_cols_array(array: &[f64; 16]) -> Self);
 }
