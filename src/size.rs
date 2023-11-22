@@ -220,7 +220,7 @@ impl<T: Unit> Size2<T> {
     }
 
     crate::forward_constructors!(2, glam::Vec2);
-    crate::forward_comparison!(<T::Scalar as Scalar>::BVec2, glam::Vec2);
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
 
     crate::casting_interface!(Size2 {
         width: T::Scalar,
@@ -265,7 +265,7 @@ where
         height: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
-    crate::forward_float_ops!(<T::Scalar as Scalar>::BVec2, glam::Vec2);
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
 }
 
 impl<T: Unit> Size3<T> {
@@ -293,7 +293,7 @@ impl<T: Unit> Size3<T> {
     }
 
     crate::forward_constructors!(3, glam::Vec3);
-    crate::forward_comparison!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
 
     crate::casting_interface!(Size3 {
         width: T::Scalar,
@@ -343,7 +343,7 @@ where
         depth: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
-    crate::forward_float_ops!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
 }
 
 #[cfg(test)]

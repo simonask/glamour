@@ -304,10 +304,7 @@ impl<T: Unit> Point2<T> {
     }
 
     crate::forward_constructors!(2, glam::Vec2);
-    crate::forward_comparison!(
-        <<T::Scalar as Scalar>::Vec2 as crate::bindings::Vector>::Mask,
-        glam::Vec2
-    );
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
     crate::casting_interface!(Point2 {
         x: T::Scalar,
         y: T::Scalar
@@ -348,7 +345,7 @@ where
         y: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
-    crate::forward_float_ops!(<T::Scalar as Scalar>::BVec2, glam::Vec2);
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
     float_point_interface!(glam::Vec2);
 }
 
@@ -373,7 +370,7 @@ impl<T: Unit> Point3<T> {
     }
 
     crate::forward_constructors!(3, glam::Vec3);
-    crate::forward_comparison!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
     crate::casting_interface!(Point3 {
         x: T::Scalar,
         y: T::Scalar,
@@ -421,7 +418,7 @@ where
         z: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
-    crate::forward_float_ops!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
     float_point_interface!(glam::Vec3);
 }
 
@@ -448,7 +445,7 @@ impl<T: Unit> Point4<T> {
     }
 
     crate::forward_constructors!(4, glam::Vec4);
-    crate::forward_comparison!(<T::Scalar as Scalar>::BVec4, glam::Vec4);
+    crate::forward_comparison!(glam::BVec4, glam::Vec4);
     crate::casting_interface!(Point4 {
         x: T::Scalar,
         y: T::Scalar,
@@ -499,7 +496,7 @@ where
         w: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
-    crate::forward_float_ops!(<T::Scalar as Scalar>::BVec4, glam::Vec4);
+    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
     float_point_interface!(glam::Vec4);
 }
 
