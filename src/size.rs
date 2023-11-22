@@ -172,6 +172,12 @@ macro_rules! impl_size {
             pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
                 bytemuck::cast_mut(self)
             }
+
+            #[doc = "True if any component is zero, or negative, or NaN."]
+            pub fn is_empty(self) -> bool {
+                let dim: [T::Scalar; $dimensions] = self.into();
+                !dim.into_iter().all(|d| d > T::Scalar::ZERO)
+            }
         }
     };
 }

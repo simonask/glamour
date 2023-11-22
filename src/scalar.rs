@@ -44,12 +44,6 @@ pub trait Scalar:
     fn try_cast<T2: Scalar>(self) -> Option<T2> {
         num_traits::NumCast::from(self)
     }
-
-    /// True if the number is not NaN and not infinity.
-    ///
-    /// Always true for integer scalars.
-    #[must_use]
-    fn is_finite(self) -> bool;
 }
 
 /// Signed scalar types (`i32`, `f32`, `f64`).
@@ -93,6 +87,10 @@ pub trait FloatScalar:
     const NAN: Self;
     const INFINITY: Self;
     const NEG_INFINITY: Self;
+
+    /// True if the number is not NaN and not infinity.
+    #[must_use]
+    fn is_finite(self) -> bool;
 }
 
 impl Scalar for f32 {
@@ -102,10 +100,6 @@ impl Scalar for f32 {
     type Vec2 = glam::Vec2;
     type Vec3 = glam::Vec3;
     type Vec4 = glam::Vec4;
-
-    fn is_finite(self) -> bool {
-        num_traits::Float::is_finite(self)
-    }
 }
 
 impl SignedScalar for f32 {
@@ -128,6 +122,10 @@ impl FloatScalar for f32 {
     const NAN: Self = f32::NAN;
     const INFINITY: Self = f32::INFINITY;
     const NEG_INFINITY: Self = f32::NEG_INFINITY;
+
+    fn is_finite(self) -> bool {
+        num_traits::Float::is_finite(self)
+    }
 }
 
 impl Scalar for f64 {
@@ -137,10 +135,6 @@ impl Scalar for f64 {
     type Vec2 = glam::DVec2;
     type Vec3 = glam::DVec3;
     type Vec4 = glam::DVec4;
-
-    fn is_finite(self) -> bool {
-        num_traits::Float::is_finite(self)
-    }
 }
 
 impl SignedScalar for f64 {
@@ -163,6 +157,10 @@ impl FloatScalar for f64 {
     const NAN: Self = f64::NAN;
     const INFINITY: Self = f64::INFINITY;
     const NEG_INFINITY: Self = f64::NEG_INFINITY;
+
+    fn is_finite(self) -> bool {
+        num_traits::Float::is_finite(self)
+    }
 }
 
 impl Scalar for i32 {
@@ -172,10 +170,6 @@ impl Scalar for i32 {
     type Vec2 = glam::IVec2;
     type Vec3 = glam::IVec3;
     type Vec4 = glam::IVec4;
-
-    fn is_finite(self) -> bool {
-        true
-    }
 }
 
 impl SignedScalar for i32 {
@@ -193,10 +187,6 @@ impl Scalar for i64 {
     type Vec2 = glam::I64Vec2;
     type Vec3 = glam::I64Vec3;
     type Vec4 = glam::I64Vec4;
-
-    fn is_finite(self) -> bool {
-        true
-    }
 }
 
 impl SignedScalar for i64 {
@@ -214,10 +204,6 @@ impl Scalar for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
-
-    fn is_finite(self) -> bool {
-        true
-    }
 }
 
 impl Scalar for u64 {
@@ -227,10 +213,6 @@ impl Scalar for u64 {
     type Vec2 = glam::U64Vec2;
     type Vec3 = glam::U64Vec3;
     type Vec4 = glam::U64Vec4;
-
-    fn is_finite(self) -> bool {
-        true
-    }
 }
 
 #[cfg(test)]
@@ -272,18 +254,11 @@ mod tests {
 
     #[test]
     fn finite() {
-        // dummy tests for coverage
-        assert!(0i32.is_finite());
-        assert!(0u32.is_finite());
-        assert!(0i64.is_finite());
-        assert!(0u64.is_finite());
-        assert!(0.0f32.is_finite());
-        assert!(0.0f64.is_finite());
-        assert!(!Scalar::is_finite(f32::NAN));
-        assert!(!Scalar::is_finite(f32::INFINITY));
-        assert!(!Scalar::is_finite(f32::NEG_INFINITY));
-        assert!(!Scalar::is_finite(f64::NAN));
-        assert!(!Scalar::is_finite(f64::INFINITY));
-        assert!(!Scalar::is_finite(f64::NEG_INFINITY));
+        assert!(!FloatScalar::is_finite(f32::NAN));
+        assert!(!FloatScalar::is_finite(f32::INFINITY));
+        assert!(!FloatScalar::is_finite(f32::NEG_INFINITY));
+        assert!(!FloatScalar::is_finite(f64::NAN));
+        assert!(!FloatScalar::is_finite(f64::INFINITY));
+        assert!(!FloatScalar::is_finite(f64::NEG_INFINITY));
     }
 }
