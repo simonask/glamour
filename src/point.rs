@@ -655,7 +655,35 @@ mod tests {
     }
 
     #[test]
-    fn from_into_vector() {
+    fn from_into_vector2() {
+        let mut p: Point2<f32> = point!(1.0, 2.0);
+        let mut v: Vector2<f32> = p.to_vector();
+        let q: Point2<f32> = Point2::from_vector(v);
+        assert_eq!(p, q);
+        assert_eq!(Vector2::from_point(p), v);
+
+        let _: &Vector2<_> = p.as_vector();
+        let _: &mut Vector2<_> = p.as_vector_mut();
+        let _: &Point2<_> = v.as_point();
+        let _: &mut Point2<_> = v.as_point_mut();
+    }
+
+    #[test]
+    fn from_into_vector3() {
+        let mut p: Point3<f32> = point!(1.0, 2.0, 3.0);
+        let mut v: Vector3<f32> = p.to_vector();
+        let q: Point3<f32> = Point3::from_vector(v);
+        assert_eq!(p, q);
+        assert_eq!(Vector3::from_point(p), v);
+
+        let _: &Vector3<_> = p.as_vector();
+        let _: &mut Vector3<_> = p.as_vector_mut();
+        let _: &Point3<_> = v.as_point();
+        let _: &mut Point3<_> = v.as_point_mut();
+    }
+
+    #[test]
+    fn from_into_vector4() {
         let mut p: Point4<f32> = point!(1.0, 2.0, 3.0, 4.0);
         let mut v: Vector4<f32> = p.to_vector();
         let q: Point4<f32> = Point4::from_vector(v);
