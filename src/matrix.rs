@@ -13,7 +13,7 @@ use crate::{
     Angle, Point2, Point3, Scalar, Unit, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{Pod, Zeroable};
+use bytemuck::{Pod, TransparentWrapper, Zeroable};
 
 /// 2x2 column-major matrix.
 ///
@@ -30,6 +30,7 @@ pub struct Matrix2<T: Scalar>(Vector4<T>);
 
 unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
 unsafe impl<T: Scalar> Pod for Matrix2<T> {}
+unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat2> for Matrix2<T> {}
 
 impl<T: FloatScalar> ToRaw for Matrix2<T> {
     type Raw = T::Mat2;
@@ -76,6 +77,7 @@ pub struct Matrix3<T: Scalar> {
 
 unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
 unsafe impl<T: Scalar> Pod for Matrix3<T> {}
+unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat3> for Matrix3<T> {}
 
 impl<T: FloatScalar> ToRaw for Matrix3<T> {
     type Raw = T::Mat3;
@@ -122,6 +124,7 @@ pub struct Matrix4<T: Scalar> {
 
 unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}
 unsafe impl<T: Scalar> Pod for Matrix4<T> {}
+unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat4> for Matrix4<T> {}
 
 impl<T: FloatScalar> ToRaw for Matrix4<T> {
     type Raw = T::Mat4;

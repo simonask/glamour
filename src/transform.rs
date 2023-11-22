@@ -8,7 +8,7 @@ use core::ops::Mul;
 use core::{fmt::Debug, marker::PhantomData};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{cast, Pod, Zeroable};
+use bytemuck::{cast, Pod, TransparentWrapper, Zeroable};
 
 use crate::{
     bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3, ToRaw,
@@ -264,6 +264,14 @@ unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform3<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform3<Src, Dst> {}
+unsafe impl<Src: Unit, Dst: Unit> TransparentWrapper<Matrix3<Src::Scalar>>
+    for Transform2<Src, Dst>
+{
+}
+unsafe impl<Src: Unit, Dst: Unit> TransparentWrapper<Matrix4<Src::Scalar>>
+    for Transform3<Src, Dst>
+{
+}
 
 impl<Src, Dst> Transform2<Src, Dst>
 where
