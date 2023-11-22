@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Missing `truncate()` method for `Vector3`.
 - Implementation of `Product` for `Vector2`, `Vector3`, and `Vector4`.
+- Implemented `bytemuck::TransparentWrapper` for applicable types.
 
 ### Breaking changes
 - Changed the field structure of `Matrix2`, `Matrix3`, and `Matrix4` to match `glam`.
