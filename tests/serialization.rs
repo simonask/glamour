@@ -250,4 +250,32 @@ mod serialization {
             Matrix4::<f32>::IDENTITY
         );
     }
+
+    #[test]
+    fn transform2() {
+        assert_eq!(
+            serde_json::to_string(&Transform2::<f32, f32>::IDENTITY).unwrap(),
+            r#"[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]"#
+        );
+        assert_eq!(
+            serde_json::from_str::<Transform2<f32, f32>>("[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]")
+                .unwrap(),
+            Transform2::<f32, f32>::IDENTITY
+        );
+    }
+
+    #[test]
+    fn transform3() {
+        assert_eq!(
+            serde_json::to_string(&Transform3::<f32, f32>::IDENTITY).unwrap(),
+            r#"[1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0]"#
+        );
+        assert_eq!(
+            serde_json::from_str::<Transform3<f32, f32>>(
+                "[1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0]"
+            )
+            .unwrap(),
+            Transform3::<f32, f32>::IDENTITY
+        );
+    }
 }
