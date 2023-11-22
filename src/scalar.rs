@@ -12,16 +12,9 @@ pub trait Scalar:
     + PartialOrd
     + ToRaw<Raw = Self> + FromRaw + AsRaw
     + core::fmt::Display
-
     + crate::Unit<Scalar = Self>
     + num_traits::NumOps
     + num_traits::NumCast
-    + num_traits::ToPrimitive
-    + num_traits::AsPrimitive<f32>
-    + num_traits::AsPrimitive<f64>
-    + num_traits::AsPrimitive<i32>
-    + num_traits::AsPrimitive<u32>
-
     + approx::AbsDiffEq<Epsilon = Self>
 {
     /// The underlying 2D vector type for this scalar ([`glam::Vec2`],
