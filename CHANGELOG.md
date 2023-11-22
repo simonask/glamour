@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped Minimum Supported Rust Version to 1.65.0. This is to simplify CI because
   Criterion relies on a version of `regex` that only works with that version.
 
+### Internal changes
+- Simplified handling of bitmasks, making it more clear in documentation that the `glam::BVec*`
+  types are indeed used directly.
+
 ## [0.8.1] - 2023-10-27
 ### Added
 - Missing `truncate()` method for `Vector4`.
