@@ -11,6 +11,8 @@
 use core::iter::{Product, Sum};
 use core::ops::Mul;
 
+use bytemuck::{Pod, TransparentWrapper, Zeroable};
+
 use crate::scalar::SignedScalar;
 use crate::{
     bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
@@ -56,9 +58,11 @@ pub struct Vector2<T: Unit = f32> {
 }
 
 /// SAFETY: `T::Scalar` is `Zeroable`, and `Vector2` is `#[repr(C)]`.
-unsafe impl<T: Unit> bytemuck::Zeroable for Vector2<T> {}
+unsafe impl<T: Unit> Zeroable for Vector2<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
-unsafe impl<T: Unit> bytemuck::Pod for Vector2<T> {}
+unsafe impl<T: Unit> Pod for Vector2<T> {}
+/// SAFETY: These are guaranteed to have the same representation.
+unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec2> for Vector2<T> {}
 
 /// 3D vector.
 ///
@@ -77,9 +81,11 @@ pub struct Vector3<T: Unit = f32> {
 }
 
 /// SAFETY: `T::Scalar` is `Zeroable`, and `Vector3` is `#[repr(C)]`.
-unsafe impl<T: Unit> bytemuck::Zeroable for Vector3<T> {}
+unsafe impl<T: Unit> Zeroable for Vector3<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
-unsafe impl<T: Unit> bytemuck::Pod for Vector3<T> {}
+unsafe impl<T: Unit> Pod for Vector3<T> {}
+/// SAFETY: These are guaranteed to have the same representation.
+unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec3> for Vector3<T> {}
 
 /// 4D vector.
 ///
@@ -107,10 +113,12 @@ pub struct Vector4<T: Unit = f32> {
     pub w: T::Scalar,
 }
 
-/// SAFETY: `T::Scalar` is `Zeroable`, and `Vector2` is `#[repr(C)]`.
-unsafe impl<T: Unit> bytemuck::Zeroable for Vector4<T> {}
+/// SAFETY: `T::Scalar` is `Zeroable`, and `Vector4` is `#[repr(C)]`.
+unsafe impl<T: Unit> Zeroable for Vector4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
-unsafe impl<T: Unit> bytemuck::Pod for Vector4<T> {}
+unsafe impl<T: Unit> Pod for Vector4<T> {}
+/// SAFETY: These are guaranteed to have the same representation.
+unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec4> for Vector4<T> {}
 
 macro_rules! vector_interface {
     ($point_ty:ident $(, $size_ty:ident)?) => {

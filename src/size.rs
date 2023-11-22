@@ -5,6 +5,8 @@ use crate::{
     Vector3,
 };
 
+use bytemuck::{Pod, TransparentWrapper, Zeroable};
+
 /// 2D size.
 #[repr(C)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
@@ -17,9 +19,10 @@ pub struct Size2<T: Unit = f32> {
 }
 
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
-unsafe impl<T: Unit> bytemuck::Pod for Size2<T> {}
+unsafe impl<T: Unit> Pod for Size2<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
-unsafe impl<T: Unit> bytemuck::Zeroable for Size2<T> {}
+unsafe impl<T: Unit> Zeroable for Size2<T> {}
+unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec2> for Size2<T> {}
 
 /// 3D size.
 #[repr(C)]
@@ -35,9 +38,10 @@ pub struct Size3<T: Unit = f32> {
 }
 
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
-unsafe impl<T: Unit> bytemuck::Pod for Size3<T> {}
+unsafe impl<T: Unit> Pod for Size3<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
-unsafe impl<T: Unit> bytemuck::Zeroable for Size3<T> {}
+unsafe impl<T: Unit> Zeroable for Size3<T> {}
+unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec3> for Size3<T> {}
 
 impl<T: Unit> ToRaw for Size2<T> {
     type Raw = <T::Scalar as Scalar>::Vec2;
