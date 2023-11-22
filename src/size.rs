@@ -402,6 +402,26 @@ mod tests {
     }
 
     #[test]
+    fn is_empty() {
+        assert!(Size2::<f32>::ZERO.is_empty());
+        assert!(Size3::<f32>::ZERO.is_empty());
+        assert!(!Size2::<f32>::ONE.is_empty());
+        assert!(!Size3::<f32>::ONE.is_empty());
+
+        assert!(Size2::<f32> {
+            width: 0.0,
+            height: 1.0
+        }
+        .is_empty());
+        assert!(Size3::<f32> {
+            width: 0.0,
+            height: 1.0,
+            depth: 1.0
+        }
+        .is_empty());
+    }
+
+    #[test]
     fn volume() {
         let a: Size3<f32> = Size3 {
             width: 2.0,
@@ -436,5 +456,35 @@ mod tests {
         let _: &mut Vector2<_> = p.as_vector_mut();
         let _: &Size2<_> = v.as_size();
         let _: &mut Size2<_> = v.as_size_mut();
+    }
+
+    #[test]
+    fn to_raw() {
+        let s = Size2::<f32> {
+            width: 1.0,
+            height: 2.0,
+        };
+        assert_eq!(s.to_raw(), glam::Vec2 { x: 1.0, y: 2.0 });
+        let s = Size3::<f32> {
+            width: 1.0,
+            height: 2.0,
+            depth: 3.0,
+        };
+        assert_eq!(
+            s.to_raw(),
+            glam::Vec3 {
+                x: 1.0,
+                y: 2.0,
+                z: 3.0
+            }
+        );
+        assert_eq!(
+            Size3::<f32>::from_raw(glam::Vec3::new(1.0, 2.0, 3.0)),
+            Size3 {
+                width: 1.0,
+                height: 2.0,
+                depth: 3.0
+            }
+        );
     }
 }
