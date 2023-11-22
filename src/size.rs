@@ -172,6 +172,12 @@ macro_rules! impl_size {
             pub fn as_vector_mut(&mut self) -> &mut $vector_type<T> {
                 bytemuck::cast_mut(self)
             }
+
+            #[doc = "True if any component is zero, or negative, or NaN."]
+            pub fn is_empty(self) -> bool {
+                let dim: [T::Scalar; $dimensions] = self.into();
+                !dim.into_iter().all(|d| d > T::Scalar::ZERO)
+            }
         }
     };
 }
@@ -220,7 +226,7 @@ impl<T: Unit> Size2<T> {
     }
 
     crate::forward_constructors!(2, glam::Vec2);
-    crate::forward_comparison!(<T::Scalar as Scalar>::BVec2, glam::Vec2);
+    crate::forward_comparison!(glam::BVec2, glam::Vec2);
 
     crate::casting_interface!(Size2 {
         width: T::Scalar,
@@ -265,7 +271,7 @@ where
         height: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
-    crate::forward_float_ops!(<T::Scalar as Scalar>::BVec2, glam::Vec2);
+    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
 }
 
 impl<T: Unit> Size3<T> {
@@ -293,7 +299,7 @@ impl<T: Unit> Size3<T> {
     }
 
     crate::forward_constructors!(3, glam::Vec3);
-    crate::forward_comparison!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
+    crate::forward_comparison!(glam::BVec3, glam::Vec3);
 
     crate::casting_interface!(Size3 {
         width: T::Scalar,
@@ -343,7 +349,7 @@ where
         depth: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
 
-    crate::forward_float_ops!(<T::Scalar as Scalar>::BVec3, glam::Vec3);
+    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
 }
 
 #[cfg(test)]
@@ -396,6 +402,26 @@ mod tests {
     }
 
     #[test]
+    fn is_empty() {
+        assert!(Size2::<f32>::ZERO.is_empty());
+        assert!(Size3::<f32>::ZERO.is_empty());
+        assert!(!Size2::<f32>::ONE.is_empty());
+        assert!(!Size3::<f32>::ONE.is_empty());
+
+        assert!(Size2::<f32> {
+            width: 0.0,
+            height: 1.0
+        }
+        .is_empty());
+        assert!(Size3::<f32> {
+            width: 0.0,
+            height: 1.0,
+            depth: 1.0
+        }
+        .is_empty());
+    }
+
+    #[test]
     fn volume() {
         let a: Size3<f32> = Size3 {
             width: 2.0,
@@ -430,5 +456,35 @@ mod tests {
         let _: &mut Vector2<_> = p.as_vector_mut();
         let _: &Size2<_> = v.as_size();
         let _: &mut Size2<_> = v.as_size_mut();
+    }
+
+    #[test]
+    fn to_raw() {
+        let s = Size2::<f32> {
+            width: 1.0,
+            height: 2.0,
+        };
+        assert_eq!(s.to_raw(), glam::Vec2 { x: 1.0, y: 2.0 });
+        let s = Size3::<f32> {
+            width: 1.0,
+            height: 2.0,
+            depth: 3.0,
+        };
+        assert_eq!(
+            s.to_raw(),
+            glam::Vec3 {
+                x: 1.0,
+                y: 2.0,
+                z: 3.0
+            }
+        );
+        assert_eq!(
+            Size3::<f32>::from_raw(glam::Vec3::new(1.0, 2.0, 3.0)),
+            Size3 {
+                width: 1.0,
+                height: 2.0,
+                depth: 3.0
+            }
+        );
     }
 }

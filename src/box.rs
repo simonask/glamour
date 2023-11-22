@@ -214,26 +214,14 @@ impl<T: Unit> Box2<T> {
     #[inline]
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        use crate::Scalar;
-        !(self.max.x > self.min.x
-            && self.max.y > self.min.y
-            && self.min.x.is_finite()
-            && self.min.y.is_finite()
-            && self.max.x.is_finite()
-            && self.max.y.is_finite())
+        !(self.max.x > self.min.x && self.max.y > self.min.y)
     }
 
     /// True when `max.x < min.x || max.y < min.y`.
     #[inline]
     #[must_use]
     pub fn is_negative(&self) -> bool {
-        use crate::Scalar;
-        !(self.max.x >= self.min.x
-            && self.max.y >= self.min.y
-            && self.min.x.is_finite()
-            && self.min.y.is_finite()
-            && self.max.x.is_finite()
-            && self.max.y.is_finite())
+        !(self.max.x >= self.min.x && self.max.y >= self.min.y)
     }
 
     /// Calculate intersection, returning an invalid (negative) box when there

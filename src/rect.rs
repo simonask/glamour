@@ -199,24 +199,18 @@ impl<T: Unit> Rect<T> {
         self.size.area()
     }
 
-    /// True if size is zero or negative or NaN, or origin is NaN or infinity.
+    /// True if size is zero or negative or NaN.
     #[inline]
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        !(self.size.width > T::Scalar::ZERO
-            && self.size.height > T::Scalar::ZERO
-            && self.origin.x.is_finite()
-            && self.origin.y.is_finite())
+        self.size.is_empty()
     }
 
-    /// True if size is negative or NaN, or origin is NaN or infinity.
+    /// True if size is negative or NaN.
     #[inline]
     #[must_use]
     pub fn is_negative(&self) -> bool {
-        !(self.size.width >= T::Scalar::ZERO
-            && self.size.height >= T::Scalar::ZERO
-            && self.origin.x.is_finite()
-            && self.origin.y.is_finite())
+        !(self.size.width >= T::Scalar::ZERO && self.size.height >= T::Scalar::ZERO)
     }
 }
 
@@ -650,8 +644,8 @@ mod tests {
         assert!(r.is_negative());
 
         let r = RectF::new((core::f32::NAN, 1.0), (1.0, 1.0));
-        assert!(r.is_empty());
-        assert!(r.is_negative());
+        assert!(!r.is_empty());
+        assert!(!r.is_negative());
     }
 
     #[test]

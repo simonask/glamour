@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Missing `truncate()` method for `Vector3`.
+- Added `Size2::is_empty()` and `Size3::is_empty()`.
 - Implementation of `Product` for `Vector2`, `Vector3`, and `Vector4`.
 - Implemented `bytemuck::TransparentWrapper` for applicable types.
 
 ### Breaking changes
 - Changed the field structure of `Matrix2`, `Matrix3`, and `Matrix4` to match `glam`.
+- Changed the implementations of `Rect::is_empty()`, `BoxN::is_empty()`, `Rect::is_negative()` to match
+  the behavior of `euclid`.
 - Implemented serialization for matrix types such that they are serialized to/from flat
   column arrays. Note that glam does not implement serialization for matrices.
 - Added `#[serde(transparent)]` to `Transform2` and `Transform3`, such that their
@@ -20,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   just the scalar value.
 - Bumped Minimum Supported Rust Version to 1.65.0. This is to simplify CI because
   Criterion relies on a version of `regex` that only works with that version.
+
+### Internal changes
+- Simplified handling of bitmasks, making it more clear in documentation that the `glam::BVec*`
+  types are indeed used directly.
+- Removed the meaningless `is_finite()` trait method from `Scalar`, moved it to `FloatScalar` instead.
 
 ## [0.8.1] - 2023-10-27
 ### Added
