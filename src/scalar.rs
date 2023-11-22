@@ -336,11 +336,19 @@ mod tests {
     }
 
     #[test]
-    fn int_finite() {
+    fn finite() {
         // dummy tests for coverage
         assert!(0i32.is_finite());
         assert!(0u32.is_finite());
         assert!(0i64.is_finite());
         assert!(0u64.is_finite());
+        assert!(0.0f32.is_finite());
+        assert!(0.0f64.is_finite());
+        assert!(!Scalar::is_finite(f32::NAN));
+        assert!(!Scalar::is_finite(f32::INFINITY));
+        assert!(!Scalar::is_finite(f32::NEG_INFINITY));
+        assert!(!Scalar::is_finite(f64::NAN));
+        assert!(!Scalar::is_finite(f64::INFINITY));
+        assert!(!Scalar::is_finite(f64::NEG_INFINITY));
     }
 }
