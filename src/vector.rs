@@ -429,6 +429,8 @@ where
         pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar>;
         #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
         pub fn rotate(self, rotation: Vector2<T::Scalar>) -> Self;
+        #[doc = "Returns the angle (in radians) of this vector in the range [-π, +π]."]
+        pub fn to_angle(self) -> Angle<T::Scalar>;
         #[doc = "Angle between this and another vector."]
         pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
     );
