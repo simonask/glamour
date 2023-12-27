@@ -11,6 +11,7 @@ macro_rules! impl_vector {
             T::Scalar: encase::private::VectorScalar,
         {
             #[inline]
+            #[cfg_attr(coverage, coverage(off))]
             fn as_ref_parts(&self) -> &[T::Scalar; $n] {
                 ::core::convert::AsRef::as_ref(self)
             }
@@ -20,6 +21,7 @@ macro_rules! impl_vector {
             T::Scalar: encase::private::VectorScalar,
         {
             #[inline]
+            #[cfg_attr(coverage, coverage(off))]
             fn as_mut_parts(&mut self) -> &mut [T::Scalar; $n] {
                 ::core::convert::AsMut::as_mut(self)
             }
@@ -29,6 +31,7 @@ macro_rules! impl_vector {
             T::Scalar: encase::private::VectorScalar,
         {
             #[inline]
+            #[cfg_attr(coverage, coverage(off))]
             fn from_parts(parts: [T::Scalar; $n]) -> Self {
                 ::core::convert::From::from(parts)
             }
@@ -232,5 +235,33 @@ mod tests {
         assert_is_matrix::<_, f32, 2>(Matrix2::<f32>::ZERO);
         assert_is_matrix::<_, f32, 3>(Matrix3::<f32>::ZERO);
         assert_is_matrix::<_, f32, 4>(Matrix4::<f32>::ZERO);
+    }
+
+    #[test]
+    fn create_from() {
+        let data = [1.0f32, 2.0, 3.0, 4.0];
+        let mut buffer = encase::DynamicUniformBuffer::new(bytemuck::cast_slice::<_, u8>(&data));
+        let v4: Vector4<F32> = buffer.create().unwrap();
+        assert_eq!(v4, Vector4::<F32>::new(1.0, 2.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn read_from() {
+        let data = [1.0f32, 2.0, 3.0, 4.0];
+        let mut buffer = encase::DynamicUniformBuffer::new(bytemuck::cast_slice::<_, u8>(&data));
+        let mut v4: Vector4<F32> = Vector4::ZERO;
+        buffer.read(&mut v4).unwrap();
+        assert_eq!(v4, Vector4::<F32>::new(1.0, 2.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn write_into() {
+        let mut data = [0.0f32, 0.0, 0.0, 0.0];
+        let mut buffer =
+            encase::DynamicUniformBuffer::new(bytemuck::cast_slice_mut::<_, u8>(&mut data));
+        let v4 = Vector4::<F32>::new(1.0, 2.0, 3.0, 4.0);
+        let n = buffer.write(&v4).unwrap();
+        assert_eq!(n, 0);
+        assert_eq!(v4, Vector4::<F32>::new(1.0, 2.0, 3.0, 4.0));
     }
 }
