@@ -396,14 +396,7 @@ impl FloatVector4 for glam::DVec4 {
     forward_impl!(glam::DVec4 => fn is_nan_mask(self) -> glam::BVec4);
 }
 
-#[cfg(all(
-    any(
-        target_feature = "sse2",
-        target_feature = "simd128",
-        feature = "core-simd"
-    ),
-    not(feature = "scalar-math"),
-))]
+#[cfg(not(feature = "scalar-math"))]
 mod bvec_compat {
     #[inline(always)]
     pub fn bvec4_to_bvec4a(bvec: glam::BVec4) -> glam::BVec4A {
@@ -423,14 +416,7 @@ mod bvec_compat {
     }
 }
 
-#[cfg(not(all(
-    any(
-        target_feature = "sse2",
-        target_feature = "simd128",
-        feature = "core-simd"
-    ),
-    not(feature = "scalar-math"),
-)))]
+#[cfg(feature = "scalar-math")]
 mod bvec_compat {
     #[inline(always)]
     pub fn bvec4_to_bvec4a(bvec: glam::BVec4) -> glam::BVec4 {
