@@ -1,6 +1,6 @@
 use crate::{
-    scalar::FloatScalar, AsRaw, FromRaw, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Scalar,
-    Size2, Size3, ToRaw, Unit, Vector2, Vector3, Vector4,
+    Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Scalar, Size2, Size3, Unit, Vector2,
+    Vector3, Vector4,
 };
 
 // Adapted from `encase::impl_vector!`.
