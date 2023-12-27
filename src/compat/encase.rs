@@ -2,230 +2,121 @@ use crate::{
     scalar::FloatScalar, AsRaw, FromRaw, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Scalar,
     Size2, Size3, ToRaw, Unit, Vector2, Vector3, Vector4,
 };
-use encase::{
-    internal::{BufferMut, BufferRef, CreateFrom, ReadFrom, Reader, WriteInto, Writer},
-    matrix::{AsMutMatrixParts, AsRefMatrixParts, FromMatrixParts, MatrixScalar},
-    vector::{AsMutVectorParts, AsRefVectorParts, FromVectorParts, VectorScalar},
-    ShaderSize, ShaderType,
-};
 
-macro_rules! impl_encase_vector {
-    ($base_type_name:ident, $raw_name:ident, $arity:literal) => {
-        impl<T> ShaderType for $base_type_name<T>
+// Adapted from `encase::impl_vector!`.
+macro_rules! impl_vector {
+    ($name:ident, $n:literal) => {
+        impl<T: Unit> encase::private::AsRefVectorParts<T::Scalar, $n> for $name<T>
         where
-            T: Unit,
-            <T::Scalar as Scalar>::$raw_name: ShaderType,
-        {
-            type ExtraMetadata = <<Self as ToRaw>::Raw as ShaderType>::ExtraMetadata;
-            const METADATA: encase::private::Metadata<Self::ExtraMetadata> =
-                <<Self as ToRaw>::Raw as ShaderType>::METADATA;
-        }
-
-        impl<T> ShaderSize for $base_type_name<T>
-        where
-            T: Unit,
-            <T::Scalar as Scalar>::$raw_name: ShaderSize,
-        {
-        }
-
-        impl<T> AsRefVectorParts<T::Scalar, $arity> for $base_type_name<T>
-        where
-            T: Unit,
-            T::Scalar: VectorScalar,
+            T::Scalar: encase::private::VectorScalar,
         {
             #[inline]
-            #[cfg_attr(coverage, coverage(off))]
-            fn as_ref_parts(&self) -> &[T::Scalar; $arity] {
-                self.as_array()
+            fn as_ref_parts(&self) -> &[T::Scalar; $n] {
+                ::core::convert::AsRef::as_ref(self)
             }
         }
-
-        impl<T> AsMutVectorParts<T::Scalar, $arity> for $base_type_name<T>
+        impl<T: Unit> encase::private::AsMutVectorParts<T::Scalar, $n> for $name<T>
         where
-            T: Unit,
-            T::Scalar: VectorScalar,
+            T::Scalar: encase::private::VectorScalar,
         {
             #[inline]
-            #[cfg_attr(coverage, coverage(off))]
-            fn as_mut_parts(&mut self) -> &mut [T::Scalar; $arity] {
-                self.as_array_mut()
+            fn as_mut_parts(&mut self) -> &mut [T::Scalar; $n] {
+                ::core::convert::AsMut::as_mut(self)
             }
         }
-
-        impl<T> FromVectorParts<T::Scalar, $arity> for $base_type_name<T>
+        impl<T: Unit> encase::private::FromVectorParts<T::Scalar, $n> for $name<T>
         where
-            T: Unit,
-            T::Scalar: VectorScalar,
+            T::Scalar: encase::private::VectorScalar,
         {
             #[inline]
-            #[cfg_attr(coverage, coverage(off))]
-            fn from_parts(parts: [T::Scalar; $arity]) -> Self {
-                Self::from_array(parts)
+            fn from_parts(parts: [T::Scalar; $n]) -> Self {
+                ::core::convert::From::from(parts)
             }
         }
-
-        impl<T> CreateFrom for $base_type_name<T>
+        impl<T: Unit> encase::private::ShaderType for $name<T>
         where
-            T: Unit,
-            <T::Scalar as Scalar>::$raw_name: CreateFrom,
+            T::Scalar: encase::private::ShaderSize,
         {
-            #[inline]
-            #[cfg_attr(coverage, coverage(off))]
-            fn create_from<B>(reader: &mut Reader<B>) -> Self
-            where
-                B: BufferRef,
-            {
-                Self::from_raw(
-                    <<T::Scalar as Scalar>::$raw_name as CreateFrom>::create_from(reader),
+            type ExtraMetadata = ();
+            const METADATA: encase::private::Metadata<Self::ExtraMetadata> = {
+                let size = encase::private::SizeValue::from(
+                    <T::Scalar as encase::private::ShaderSize>::SHADER_SIZE,
                 )
-            }
+                .mul($n);
+                let alignment = encase::private::AlignmentValue::from_next_power_of_two_size(size);
+                encase::private::Metadata {
+                    alignment,
+                    has_uniform_min_alignment: false,
+                    min_size: size,
+                    extra: (),
+                }
+            };
+        }
+        impl<T: Unit> encase::private::ShaderSize for $name<T> where
+            T::Scalar: encase::private::ShaderSize
+        {
         }
 
-        impl<T> ReadFrom for $base_type_name<T>
+        impl<T: Unit> encase::private::WriteInto for $name<T>
         where
-            T: Unit,
-            <T::Scalar as Scalar>::$raw_name: ReadFrom,
+            T::Scalar: encase::private::VectorScalar + encase::private::WriteInto,
         {
             #[inline]
-            #[cfg_attr(coverage, coverage(off))]
-            fn read_from<B>(&mut self, reader: &mut Reader<B>)
-            where
-                B: BufferRef,
-            {
-                self.as_raw_mut().read_from(reader);
+            fn write_into<B: encase::private::BufferMut>(
+                &self,
+                writer: &mut encase::private::Writer<B>,
+            ) {
+                let elements =
+                    encase::private::AsRefVectorParts::<T::Scalar, $n>::as_ref_parts(self);
+                for el in elements {
+                    encase::private::WriteInto::write_into(el, writer);
+                }
             }
         }
-
-        impl<T> WriteInto for $base_type_name<T>
+        impl<T: Unit> encase::private::ReadFrom for $name<T>
         where
-            T: Unit,
-            <T::Scalar as Scalar>::$raw_name: WriteInto,
+            T::Scalar: encase::private::VectorScalar + encase::private::ReadFrom,
         {
             #[inline]
-            #[cfg_attr(coverage, coverage(off))]
-            fn write_into<B>(&self, writer: &mut Writer<B>)
-            where
-                B: BufferMut,
-            {
-                self.as_raw().write_into(writer);
+            fn read_from<B: encase::private::BufferRef>(
+                &mut self,
+                reader: &mut encase::private::Reader<B>,
+            ) {
+                let elements =
+                    encase::private::AsMutVectorParts::<T::Scalar, $n>::as_mut_parts(self);
+                for el in elements {
+                    encase::private::ReadFrom::read_from(el, reader);
+                }
+            }
+        }
+        impl<T: Unit> encase::private::CreateFrom for $name<T>
+        where
+            T::Scalar: encase::private::VectorScalar + encase::private::CreateFrom,
+        {
+            #[inline]
+            fn create_from<B: encase::private::BufferRef>(
+                reader: &mut encase::private::Reader<B>,
+            ) -> Self {
+                let elements =
+                    ::core::array::from_fn(|_| encase::private::CreateFrom::create_from(reader));
+                encase::private::FromVectorParts::<T::Scalar, $n>::from_parts(elements)
             }
         }
     };
 }
 
-macro_rules! impl_encase_matrix {
-    ($base_type_name:ident, $raw_name:ident, $n:literal) => {
-        impl<T> ShaderType for $base_type_name<T>
-        where
-            T: FloatScalar,
-            T::$raw_name: ShaderType,
-        {
-            type ExtraMetadata = <<Self as ToRaw>::Raw as ShaderType>::ExtraMetadata;
-            const METADATA: encase::private::Metadata<Self::ExtraMetadata> =
-                <<Self as ToRaw>::Raw as ShaderType>::METADATA;
-        }
+impl_vector!(Vector2, 2);
+impl_vector!(Vector3, 3);
+impl_vector!(Vector4, 4);
+impl_vector!(Point2, 2);
+impl_vector!(Point3, 3);
+impl_vector!(Point4, 4);
+impl_vector!(Size2, 2);
+impl_vector!(Size3, 3);
 
-        impl<T> ShaderSize for $base_type_name<T>
-        where
-            T: FloatScalar,
-            T::$raw_name: ShaderType,
-        {
-        }
-
-        impl<T> FromMatrixParts<T, $n, $n> for $base_type_name<T>
-        where
-            T: FloatScalar + MatrixScalar,
-            T::$raw_name: FromMatrixParts<T, $n, $n>,
-        {
-            #[cfg_attr(coverage, coverage(off))]
-            fn from_parts(parts: [[T; $n]; $n]) -> Self {
-                Self::from_raw(<<Self as ToRaw>::Raw>::from_parts(parts))
-            }
-        }
-
-        impl<T> AsRefMatrixParts<T, $n, $n> for $base_type_name<T>
-        where
-            T: FloatScalar + MatrixScalar,
-            T::$raw_name: AsRefMatrixParts<T, $n, $n>,
-        {
-            #[cfg_attr(coverage, coverage(off))]
-            fn as_ref_parts(&self) -> &[[T; $n]; $n] {
-                self.as_raw().as_ref_parts()
-            }
-        }
-
-        impl<T> AsMutMatrixParts<T, $n, $n> for $base_type_name<T>
-        where
-            T: FloatScalar + MatrixScalar,
-            T::$raw_name: AsMutMatrixParts<T, $n, $n>,
-        {
-            #[cfg_attr(coverage, coverage(off))]
-            fn as_mut_parts(&mut self) -> &mut [[T; $n]; $n] {
-                self.as_raw_mut().as_mut_parts()
-            }
-        }
-
-        impl<T> CreateFrom for $base_type_name<T>
-        where
-            T: FloatScalar + MatrixScalar,
-            T::$raw_name: CreateFrom,
-        {
-            #[cfg_attr(coverage, coverage(off))]
-            #[inline]
-            fn create_from<B>(reader: &mut Reader<B>) -> Self
-            where
-                B: BufferRef,
-            {
-                Self::from_raw(
-                    <<T::Scalar as FloatScalar>::$raw_name as CreateFrom>::create_from(reader),
-                )
-            }
-        }
-
-        impl<T> ReadFrom for $base_type_name<T>
-        where
-            T: FloatScalar + MatrixScalar,
-            T::$raw_name: ReadFrom,
-        {
-            #[cfg_attr(coverage, coverage(off))]
-            #[inline]
-            fn read_from<B>(&mut self, reader: &mut Reader<B>)
-            where
-                B: BufferRef,
-            {
-                self.as_raw_mut().read_from(reader);
-            }
-        }
-
-        impl<T> WriteInto for $base_type_name<T>
-        where
-            T: FloatScalar + MatrixScalar,
-            T::$raw_name: WriteInto,
-        {
-            #[cfg_attr(coverage, coverage(off))]
-            #[inline]
-            fn write_into<B>(&self, writer: &mut Writer<B>)
-            where
-                B: BufferMut,
-            {
-                self.as_raw().write_into(writer);
-            }
-        }
-    };
-}
-
-impl_encase_vector!(Vector2, Vec2, 2);
-impl_encase_vector!(Vector3, Vec3, 3);
-impl_encase_vector!(Vector4, Vec4, 4);
-impl_encase_vector!(Point2, Vec2, 2);
-impl_encase_vector!(Point3, Vec3, 3);
-impl_encase_vector!(Point4, Vec4, 4);
-impl_encase_vector!(Size2, Vec2, 2);
-impl_encase_vector!(Size3, Vec3, 3);
-
-impl_encase_matrix!(Matrix2, Mat2, 2);
-impl_encase_matrix!(Matrix3, Mat3, 3);
-impl_encase_matrix!(Matrix4, Mat4, 4);
+encase::impl_matrix!(2, 2, Matrix2<T>; (T: Scalar); using AsRef AsMut From);
+encase::impl_matrix!(3, 3, Matrix3<T>; (T: Scalar); using AsRef AsMut From);
+encase::impl_matrix!(4, 4, Matrix4<T>; (T: Scalar); using AsRef AsMut From);
 
 #[cfg(test)]
 mod tests {
