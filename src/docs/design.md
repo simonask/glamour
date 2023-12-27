@@ -79,7 +79,7 @@ The relevant traits are:
 - [`Matrix`](crate::bindings::Matrix) - describing all `glam` matrix
   types.
 - [`Scalar`](crate::Scalar) - one of the primitive types supported by glam
-  (`f32`, `f64`, `i32`, `u32`).
+  (`f32`, `f64`, `i32`, `u32`, etc.).
 - [`Unit`](crate::Unit) - describes which scalar to use for a particular
   logical unit.
 

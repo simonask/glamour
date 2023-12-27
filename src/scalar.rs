@@ -3,7 +3,7 @@ use crate::{bindings, AsRaw, FromRaw, ToRaw};
 
 /// All types that can serve as components of a SIMD type in [`glam`].
 ///
-/// This is implemented for `f32`, `f64`, `i32`, and `u32`.
+/// This is implemented for `f32`, `f64`, `i32`, `u32`, `i16`, `u16`, `i64`, and `u64`.
 pub trait Scalar:
     // This bound is important because it implies `Pod`, which means that types
     // that are `#[repr(C)]` and only have `Scalar` members can safely implement
@@ -163,6 +163,23 @@ impl FloatScalar for f64 {
     }
 }
 
+impl Scalar for i16 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    type Vec2 = glam::I16Vec2;
+    type Vec3 = glam::I16Vec3;
+    type Vec4 = glam::I16Vec4;
+}
+
+impl SignedScalar for i16 {
+    const NEG_ONE: Self = -1;
+
+    type Vec2s = glam::I16Vec2;
+    type Vec3s = glam::I16Vec3;
+    type Vec4s = glam::I16Vec4;
+}
+
 impl Scalar for i32 {
     const ZERO: Self = 0;
     const ONE: Self = 1;
@@ -195,6 +212,15 @@ impl SignedScalar for i64 {
     type Vec2s = glam::I64Vec2;
     type Vec3s = glam::I64Vec3;
     type Vec4s = glam::I64Vec4;
+}
+
+impl Scalar for u16 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    type Vec2 = glam::U16Vec2;
+    type Vec3 = glam::U16Vec3;
+    type Vec4 = glam::U16Vec4;
 }
 
 impl Scalar for u32 {

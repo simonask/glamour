@@ -28,7 +28,7 @@ allow you to easily drop down to plain `glam` when needed.
    traits to be derived).
 2. Implement [`Unit`] for that struct. [`Unit::Scalar`] determines the primitive
    type used in vector components.
-3. The scalar must be `f32`, `f64`, `i32`, or `u32`.
+3. The scalar must be `f32`, `f64`, `i32`, `u32`, `i64`, `u64`, `i16`, or `u16`.
 4. The basic primitive scalars are also units in their own right ("untyped").
 
 ##### Example

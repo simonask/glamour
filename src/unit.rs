@@ -2,16 +2,14 @@ use super::Scalar;
 
 /// The name of a coordinate space.
 ///
-/// The unit is used to give vector types a "tag" so they can be distinguished
-/// at compile time.
+/// The unit is used to give vector types a "tag" so they can be distinguished at compile time.
 ///
-/// The unit also determines which type is used as the scalar for that
-/// coordinate space. This is in contrast to a crate like
-/// [euclid](https://docs.rs/euclid/latest/euclid), where the unit and the
-/// scalar are separate type parameters to each vector type.
+/// The unit also determines which type is used as the scalar for that coordinate space. This is in contrast to a crate
+/// like [euclid](https://docs.rs/euclid/latest/euclid), where the unit and the scalar are separate type parameters to
+/// each vector type.
 ///
-/// Note that primitive scalars (`f32`, `f64`, `i32`, and `u32`) also implement
-/// `Unit`. This allows them to function as the "untyped" vector variants.
+/// Note that primitive scalars (`f32`, `f64`, `i32`, `u32`, `i64`, `u64`, `i16`, `u16`) also implement `Unit`. This
+/// allows them to function as the "untyped" vector variants.
 ///
 /// #### Example
 /// ```rust
@@ -56,10 +54,24 @@ impl Unit for f64 {
     }
 }
 
+impl Unit for i16 {
+    type Scalar = i16;
+    fn name() -> Option<&'static str> {
+        Some("i16")
+    }
+}
+
 impl Unit for i32 {
     type Scalar = i32;
     fn name() -> Option<&'static str> {
         Some("i32")
+    }
+}
+
+impl Unit for u16 {
+    type Scalar = u16;
+    fn name() -> Option<&'static str> {
+        Some("u16")
     }
 }
 
