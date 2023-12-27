@@ -61,6 +61,8 @@ macro_rules! impl_identity {
 impl_identity!(());
 impl_identity!(f32);
 impl_identity!(f64);
+impl_identity!(i16);
+impl_identity!(u16);
 impl_identity!(i32);
 impl_identity!(u32);
 impl_identity!(i64);

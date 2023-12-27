@@ -261,6 +261,12 @@ impl_vector!(glam::Vec4, f32, BVec4);
 impl_vector!(glam::DVec2, f64, BVec2);
 impl_vector!(glam::DVec3, f64, BVec3);
 impl_vector!(glam::DVec4, f64, BVec4);
+impl_vector!(glam::I16Vec2, i16, BVec2);
+impl_vector!(glam::I16Vec3, i16, BVec3);
+impl_vector!(glam::I16Vec4, i16, BVec4);
+impl_vector!(glam::U16Vec2, u16, BVec2);
+impl_vector!(glam::U16Vec3, u16, BVec3);
+impl_vector!(glam::U16Vec4, u16, BVec4);
 impl_vector!(glam::IVec2, i32, BVec2);
 impl_vector!(glam::IVec3, i32, BVec3);
 impl_vector!(glam::IVec4, i32, BVec4);
@@ -276,6 +282,8 @@ impl_vector!(glam::U64Vec4, u64, BVec4);
 
 impl_vector2!(glam::Vec2, glam::Vec3);
 impl_vector2!(glam::DVec2, glam::DVec3);
+impl_vector2!(glam::I16Vec2, glam::I16Vec3);
+impl_vector2!(glam::U16Vec2, glam::U16Vec3);
 impl_vector2!(glam::IVec2, glam::IVec3);
 impl_vector2!(glam::UVec2, glam::UVec3);
 impl_vector2!(glam::I64Vec2, glam::I64Vec3);
@@ -283,12 +291,16 @@ impl_vector2!(glam::U64Vec2, glam::U64Vec3);
 
 impl_vector3!(glam::Vec3, glam::Vec2, glam::Vec4);
 impl_vector3!(glam::DVec3, glam::DVec2, glam::DVec4);
+impl_vector3!(glam::I16Vec3, glam::I16Vec2, glam::I16Vec4);
+impl_vector3!(glam::U16Vec3, glam::U16Vec2, glam::U16Vec4);
 impl_vector3!(glam::IVec3, glam::IVec2, glam::IVec4);
 impl_vector3!(glam::UVec3, glam::UVec2, glam::UVec4);
 impl_vector3!(glam::I64Vec3, glam::I64Vec2, glam::I64Vec4);
 impl_vector3!(glam::U64Vec3, glam::U64Vec2, glam::U64Vec4);
 
 impl_vector4!(glam::DVec4, glam::DVec3);
+impl_vector4!(glam::I16Vec4, glam::I16Vec3);
+impl_vector4!(glam::U16Vec4, glam::U16Vec3);
 impl_vector4!(glam::IVec4, glam::IVec3);
 impl_vector4!(glam::UVec4, glam::UVec3);
 impl_vector4!(glam::I64Vec4, glam::I64Vec3);
@@ -300,6 +312,9 @@ impl_signed_vector!(glam::Vec4);
 impl_signed_vector!(glam::DVec2);
 impl_signed_vector!(glam::DVec3);
 impl_signed_vector!(glam::DVec4);
+impl_signed_vector!(glam::I16Vec2);
+impl_signed_vector!(glam::I16Vec3);
+impl_signed_vector!(glam::I16Vec4);
 impl_signed_vector!(glam::IVec2);
 impl_signed_vector!(glam::IVec3);
 impl_signed_vector!(glam::IVec4);
@@ -349,6 +364,10 @@ impl SignedVector2 for glam::Vec2 {
 impl SignedVector2 for glam::DVec2 {
     forward_impl!(glam::DVec2 => fn perp(self) -> Self);
     forward_impl!(glam::DVec2 => fn perp_dot(self, other: Self) -> Self::Scalar);
+}
+impl SignedVector2 for glam::I16Vec2 {
+    forward_impl!(glam::I16Vec2 => fn perp(self) -> Self);
+    forward_impl!(glam::I16Vec2 => fn perp_dot(self, other: Self) -> Self::Scalar);
 }
 impl SignedVector2 for glam::IVec2 {
     forward_impl!(glam::IVec2 => fn perp(self) -> Self);
