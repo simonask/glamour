@@ -278,6 +278,24 @@ macro_rules! impl_matrix {
                 list.finish()
             }
         }
+
+        impl<T: Scalar> AsRef<[[T; $dimensions]; $dimensions]> for $base_type_name<T> {
+            fn as_ref(&self) -> &[[T; $dimensions]; $dimensions] {
+                bytemuck::cast_ref(self)
+            }
+        }
+
+        impl<T: Scalar> AsMut<[[T; $dimensions]; $dimensions]> for $base_type_name<T> {
+            fn as_mut(&mut self) -> &mut [[T; $dimensions]; $dimensions] {
+                bytemuck::cast_mut(self)
+            }
+        }
+
+        impl<T: Scalar> From<[[T; $dimensions]; $dimensions]> for $base_type_name<T> {
+            fn from(value: [[T; $dimensions]; $dimensions]) -> Self {
+                bytemuck::cast(value)
+            }
+        }
     };
 }
 
@@ -1797,6 +1815,39 @@ mod tests {
         assert_eq!(
             Matrix4::from(glam::DMat4::from(Matrix4::IDENTITY)),
             Matrix4::IDENTITY
+        );
+    }
+
+    #[test]
+    fn as_ref_column_major() {
+        let mut m2 = Matrix2::from_cols(vec2!(1.0, 2.0), vec2!(3.0, 4.0));
+        assert_eq!(m2, Matrix2::from([[1.0, 2.0], [3.0, 4.0]]));
+        let r: &[[f32; 2]; 2] = m2.as_ref();
+        assert_eq!(*r, [[1.0, 2.0], [3.0, 4.0]]);
+        let m: &mut [[f32; 2]; 2] = m2.as_mut();
+        m[1][1] = 5.0;
+        assert_eq!(m2, Matrix2::from_cols(vec2!(1.0, 2.0), vec2!(3.0, 5.0)));
+
+        let mut m3 = Matrix3::from_cols(
+            vec3!(1.0, 2.0, 3.0),
+            vec3!(4.0, 5.0, 6.0),
+            vec3!(7.0, 8.0, 9.0),
+        );
+        assert_eq!(
+            m3,
+            Matrix3::from([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+        );
+        let r: &[[f32; 3]; 3] = m3.as_ref();
+        assert_eq!(*r, [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]);
+        let m: &mut [[f32; 3]; 3] = m3.as_mut();
+        m[2][2] = 10.0;
+        assert_eq!(
+            m3,
+            Matrix3::from_cols(
+                vec3!(1.0, 2.0, 3.0),
+                vec3!(4.0, 5.0, 6.0),
+                vec3!(7.0, 8.0, 10.0)
+            )
         );
     }
 }

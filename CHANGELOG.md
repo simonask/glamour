@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Implement `AsRef<[[T; N]; N]>` for matrix types (as well as `AsMut` and `From` counterparts).
+
+### Breaking changes
+- Bumped dependency on `glam` to 0.25.0.
+
+### Internal changes
+- No longer implement `encase` traits via `glam`. This is for maintenance purposes, because the `glam` dependency of
+  `encase` is often outdated.
+
 ## [0.9.0] - 2023-11-22
 ### Added
 - Missing `truncate()` method for `Vector3`.
