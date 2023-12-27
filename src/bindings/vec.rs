@@ -238,6 +238,7 @@ pub trait SignedVector2: SignedVector + Vector2 {
 
 pub trait FloatVector2: SignedVector2 + FloatVector {
     fn from_angle(angle: Self::Scalar) -> Self;
+    fn to_angle(self) -> Self::Scalar;
     fn angle_between(self, rhs: Self) -> Self::Scalar;
     fn rotate(self, other: Self) -> Self;
     fn is_nan_mask(self) -> glam::BVec2;
@@ -380,6 +381,7 @@ impl SignedVector2 for glam::I64Vec2 {
 
 impl FloatVector2 for glam::Vec2 {
     forward_impl!(glam::Vec2 => fn from_angle(angle: Self::Scalar) -> Self);
+    forward_impl!(glam::Vec2 => fn to_angle(self) -> f32);
     forward_impl!(glam::Vec2 => fn angle_between(self, other: Self) -> f32);
     forward_impl!(glam::Vec2 => fn rotate(self, other: Self) -> Self);
     forward_impl!(glam::Vec2 => fn is_nan_mask(self) -> glam::BVec2);
@@ -387,6 +389,7 @@ impl FloatVector2 for glam::Vec2 {
 
 impl FloatVector2 for glam::DVec2 {
     forward_impl!(glam::DVec2 => fn from_angle(angle: Self::Scalar) -> Self);
+    forward_impl!(glam::DVec2 => fn to_angle(self) -> f64);
     forward_impl!(glam::DVec2 => fn angle_between(self, other: Self) -> f64);
     forward_impl!(glam::DVec2 => fn rotate(self, other: Self) -> Self);
     forward_impl!(glam::DVec2 => fn is_nan_mask(self) -> glam::BVec2);

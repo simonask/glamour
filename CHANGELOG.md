@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Added support for 16-bit integer scalars, via `glam::I16Vec{N}` etc.
+- Added `Vector2::to_angle()` for floating-point scalars.
 - Implement `AsRef<[[T; N]; N]>` for matrix types (as well as `AsMut` and `From` counterparts).
 
 ### Breaking changes
