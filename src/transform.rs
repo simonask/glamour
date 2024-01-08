@@ -288,7 +288,7 @@ where
     /// Create from matrix.
     #[inline]
     #[must_use]
-    pub fn from_matrix_unchecked(matrix: Matrix3<Src::Scalar>) -> Self {
+    pub const fn from_matrix_unchecked(matrix: Matrix3<Src::Scalar>) -> Self {
         Transform2 {
             matrix,
             _marker: PhantomData,
@@ -561,7 +561,7 @@ where
     /// Create from matrix.
     #[inline]
     #[must_use]
-    pub fn from_matrix_unchecked(matrix: Matrix4<Src::Scalar>) -> Self {
+    pub const fn from_matrix_unchecked(matrix: Matrix4<Src::Scalar>) -> Self {
         Transform3 {
             matrix,
             _marker: PhantomData,
