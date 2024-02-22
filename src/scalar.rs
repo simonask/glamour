@@ -46,47 +46,65 @@ pub trait Scalar:
     }
 }
 
-/// Signed scalar types (`i32`, `f32`, `f64`).
+/// Signed scalar types (`i32`, `f32`, `f64`, etc.).
 pub trait SignedScalar: Scalar<Vec2 = Self::Vec2s, Vec3 = Self::Vec3s, Vec4 = Self::Vec4s> {
+    /// Negative one.
     const NEG_ONE: Self;
+
+    // Note: Hiding these because they are implementation details to aid type inference.
+    #[doc(hidden)]
     type Vec2s: bindings::SignedVector2<Scalar = Self>;
+    #[doc(hidden)]
     type Vec3s: bindings::SignedVector<Scalar = Self>;
+    #[doc(hidden)]
     type Vec4s: bindings::SignedVector<Scalar = Self>;
 }
 
+/// Floating-point scalar types (`f32` and `f64`).
 pub trait FloatScalar:
     SignedScalar<Vec2s = Self::Vec2f, Vec3s = Self::Vec3f, Vec4s = Self::Vec4f>
     + num_traits::Float
     + approx::RelativeEq<Epsilon = Self>
     + approx::UlpsEq<Epsilon = Self>
 {
-    type Vec2f: bindings::FloatVector2<Scalar = Self>;
-    type Vec3f: bindings::FloatVector3<Scalar = Self>;
-    type Vec4f: bindings::FloatVector4<Scalar = Self>;
+    /// A NaN value for this floating-point scalar type.
+    const NAN: Self;
+    /// Infinity.
+    const INFINITY: Self;
+    /// Negative infinity.
+    const NEG_INFINITY: Self;
 
+    // Note: Hiding these because they are implementation details to aid type inference.
+    #[doc(hidden)]
+    type Vec2f: bindings::FloatVector2<Scalar = Self>;
+    #[doc(hidden)]
+    type Vec3f: bindings::FloatVector3<Scalar = Self>;
+    #[doc(hidden)]
+    type Vec4f: bindings::FloatVector4<Scalar = Self>;
+    #[doc(hidden)]
     type Mat2: bindings::Matrix2<
         Scalar = Self,
         Vec2 = Self::Vec2f,
         Vec3 = Self::Vec3f,
         Vec4 = Self::Vec4f,
     >;
+    #[doc(hidden)]
     type Mat3: bindings::Matrix3<
         Scalar = Self,
         Vec2 = Self::Vec2f,
         Vec3 = Self::Vec3f,
         Vec4 = Self::Vec4f,
     >;
+    #[doc(hidden)]
     type Mat4: bindings::Matrix4<
         Scalar = Self,
         Vec2 = Self::Vec2f,
         Vec3 = Self::Vec3f,
         Vec4 = Self::Vec4f,
     >;
+    #[doc(hidden)]
     type Quat: bindings::Quat<Scalar = Self, Vec3 = Self::Vec3f, Vec4 = Self::Vec4f>
         + ToRaw<Raw = Self::Quat>;
-    const NAN: Self;
-    const INFINITY: Self;
-    const NEG_INFINITY: Self;
 
     /// True if the number is not NaN and not infinity.
     #[must_use]
