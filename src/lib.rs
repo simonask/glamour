@@ -36,7 +36,7 @@ pub use point::{Point2, Point3, Point4};
 pub use r#box::{Box2, Box3};
 pub use raw::*;
 pub use rect::Rect;
-pub use scalar::{Scalar, SignedScalar, FloatScalar};
+pub use scalar::{FloatScalar, Scalar, SignedScalar};
 pub use size::{Size2, Size3};
 pub use transform::{Transform2, Transform3, TransformMap};
 pub use unit::Unit;
