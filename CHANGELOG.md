@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.9.1 (Hotfix) - 2024-03-17
+### Bugfixes
+- Fix 0.9 branch glam version in Cargo.toml, such that newer incompatible glam
+  versions are not pulled in (https://github.com/simonask/glamour/pull/44).
+
 ## [0.9.0] - 2023-11-22
 ### Added
 - Missing `truncate()` method for `Vector3`.
