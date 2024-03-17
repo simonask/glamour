@@ -26,7 +26,7 @@ categories = [
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-glam = { version = ">=0.25.0", default-features = false, features = [
+glam = { version = "0.25.0", default-features = false, features = [
     "bytemuck",
     "approx",
 ] }
