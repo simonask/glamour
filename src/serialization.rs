@@ -4,22 +4,15 @@ use crate::{
 };
 use serde::ser::SerializeStruct;
 
-macro_rules! impl_vectorlike {
-    ($count:literal, $($field:ident),+) => {};
-}
+// macro_rules! impl_vectorlike {
+//     ($count:literal, $($field:ident),+) => {};
+// }
 
 impl<T: Unit> serde::Serialize for Vector2<T> {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let mut map = match serializer.serialize_struct("Vector2", 2) {
-            Ok(map) => map,
-            Err(err) => return Err(err),
-        };
-        if let Err(err) = map.serialize_field("x", &self.x) {
-            return Err(err);
-        }
-        if let Err(err) = map.serialize_field("y", &self.y) {
-            return Err(err);
-        }
+        let mut map = serializer.serialize_struct("Vector2", 2)?;
+        map.serialize_field("x", &self.x)?;
+        map.serialize_field("y", &self.y)?;
         map.end()
     }
 }
