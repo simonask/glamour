@@ -249,16 +249,16 @@ mod tests {
             ],
             "missing field `x`",
         );
-        assert_de_tokens_error::<Vector2<f32>>(
+        assert_de_tokens_error::<Vector2<i32>>(
             &[
                 Token::Struct {
                     name: "Vector2",
                     len: 2,
                 },
-                Token::F32(1.0),
+                Token::I32(1),
                 Token::StructEnd,
             ],
-            "invalid type: floating point `1`, expected a field name",
+            "invalid type: integer `1`, expected a field name",
         );
         assert_de_tokens_error::<Vector2<f32>>(
             &[
