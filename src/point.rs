@@ -130,6 +130,8 @@ macro_rules! float_point_interface {
             pub fn distance(self, other: Self) -> T::Scalar;
             #[doc = "Distance squared"]
             pub fn distance_squared(self, other: Self) -> T::Scalar;
+            #[doc = "Midpoint between two points"]
+            pub fn midpoint(self, rhs: Self) -> Self;
         );
     };
 }
