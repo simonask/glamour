@@ -5,7 +5,8 @@
 #![allow(
     clippy::inline_always,
     clippy::module_name_repetitions,
-    clippy::wildcard_imports
+    clippy::wildcard_imports,
+    clippy::similar_names
 )]
 #![cfg_attr(coverage, feature(coverage_attribute))]
 
@@ -29,6 +30,9 @@ mod raw;
 mod transform;
 mod unit;
 mod vector;
+
+#[cfg(feature = "serde")]
+mod serialization;
 
 pub use angle::{Angle, AngleConsts, FloatAngleExt};
 pub use matrix::{Matrix2, Matrix3, Matrix4};

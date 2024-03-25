@@ -9,8 +9,6 @@ use crate::{
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
 #[repr(C)]
 pub struct Rect<T: Unit = f32> {
     /// Lower bound of the rect.
@@ -795,22 +793,5 @@ mod tests {
         let rect = RectF::new((0.1, 0.1), (0.3, 0.3)).round_out();
         assert_eq!(rect.origin, (0.0, 0.0));
         assert_eq!(rect.size, (1.0, 1.0));
-    }
-}
-
-#[cfg(all(test, feature = "serde"))]
-mod serde_tests {
-    use super::*;
-
-    #[test]
-    fn serde_rect() {
-        let rect = Rect::<f32>::new((10.0, 20.0), (30.0, 40.0));
-        let serialized = serde_json::to_string(&rect).unwrap();
-        assert_eq!(
-            serialized,
-            r#"{"origin":{"x":10.0,"y":20.0},"size":{"width":30.0,"height":40.0}}"#
-        );
-        let deserialized: Rect<f32> = serde_json::from_str(&serialized).unwrap();
-        assert_eq!(rect, deserialized);
     }
 }

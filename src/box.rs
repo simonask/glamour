@@ -9,8 +9,6 @@ use crate::{
 };
 
 /// 2D axis-aligned box represented as "min" and "max" points.
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
 #[repr(C)]
 pub struct Box2<T: Unit = f32> {
     /// Lower bound of the box.
@@ -25,8 +23,6 @@ unsafe impl<T: Unit> bytemuck::Pod for Box2<T> {}
 unsafe impl<T: Unit> bytemuck::Zeroable for Box2<T> {}
 
 /// 3D axis-aligned box.
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
 #[repr(C)]
 pub struct Box3<T: Unit = f32> {
     /// Lower bound of the box.

@@ -21,11 +21,6 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 ///
 /// Alignment: Always 16-byte aligned.
 #[derive(Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(
-    feature = "serde",
-    serde(bound = "T: Scalar", from = "[T;4]", into = "[T;4]")
-)]
 pub struct Matrix2<T: Scalar>(Vector4<T>);
 
 unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
@@ -64,11 +59,6 @@ impl<T: FloatScalar> AsRaw for Matrix2<T> {
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(
-    feature = "serde",
-    serde(bound = "T: FloatScalar", from = "[T;9]", into = "[T;9]")
-)]
 pub struct Matrix3<T: Scalar> {
     pub x_axis: Vector3<T>,
     pub y_axis: Vector3<T>,
@@ -110,11 +100,6 @@ impl<T: FloatScalar> AsRaw for Matrix3<T> {
 /// Alignment: Always 16-byte aligned.
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(
-    feature = "serde",
-    serde(bound = "T: FloatScalar", from = "[T;16]", into = "[T;16]")
-)]
 pub struct Matrix4<T: Scalar> {
     pub x_axis: Vector4<T>,
     pub y_axis: Vector4<T>,
