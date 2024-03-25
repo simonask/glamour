@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use crate::{
     Angle, Box2, Box3, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Rect, Size2, Size3,
     Transform2, Transform3, Unit, Vector2, Vector3, Vector4,
@@ -17,27 +18,28 @@ impl<T: Unit> serde::Serialize for Vector2<T> {
     }
 }
 
+#[allow(non_camel_case_types)]
 enum Field {
-    X,
-    Y,
-    Z,
-    W,
-    Width,
-    Height,
-    Depth,
+    x,
+    y,
+    z,
+    w,
+    width,
+    height,
+    depth,
 }
 
 impl Field {
     #[inline]
     pub fn as_str(&self) -> &'static str {
         match self {
-            Field::X => "x",
-            Field::Y => "y",
-            Field::Z => "z",
-            Field::W => "w",
-            Field::Width => "width",
-            Field::Height => "height",
-            Field::Depth => "depth",
+            Field::x => "x",
+            Field::y => "y",
+            Field::z => "z",
+            Field::w => "w",
+            Field::width => "width",
+            Field::height => "height",
+            Field::depth => "depth",
         }
     }
 }
@@ -73,13 +75,13 @@ impl<'de> serde::de::DeserializeSeed<'de> for AllowedFields {
             #[inline]
             fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
                 match value {
-                    "x" => Ok(Field::X),
-                    "y" => Ok(Field::Y),
-                    "z" if self.allowed.len >= 3 => Ok(Field::Z),
-                    "w" if self.allowed.len >= 4 => Ok(Field::W),
-                    "width" if self.allowed.allow_size => Ok(Field::Width),
-                    "height" if self.allowed.allow_size => Ok(Field::Height),
-                    "depth" if self.allowed.allow_size && self.allowed.len >= 3 => Ok(Field::Depth),
+                    "x" => Ok(Field::x),
+                    "y" => Ok(Field::y),
+                    "z" if self.allowed.len >= 3 => Ok(Field::z),
+                    "w" if self.allowed.len >= 4 => Ok(Field::w),
+                    "width" if self.allowed.allow_size => Ok(Field::width),
+                    "height" if self.allowed.allow_size => Ok(Field::height),
+                    "depth" if self.allowed.allow_size && self.allowed.len >= 3 => Ok(Field::depth),
                     _ => {
                         let allowed_fields = if self.allowed.allow_size {
                             &ALLOWED_FIELDS_SIZELIKE[..self.allowed.len * 2]
@@ -120,13 +122,13 @@ impl<'de, T: Unit> serde::Deserialize<'de> for Vector2<T> {
                     len: 2,
                 })? {
                     match key {
-                        Field::X => {
+                        Field::x => {
                             if x.is_some() {
                                 return Err(serde::de::Error::duplicate_field("x"));
                             }
                             x = Some(map.next_value()?);
                         }
-                        Field::Y => {
+                        Field::y => {
                             if y.is_some() {
                                 return Err(serde::de::Error::duplicate_field("y"));
                             }
