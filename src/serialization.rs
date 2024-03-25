@@ -1,8 +1,6 @@
-use crate::FloatScalar;
-#[allow(unused_imports)]
 use crate::{
-    Angle, Box2, Box3, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Rect, Size2, Size3,
-    Transform2, Transform3, Unit, Vector2, Vector3, Vector4,
+    Angle, Box2, Box3, FloatScalar, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Rect, Size2,
+    Size3, Transform2, Transform3, Unit, Vector2, Vector3, Vector4,
 };
 use serde::ser::SerializeStruct;
 
