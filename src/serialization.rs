@@ -1,3 +1,4 @@
+use crate::FloatScalar;
 #[allow(unused_imports)]
 use crate::{
     Angle, Box2, Box3, Matrix2, Matrix3, Matrix4, Point2, Point3, Point4, Rect, Size2, Size3,
@@ -50,9 +51,8 @@ macro_rules! impl_vectorlike {
                                         $field = Some(map.next_value()?);
                                     }
                                 )*
-                                _ => {
-                                    return Err(serde::de::Error::unknown_field(key.as_str(), &[$(stringify!($field)),*]));
-                                }
+                                // Allowed fields tracked by AllowedFields
+                                _ => unreachable!()
                             }
                         }
                         $(
@@ -133,9 +133,8 @@ macro_rules! impl_sizelike {
                                         $field = Some(map.next_value()?);
                                     }
                                 )*
-                                _ => {
-                                    return Err(serde::de::Error::unknown_field(key.as_str(), &[$(stringify!($field)),*]));
-                                }
+                                // Allowed fields tracked by AllowedFields
+                                _ => unreachable!()
                             }
                         }
                         $(
@@ -191,21 +190,6 @@ enum Field {
     depth,
 }
 
-impl Field {
-    #[inline]
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Field::x => "x",
-            Field::y => "y",
-            Field::z => "z",
-            Field::w => "w",
-            Field::width => "width",
-            Field::height => "height",
-            Field::depth => "depth",
-        }
-    }
-}
-
 struct AllowedFields {
     len: usize,
     allow_size: bool,
@@ -257,6 +241,94 @@ impl<'de> serde::de::DeserializeSeed<'de> for AllowedFields {
         }
 
         deserializer.deserialize_identifier(Visitor { allowed: self })
+    }
+}
+
+impl<Src, Dst> serde::Serialize for Transform2<Src, Dst>
+where
+    Src: Unit,
+    Dst: Unit<Scalar = Src::Scalar>,
+    Src::Scalar: FloatScalar,
+{
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.matrix.serialize(serializer)
+    }
+}
+
+impl<'de, Src, Dst> serde::Deserialize<'de> for Transform2<Src, Dst>
+where
+    Src: Unit,
+    Dst: Unit<Scalar = Src::Scalar>,
+    Src::Scalar: FloatScalar,
+{
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let matrix: Matrix3<Src::Scalar> = serde::Deserialize::deserialize(deserializer)?;
+        Ok(Transform2::from_matrix_unchecked(matrix))
+    }
+}
+
+impl<Src, Dst> serde::Serialize for Transform3<Src, Dst>
+where
+    Src: Unit,
+    Dst: Unit<Scalar = Src::Scalar>,
+    Src::Scalar: FloatScalar,
+{
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.matrix.serialize(serializer)
+    }
+}
+
+impl<'de, Src, Dst> serde::Deserialize<'de> for Transform3<Src, Dst>
+where
+    Src: Unit,
+    Dst: Unit<Scalar = Src::Scalar>,
+    Src::Scalar: FloatScalar,
+{
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let matrix: Matrix4<Src::Scalar> = serde::Deserialize::deserialize(deserializer)?;
+        Ok(Transform3::from_matrix_unchecked(matrix))
+    }
+}
+
+impl<T: FloatScalar> serde::Serialize for Matrix2<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let cols: [T; 4] = (*self).into();
+        cols.serialize(serializer)
+    }
+}
+
+impl<'de, T: FloatScalar> serde::Deserialize<'de> for Matrix2<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let cols: [T; 4] = serde::Deserialize::deserialize(deserializer)?;
+        Ok(cols.into())
+    }
+}
+
+impl<T: FloatScalar> serde::Serialize for Matrix3<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let cols: [T; 9] = (*self).into();
+        cols.serialize(serializer)
+    }
+}
+
+impl<'de, T: FloatScalar> serde::Deserialize<'de> for Matrix3<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let cols: [T; 9] = serde::Deserialize::deserialize(deserializer)?;
+        Ok(cols.into())
+    }
+}
+
+impl<T: FloatScalar> serde::Serialize for Matrix4<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let cols: [T; 16] = (*self).into();
+        cols.serialize(serializer)
+    }
+}
+
+impl<'de, T: FloatScalar> serde::Deserialize<'de> for Matrix4<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let cols: [T; 16] = serde::Deserialize::deserialize(deserializer)?;
+        Ok(cols.into())
     }
 }
 
