@@ -345,6 +345,234 @@ impl<'de, T: FloatScalar> serde::Deserialize<'de> for Angle<T> {
     }
 }
 
+impl<T: Unit> serde::Serialize for Rect<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut map = serializer.serialize_struct("Rect", 2)?;
+        map.serialize_field("origin", &self.origin)?;
+        map.serialize_field("size", &self.size)?;
+        map.end()
+    }
+}
+
+impl<'de, T: Unit> serde::Deserialize<'de> for Rect<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor<T> {
+            _marker: core::marker::PhantomData<T>,
+        }
+
+        impl<'de, T: Unit> serde::de::Visitor<'de> for Visitor<T> {
+            type Value = Rect<T>;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                write!(formatter, "a mapping with `origin` and `size` fields")
+            }
+
+            fn visit_map<A: serde::de::MapAccess<'de>>(
+                self,
+                mut map: A,
+            ) -> Result<Self::Value, A::Error> {
+                let mut origin = None;
+                let mut size = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        "origin" => {
+                            if origin.is_some() {
+                                return Err(serde::de::Error::duplicate_field("origin"));
+                            }
+                            origin = Some(map.next_value()?);
+                        }
+                        "size" => {
+                            if size.is_some() {
+                                return Err(serde::de::Error::duplicate_field("size"));
+                            }
+                            size = Some(map.next_value()?);
+                        }
+                        _ => {
+                            return Err(serde::de::Error::unknown_field(key, &["origin", "size"]));
+                        }
+                    }
+                }
+                let origin = origin.ok_or_else(|| serde::de::Error::missing_field("origin"))?;
+                let size = size.ok_or_else(|| serde::de::Error::missing_field("size"))?;
+                Ok(Rect { origin, size })
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let origin = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let size = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                Ok(Rect { origin, size })
+            }
+        }
+
+        deserializer.deserialize_struct(
+            "Rect",
+            &["origin", "size"],
+            Visitor {
+                _marker: core::marker::PhantomData,
+            },
+        )
+    }
+}
+
+impl<T: Unit> serde::Serialize for Box2<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut map = serializer.serialize_struct("Box2", 2)?;
+        map.serialize_field("min", &self.min)?;
+        map.serialize_field("max", &self.max)?;
+        map.end()
+    }
+}
+
+impl<'de, T: Unit> serde::Deserialize<'de> for Box2<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor<T> {
+            _marker: core::marker::PhantomData<T>,
+        }
+
+        impl<'de, T: Unit> serde::de::Visitor<'de> for Visitor<T> {
+            type Value = Box2<T>;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                write!(formatter, "a mapping with `min` and `max` fields")
+            }
+
+            fn visit_map<A: serde::de::MapAccess<'de>>(
+                self,
+                mut map: A,
+            ) -> Result<Self::Value, A::Error> {
+                let mut min = None;
+                let mut max = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        "min" => {
+                            if min.is_some() {
+                                return Err(serde::de::Error::duplicate_field("min"));
+                            }
+                            min = Some(map.next_value()?);
+                        }
+                        "max" => {
+                            if max.is_some() {
+                                return Err(serde::de::Error::duplicate_field("max"));
+                            }
+                            max = Some(map.next_value()?);
+                        }
+                        _ => {
+                            return Err(serde::de::Error::unknown_field(key, &["min", "max"]));
+                        }
+                    }
+                }
+                let min = min.ok_or_else(|| serde::de::Error::missing_field("origin"))?;
+                let max = max.ok_or_else(|| serde::de::Error::missing_field("size"))?;
+                Ok(Box2 { min, max })
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let min = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let max = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                Ok(Box2 { min, max })
+            }
+        }
+
+        deserializer.deserialize_struct(
+            "Box2",
+            &["min", "max"],
+            Visitor {
+                _marker: core::marker::PhantomData,
+            },
+        )
+    }
+}
+
+impl<T: Unit> serde::Serialize for Box3<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut map = serializer.serialize_struct("Box3", 2)?;
+        map.serialize_field("min", &self.min)?;
+        map.serialize_field("max", &self.max)?;
+        map.end()
+    }
+}
+
+impl<'de, T: Unit> serde::Deserialize<'de> for Box3<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor<T> {
+            _marker: core::marker::PhantomData<T>,
+        }
+
+        impl<'de, T: Unit> serde::de::Visitor<'de> for Visitor<T> {
+            type Value = Box3<T>;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                write!(formatter, "a mapping with `min` and `max` fields")
+            }
+
+            fn visit_map<A: serde::de::MapAccess<'de>>(
+                self,
+                mut map: A,
+            ) -> Result<Self::Value, A::Error> {
+                let mut min = None;
+                let mut max = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        "min" => {
+                            if min.is_some() {
+                                return Err(serde::de::Error::duplicate_field("min"));
+                            }
+                            min = Some(map.next_value()?);
+                        }
+                        "max" => {
+                            if max.is_some() {
+                                return Err(serde::de::Error::duplicate_field("max"));
+                            }
+                            max = Some(map.next_value()?);
+                        }
+                        _ => {
+                            return Err(serde::de::Error::unknown_field(key, &["min", "max"]));
+                        }
+                    }
+                }
+                let min = min.ok_or_else(|| serde::de::Error::missing_field("origin"))?;
+                let max = max.ok_or_else(|| serde::de::Error::missing_field("size"))?;
+                Ok(Box3 { min, max })
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let min = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let max = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                Ok(Box3 { min, max })
+            }
+        }
+
+        deserializer.deserialize_struct(
+            "Box3",
+            &["min", "max"],
+            Visitor {
+                _marker: core::marker::PhantomData,
+            },
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1039,5 +1267,188 @@ mod tests {
             ],
             "unknown field `z`, expected one of `x`, `width`, `y`, `height`",
         );
+    }
+
+    #[test]
+    fn rect() {
+        let rect = Rect::<f32>::new((10.0, 20.0), (30.0, 40.0));
+        assert_ser_tokens(
+            &rect,
+            &[
+                Token::Struct {
+                    name: "Rect",
+                    len: 2,
+                },
+                Token::Str("origin"),
+                Token::Struct {
+                    name: "Point2",
+                    len: 2,
+                },
+                Token::Str("x"),
+                Token::F32(10.0),
+                Token::Str("y"),
+                Token::F32(20.0),
+                Token::StructEnd,
+                Token::Str("size"),
+                Token::Struct {
+                    name: "Size2",
+                    len: 2,
+                },
+                Token::Str("width"),
+                Token::F32(30.0),
+                Token::Str("height"),
+                Token::F32(40.0),
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+
+        assert_de_tokens(
+            &rect,
+            &[
+                Token::Seq { len: Some(2) },
+                Token::Seq { len: Some(2) },
+                Token::F32(10.0),
+                Token::F32(20.0),
+                Token::SeqEnd,
+                Token::Seq { len: Some(2) },
+                Token::F32(30.0),
+                Token::F32(40.0),
+                Token::SeqEnd,
+                Token::SeqEnd,
+            ],
+        );
+
+        let serialized = serde_json::to_string(&rect).unwrap();
+        assert_eq!(
+            serialized,
+            r#"{"origin":{"x":10.0,"y":20.0},"size":{"width":30.0,"height":40.0}}"#
+        );
+        let deserialized: Rect<f32> = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(rect, deserialized);
+    }
+
+    #[test]
+    fn box2() {
+        let box2 = Box2::<f32>::new((10.0, 20.0), (30.0, 40.0));
+        assert_ser_tokens(
+            &box2,
+            &[
+                Token::Struct {
+                    name: "Box2",
+                    len: 2,
+                },
+                Token::Str("min"),
+                Token::Struct {
+                    name: "Point2",
+                    len: 2,
+                },
+                Token::Str("x"),
+                Token::F32(10.0),
+                Token::Str("y"),
+                Token::F32(20.0),
+                Token::StructEnd,
+                Token::Str("max"),
+                Token::Struct {
+                    name: "Point2",
+                    len: 2,
+                },
+                Token::Str("x"),
+                Token::F32(30.0),
+                Token::Str("y"),
+                Token::F32(40.0),
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+
+        assert_de_tokens(
+            &box2,
+            &[
+                Token::Seq { len: Some(2) },
+                Token::Seq { len: Some(2) },
+                Token::F32(10.0),
+                Token::F32(20.0),
+                Token::SeqEnd,
+                Token::Seq { len: Some(2) },
+                Token::F32(30.0),
+                Token::F32(40.0),
+                Token::SeqEnd,
+                Token::SeqEnd,
+            ],
+        );
+
+        let serialized = serde_json::to_string(&box2).unwrap();
+        assert_eq!(
+            serialized,
+            r#"{"min":{"x":10.0,"y":20.0},"max":{"x":30.0,"y":40.0}}"#
+        );
+        let deserialized: Box2<f32> = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(box2, deserialized);
+    }
+
+    #[test]
+    fn box3() {
+        let box3 = Box3::<f32>::new((10.0, 20.0, 30.0), (40.0, 50.0, 60.0));
+        assert_ser_tokens(
+            &box3,
+            &[
+                Token::Struct {
+                    name: "Box3",
+                    len: 2,
+                },
+                Token::Str("min"),
+                Token::Struct {
+                    name: "Point3",
+                    len: 3,
+                },
+                Token::Str("x"),
+                Token::F32(10.0),
+                Token::Str("y"),
+                Token::F32(20.0),
+                Token::Str("z"),
+                Token::F32(30.0),
+                Token::StructEnd,
+                Token::Str("max"),
+                Token::Struct {
+                    name: "Point3",
+                    len: 3,
+                },
+                Token::Str("x"),
+                Token::F32(40.0),
+                Token::Str("y"),
+                Token::F32(50.0),
+                Token::Str("z"),
+                Token::F32(60.0),
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+
+        assert_de_tokens(
+            &box3,
+            &[
+                Token::Seq { len: Some(2) },
+                Token::Seq { len: Some(3) },
+                Token::F32(10.0),
+                Token::F32(20.0),
+                Token::F32(30.0),
+                Token::SeqEnd,
+                Token::Seq { len: Some(3) },
+                Token::F32(40.0),
+                Token::F32(50.0),
+                Token::F32(60.0),
+                Token::SeqEnd,
+                Token::SeqEnd,
+            ],
+        );
+
+        let serialized = serde_json::to_string(&box3).unwrap();
+        assert_eq!(
+            serialized,
+            r#"{"min":{"x":10.0,"y":20.0,"z":30.0},"max":{"x":40.0,"y":50.0,"z":60.0}}"#
+        );
+        let deserialized: Box3<f32> = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(box3, deserialized);
     }
 }
