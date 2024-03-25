@@ -30,6 +30,9 @@ mod transform;
 mod unit;
 mod vector;
 
+#[cfg(feature = "serde")]
+mod serialization;
+
 pub use angle::{Angle, AngleConsts, FloatAngleExt};
 pub use matrix::{Matrix2, Matrix3, Matrix4};
 pub use point::{Point2, Point3, Point4};

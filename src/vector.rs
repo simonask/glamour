@@ -48,8 +48,6 @@ pub trait Swizzle<T: Unit> {
 ///
 /// Alignment: Same as the scalar.
 #[repr(C)]
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
 pub struct Vector2<T: Unit = f32> {
     /// X coordinate
     pub x: T::Scalar,
