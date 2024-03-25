@@ -260,6 +260,17 @@ mod tests {
                     name: "Vector2",
                     len: 2,
                 },
+                Token::F32(1.0),
+                Token::StructEnd,
+            ],
+            "invalid type: floating point `1`, expected a field name",
+        );
+        assert_de_tokens_error::<Vector2<f32>>(
+            &[
+                Token::Struct {
+                    name: "Vector2",
+                    len: 2,
+                },
                 Token::Str("x"),
                 Token::F32(1.0),
                 Token::Str("z"),
