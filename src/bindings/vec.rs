@@ -107,6 +107,7 @@ pub trait FloatVector: SignedVector {
     fn round(self) -> Self;
     fn try_normalize(self) -> Option<Self>;
     fn midpoint(self, rhs: Self) -> Self;
+    fn move_towards(&self, rhs: Self, d: Self::Scalar) -> Self;
 }
 
 macro_rules! impl_float_vector {
@@ -141,6 +142,7 @@ macro_rules! impl_float_vector {
             forward_impl!($glam_ty => fn round(self) -> Self);
             forward_impl!($glam_ty => fn try_normalize(self) -> Option<Self>);
             forward_impl!($glam_ty => fn midpoint(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn move_towards(&self, rhs: Self, d: Self::Scalar) -> Self);
         }
     };
 }

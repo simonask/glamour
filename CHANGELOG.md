@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `with_x()`, `with_y()`, etc., as well as `with_width()` and `with_height()`
   for size types.
 - `PointN::midpoint()`
+- `PointN::move_towards()`
 
 ### Breaking changes
 - Bumped dependency on `glam` to 0.27.0.
