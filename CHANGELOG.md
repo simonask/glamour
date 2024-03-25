@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Changes
+- Serialization/deserialization are now manually implemented for all types,
+  instead of relying on `#[derive(Serialize, Deserialize)]`.
+- Vector types, size types, rects, and boxes can now be deserialized from
+  sequence-shaped input, not only struct-shaped data.
+- The `derive` feature of `serde` is now disabled.
+- The dependency on `serde` now sets `default-features = false`, enabling use of
+  the `serde` feature in `nostd` environments.
+
 ## [0.10.2] - 2024-02-22
 ### Added
 - The traits `SignedScalar` and `FloatScalar` are now public.
