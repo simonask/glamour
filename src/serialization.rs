@@ -332,6 +332,19 @@ impl<'de, T: FloatScalar> serde::Deserialize<'de> for Matrix4<T> {
     }
 }
 
+impl<T: FloatScalar> serde::Serialize for Angle<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.radians.serialize(serializer)
+    }
+}
+
+impl<'de, T: FloatScalar> serde::Deserialize<'de> for Angle<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let radians: T = serde::Deserialize::deserialize(deserializer)?;
+        Ok(Angle { radians })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
