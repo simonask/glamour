@@ -174,6 +174,18 @@ macro_rules! impl_size {
                 let dim: [T::Scalar; $dimensions] = self.into();
                 !dim.into_iter().all(|d| d > T::Scalar::ZERO)
             }
+
+            #[doc = "Replace the width component with a new value."]
+            #[inline]
+            pub fn with_width(self, width: T::Scalar) -> Self {
+                Self { width, ..self }
+            }
+
+            #[doc = "Replace the width component with a new value."]
+            #[inline]
+            pub fn with_height(self, height: T::Scalar) -> Self {
+                Self { height, ..self }
+            }
         }
     };
 }
@@ -318,6 +330,11 @@ impl<T: Unit> Size3<T> {
     /// Calculate the volume.
     pub fn volume(&self) -> T::Scalar {
         self.width * self.height * self.depth
+    }
+
+    /// Replace the depth component with a new value.
+    pub fn with_depth(self, depth: T::Scalar) -> Self {
+        Self { depth, ..self }
     }
 }
 

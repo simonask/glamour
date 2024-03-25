@@ -380,6 +380,10 @@ impl<T: Unit> Vector2<T> {
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Extend with z-component to [`Vector3`]."]
         pub fn extend(self, z: T::Scalar) -> Vector3<T>;
+        #[doc = "Replace the x-component with a new value."]
+        pub fn with_x(self, x: T::Scalar) -> Self;
+        #[doc = "Replace the y-component with a new value."]
+        pub fn with_y(self, y: T::Scalar) -> Self;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -533,6 +537,12 @@ impl<T: Unit> Vector3<T> {
         pub fn extend(self, w: T::Scalar) -> Vector4<T>;
         #[doc = "Truncate to [`Vector2`]."]
         pub fn truncate(self) -> Vector2<T>;
+        #[doc = "Replace the x-component with a new value."]
+        pub fn with_x(self, x: T::Scalar) -> Self;
+        #[doc = "Replace the y-component with a new value."]
+        pub fn with_y(self, y: T::Scalar) -> Self;
+        #[doc = "Replace the z-component with a new value."]
+        pub fn with_z(self, z: T::Scalar) -> Self;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -730,6 +740,14 @@ impl<T: Unit> Vector4<T> {
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Truncate to [`Vector3`]."]
         pub fn truncate(self) -> Vector3<T>;
+        #[doc = "Replace the x-component with a new value."]
+        pub fn with_x(self, x: T::Scalar) -> Self;
+        #[doc = "Replace the y-component with a new value."]
+        pub fn with_y(self, y: T::Scalar) -> Self;
+        #[doc = "Replace the z-component with a new value."]
+        pub fn with_z(self, z: T::Scalar) -> Self;
+        #[doc = "Replace the w-component with a new value."]
+        pub fn with_w(self, w: T::Scalar) -> Self;
     );
 
     /// Select components of this vector and return a new vector containing

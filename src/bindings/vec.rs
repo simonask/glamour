@@ -40,6 +40,8 @@ pub trait Vector:
     fn max_element(self) -> Self::Scalar;
     fn dot(self, other: Self) -> Self::Scalar;
     fn write_to_slice(self, slice: &mut [Self::Scalar]);
+    fn with_x(self, x: Self::Scalar) -> Self;
+    fn with_y(self, x: Self::Scalar) -> Self;
 }
 
 macro_rules! impl_vector {
@@ -55,6 +57,8 @@ macro_rules! impl_vector {
             forward_impl!($glam_ty => fn max_element(self) -> Self::Scalar);
             forward_impl!($glam_ty => fn dot(self, other: Self) -> Self::Scalar);
             forward_impl!($glam_ty => fn write_to_slice(self, slice: &mut [Self::Scalar]) -> ());
+            forward_impl!($glam_ty => fn with_x(self, x: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn with_y(self, y: Self::Scalar) -> Self);
         }
     };
 }
@@ -182,6 +186,7 @@ pub trait Vector3: Vector {
     fn cmple(self, other: Self) -> glam::BVec3;
     fn cmplt(self, other: Self) -> glam::BVec3;
     fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self;
+    fn with_z(self, z: Self::Scalar) -> Self;
 }
 
 macro_rules! impl_vector3 {
@@ -199,6 +204,7 @@ macro_rules! impl_vector3 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec3);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec3);
             forward_impl!($glam_ty => fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self);
+            forward_impl!($glam_ty => fn with_z(self, z: Self::Scalar) -> Self);
         }
     };
 }
@@ -214,6 +220,8 @@ pub trait Vector4: Vector {
     fn cmple(self, other: Self) -> glam::BVec4;
     fn cmplt(self, other: Self) -> glam::BVec4;
     fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self;
+    fn with_z(self, z: Self::Scalar) -> Self;
+    fn with_w(self, w: Self::Scalar) -> Self;
 }
 
 macro_rules! impl_vector4 {
@@ -229,6 +237,8 @@ macro_rules! impl_vector4 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec4);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec4);
             forward_impl!($glam_ty => fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self);
+            forward_impl!($glam_ty => fn with_z(self, z: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn with_w(self, w: Self::Scalar) -> Self);
         }
     };
 }
@@ -336,6 +346,8 @@ impl Vector4 for glam::Vec4 {
     forward_impl!(glam::Vec4 => fn from_array(array: [Self::Scalar; 4]) -> Self);
     forward_impl!(glam::Vec4 => fn to_array(&self) -> [Self::Scalar; 4]);
     forward_impl!(glam::Vec4 => fn truncate(self) -> glam::Vec3);
+    forward_impl!(glam::Vec4 => fn with_z(self, z: Self::Scalar) -> Self);
+    forward_impl!(glam::Vec4 => fn with_w(self, w: Self::Scalar) -> Self);
 
     fn cmpeq(self, other: Self) -> glam::BVec4 {
         bvec4a_to_bvec4(glam::Vec4::cmpeq(self, other))
