@@ -9,8 +9,6 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 
 /// 2D size.
 #[repr(C)]
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
 pub struct Size2<T: Unit = f32> {
     /// Width
     pub width: T::Scalar,
@@ -26,8 +24,6 @@ unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec2> for Size2<T
 
 /// 3D size.
 #[repr(C)]
-#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound = ""))]
 pub struct Size3<T: Unit = f32> {
     /// Width
     pub width: T::Scalar,
