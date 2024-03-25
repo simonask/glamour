@@ -5,7 +5,8 @@
 #![allow(
     clippy::inline_always,
     clippy::module_name_repetitions,
-    clippy::wildcard_imports
+    clippy::wildcard_imports,
+    clippy::similar_names
 )]
 #![cfg_attr(coverage, feature(coverage_attribute))]
 
