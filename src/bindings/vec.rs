@@ -83,6 +83,7 @@ pub trait FloatVector: SignedVector {
     fn exp(self) -> Self;
     fn floor(self) -> Self;
     fn fract(self) -> Self;
+    fn fract_gl(self) -> Self;
     fn is_finite(self) -> bool;
     fn is_nan(self) -> bool;
     fn is_normalized(self) -> bool;
@@ -115,6 +116,7 @@ macro_rules! impl_float_vector {
             forward_impl!($glam_ty => fn exp(self) -> Self);
             forward_impl!($glam_ty => fn floor(self) -> Self);
             forward_impl!($glam_ty => fn fract(self) -> Self);
+            forward_impl!($glam_ty => fn fract_gl(self) -> Self);
             forward_impl!($glam_ty => fn is_finite(self) -> bool);
             forward_impl!($glam_ty => fn is_nan(self) -> bool);
             forward_impl!($glam_ty => fn is_normalized(self) -> bool);
