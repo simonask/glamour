@@ -409,6 +409,10 @@ impl<T: Unit> Vector2<T> {
         pub fn with_x(self, x: T::Scalar) -> Self;
         #[doc = "Replace the y-component with a new value."]
         pub fn with_y(self, y: T::Scalar) -> Self;
+        #[doc = "Returns the sum of all elements of self."]
+        pub fn element_sum(self) -> T::Scalar;
+        #[doc = "Returns the product of all elements of self."]
+        pub fn element_product(self) -> T::Scalar;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -576,6 +580,10 @@ impl<T: Unit> Vector3<T> {
         pub fn with_y(self, y: T::Scalar) -> Self;
         #[doc = "Replace the z-component with a new value."]
         pub fn with_z(self, z: T::Scalar) -> Self;
+        #[doc = "Returns the sum of all elements of self."]
+        pub fn element_sum(self) -> T::Scalar;
+        #[doc = "Returns the product of all elements of self."]
+        pub fn element_product(self) -> T::Scalar;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -789,6 +797,10 @@ impl<T: Unit> Vector4<T> {
         pub fn with_z(self, z: T::Scalar) -> Self;
         #[doc = "Replace the w-component with a new value."]
         pub fn with_w(self, w: T::Scalar) -> Self;
+        #[doc = "Returns the sum of all elements of self."]
+        pub fn element_sum(self) -> T::Scalar;
+        #[doc = "Returns the product of all elements of self."]
+        pub fn element_product(self) -> T::Scalar;
     );
 
     /// Select components of this vector and return a new vector containing

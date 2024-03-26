@@ -42,6 +42,8 @@ pub trait Vector:
     fn write_to_slice(self, slice: &mut [Self::Scalar]);
     fn with_x(self, x: Self::Scalar) -> Self;
     fn with_y(self, x: Self::Scalar) -> Self;
+    fn element_sum(self) -> Self::Scalar;
+    fn element_product(self) -> Self::Scalar;
 }
 
 macro_rules! impl_vector {
@@ -59,6 +61,8 @@ macro_rules! impl_vector {
             forward_impl!($glam_ty => fn write_to_slice(self, slice: &mut [Self::Scalar]) -> ());
             forward_impl!($glam_ty => fn with_x(self, x: Self::Scalar) -> Self);
             forward_impl!($glam_ty => fn with_y(self, y: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn element_sum(self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn element_product(self) -> Self::Scalar);
         }
     };
 }
