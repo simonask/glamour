@@ -508,4 +508,56 @@ mod tests {
             }
         );
     }
+
+    #[test]
+    fn with_width_height_depth() {
+        let s = Size2::<f32> {
+            width: 1.0,
+            height: 2.0,
+        };
+        assert_eq!(
+            s.with_width(3.0),
+            Size2::<f32> {
+                width: 3.0,
+                height: 2.0
+            }
+        );
+        assert_eq!(
+            s.with_height(3.0),
+            Size2::<f32> {
+                width: 1.0,
+                height: 3.0
+            }
+        );
+
+        let s = Size3::<f32> {
+            width: 1.0,
+            height: 2.0,
+            depth: 3.0,
+        };
+        assert_eq!(
+            s.with_width(4.0),
+            Size3::<f32> {
+                width: 4.0,
+                height: 2.0,
+                depth: 3.0
+            }
+        );
+        assert_eq!(
+            s.with_height(4.0),
+            Size3::<f32> {
+                width: 1.0,
+                height: 4.0,
+                depth: 3.0
+            }
+        );
+        assert_eq!(
+            s.with_depth(4.0),
+            Size3::<f32> {
+                width: 1.0,
+                height: 2.0,
+                depth: 4.0
+            }
+        );
+    }
 }

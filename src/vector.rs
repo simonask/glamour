@@ -1722,6 +1722,10 @@ mod tests {
             Vector4::<f32>::from(glam::BVec4::new(true, false, true, false)),
             (1.0, 0.0, 1.0, 0.0)
         );
+        assert_eq!(
+            Vector4::<i32>::from(glam::BVec4::new(true, false, true, false)),
+            (1, 0, 1, 0)
+        );
     }
 
     #[test]

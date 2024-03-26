@@ -1621,30 +1621,36 @@ mod tests {
     #[test]
     fn nan() {
         let m2 = Mat2::NAN;
+        assert!(m2.is_nan());
         assert!(m2.col(0).is_nan());
         assert!(m2.col(1).is_nan());
 
         let m3 = Mat3::NAN;
+        assert!(m2.is_nan());
         assert!(m3.col(0).is_nan());
         assert!(m3.col(1).is_nan());
         assert!(m3.col(2).is_nan());
 
         let m4 = Mat4::NAN;
+        assert!(m4.is_nan());
         assert!(m4.col(0).is_nan());
         assert!(m4.col(1).is_nan());
         assert!(m4.col(2).is_nan());
         assert!(m4.col(3).is_nan());
 
         let m2 = DMat2::NAN;
+        assert!(m2.is_nan());
         assert!(m2.col(0).is_nan());
         assert!(m2.col(1).is_nan());
 
         let m3 = DMat3::NAN;
+        assert!(m2.is_nan());
         assert!(m3.col(0).is_nan());
         assert!(m3.col(1).is_nan());
         assert!(m3.col(2).is_nan());
 
         let m4 = DMat4::NAN;
+        assert!(m4.is_nan());
         assert!(m4.col(0).is_nan());
         assert!(m4.col(1).is_nan());
         assert!(m4.col(2).is_nan());
@@ -1741,6 +1747,10 @@ mod tests {
             assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO).is_invertible());
             assert!(Mat4::IDENTITY.is_invertible());
         }
+
+        assert!(Mat2::ZERO.try_inverse().is_none());
+        assert!(Mat3::ZERO.try_inverse().is_none());
+        assert!(Mat4::ZERO.try_inverse().is_none());
     }
 
     #[test]
@@ -2075,5 +2085,15 @@ mod tests {
         assert_eq!(m2_copy, m2 / 2.0);
         assert_eq!(m3_copy, m3 / 2.0);
         assert_eq!(m4_copy, m4 / 2.0);
+    }
+
+    #[test]
+    fn abs() {
+        let m2 = Mat2::from_diagonal(vec2!(1.0, -1.0)).abs();
+        assert_eq!(m2, Mat2::IDENTITY);
+        let m3 = Mat3::from_diagonal(vec3!(1.0, 1.0, -1.0)).abs();
+        assert_eq!(m3, Mat3::IDENTITY);
+        let m4 = Mat4::from_diagonal(vec4!(1.0, 1.0, -1.0, -1.0)).abs();
+        assert_eq!(m4, Mat4::IDENTITY);
     }
 }
