@@ -177,12 +177,14 @@ macro_rules! impl_size {
 
             #[doc = "Replace the width component with a new value."]
             #[inline]
+            #[must_use]
             pub fn with_width(self, width: T::Scalar) -> Self {
                 Self { width, ..self }
             }
 
             #[doc = "Replace the width component with a new value."]
             #[inline]
+            #[must_use]
             pub fn with_height(self, height: T::Scalar) -> Self {
                 Self { height, ..self }
             }
@@ -254,6 +256,7 @@ impl<T: Unit> Size2<T> {
 
     /// Calculate the area.
     #[inline]
+    #[must_use]
     pub fn area(&self) -> T::Scalar {
         self.to_vector().element_product()
     }
@@ -330,12 +333,14 @@ impl<T: Unit> Size3<T> {
 
     /// Calculate the volume.
     #[inline]
+    #[must_use]
     pub fn volume(&self) -> T::Scalar {
         self.to_vector().element_product()
     }
 
     /// Replace the depth component with a new value.
     #[inline]
+    #[must_use]
     pub fn with_depth(self, depth: T::Scalar) -> Self {
         Self { depth, ..self }
     }
