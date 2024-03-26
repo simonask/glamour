@@ -111,6 +111,16 @@ pub trait FloatScalar:
     fn is_finite(self) -> bool;
 }
 
+/// Integer scalar types.
+pub trait IntScalar: Scalar<Vec2 = Self::Vec2i, Vec3 = Self::Vec3i, Vec4 = Self::Vec4i> {
+    #[doc(hidden)]
+    type Vec2i: bindings::Vector2<Scalar = Self> + bindings::IntegerVector;
+    #[doc(hidden)]
+    type Vec3i: bindings::Vector3<Scalar = Self> + bindings::IntegerVector;
+    #[doc(hidden)]
+    type Vec4i: bindings::Vector4<Scalar = Self> + bindings::IntegerVector;
+}
+
 impl Scalar for f32 {
     const ZERO: Self = 0.0;
     const ONE: Self = 1.0;

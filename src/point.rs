@@ -13,7 +13,7 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 
 use crate::{
     bindings::prelude::*,
-    scalar::{FloatScalar, SignedScalar},
+    scalar::{FloatScalar, IntScalar, SignedScalar},
     AsRaw, FromRaw, Scalar, ToRaw, Unit, Vector2, Vector3, Vector4,
 };
 use core::ops::Mul;
@@ -134,6 +134,30 @@ macro_rules! float_point_interface {
             pub fn midpoint(self, rhs: Self) -> Self;
             #[doc = "Moves towards rhs based on the value d."]
             pub fn move_towards(self, rhs: Self, d: T::Scalar) -> Self;
+        );
+    };
+}
+
+macro_rules! int_point_interface {
+    ($vector:ty, $see_also_doc_ty:ty) => {
+        crate::forward_to_raw!(
+            $see_also_doc_ty =>
+            #[doc = "Returns a vector containing the saturating addition of self and rhs."]
+            pub fn saturating_add(self, rhs: $vector) -> Self;
+            #[doc = "Returns a vector containing the saturating subtraction of self and rhs."]
+            pub fn saturating_sub(self, rhs: $vector) -> Self;
+            #[doc = "Returns a vector containing the saturating multiplication of self and rhs."]
+            pub fn saturating_mul(self, rhs: $vector) -> Self;
+            #[doc = "Returns a vector containing the saturating division of self and rhs."]
+            pub fn saturating_div(self, rhs: $vector) -> Self;
+            #[doc = "Returns a vector containing the wrapping addition of self and rhs."]
+            pub fn wrapping_add(self, rhs: $vector) -> Self;
+            #[doc = "Returns a vector containing the wrapping subtraction of self and rhs."]
+            pub fn wrapping_sub(self, rhs: $vector) -> Self;
+            #[doc = "Returns a vector containing the wrapping multiplication of self and rhs."]
+            pub fn wrapping_mul(self, rhs: $vector) -> Self;
+            #[doc = "Returns a vector containing the wrapping division of self and rhs."]
+            pub fn wrapping_div(self, rhs: $vector) -> Self;
         );
     };
 }
@@ -351,6 +375,14 @@ where
     float_point_interface!(glam::Vec2);
 }
 
+impl<T> Point2<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_point_interface!(Vector2<T>, glam::IVec2);
+}
+
 impl<T: Unit> Point3<T> {
     /// All zeroes.
     pub const ZERO: Self = Self {
@@ -428,6 +460,14 @@ where
 
     crate::forward_float_ops!(glam::BVec3, glam::Vec3);
     float_point_interface!(glam::Vec3);
+}
+
+impl<T> Point3<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_point_interface!(Vector3<T>, glam::IVec3);
 }
 
 impl<T: Unit> Point4<T> {
@@ -514,6 +554,14 @@ where
 
     crate::forward_float_ops!(glam::BVec4, glam::Vec4);
     float_point_interface!(glam::Vec4);
+}
+
+impl<T> Point4<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_point_interface!(Vector4<T>, glam::IVec4);
 }
 
 impl<T> Point3<T>

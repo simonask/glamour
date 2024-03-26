@@ -15,7 +15,8 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 
 use crate::scalar::SignedScalar;
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
+    bindings::prelude::*, scalar::FloatScalar, scalar::IntScalar, Point2, Point3, Point4, Scalar,
+    Size2, Size3, Unit,
 };
 use crate::{Angle, AsRaw, FromRaw, ToRaw};
 
@@ -328,6 +329,30 @@ implement_swizzle!(Vector2);
 implement_swizzle!(Vector3);
 implement_swizzle!(Vector4);
 
+macro_rules! int_vector_interface {
+    ($see_also_doc_ty:ty) => {
+        crate::forward_to_raw!(
+            $see_also_doc_ty =>
+            #[doc = "Returns a vector containing the saturating addition of self and rhs."]
+            pub fn saturating_add(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the saturating subtraction of self and rhs."]
+            pub fn saturating_sub(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the saturating multiplication of self and rhs."]
+            pub fn saturating_mul(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the saturating division of self and rhs."]
+            pub fn saturating_div(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping addition of self and rhs."]
+            pub fn wrapping_add(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping subtraction of self and rhs."]
+            pub fn wrapping_sub(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping multiplication of self and rhs."]
+            pub fn wrapping_mul(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping division of self and rhs."]
+            pub fn wrapping_div(self, rhs: Self) -> Self;
+        );
+    };
+}
+
 impl<T: Unit> Vector2<T> {
     /// All zeroes.
     pub const ZERO: Self = Self {
@@ -432,6 +457,14 @@ where
         #[doc = "Angle between this and another vector."]
         pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
     );
+}
+
+impl<T> Vector2<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_vector_interface!(glam::IVec2);
 }
 
 impl<T> Vector2<T>
@@ -596,6 +629,14 @@ where
         #[doc = "Cross product"]
         pub fn cross(self, other: Self) -> Self;
     );
+}
+
+impl<T> Vector3<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_vector_interface!(glam::IVec3);
 }
 
 impl<T> Vector3<T>
@@ -790,6 +831,14 @@ where
 
     crate::forward_float_ops!(glam::BVec4, glam::Vec4);
     crate::forward_float_vector_ops!(glam::Vec4);
+}
+
+impl<T> Vector4<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_vector_interface!(glam::IVec4);
 }
 
 impl<T> Vector4<T>

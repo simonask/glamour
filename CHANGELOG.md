@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for size types.
 - `PointN::midpoint()`
 - `PointN::move_towards()`
+- `saturating_add()` and friends for integer vector types.
+- `wrapping_add()` and friends for integer vector types.
 
 ### Breaking changes
 - Bumped dependency on `glam` to 0.27.0.

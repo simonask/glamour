@@ -77,6 +77,32 @@ macro_rules! impl_signed_vector {
     };
 }
 
+pub trait IntegerVector: Vector {
+    fn saturating_add(self, rhs: Self) -> Self;
+    fn saturating_sub(self, rhs: Self) -> Self;
+    fn saturating_mul(self, rhs: Self) -> Self;
+    fn saturating_div(self, rhs: Self) -> Self;
+    fn wrapping_add(self, rhs: Self) -> Self;
+    fn wrapping_sub(self, rhs: Self) -> Self;
+    fn wrapping_mul(self, rhs: Self) -> Self;
+    fn wrapping_div(self, rhs: Self) -> Self;
+}
+
+macro_rules! impl_integer_vector {
+    ($glam_ty:ty) => {
+        impl IntegerVector for $glam_ty {
+            forward_impl!($glam_ty => fn saturating_add(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn saturating_sub(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn saturating_mul(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn saturating_div(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_add(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_sub(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_mul(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_div(self, rhs: Self) -> Self);
+        }
+    };
+}
+
 pub trait FloatVector: SignedVector {
     fn ceil(self) -> Self;
     fn clamp_length_max(self, min: Self::Scalar) -> Self;
@@ -338,6 +364,25 @@ impl_signed_vector!(glam::IVec4);
 impl_signed_vector!(glam::I64Vec2);
 impl_signed_vector!(glam::I64Vec3);
 impl_signed_vector!(glam::I64Vec4);
+
+impl_integer_vector!(glam::U16Vec2);
+impl_integer_vector!(glam::U16Vec3);
+impl_integer_vector!(glam::U16Vec4);
+impl_integer_vector!(glam::UVec2);
+impl_integer_vector!(glam::UVec3);
+impl_integer_vector!(glam::UVec4);
+impl_integer_vector!(glam::U64Vec2);
+impl_integer_vector!(glam::U64Vec3);
+impl_integer_vector!(glam::U64Vec4);
+impl_integer_vector!(glam::I16Vec2);
+impl_integer_vector!(glam::I16Vec3);
+impl_integer_vector!(glam::I16Vec4);
+impl_integer_vector!(glam::IVec2);
+impl_integer_vector!(glam::IVec3);
+impl_integer_vector!(glam::IVec4);
+impl_integer_vector!(glam::I64Vec2);
+impl_integer_vector!(glam::I64Vec3);
+impl_integer_vector!(glam::I64Vec4);
 
 impl_float_vector!(glam::Vec2, f32);
 impl_float_vector!(glam::Vec3, f32);
