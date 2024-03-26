@@ -128,6 +128,7 @@ pub trait FloatVector: SignedVector {
     fn mul_add(self, a: Self, b: Self) -> Self;
     fn normalize_or_zero(self) -> Self;
     fn normalize(self) -> Self;
+    fn normalize_or(self, fallback: Self) -> Self;
     fn powf(self, n: Self::Scalar) -> Self;
     fn project_onto_normalized(self, other: Self) -> Self;
     fn project_onto(self, other: Self) -> Self;
@@ -163,6 +164,7 @@ macro_rules! impl_float_vector {
             forward_impl!($glam_ty => fn mul_add(self, a: Self, b: Self) -> Self);
             forward_impl!($glam_ty => fn normalize_or_zero(self) -> Self);
             forward_impl!($glam_ty => fn normalize(self) -> Self);
+            forward_impl!($glam_ty => fn normalize_or(self, fallback: Self) -> Self);
             forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
             forward_impl!($glam_ty => fn project_onto_normalized(self, other: Self) -> Self);
             forward_impl!($glam_ty => fn project_onto(self, other: Self) -> Self);

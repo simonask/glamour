@@ -279,6 +279,8 @@ macro_rules! forward_float_vector_ops {
             pub fn normalize(self) -> Self;
             #[doc = "Normalize the vector, returning zero if the length was already (very close to) zero."]
             pub fn normalize_or_zero(self) -> Self;
+            #[doc = "Returns self normalized to length 1.0 if possible, else returns a fallback value."]
+            pub fn normalize_or(self, fallback: Self) -> Self;
             #[doc = "Normalize the vector, returning `None` if the length was already (very close to) zero."]
             pub fn try_normalize(self) -> Option<Self>;
             #[doc = "True if the vector is normalized."]
