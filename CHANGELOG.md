@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- `fract_gl()`, and made `fract()` available on points and sizes as well.
+- `with_x()`, `with_y()`, etc., as well as `with_width()` and `with_height()`
+  for size types.
+- `PointN::midpoint()`
+- `PointN::move_towards()`
+- `saturating_add()` and friends for integer vector types.
+- `wrapping_add()` and friends for integer vector types.
+- `element_sum()`, `element_product()`
+- `VectorN::normalize_or()`
+- `From<glam::BVecN>` for vector types.
+- `MatrixN::abs()`
+- Implement `Mul`, `MulAssign`, `Div`, `DivAssign` by scalars for matrix types.
+
+### Breaking changes
+- Bumped dependency on `glam` to 0.27.0.
+- Minimum Supported Rust Version bumped to 1.68.2 for `impl From<bool> for
+  {f32,f64}` support.
+
 ## [0.10.3] - 2024-03-25
 ### Changes
 - Serialization/deserialization are now manually implemented for all types,

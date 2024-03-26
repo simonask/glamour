@@ -4,7 +4,7 @@
 //! necessarily have a clear logical meaning in the context of any particular
 //! unit. Instead, they just use `Scalar`.
 
-use core::ops::Mul;
+use core::ops::{Div, DivAssign, Mul, MulAssign};
 
 use crate::{
     bindings::{Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4},
@@ -238,6 +238,13 @@ macro_rules! impl_matrix {
             #[must_use]
             pub fn is_finite(&self) -> bool {
                 self.as_raw().is_finite()
+            }
+
+            #[doc = "Takes the absolute value of each element in self"]
+            #[inline]
+            #[must_use]
+            pub fn abs(&self) -> Self {
+                Self::from_raw(self.as_raw().abs())
             }
         }
 
@@ -623,8 +630,31 @@ where
 {
     type Output = Self;
 
+    #[inline(always)]
     fn mul(self, rhs: Self) -> Self::Output {
         Self::from_raw(self.to_raw() * rhs.to_raw())
+    }
+}
+
+impl<T> Mul<T> for Matrix2<T>
+where
+    T: FloatScalar,
+{
+    type Output = Self;
+
+    #[inline(always)]
+    fn mul(self, rhs: T) -> Self::Output {
+        Self::from_raw(self.to_raw() * rhs)
+    }
+}
+
+impl<T> MulAssign<T> for Matrix2<T>
+where
+    T: FloatScalar,
+{
+    #[inline(always)]
+    fn mul_assign(&mut self, rhs: T) {
+        *self.as_raw_mut() *= rhs;
     }
 }
 
@@ -634,8 +664,31 @@ where
 {
     type Output = Vector2<T>;
 
+    #[inline(always)]
     fn mul(self, rhs: Vector2<T>) -> Vector2<T> {
         Vector2::from_raw(self.to_raw() * rhs.to_raw())
+    }
+}
+
+impl<T> Div<T> for Matrix2<T>
+where
+    T: FloatScalar,
+{
+    type Output = Self;
+
+    #[inline(always)]
+    fn div(self, rhs: T) -> Self::Output {
+        Self::from_raw(self.to_raw() / rhs)
+    }
+}
+
+impl<T> DivAssign<T> for Matrix2<T>
+where
+    T: FloatScalar,
+{
+    #[inline(always)]
+    fn div_assign(&mut self, rhs: T) {
+        *self.as_raw_mut() /= rhs;
     }
 }
 
@@ -652,6 +705,28 @@ where
     }
 }
 
+impl<T> Mul<T> for Matrix3<T>
+where
+    T: FloatScalar,
+{
+    type Output = Self;
+
+    #[inline(always)]
+    fn mul(self, rhs: T) -> Self::Output {
+        Self::from_raw(self.to_raw() * rhs)
+    }
+}
+
+impl<T> MulAssign<T> for Matrix3<T>
+where
+    T: FloatScalar,
+{
+    #[inline(always)]
+    fn mul_assign(&mut self, rhs: T) {
+        *self.as_raw_mut() *= rhs;
+    }
+}
+
 impl<T> Mul<Vector3<T>> for Matrix3<T::Scalar>
 where
     T: Unit,
@@ -663,6 +738,72 @@ where
     #[must_use]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
         Vector3::from_raw(self.to_raw() * rhs.to_raw())
+    }
+}
+
+impl<T> Div<T> for Matrix3<T>
+where
+    T: FloatScalar,
+{
+    type Output = Self;
+
+    #[inline(always)]
+    fn div(self, rhs: T) -> Self::Output {
+        Self::from_raw(self.to_raw() / rhs)
+    }
+}
+
+impl<T> DivAssign<T> for Matrix3<T>
+where
+    T: FloatScalar,
+{
+    #[inline(always)]
+    fn div_assign(&mut self, rhs: T) {
+        *self.as_raw_mut() /= rhs;
+    }
+}
+
+impl<T> Mul<T> for Matrix4<T>
+where
+    T: FloatScalar,
+{
+    type Output = Self;
+
+    #[inline(always)]
+    fn mul(self, rhs: T) -> Self::Output {
+        Self::from_raw(self.to_raw() * rhs)
+    }
+}
+
+impl<T> MulAssign<T> for Matrix4<T>
+where
+    T: FloatScalar,
+{
+    #[inline(always)]
+    fn mul_assign(&mut self, rhs: T) {
+        *self.as_raw_mut() *= rhs;
+    }
+}
+
+impl<T> Div<T> for Matrix4<T>
+where
+    T: FloatScalar,
+{
+    type Output = Self;
+
+    #[inline(always)]
+    fn div(self, rhs: T) -> Self::Output {
+        Self::from_raw(self.to_raw() / rhs)
+    }
+}
+
+impl<T> DivAssign<T> for Matrix4<T>
+where
+    T: FloatScalar,
+{
+    #[inline(always)]
+    fn div_assign(&mut self, rhs: T) {
+        *self.as_raw_mut() /= rhs;
     }
 }
 
@@ -1480,30 +1621,36 @@ mod tests {
     #[test]
     fn nan() {
         let m2 = Mat2::NAN;
+        assert!(m2.is_nan());
         assert!(m2.col(0).is_nan());
         assert!(m2.col(1).is_nan());
 
         let m3 = Mat3::NAN;
+        assert!(m2.is_nan());
         assert!(m3.col(0).is_nan());
         assert!(m3.col(1).is_nan());
         assert!(m3.col(2).is_nan());
 
         let m4 = Mat4::NAN;
+        assert!(m4.is_nan());
         assert!(m4.col(0).is_nan());
         assert!(m4.col(1).is_nan());
         assert!(m4.col(2).is_nan());
         assert!(m4.col(3).is_nan());
 
         let m2 = DMat2::NAN;
+        assert!(m2.is_nan());
         assert!(m2.col(0).is_nan());
         assert!(m2.col(1).is_nan());
 
         let m3 = DMat3::NAN;
+        assert!(m2.is_nan());
         assert!(m3.col(0).is_nan());
         assert!(m3.col(1).is_nan());
         assert!(m3.col(2).is_nan());
 
         let m4 = DMat4::NAN;
+        assert!(m4.is_nan());
         assert!(m4.col(0).is_nan());
         assert!(m4.col(1).is_nan());
         assert!(m4.col(2).is_nan());
@@ -1600,6 +1747,10 @@ mod tests {
             assert!(!Mat4::from_cols(Vec4::ONE, Vec4::ONE, Vec4::ONE, Vec4::ZERO).is_invertible());
             assert!(Mat4::IDENTITY.is_invertible());
         }
+
+        assert!(Mat2::ZERO.try_inverse().is_none());
+        assert!(Mat3::ZERO.try_inverse().is_none());
+        assert!(Mat4::ZERO.try_inverse().is_none());
     }
 
     #[test]
@@ -1834,5 +1985,115 @@ mod tests {
                 vec3!(7.0, 8.0, 10.0)
             )
         );
+    }
+
+    #[test]
+    fn mul() {
+        let m2 = Matrix2::from_cols(vec2!(1.0, 2.0), vec2!(3.0, 4.0));
+        let m3 = Matrix3::from_cols(
+            vec3!(1.0, 2.0, 3.0),
+            vec3!(4.0, 5.0, 6.0),
+            vec3!(7.0, 8.0, 9.0),
+        );
+        let m4 = Matrix4::from_cols(
+            vec4!(1.0, 2.0, 3.0, 4.0),
+            vec4!(5.0, 6.0, 7.0, 8.0),
+            vec4!(9.0, 10.0, 11.0, 12.0),
+            vec4!(13.0, 14.0, 15.0, 16.0),
+        );
+
+        assert_eq!(
+            m2 * 2.0,
+            Matrix2::from_cols(vec2!(2.0, 4.0), vec2!(6.0, 8.0))
+        );
+        assert_eq!(
+            m3 * 2.0,
+            Matrix3::from_cols(
+                vec3!(2.0, 4.0, 6.0),
+                vec3!(8.0, 10.0, 12.0),
+                vec3!(14.0, 16.0, 18.0)
+            )
+        );
+        assert_eq!(
+            m4 * 2.0,
+            Matrix4::from_cols(
+                vec4!(2.0, 4.0, 6.0, 8.0),
+                vec4!(10.0, 12.0, 14.0, 16.0),
+                vec4!(18.0, 20.0, 22.0, 24.0),
+                vec4!(26.0, 28.0, 30.0, 32.0)
+            )
+        );
+
+        let mut m2_copy = m2;
+        let mut m3_copy = m3;
+        let mut m4_copy = m4;
+
+        m2_copy *= 2.0;
+        m3_copy *= 2.0;
+        m4_copy *= 2.0;
+
+        assert_eq!(m2_copy, m2 * 2.0);
+        assert_eq!(m3_copy, m3 * 2.0);
+        assert_eq!(m4_copy, m4 * 2.0);
+    }
+
+    #[test]
+    fn div() {
+        let m2 = Matrix2::from_cols(vec2!(2.0, 4.0), vec2!(6.0, 8.0));
+        let m3 = Matrix3::from_cols(
+            vec3!(2.0, 4.0, 6.0),
+            vec3!(8.0, 10.0, 12.0),
+            vec3!(14.0, 16.0, 18.0),
+        );
+        let m4 = Matrix4::from_cols(
+            vec4!(2.0, 4.0, 6.0, 8.0),
+            vec4!(10.0, 12.0, 14.0, 16.0),
+            vec4!(18.0, 20.0, 22.0, 24.0),
+            vec4!(26.0, 28.0, 30.0, 32.0),
+        );
+
+        assert_eq!(
+            m2 / 2.0,
+            Matrix2::from_cols(vec2!(1.0, 2.0), vec2!(3.0, 4.0))
+        );
+        assert_eq!(
+            m3 / 2.0,
+            Matrix3::from_cols(
+                vec3!(1.0, 2.0, 3.0),
+                vec3!(4.0, 5.0, 6.0),
+                vec3!(7.0, 8.0, 9.0)
+            )
+        );
+        assert_eq!(
+            m4 / 2.0,
+            Matrix4::from_cols(
+                vec4!(1.0, 2.0, 3.0, 4.0),
+                vec4!(5.0, 6.0, 7.0, 8.0),
+                vec4!(9.0, 10.0, 11.0, 12.0),
+                vec4!(13.0, 14.0, 15.0, 16.0)
+            )
+        );
+
+        let mut m2_copy = m2;
+        let mut m3_copy = m3;
+        let mut m4_copy = m4;
+
+        m2_copy /= 2.0;
+        m3_copy /= 2.0;
+        m4_copy /= 2.0;
+
+        assert_eq!(m2_copy, m2 / 2.0);
+        assert_eq!(m3_copy, m3 / 2.0);
+        assert_eq!(m4_copy, m4 / 2.0);
+    }
+
+    #[test]
+    fn abs() {
+        let m2 = Mat2::from_diagonal(vec2!(1.0, -1.0)).abs();
+        assert_eq!(m2, Mat2::IDENTITY);
+        let m3 = Mat3::from_diagonal(vec3!(1.0, 1.0, -1.0)).abs();
+        assert_eq!(m3, Mat3::IDENTITY);
+        let m4 = Mat4::from_diagonal(vec4!(1.0, 1.0, -1.0, -1.0)).abs();
+        assert_eq!(m4, Mat4::IDENTITY);
     }
 }

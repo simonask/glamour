@@ -15,7 +15,8 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 
 use crate::scalar::SignedScalar;
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, Point2, Point3, Point4, Scalar, Size2, Size3, Unit,
+    bindings::prelude::*, scalar::FloatScalar, scalar::IntScalar, Point2, Point3, Point4, Scalar,
+    Size2, Size3, Unit,
 };
 use crate::{Angle, AsRaw, FromRaw, ToRaw};
 
@@ -328,6 +329,30 @@ implement_swizzle!(Vector2);
 implement_swizzle!(Vector3);
 implement_swizzle!(Vector4);
 
+macro_rules! int_vector_interface {
+    ($see_also_doc_ty:ty) => {
+        crate::forward_to_raw!(
+            $see_also_doc_ty =>
+            #[doc = "Returns a vector containing the saturating addition of self and rhs."]
+            pub fn saturating_add(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the saturating subtraction of self and rhs."]
+            pub fn saturating_sub(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the saturating multiplication of self and rhs."]
+            pub fn saturating_mul(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the saturating division of self and rhs."]
+            pub fn saturating_div(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping addition of self and rhs."]
+            pub fn wrapping_add(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping subtraction of self and rhs."]
+            pub fn wrapping_sub(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping multiplication of self and rhs."]
+            pub fn wrapping_mul(self, rhs: Self) -> Self;
+            #[doc = "Returns a vector containing the wrapping division of self and rhs."]
+            pub fn wrapping_div(self, rhs: Self) -> Self;
+        );
+    };
+}
+
 impl<T: Unit> Vector2<T> {
     /// All zeroes.
     pub const ZERO: Self = Self {
@@ -380,6 +405,14 @@ impl<T: Unit> Vector2<T> {
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Extend with z-component to [`Vector3`]."]
         pub fn extend(self, z: T::Scalar) -> Vector3<T>;
+        #[doc = "Replace the x-component with a new value."]
+        pub fn with_x(self, x: T::Scalar) -> Self;
+        #[doc = "Replace the y-component with a new value."]
+        pub fn with_y(self, y: T::Scalar) -> Self;
+        #[doc = "Returns the sum of all elements of self."]
+        pub fn element_sum(self) -> T::Scalar;
+        #[doc = "Returns the product of all elements of self."]
+        pub fn element_product(self) -> T::Scalar;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -428,6 +461,14 @@ where
         #[doc = "Angle between this and another vector."]
         pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
     );
+}
+
+impl<T> Vector2<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_vector_interface!(glam::IVec2);
 }
 
 impl<T> Vector2<T>
@@ -533,6 +574,16 @@ impl<T: Unit> Vector3<T> {
         pub fn extend(self, w: T::Scalar) -> Vector4<T>;
         #[doc = "Truncate to [`Vector2`]."]
         pub fn truncate(self) -> Vector2<T>;
+        #[doc = "Replace the x-component with a new value."]
+        pub fn with_x(self, x: T::Scalar) -> Self;
+        #[doc = "Replace the y-component with a new value."]
+        pub fn with_y(self, y: T::Scalar) -> Self;
+        #[doc = "Replace the z-component with a new value."]
+        pub fn with_z(self, z: T::Scalar) -> Self;
+        #[doc = "Returns the sum of all elements of self."]
+        pub fn element_sum(self) -> T::Scalar;
+        #[doc = "Returns the product of all elements of self."]
+        pub fn element_product(self) -> T::Scalar;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -586,6 +637,14 @@ where
         #[doc = "Cross product"]
         pub fn cross(self, other: Self) -> Self;
     );
+}
+
+impl<T> Vector3<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_vector_interface!(glam::IVec3);
 }
 
 impl<T> Vector3<T>
@@ -730,6 +789,18 @@ impl<T: Unit> Vector4<T> {
         pub fn dot(self, other: Self) -> T::Scalar;
         #[doc = "Truncate to [`Vector3`]."]
         pub fn truncate(self) -> Vector3<T>;
+        #[doc = "Replace the x-component with a new value."]
+        pub fn with_x(self, x: T::Scalar) -> Self;
+        #[doc = "Replace the y-component with a new value."]
+        pub fn with_y(self, y: T::Scalar) -> Self;
+        #[doc = "Replace the z-component with a new value."]
+        pub fn with_z(self, z: T::Scalar) -> Self;
+        #[doc = "Replace the w-component with a new value."]
+        pub fn with_w(self, w: T::Scalar) -> Self;
+        #[doc = "Returns the sum of all elements of self."]
+        pub fn element_sum(self) -> T::Scalar;
+        #[doc = "Returns the product of all elements of self."]
+        pub fn element_product(self) -> T::Scalar;
     );
 
     /// Select components of this vector and return a new vector containing
@@ -772,6 +843,14 @@ where
 
     crate::forward_float_ops!(glam::BVec4, glam::Vec4);
     crate::forward_float_vector_ops!(glam::Vec4);
+}
+
+impl<T> Vector4<T>
+where
+    T: Unit,
+    T::Scalar: IntScalar,
+{
+    int_vector_interface!(glam::IVec4);
 }
 
 impl<T> Vector4<T>
@@ -926,6 +1005,27 @@ where
     #[inline]
     fn from(v: Vector3<T>) -> Self {
         v.to_raw().into()
+    }
+}
+
+impl<T: Unit> From<glam::BVec2> for Vector2<T> {
+    #[inline(always)]
+    fn from(v: glam::BVec2) -> Self {
+        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector2>::from_bools(v))
+    }
+}
+
+impl<T: Unit> From<glam::BVec3> for Vector3<T> {
+    #[inline(always)]
+    fn from(v: glam::BVec3) -> Self {
+        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector3>::from_bools(v))
+    }
+}
+
+impl<T: Unit> From<glam::BVec4> for Vector4<T> {
+    #[inline(always)]
+    fn from(v: glam::BVec4) -> Self {
+        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector4>::from_bools(v))
     }
 }
 
@@ -1606,6 +1706,26 @@ mod tests {
         let vec3: &mut Vector4<i32> = vec.cast_mut();
         vec3.z = 100;
         assert_eq!(vec, [1, 100, 100, 4]);
+    }
+
+    #[test]
+    fn from_bools() {
+        assert_eq!(
+            Vector2::<f32>::from(glam::BVec2::new(true, false)),
+            (1.0, 0.0)
+        );
+        assert_eq!(
+            Vector3::<f32>::from(glam::BVec3::new(true, false, true)),
+            (1.0, 0.0, 1.0)
+        );
+        assert_eq!(
+            Vector4::<f32>::from(glam::BVec4::new(true, false, true, false)),
+            (1.0, 0.0, 1.0, 0.0)
+        );
+        assert_eq!(
+            Vector4::<i32>::from(glam::BVec4::new(true, false, true, false)),
+            (1, 0, 1, 0)
+        );
     }
 
     #[test]

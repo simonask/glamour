@@ -174,6 +174,20 @@ macro_rules! impl_size {
                 let dim: [T::Scalar; $dimensions] = self.into();
                 !dim.into_iter().all(|d| d > T::Scalar::ZERO)
             }
+
+            #[doc = "Replace the width component with a new value."]
+            #[inline]
+            #[must_use]
+            pub fn with_width(self, width: T::Scalar) -> Self {
+                Self { width, ..self }
+            }
+
+            #[doc = "Replace the width component with a new value."]
+            #[inline]
+            #[must_use]
+            pub fn with_height(self, height: T::Scalar) -> Self {
+                Self { height, ..self }
+            }
         }
     };
 }
@@ -241,8 +255,10 @@ impl<T: Unit> Size2<T> {
     );
 
     /// Calculate the area.
+    #[inline]
+    #[must_use]
     pub fn area(&self) -> T::Scalar {
-        self.width * self.height
+        self.to_vector().element_product()
     }
 }
 
@@ -316,8 +332,17 @@ impl<T: Unit> Size3<T> {
     );
 
     /// Calculate the volume.
+    #[inline]
+    #[must_use]
     pub fn volume(&self) -> T::Scalar {
-        self.width * self.height * self.depth
+        self.to_vector().element_product()
+    }
+
+    /// Replace the depth component with a new value.
+    #[inline]
+    #[must_use]
+    pub fn with_depth(self, depth: T::Scalar) -> Self {
+        Self { depth, ..self }
     }
 }
 
@@ -480,6 +505,58 @@ mod tests {
                 width: 1.0,
                 height: 2.0,
                 depth: 3.0
+            }
+        );
+    }
+
+    #[test]
+    fn with_width_height_depth() {
+        let s = Size2::<f32> {
+            width: 1.0,
+            height: 2.0,
+        };
+        assert_eq!(
+            s.with_width(3.0),
+            Size2::<f32> {
+                width: 3.0,
+                height: 2.0
+            }
+        );
+        assert_eq!(
+            s.with_height(3.0),
+            Size2::<f32> {
+                width: 1.0,
+                height: 3.0
+            }
+        );
+
+        let s = Size3::<f32> {
+            width: 1.0,
+            height: 2.0,
+            depth: 3.0,
+        };
+        assert_eq!(
+            s.with_width(4.0),
+            Size3::<f32> {
+                width: 4.0,
+                height: 2.0,
+                depth: 3.0
+            }
+        );
+        assert_eq!(
+            s.with_height(4.0),
+            Size3::<f32> {
+                width: 1.0,
+                height: 4.0,
+                depth: 3.0
+            }
+        );
+        assert_eq!(
+            s.with_depth(4.0),
+            Size3::<f32> {
+                width: 1.0,
+                height: 2.0,
+                depth: 4.0
             }
         );
     }

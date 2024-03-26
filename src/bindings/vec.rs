@@ -40,6 +40,10 @@ pub trait Vector:
     fn max_element(self) -> Self::Scalar;
     fn dot(self, other: Self) -> Self::Scalar;
     fn write_to_slice(self, slice: &mut [Self::Scalar]);
+    fn with_x(self, x: Self::Scalar) -> Self;
+    fn with_y(self, x: Self::Scalar) -> Self;
+    fn element_sum(self) -> Self::Scalar;
+    fn element_product(self) -> Self::Scalar;
 }
 
 macro_rules! impl_vector {
@@ -55,6 +59,10 @@ macro_rules! impl_vector {
             forward_impl!($glam_ty => fn max_element(self) -> Self::Scalar);
             forward_impl!($glam_ty => fn dot(self, other: Self) -> Self::Scalar);
             forward_impl!($glam_ty => fn write_to_slice(self, slice: &mut [Self::Scalar]) -> ());
+            forward_impl!($glam_ty => fn with_x(self, x: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn with_y(self, y: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn element_sum(self) -> Self::Scalar);
+            forward_impl!($glam_ty => fn element_product(self) -> Self::Scalar);
         }
     };
 }
@@ -73,6 +81,32 @@ macro_rules! impl_signed_vector {
     };
 }
 
+pub trait IntegerVector: Vector {
+    fn saturating_add(self, rhs: Self) -> Self;
+    fn saturating_sub(self, rhs: Self) -> Self;
+    fn saturating_mul(self, rhs: Self) -> Self;
+    fn saturating_div(self, rhs: Self) -> Self;
+    fn wrapping_add(self, rhs: Self) -> Self;
+    fn wrapping_sub(self, rhs: Self) -> Self;
+    fn wrapping_mul(self, rhs: Self) -> Self;
+    fn wrapping_div(self, rhs: Self) -> Self;
+}
+
+macro_rules! impl_integer_vector {
+    ($glam_ty:ty) => {
+        impl IntegerVector for $glam_ty {
+            forward_impl!($glam_ty => fn saturating_add(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn saturating_sub(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn saturating_mul(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn saturating_div(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_add(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_sub(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_mul(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn wrapping_div(self, rhs: Self) -> Self);
+        }
+    };
+}
+
 pub trait FloatVector: SignedVector {
     fn ceil(self) -> Self;
     fn clamp_length_max(self, min: Self::Scalar) -> Self;
@@ -83,6 +117,7 @@ pub trait FloatVector: SignedVector {
     fn exp(self) -> Self;
     fn floor(self) -> Self;
     fn fract(self) -> Self;
+    fn fract_gl(self) -> Self;
     fn is_finite(self) -> bool;
     fn is_nan(self) -> bool;
     fn is_normalized(self) -> bool;
@@ -93,6 +128,7 @@ pub trait FloatVector: SignedVector {
     fn mul_add(self, a: Self, b: Self) -> Self;
     fn normalize_or_zero(self) -> Self;
     fn normalize(self) -> Self;
+    fn normalize_or(self, fallback: Self) -> Self;
     fn powf(self, n: Self::Scalar) -> Self;
     fn project_onto_normalized(self, other: Self) -> Self;
     fn project_onto(self, other: Self) -> Self;
@@ -101,6 +137,8 @@ pub trait FloatVector: SignedVector {
     fn reject_from(self, other: Self) -> Self;
     fn round(self) -> Self;
     fn try_normalize(self) -> Option<Self>;
+    fn midpoint(self, rhs: Self) -> Self;
+    fn move_towards(&self, rhs: Self, d: Self::Scalar) -> Self;
 }
 
 macro_rules! impl_float_vector {
@@ -115,6 +153,7 @@ macro_rules! impl_float_vector {
             forward_impl!($glam_ty => fn exp(self) -> Self);
             forward_impl!($glam_ty => fn floor(self) -> Self);
             forward_impl!($glam_ty => fn fract(self) -> Self);
+            forward_impl!($glam_ty => fn fract_gl(self) -> Self);
             forward_impl!($glam_ty => fn is_finite(self) -> bool);
             forward_impl!($glam_ty => fn is_nan(self) -> bool);
             forward_impl!($glam_ty => fn is_normalized(self) -> bool);
@@ -125,6 +164,7 @@ macro_rules! impl_float_vector {
             forward_impl!($glam_ty => fn mul_add(self, a: Self, b: Self) -> Self);
             forward_impl!($glam_ty => fn normalize_or_zero(self) -> Self);
             forward_impl!($glam_ty => fn normalize(self) -> Self);
+            forward_impl!($glam_ty => fn normalize_or(self, fallback: Self) -> Self);
             forward_impl!($glam_ty => fn powf(self, n: Self::Scalar) -> Self);
             forward_impl!($glam_ty => fn project_onto_normalized(self, other: Self) -> Self);
             forward_impl!($glam_ty => fn project_onto(self, other: Self) -> Self);
@@ -133,6 +173,8 @@ macro_rules! impl_float_vector {
             forward_impl!($glam_ty => fn reject_from(self, other: Self) -> Self);
             forward_impl!($glam_ty => fn round(self) -> Self);
             forward_impl!($glam_ty => fn try_normalize(self) -> Option<Self>);
+            forward_impl!($glam_ty => fn midpoint(self, rhs: Self) -> Self);
+            forward_impl!($glam_ty => fn move_towards(&self, rhs: Self, d: Self::Scalar) -> Self);
         }
     };
 }
@@ -140,6 +182,7 @@ macro_rules! impl_float_vector {
 pub trait Vector2: Vector {
     fn from_array(array: [Self::Scalar; 2]) -> Self;
     fn to_array(&self) -> [Self::Scalar; 2];
+    fn from_bools(bvec: glam::BVec2) -> Self;
     fn extend(self, z: Self::Scalar) -> <Self::Scalar as Scalar>::Vec3;
     fn cmpeq(self, other: Self) -> glam::BVec2;
     fn cmpne(self, other: Self) -> glam::BVec2;
@@ -163,6 +206,11 @@ macro_rules! impl_vector2 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec2);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec2);
             forward_impl!($glam_ty => fn select(mask: glam::BVec2, if_true: Self, if_false: Self) -> Self);
+
+            #[inline(always)]
+            fn from_bools(bvec: glam::BVec2) -> Self {
+                <$glam_ty>::from(bvec)
+            }
         }
     };
 }
@@ -170,6 +218,7 @@ macro_rules! impl_vector2 {
 pub trait Vector3: Vector {
     fn from_array(array: [Self::Scalar; 3]) -> Self;
     fn to_array(&self) -> [Self::Scalar; 3];
+    fn from_bools(bvec: glam::BVec3) -> Self;
     fn extend(self, w: Self::Scalar) -> <Self::Scalar as Scalar>::Vec4;
     fn truncate(self) -> <Self::Scalar as Scalar>::Vec2;
     fn cross(self, other: Self) -> Self;
@@ -180,6 +229,7 @@ pub trait Vector3: Vector {
     fn cmple(self, other: Self) -> glam::BVec3;
     fn cmplt(self, other: Self) -> glam::BVec3;
     fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self;
+    fn with_z(self, z: Self::Scalar) -> Self;
 }
 
 macro_rules! impl_vector3 {
@@ -197,6 +247,12 @@ macro_rules! impl_vector3 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec3);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec3);
             forward_impl!($glam_ty => fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self);
+            forward_impl!($glam_ty => fn with_z(self, z: Self::Scalar) -> Self);
+
+            #[inline(always)]
+            fn from_bools(bvec: glam::BVec3) -> Self {
+                <$glam_ty>::from(bvec)
+            }
         }
     };
 }
@@ -204,6 +260,7 @@ macro_rules! impl_vector3 {
 pub trait Vector4: Vector {
     fn from_array(array: [Self::Scalar; 4]) -> Self;
     fn to_array(&self) -> [Self::Scalar; 4];
+    fn from_bools(bvec: glam::BVec4) -> Self;
     fn truncate(self) -> <Self::Scalar as Scalar>::Vec3;
     fn cmpeq(self, other: Self) -> glam::BVec4;
     fn cmpne(self, other: Self) -> glam::BVec4;
@@ -212,6 +269,8 @@ pub trait Vector4: Vector {
     fn cmple(self, other: Self) -> glam::BVec4;
     fn cmplt(self, other: Self) -> glam::BVec4;
     fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self;
+    fn with_z(self, z: Self::Scalar) -> Self;
+    fn with_w(self, w: Self::Scalar) -> Self;
 }
 
 macro_rules! impl_vector4 {
@@ -227,6 +286,13 @@ macro_rules! impl_vector4 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec4);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec4);
             forward_impl!($glam_ty => fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self);
+            forward_impl!($glam_ty => fn with_z(self, z: Self::Scalar) -> Self);
+            forward_impl!($glam_ty => fn with_w(self, w: Self::Scalar) -> Self);
+
+            #[inline(always)]
+            fn from_bools(bvec: glam::BVec4) -> Self {
+                <$glam_ty>::from(bvec)
+            }
         }
     };
 }
@@ -323,6 +389,25 @@ impl_signed_vector!(glam::I64Vec2);
 impl_signed_vector!(glam::I64Vec3);
 impl_signed_vector!(glam::I64Vec4);
 
+impl_integer_vector!(glam::U16Vec2);
+impl_integer_vector!(glam::U16Vec3);
+impl_integer_vector!(glam::U16Vec4);
+impl_integer_vector!(glam::UVec2);
+impl_integer_vector!(glam::UVec3);
+impl_integer_vector!(glam::UVec4);
+impl_integer_vector!(glam::U64Vec2);
+impl_integer_vector!(glam::U64Vec3);
+impl_integer_vector!(glam::U64Vec4);
+impl_integer_vector!(glam::I16Vec2);
+impl_integer_vector!(glam::I16Vec3);
+impl_integer_vector!(glam::I16Vec4);
+impl_integer_vector!(glam::IVec2);
+impl_integer_vector!(glam::IVec3);
+impl_integer_vector!(glam::IVec4);
+impl_integer_vector!(glam::I64Vec2);
+impl_integer_vector!(glam::I64Vec3);
+impl_integer_vector!(glam::I64Vec4);
+
 impl_float_vector!(glam::Vec2, f32);
 impl_float_vector!(glam::Vec3, f32);
 impl_float_vector!(glam::Vec4, f32);
@@ -334,6 +419,8 @@ impl Vector4 for glam::Vec4 {
     forward_impl!(glam::Vec4 => fn from_array(array: [Self::Scalar; 4]) -> Self);
     forward_impl!(glam::Vec4 => fn to_array(&self) -> [Self::Scalar; 4]);
     forward_impl!(glam::Vec4 => fn truncate(self) -> glam::Vec3);
+    forward_impl!(glam::Vec4 => fn with_z(self, z: Self::Scalar) -> Self);
+    forward_impl!(glam::Vec4 => fn with_w(self, w: Self::Scalar) -> Self);
 
     fn cmpeq(self, other: Self) -> glam::BVec4 {
         bvec4a_to_bvec4(glam::Vec4::cmpeq(self, other))
@@ -355,6 +442,11 @@ impl Vector4 for glam::Vec4 {
     }
     fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self {
         glam::Vec4::select(bvec4_to_bvec4a(mask), if_true, if_false)
+    }
+
+    #[inline(always)]
+    fn from_bools(bvec: glam::BVec4) -> Self {
+        glam::Vec4::from(bvec)
     }
 }
 

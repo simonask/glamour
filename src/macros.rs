@@ -260,6 +260,10 @@ macro_rules! forward_float_ops {
             pub fn floor(self) -> Self;
             #[doc = "Round all components."]
             pub fn round(self) -> Self;
+            #[doc = "See (e.g.) [`glam::Vec2::fract()`]"]
+            pub fn fract(self) -> Self;
+            #[doc = "See (e.g.) [`glam::Vec2::fract_gl()`]"]
+            pub fn fract_gl(self) -> Self;
             #[doc = "Linear interpolation."]
             pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
         }
@@ -275,6 +279,8 @@ macro_rules! forward_float_vector_ops {
             pub fn normalize(self) -> Self;
             #[doc = "Normalize the vector, returning zero if the length was already (very close to) zero."]
             pub fn normalize_or_zero(self) -> Self;
+            #[doc = "Returns self normalized to length 1.0 if possible, else returns a fallback value."]
+            pub fn normalize_or(self, fallback: Self) -> Self;
             #[doc = "Normalize the vector, returning `None` if the length was already (very close to) zero."]
             pub fn try_normalize(self) -> Option<Self>;
             #[doc = "True if the vector is normalized."]
@@ -299,8 +305,6 @@ macro_rules! forward_float_vector_ops {
             pub fn clamp_length_min(self, min: T::Scalar) -> Self;
             #[doc = "Clamp length"]
             pub fn clamp_length_max(self, max: T::Scalar) -> Self;
-            #[doc = "fract()"]
-            pub fn fract(self) -> Self;
             #[doc = "See (e.g.) [`glam::Vec2::project_onto()`]"]
             pub fn project_onto(self, other: Self) -> Self;
             #[doc = "See (e.g.) [`glam::Vec2::reject_from()`]"]
