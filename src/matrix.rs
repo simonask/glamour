@@ -239,6 +239,13 @@ macro_rules! impl_matrix {
             pub fn is_finite(&self) -> bool {
                 self.as_raw().is_finite()
             }
+
+            #[doc = "Takes the absolute value of each element in self"]
+            #[inline]
+            #[must_use]
+            pub fn abs(&self) -> Self {
+                Self::from_raw(self.as_raw().abs())
+            }
         }
 
         impl<T> Default for $base_type_name<T>

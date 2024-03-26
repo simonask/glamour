@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `element_sum()`, `element_product()`
 - `VectorN::normalize_or()`
 - `From<glam::BVecN>` for vector types.
+- `MatrixN::abs()`
 
 ### Breaking changes
 - Bumped dependency on `glam` to 0.27.0.

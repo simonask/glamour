@@ -36,6 +36,8 @@ pub trait Matrix:
     fn inverse(&self) -> Self;
     #[must_use]
     fn determinant(&self) -> Self::Scalar;
+    #[must_use]
+    fn abs(&self) -> Self;
 }
 
 /// Primitive 2x2 matrix.
@@ -203,6 +205,7 @@ macro_rules! impl_matrix {
             forward_impl!($glam_ty => fn determinant(&self) -> $scalar);
             forward_impl!($glam_ty => fn transpose(&self) -> Self);
             forward_impl!($glam_ty => fn inverse(&self) -> Self);
+            forward_impl!($glam_ty => fn abs(&self) -> Self);
         }
     };
 }
