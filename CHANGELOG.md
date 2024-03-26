@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Fixed
+- Deserialization of `Rect`, `Box2`, and `Box3` relied on borrowed strings for
+  field names, which is incompatible with some formats.
+
 ## [0.11.0] - 2024-03-26
 ### Added
 - `fract_gl()`, and made `fract()` available on points and sizes as well.

@@ -352,6 +352,38 @@ impl<T: Unit> serde::Serialize for Rect<T> {
     }
 }
 
+enum RectField {
+    Origin,
+    Size,
+}
+
+impl<'de> serde::Deserialize<'de> for RectField {
+    #[inline]
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = RectField;
+
+            #[inline]
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                write!(formatter, "a field name")
+            }
+
+            #[inline]
+            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                match value {
+                    "origin" => Ok(RectField::Origin),
+                    "size" => Ok(RectField::Size),
+                    _ => Err(serde::de::Error::unknown_field(value, &["origin", "size"])),
+                }
+            }
+        }
+
+        deserializer.deserialize_identifier(Visitor)
+    }
+}
+
 impl<'de, T: Unit> serde::Deserialize<'de> for Rect<T> {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         struct Visitor<T> {
@@ -373,20 +405,17 @@ impl<'de, T: Unit> serde::Deserialize<'de> for Rect<T> {
                 let mut size = None;
                 while let Some(key) = map.next_key()? {
                     match key {
-                        "origin" => {
+                        RectField::Origin => {
                             if origin.is_some() {
                                 return Err(serde::de::Error::duplicate_field("origin"));
                             }
                             origin = Some(map.next_value()?);
                         }
-                        "size" => {
+                        RectField::Size => {
                             if size.is_some() {
                                 return Err(serde::de::Error::duplicate_field("size"));
                             }
                             size = Some(map.next_value()?);
-                        }
-                        _ => {
-                            return Err(serde::de::Error::unknown_field(key, &["origin", "size"]));
                         }
                     }
                 }
@@ -428,6 +457,38 @@ impl<T: Unit> serde::Serialize for Box2<T> {
     }
 }
 
+enum BoxField {
+    Min,
+    Max,
+}
+
+impl<'de> serde::Deserialize<'de> for BoxField {
+    #[inline]
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = BoxField;
+
+            #[inline]
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                write!(formatter, "a field name")
+            }
+
+            #[inline]
+            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                match value {
+                    "min" => Ok(BoxField::Min),
+                    "max" => Ok(BoxField::Max),
+                    _ => Err(serde::de::Error::unknown_field(value, &["min", "max"])),
+                }
+            }
+        }
+
+        deserializer.deserialize_identifier(Visitor)
+    }
+}
+
 impl<'de, T: Unit> serde::Deserialize<'de> for Box2<T> {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         struct Visitor<T> {
@@ -449,20 +510,17 @@ impl<'de, T: Unit> serde::Deserialize<'de> for Box2<T> {
                 let mut max = None;
                 while let Some(key) = map.next_key()? {
                     match key {
-                        "min" => {
+                        BoxField::Min => {
                             if min.is_some() {
                                 return Err(serde::de::Error::duplicate_field("min"));
                             }
                             min = Some(map.next_value()?);
                         }
-                        "max" => {
+                        BoxField::Max => {
                             if max.is_some() {
                                 return Err(serde::de::Error::duplicate_field("max"));
                             }
                             max = Some(map.next_value()?);
-                        }
-                        _ => {
-                            return Err(serde::de::Error::unknown_field(key, &["min", "max"]));
                         }
                     }
                 }
@@ -525,20 +583,17 @@ impl<'de, T: Unit> serde::Deserialize<'de> for Box3<T> {
                 let mut max = None;
                 while let Some(key) = map.next_key()? {
                     match key {
-                        "min" => {
+                        BoxField::Min => {
                             if min.is_some() {
                                 return Err(serde::de::Error::duplicate_field("min"));
                             }
                             min = Some(map.next_value()?);
                         }
-                        "max" => {
+                        BoxField::Max => {
                             if max.is_some() {
                                 return Err(serde::de::Error::duplicate_field("max"));
                             }
                             max = Some(map.next_value()?);
-                        }
-                        _ => {
-                            return Err(serde::de::Error::unknown_field(key, &["min", "max"]));
                         }
                     }
                 }
