@@ -1008,6 +1008,27 @@ where
     }
 }
 
+impl<T: Unit> From<glam::BVec2> for Vector2<T> {
+    #[inline(always)]
+    fn from(v: glam::BVec2) -> Self {
+        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector2>::from_bools(v))
+    }
+}
+
+impl<T: Unit> From<glam::BVec3> for Vector3<T> {
+    #[inline(always)]
+    fn from(v: glam::BVec3) -> Self {
+        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector3>::from_bools(v))
+    }
+}
+
+impl<T: Unit> From<glam::BVec4> for Vector4<T> {
+    #[inline(always)]
+    fn from(v: glam::BVec4) -> Self {
+        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector4>::from_bools(v))
+    }
+}
+
 impl<T> Mul<Vector3<T>> for glam::Quat
 where
     T: Unit<Scalar = f32>,
@@ -1685,6 +1706,22 @@ mod tests {
         let vec3: &mut Vector4<i32> = vec.cast_mut();
         vec3.z = 100;
         assert_eq!(vec, [1, 100, 100, 4]);
+    }
+
+    #[test]
+    fn from_bools() {
+        assert_eq!(
+            Vector2::<f32>::from(glam::BVec2::new(true, false)),
+            (1.0, 0.0)
+        );
+        assert_eq!(
+            Vector3::<f32>::from(glam::BVec3::new(true, false, true)),
+            (1.0, 0.0, 1.0)
+        );
+        assert_eq!(
+            Vector4::<f32>::from(glam::BVec4::new(true, false, true, false)),
+            (1.0, 0.0, 1.0, 0.0)
+        );
     }
 
     #[test]

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wrapping_add()` and friends for integer vector types.
 - `element_sum()`, `element_product()`
 - `VectorN::normalize_or()`
+- `From<glam::BVecN>` for vector types.
 
 ### Breaking changes
 - Bumped dependency on `glam` to 0.27.0.

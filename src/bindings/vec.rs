@@ -182,6 +182,7 @@ macro_rules! impl_float_vector {
 pub trait Vector2: Vector {
     fn from_array(array: [Self::Scalar; 2]) -> Self;
     fn to_array(&self) -> [Self::Scalar; 2];
+    fn from_bools(bvec: glam::BVec2) -> Self;
     fn extend(self, z: Self::Scalar) -> <Self::Scalar as Scalar>::Vec3;
     fn cmpeq(self, other: Self) -> glam::BVec2;
     fn cmpne(self, other: Self) -> glam::BVec2;
@@ -205,6 +206,11 @@ macro_rules! impl_vector2 {
             forward_impl!($glam_ty => fn cmple(self, other: Self) -> glam::BVec2);
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec2);
             forward_impl!($glam_ty => fn select(mask: glam::BVec2, if_true: Self, if_false: Self) -> Self);
+
+            #[inline(always)]
+            fn from_bools(bvec: glam::BVec2) -> Self {
+                <$glam_ty>::from(bvec)
+            }
         }
     };
 }
@@ -212,6 +218,7 @@ macro_rules! impl_vector2 {
 pub trait Vector3: Vector {
     fn from_array(array: [Self::Scalar; 3]) -> Self;
     fn to_array(&self) -> [Self::Scalar; 3];
+    fn from_bools(bvec: glam::BVec3) -> Self;
     fn extend(self, w: Self::Scalar) -> <Self::Scalar as Scalar>::Vec4;
     fn truncate(self) -> <Self::Scalar as Scalar>::Vec2;
     fn cross(self, other: Self) -> Self;
@@ -241,6 +248,11 @@ macro_rules! impl_vector3 {
             forward_impl!($glam_ty => fn cmplt(self, other: Self) -> glam::BVec3);
             forward_impl!($glam_ty => fn select(mask: glam::BVec3, if_true: Self, if_false: Self) -> Self);
             forward_impl!($glam_ty => fn with_z(self, z: Self::Scalar) -> Self);
+
+            #[inline(always)]
+            fn from_bools(bvec: glam::BVec3) -> Self {
+                <$glam_ty>::from(bvec)
+            }
         }
     };
 }
@@ -248,6 +260,7 @@ macro_rules! impl_vector3 {
 pub trait Vector4: Vector {
     fn from_array(array: [Self::Scalar; 4]) -> Self;
     fn to_array(&self) -> [Self::Scalar; 4];
+    fn from_bools(bvec: glam::BVec4) -> Self;
     fn truncate(self) -> <Self::Scalar as Scalar>::Vec3;
     fn cmpeq(self, other: Self) -> glam::BVec4;
     fn cmpne(self, other: Self) -> glam::BVec4;
@@ -275,6 +288,11 @@ macro_rules! impl_vector4 {
             forward_impl!($glam_ty => fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self);
             forward_impl!($glam_ty => fn with_z(self, z: Self::Scalar) -> Self);
             forward_impl!($glam_ty => fn with_w(self, w: Self::Scalar) -> Self);
+
+            #[inline(always)]
+            fn from_bools(bvec: glam::BVec4) -> Self {
+                <$glam_ty>::from(bvec)
+            }
         }
     };
 }
@@ -424,6 +442,11 @@ impl Vector4 for glam::Vec4 {
     }
     fn select(mask: glam::BVec4, if_true: Self, if_false: Self) -> Self {
         glam::Vec4::select(bvec4_to_bvec4a(mask), if_true, if_false)
+    }
+
+    #[inline(always)]
+    fn from_bools(bvec: glam::BVec4) -> Self {
+        glam::Vec4::from(bvec)
     }
 }
 

@@ -16,6 +16,7 @@ pub trait Scalar:
     + num_traits::NumOps
     + num_traits::NumCast
     + approx::AbsDiffEq<Epsilon = Self>
+    + From<bool>
 {
     /// The underlying 2D vector type for this scalar ([`glam::Vec2`],
     /// [`glam::DVec2`], [`glam::IVec2`], or [`glam::UVec2`]).
