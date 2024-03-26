@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `VectorN::normalize_or()`
 - `From<glam::BVecN>` for vector types.
 - `MatrixN::abs()`
+- Implement `Mul`, `MulAssign`, `Div`, `DivAssign` by scalars for matrix types.
 
 ### Breaking changes
 - Bumped dependency on `glam` to 0.27.0.

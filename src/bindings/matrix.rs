@@ -18,6 +18,8 @@ pub trait Matrix:
     + MulAssign<Self>
     + Mul<Self::Scalar, Output = Self>
     + MulAssign<Self::Scalar>
+    + Div<Self::Scalar, Output = Self>
+    + DivAssign<Self::Scalar>
     + Neg<Output = Self>
     + AbsDiffEq<Epsilon = <Self::Scalar as AbsDiffEq>::Epsilon>
 {
