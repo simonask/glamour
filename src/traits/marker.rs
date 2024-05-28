@@ -38,3 +38,26 @@ const _: () = {
 const _: () = {
     impl<T> Serializable for T {}
 };
+
+/// When compiled with the `wasmtime` feature, this trait marks every type that
+/// implements `wasmtime::component::ComponentType`. When `wasmtime` is
+/// disabled, it is an empty trait with no bounds.
+#[cfg(feature = "wasmtime")]
+pub trait WasmComponentType:
+    wasmtime::component::ComponentType + wasmtime::component::Lower + wasmtime::component::Lift
+{
+}
+
+/// When compiled with the `wasmtime` feature, this trait marks every type that
+/// implements `wasmtime::component::ComponentType`. When `wasmtime` is
+/// disabled, it is an empty trait with no bounds.
+#[cfg(not(feature = "wasmtime"))]
+pub trait WasmComponentType {}
+
+#[cfg(feature = "wasmtime")]
+impl<T> WasmComponentType for T where
+    T: wasmtime::component::ComponentType + wasmtime::component::Lower + wasmtime::component::Lift
+{
+}
+#[cfg(not(feature = "wasmtime"))]
+impl<T> WasmComponentType for T {}

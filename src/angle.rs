@@ -12,9 +12,18 @@ use crate::{
 /// Angle in radians.
 #[repr(transparent)]
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Angle<T: Scalar = f32> {
+#[cfg_attr(
+    feature = "wasmtime",
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(feature = "wasmtime", component(record))]
+pub struct Angle<U: Scalar = f32> {
     /// Angle in radians.
-    pub radians: T,
+    pub radians: U,
 }
 unsafe impl<T: Scalar> Zeroable for Angle<T> {}
 unsafe impl<T: Scalar> Pod for Angle<T> {}

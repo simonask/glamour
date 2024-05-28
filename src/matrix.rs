@@ -24,6 +24,8 @@ use bytemuck::{Pod, Zeroable};
 /// Alignment: Always 16-byte aligned.
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
+// #[cfg_attr(feature = "wasmtime", derive(wasmtime::component::ComponentType))]
+// #[cfg_attr(feature = "wasmtime", component(record))]
 pub struct Matrix2<T: Scalar>(Vector4<T>);
 
 unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
@@ -41,10 +43,19 @@ unsafe impl<T: FloatScalar> Transparent for Matrix2<T> {
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
-pub struct Matrix3<T: Scalar> {
-    pub x_axis: Vector3<T>,
-    pub y_axis: Vector3<T>,
-    pub z_axis: Vector3<T>,
+#[cfg_attr(
+    feature = "wasmtime",
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(feature = "wasmtime", component(record))]
+pub struct Matrix3<U: Scalar> {
+    pub x_axis: Vector3<U>,
+    pub y_axis: Vector3<U>,
+    pub z_axis: Vector3<U>,
 }
 
 unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
@@ -62,11 +73,21 @@ unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
-pub struct Matrix4<T: Scalar> {
-    pub x_axis: Vector4<T>,
-    pub y_axis: Vector4<T>,
-    pub z_axis: Vector4<T>,
-    pub w_axis: Vector4<T>,
+#[cfg_attr(
+    feature = "wasmtime",
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(feature = "wasmtime", component(record))]
+#[repr(C)]
+pub struct Matrix4<U: Scalar> {
+    pub x_axis: Vector4<U>,
+    pub y_axis: Vector4<U>,
+    pub z_axis: Vector4<U>,
+    pub w_axis: Vector4<U>,
 }
 
 unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}

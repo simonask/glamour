@@ -1,7 +1,8 @@
 use num_traits::AsPrimitive;
 
 use crate::bindings;
-use crate::traits::marker::PodValue;
+
+use crate::traits::marker::{PodValue, WasmComponentType};
 
 /// All types that can serve as components of a SIMD type in [`glam`].
 ///
@@ -17,6 +18,7 @@ pub unsafe trait Scalar:
     // that are `#[repr(C)]` and only have `Scalar` members can safely implement
     // `Pod` as well.
     PodValue
+    + WasmComponentType
     + PartialOrd
     + core::fmt::Display
     + crate::Unit<Scalar = Self>
