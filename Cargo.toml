@@ -22,7 +22,7 @@ glam = { version = "0.28.0", default-features = false, features = [
 bytemuck = { version = "^1.8", default-features = false }
 num-traits = { version = "^0.2.19", default-features = false }
 approx = "^0.5"
-wasmtime = { version = "21.0", optional = true, default-features = false, features = [
+wasmtime = { version = "*", optional = true, default-features = false, features = [
     "runtime",
     "component-model",
 ] }
