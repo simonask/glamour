@@ -22,14 +22,17 @@ use core::ops::Mul;
 ///
 /// Alignment: Same as the scalar.
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
 pub struct Point2<U: Unit = f32> {
     /// X coordinate
@@ -52,14 +55,17 @@ unsafe impl<T: Unit> Transparent for Point2<T> {
 /// Alignment: Same as the scalar (so not 16 bytes). If you really need 16-byte
 /// alignment, use [`Point4`].
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
 pub struct Point3<U: Unit = f32> {
     /// X coordinate
@@ -92,14 +98,17 @@ unsafe impl<T: Unit> Transparent for Point3<T> {
     repr(C, align(16))
 )]
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 pub struct Point4<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,

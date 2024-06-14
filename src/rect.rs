@@ -11,14 +11,17 @@ use crate::{
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
 pub struct Rect<U: Unit = f32> {
     /// Lower bound of the rect.

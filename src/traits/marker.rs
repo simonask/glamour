@@ -42,7 +42,7 @@ const _: () = {
 /// When compiled with the `wasmtime` feature, this trait marks every type that
 /// implements `wasmtime::component::ComponentType`. When `wasmtime` is
 /// disabled, it is an empty trait with no bounds.
-#[cfg(feature = "wasmtime")]
+#[cfg(all(not(target_arch = "wasm32"), feature = "wasmtime"))]
 pub trait WasmComponentType:
     wasmtime::component::ComponentType + wasmtime::component::Lower + wasmtime::component::Lift
 {
@@ -51,13 +51,13 @@ pub trait WasmComponentType:
 /// When compiled with the `wasmtime` feature, this trait marks every type that
 /// implements `wasmtime::component::ComponentType`. When `wasmtime` is
 /// disabled, it is an empty trait with no bounds.
-#[cfg(not(feature = "wasmtime"))]
+#[cfg(any(target_target = "wasm32", not(feature = "wasmtime")))]
 pub trait WasmComponentType {}
 
-#[cfg(feature = "wasmtime")]
+#[cfg(all(not(target_arch = "wasm32"), feature = "wasmtime"))]
 impl<T> WasmComponentType for T where
     T: wasmtime::component::ComponentType + wasmtime::component::Lower + wasmtime::component::Lift
 {
 }
-#[cfg(not(feature = "wasmtime"))]
+#[cfg(any(target_target = "wasm32", not(feature = "wasmtime")))]
 impl<T> WasmComponentType for T {}

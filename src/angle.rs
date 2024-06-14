@@ -13,14 +13,17 @@ use crate::{
 #[repr(transparent)]
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 pub struct Angle<U: Scalar = f32> {
     /// Angle in radians.
     pub radians: U,

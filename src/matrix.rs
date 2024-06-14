@@ -44,14 +44,17 @@ unsafe impl<T: FloatScalar> Transparent for Matrix2<T> {
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 pub struct Matrix3<U: Scalar> {
     pub x_axis: Vector3<U>,
     pub y_axis: Vector3<U>,
@@ -74,14 +77,17 @@ unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
 pub struct Matrix4<U: Scalar> {
     pub x_axis: Vector4<U>,

@@ -10,14 +10,17 @@ use num_traits::{ConstOne, ConstZero};
 
 /// 2D size.
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
 pub struct Size2<U: Unit = f32> {
     /// Width
@@ -36,14 +39,17 @@ unsafe impl<T: Unit> Transparent for Size2<T> {
 
 /// 3D size.
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
 pub struct Size3<U: Unit = f32> {
     /// Width

@@ -14,14 +14,6 @@ categories = ["game-development", "mathematics", "graphics", "no-std"]
 [badges]
 maintenance = { status = "actively-developed" }
 
-[dependencies.wasmtime]
-# Waiting for this to be released: https://github.com/bytecodealliance/wasmtime/pull/8693
-git = "http://github.com/bytecodealliance/wasmtime"
-rev = "28ee78b"
-optional = true
-default-features = false
-features = ["runtime", "component-model"]
-
 [dependencies]
 glam = { version = "0.28.0", default-features = false, features = [
     "bytemuck",
@@ -34,6 +26,13 @@ approx = "^0.5"
 version = "^1.0"
 default-features = false
 optional = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies.wasmtime]
+git = "http://github.com/bytecodealliance/wasmtime"
+rev = "28ee78b"
+optional = true
+default-features = false
+features = ["runtime", "component-model"]
 
 [dependencies.mint]
 version = "^0.5"

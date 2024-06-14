@@ -49,14 +49,17 @@ pub trait Swizzle<T: Unit> {
 /// Alignment: Same as the scalar.
 #[repr(C)]
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 pub struct Vector2<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,
@@ -78,14 +81,17 @@ unsafe impl<T: Unit> Transparent for Vector2<T> {
 /// Alignment: Same as the scalar (so not 16 bytes). If you really need 16-byte
 /// alignment, use [`Vector4`].
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
 pub struct Vector3<U: Unit = f32> {
     /// X coordinate
@@ -122,14 +128,17 @@ unsafe impl<T: Unit> Transparent for Vector3<T> {
     repr(C, align(16))
 )]
 #[cfg_attr(
-    feature = "wasmtime",
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
         wasmtime::component::ComponentType,
         wasmtime::component::Lower,
         wasmtime::component::Lift
     )
 )]
-#[cfg_attr(feature = "wasmtime", component(record))]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 pub struct Vector4<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,
