@@ -26,7 +26,6 @@ mod size;
 pub mod traits;
 
 mod compat;
-mod raw;
 mod transform;
 mod unit;
 mod vector;
@@ -35,10 +34,10 @@ mod vector;
 mod serialization;
 
 pub use angle::{Angle, AngleConsts, FloatAngleExt};
+use bytemuck::TransparentWrapper;
 pub use matrix::{Matrix2, Matrix3, Matrix4};
 pub use point::{Point2, Point3, Point4};
 pub use r#box::{Box2, Box3};
-pub use raw::*;
 pub use rect::Rect;
 pub use scalar::{FloatScalar, Scalar, SignedScalar};
 pub use size::{Size2, Size3};
@@ -58,9 +57,9 @@ pub use traits::{Contains, Intersection, Union};
 pub mod prelude {
     #[doc(no_inline)]
     pub use super::{
-        Angle, AngleConsts as _, AsRaw, Box2, Box3, FloatAngleExt as _, FromRaw, Matrix2, Matrix3,
-        Matrix4, Point2, Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, ToRaw,
-        Unit, Vector2, Vector3, Vector4,
+        Angle, AngleConsts as _, Box2, Box3, FloatAngleExt as _, Matrix2, Matrix3, Matrix4, Point2,
+        Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, Unit, Vector2, Vector3,
+        Vector4,
     };
     #[doc(no_inline)]
     pub use super::{Transform2, Transform3, TransformMap as _};
@@ -70,6 +69,22 @@ pub mod prelude {
 
     #[doc(no_inline)]
     pub use super::{point, point2, point3, point4, size, size2, size3, vec2, vec3, vec4, vector};
+}
+
+pub(crate) fn wrap<T, U: TransparentWrapper<T>>(t: T) -> U {
+    U::wrap(t)
+}
+pub(crate) fn peel<T, U: TransparentWrapper<T>>(u: U) -> T {
+    U::peel(u)
+}
+pub(crate) fn peel_ref<T, U: TransparentWrapper<T>>(u: &U) -> &T {
+    U::peel_ref(u)
+}
+pub(crate) fn peel_mut<T, U: TransparentWrapper<T>>(u: &mut U) -> &mut T {
+    U::peel_mut(u)
+}
+pub(crate) fn rewrap<A: TransparentWrapper<T>, B: TransparentWrapper<T>, T>(a: A) -> B {
+    B::wrap(A::peel(a))
 }
 
 /// Construct a [`Vector2`]. Usable in const contexts.

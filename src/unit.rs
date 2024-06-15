@@ -1,3 +1,5 @@
+use crate::{scalar::IntScalar, FloatScalar, SignedScalar};
+
 use super::Scalar;
 
 /// The name of a coordinate space.
@@ -39,6 +41,14 @@ pub trait Unit: 'static {
         None
     }
 }
+
+pub trait IntUnit: Unit<Scalar: IntScalar> {}
+pub trait SignedUnit: Unit<Scalar: SignedScalar> {}
+pub trait FloatUnit: Unit<Scalar: FloatScalar> {}
+
+impl<T> IntUnit for T where T: Unit<Scalar: IntScalar> {}
+impl<T> SignedUnit for T where T: Unit<Scalar: SignedScalar> {}
+impl<T> FloatUnit for T where T: Unit<Scalar: FloatScalar> {}
 
 impl Unit for f32 {
     type Scalar = f32;

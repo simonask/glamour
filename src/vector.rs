@@ -12,13 +12,15 @@ use core::iter::{Product, Sum};
 use core::ops::Mul;
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use num_traits::Float;
 
 use crate::scalar::SignedScalar;
+use crate::unit::{FloatUnit, SignedUnit};
 use crate::{
     bindings::prelude::*, scalar::FloatScalar, scalar::IntScalar, Point2, Point3, Point4, Scalar,
     Size2, Size3, Unit,
 };
-use crate::{Angle, AsRaw, FromRaw, ToRaw};
+use crate::{peel, peel_ref, wrap, Angle};
 
 /// Vector swizzling by const generics.
 ///
@@ -386,8 +388,8 @@ impl<T: Unit> Vector2<T> {
         Self { x, y }
     }
 
-    crate::forward_constructors!(2, glam::Vec2);
-    crate::forward_comparison!(glam::BVec2, glam::Vec2);
+    crate::forward_constructors!(2, Vec2);
+    crate::forward_comparison!(glam::BVec2, Vec2);
 
     crate::casting_interface!(Vector2 {
         x: T::Scalar,
@@ -399,21 +401,30 @@ impl<T: Unit> Vector2<T> {
     });
     crate::array_interface!(2);
 
-    crate::forward_to_raw!(
-        glam::Vec2 =>
-        #[doc = "Dot product"]
-        pub fn dot(self, other: Self) -> T::Scalar;
-        #[doc = "Extend with z-component to [`Vector3`]."]
-        pub fn extend(self, z: T::Scalar) -> Vector3<T>;
-        #[doc = "Replace the x-component with a new value."]
-        pub fn with_x(self, x: T::Scalar) -> Self;
-        #[doc = "Replace the y-component with a new value."]
-        pub fn with_y(self, y: T::Scalar) -> Self;
-        #[doc = "Returns the sum of all elements of self."]
-        pub fn element_sum(self) -> T::Scalar;
-        #[doc = "Returns the product of all elements of self."]
-        pub fn element_product(self) -> T::Scalar;
-    );
+    #[doc = "Dot product"]
+    pub fn dot(self, other: Self) -> T::Scalar {
+        peel(self).dot(peel(other))
+    }
+    #[doc = "Extend with z-component to [`Vector3`]."]
+    pub fn extend(self, z: T::Scalar) -> Vector3<T> {
+        wrap(peel(self).extend(z))
+    }
+    #[doc = "Replace the x-component with a new value."]
+    pub fn with_x(self, x: T::Scalar) -> Self {
+        Self { x, y: self.y }
+    }
+    #[doc = "Replace the y-component with a new value."]
+    pub fn with_y(self, y: T::Scalar) -> Self {
+        Self { x: self.x, y }
+    }
+    #[doc = "Returns the sum of all elements of self."]
+    pub fn element_sum(self) -> T::Scalar {
+        self.x + self.y
+    }
+    #[doc = "Returns the product of all elements of self."]
+    pub fn element_product(self) -> T::Scalar {
+        self.x * self.y
+    }
 
     /// Select components of this vector and return a new vector containing
     /// those components.
@@ -428,8 +439,7 @@ impl<T: Unit> Vector2<T> {
 
 impl<T> Vector2<T>
 where
-    T: Unit,
-    T::Scalar: FloatScalar,
+    T: FloatUnit,
 {
     /// All NaN.
     pub const NAN: Self = Vector2 {
@@ -450,17 +460,22 @@ where
     crate::forward_float_ops!(glam::BVec2, glam::Vec2);
     crate::forward_float_vector_ops!(glam::Vec2);
 
-    crate::forward_to_raw!(
-        glam::Vec2 =>
-        #[doc = "Return `(sin(angle), cos(angle)`."]
-        pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar>;
-        #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
-        pub fn rotate(self, rotation: Vector2<T::Scalar>) -> Self;
-        #[doc = "Returns the angle (in radians) of this vector in the range [-π, +π]."]
-        pub fn to_angle(self) -> Angle<T::Scalar>;
-        #[doc = "Angle between this and another vector."]
-        pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
-    );
+    #[doc = "Return `(sin(angle), cos(angle)`."]
+    pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar> {
+        wrap(<<T::Scalar as Scalar>::Vec2>::from_angle(peel(angle)))
+    }
+    #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
+    pub fn rotate(self, rotation: Vector2<T::Scalar>) -> Self {
+        wrap(peel(self).rotate(peel(rotation)))
+    }
+    #[doc = "Returns the angle (in radians) of this vector in the range [-π, +π]."]
+    pub fn to_angle(self) -> Angle<T::Scalar> {
+        wrap(peel(self).to_angle())
+    }
+    #[doc = "Angle between this and another vector."]
+    pub fn angle_between(self, other: Self) -> Angle<T::Scalar> {
+        wrap(peel(self).angle_between(peel(other)))
+    }
 }
 
 impl<T> Vector2<T>
@@ -471,11 +486,7 @@ where
     int_vector_interface!(glam::IVec2);
 }
 
-impl<T> Vector2<T>
-where
-    T: Unit,
-    T::Scalar: SignedScalar,
-{
+impl<T: SignedUnit> Vector2<T> {
     /// All negative one.
     pub const NEG_ONE: Self = Vector2 {
         x: T::Scalar::NEG_ONE,
@@ -501,12 +512,15 @@ where
         pub fn signum(self) -> Self;
         #[doc = "Get the perpendicular vector."]
         pub fn perp(self) -> Self;
-        #[doc(alias = "wedge")]
-        #[doc(alias = "cross")]
-        #[doc(alias = "determinant")]
-        #[doc = "Perpendicular dot product"]
-        pub fn perp_dot(self, other: Self) -> T::Scalar;
     );
+
+    #[doc(alias = "wedge")]
+    #[doc(alias = "cross")]
+    #[doc(alias = "determinant")]
+    #[doc = "Perpendicular dot product"]
+    pub fn perp_dot(self, other: Self) -> T::Scalar {
+        peel(self).perp_dot(peel(other))
+    }
 }
 
 impl<T: Unit> Vector3<T> {
@@ -551,8 +565,8 @@ impl<T: Unit> Vector3<T> {
         Self { x, y, z }
     }
 
-    crate::forward_constructors!(3, glam::Vec3);
-    crate::forward_comparison!(glam::BVec3, glam::Vec3);
+    crate::forward_constructors!(3, Vec3);
+    crate::forward_comparison!(glam::BVec3, Vec3);
 
     crate::casting_interface!(Vector3 {
         x: T::Scalar,
@@ -568,23 +582,50 @@ impl<T: Unit> Vector3<T> {
 
     crate::forward_to_raw!(
         glam::Vec3 =>
-        #[doc = "Dot product"]
-        pub fn dot(self, other: Self) -> T::Scalar;
-        #[doc = "Extend with w-component to [`Vector4`]."]
-        pub fn extend(self, w: T::Scalar) -> Vector4<T>;
         #[doc = "Truncate to [`Vector2`]."]
         pub fn truncate(self) -> Vector2<T>;
-        #[doc = "Replace the x-component with a new value."]
-        pub fn with_x(self, x: T::Scalar) -> Self;
-        #[doc = "Replace the y-component with a new value."]
-        pub fn with_y(self, y: T::Scalar) -> Self;
-        #[doc = "Replace the z-component with a new value."]
-        pub fn with_z(self, z: T::Scalar) -> Self;
-        #[doc = "Returns the sum of all elements of self."]
-        pub fn element_sum(self) -> T::Scalar;
-        #[doc = "Returns the product of all elements of self."]
-        pub fn element_product(self) -> T::Scalar;
     );
+
+    #[doc = "Dot product"]
+    pub fn dot(self, other: Self) -> T::Scalar {
+        peel(self).dot(peel(other))
+    }
+    #[doc = "Extend with w-component to [`Vector4`]."]
+    pub fn extend(self, w: T::Scalar) -> Vector4<T> {
+        wrap(peel(self).extend(w))
+    }
+    #[doc = "Replace the x-component with a new value."]
+    pub fn with_x(self, x: T::Scalar) -> Self {
+        Self {
+            x,
+            y: self.y,
+            z: self.z,
+        }
+    }
+    #[doc = "Replace the y-component with a new value."]
+    pub fn with_y(self, y: T::Scalar) -> Self {
+        Self {
+            x: self.x,
+            y,
+            z: self.z,
+        }
+    }
+    #[doc = "Replace the z-component with a new value."]
+    pub fn with_z(self, z: T::Scalar) -> Self {
+        Self {
+            x: self.x,
+            y: self.y,
+            z,
+        }
+    }
+    #[doc = "Returns the sum of all elements of self."]
+    pub fn element_sum(self) -> T::Scalar {
+        self.x + self.y + self.z
+    }
+    #[doc = "Returns the product of all elements of self."]
+    pub fn element_product(self) -> T::Scalar {
+        self.x * self.y * self.z
+    }
 
     /// Select components of this vector and return a new vector containing
     /// those components.
@@ -632,11 +673,15 @@ where
         pub fn any_orthogonal_vector(&self) -> Self;
         #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_vector()`]."]
         pub fn any_orthonormal_vector(&self) -> Self;
-        #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_pair()`]."]
-        pub fn any_orthonormal_pair(&self) -> (Self, Self);
         #[doc = "Cross product"]
         pub fn cross(self, other: Self) -> Self;
     );
+
+    #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_pair()`]."]
+    pub fn any_orthonormal_pair(&self) -> (Self, Self) {
+        let (a, b) = peel_ref(self).any_orthonormal_pair();
+        (wrap(a), wrap(b))
+    }
 }
 
 impl<T> Vector3<T>
@@ -766,8 +811,8 @@ impl<T: Unit> Vector4<T> {
         Self { x, y, z, w }
     }
 
-    crate::forward_constructors!(4, glam::Vec4);
-    crate::forward_comparison!(glam::BVec4, glam::Vec4);
+    crate::forward_constructors!(4, Vec4);
+    crate::forward_comparison!(glam::BVec4, Vec4);
 
     crate::casting_interface!(Vector4 {
         x: T::Scalar,
@@ -784,24 +829,60 @@ impl<T: Unit> Vector4<T> {
     crate::array_interface!(4);
 
     crate::forward_to_raw!(
-        glam::Vec4 =>
-        #[doc = "Dot product"]
-        pub fn dot(self, other: Self) -> T::Scalar;
-        #[doc = "Truncate to [`Vector3`]."]
-        pub fn truncate(self) -> Vector3<T>;
-        #[doc = "Replace the x-component with a new value."]
-        pub fn with_x(self, x: T::Scalar) -> Self;
-        #[doc = "Replace the y-component with a new value."]
-        pub fn with_y(self, y: T::Scalar) -> Self;
-        #[doc = "Replace the z-component with a new value."]
-        pub fn with_z(self, z: T::Scalar) -> Self;
-        #[doc = "Replace the w-component with a new value."]
-        pub fn with_w(self, w: T::Scalar) -> Self;
-        #[doc = "Returns the sum of all elements of self."]
-        pub fn element_sum(self) -> T::Scalar;
-        #[doc = "Returns the product of all elements of self."]
-        pub fn element_product(self) -> T::Scalar;
+    glam::Vec4 =>
+    #[doc = "Truncate to [`Vector3`]."]
+    pub fn truncate(self) -> Vector3<T>;
     );
+
+    #[doc = "Dot product"]
+    pub fn dot(self, other: Self) -> T::Scalar {
+        peel(self).dot(peel(other))
+    }
+
+    #[doc = "Replace the x-component with a new value."]
+    pub fn with_x(self, x: T::Scalar) -> Self {
+        Self {
+            x,
+            y: self.y,
+            z: self.z,
+            w: self.w,
+        }
+    }
+    #[doc = "Replace the y-component with a new value."]
+    pub fn with_y(self, y: T::Scalar) -> Self {
+        Self {
+            x: self.x,
+            y,
+            z: self.z,
+            w: self.w,
+        }
+    }
+    #[doc = "Replace the z-component with a new value."]
+    pub fn with_z(self, z: T::Scalar) -> Self {
+        Self {
+            x: self.x,
+            y: self.y,
+            z,
+            w: self.w,
+        }
+    }
+    #[doc = "Replace the w-component with a new value."]
+    pub fn with_w(self, w: T::Scalar) -> Self {
+        Self {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            w,
+        }
+    }
+    #[doc = "Returns the sum of all elements of self."]
+    pub fn element_sum(self) -> T::Scalar {
+        peel(self).element_sum()
+    }
+    #[doc = "Returns the product of all elements of self."]
+    pub fn element_product(self) -> T::Scalar {
+        peel(self).element_product()
+    }
 
     /// Select components of this vector and return a new vector containing
     /// those components.
@@ -816,8 +897,7 @@ impl<T: Unit> Vector4<T> {
 
 impl<T> Vector4<T>
 where
-    T: Unit,
-    T::Scalar: FloatScalar,
+    T: Unit<Scalar: FloatScalar>,
 {
     /// All NaN.
     pub const NAN: Self = Vector4 {
@@ -847,8 +927,7 @@ where
 
 impl<T> Vector4<T>
 where
-    T: Unit,
-    T::Scalar: IntScalar,
+    T: Unit<Scalar: IntScalar>,
 {
     int_vector_interface!(glam::IVec4);
 }
@@ -904,97 +983,13 @@ where
     );
 }
 
-impl<T: Unit> ToRaw for Vector2<T> {
-    type Raw = <T::Scalar as Scalar>::Vec2;
-
-    #[inline]
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: Unit> FromRaw for Vector2<T> {
-    #[inline]
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: Unit> AsRaw for Vector2<T> {
-    #[inline]
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    #[inline]
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
-}
-
-impl<T: Unit> ToRaw for Vector3<T> {
-    type Raw = <T::Scalar as Scalar>::Vec3;
-
-    #[inline]
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: Unit> FromRaw for Vector3<T> {
-    #[inline]
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: Unit> AsRaw for Vector3<T> {
-    #[inline]
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    #[inline]
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
-}
-
-impl<T: Unit> ToRaw for Vector4<T> {
-    type Raw = <T::Scalar as Scalar>::Vec4;
-
-    #[inline]
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: Unit> FromRaw for Vector4<T> {
-    #[inline]
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: Unit> AsRaw for Vector4<T> {
-    #[inline]
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    #[inline]
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
-}
-
 impl<T> From<glam::Vec3A> for Vector3<T>
 where
     T: Unit<Scalar = f32>,
 {
     #[inline]
     fn from(v: glam::Vec3A) -> Self {
-        Self::from_raw(v.into())
+        wrap(v.into())
     }
 }
 
@@ -1004,54 +999,58 @@ where
 {
     #[inline]
     fn from(v: Vector3<T>) -> Self {
-        v.to_raw().into()
+        peel(v).into()
     }
 }
 
 impl<T: Unit> From<glam::BVec2> for Vector2<T> {
     #[inline(always)]
     fn from(v: glam::BVec2) -> Self {
-        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector2>::from_bools(v))
+        TransparentWrapper::wrap(
+            <<T::Scalar as Scalar>::Vec2 as crate::bindings::Vector2>::from_bools(v),
+        )
     }
 }
 
 impl<T: Unit> From<glam::BVec3> for Vector3<T> {
     #[inline(always)]
     fn from(v: glam::BVec3) -> Self {
-        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector3>::from_bools(v))
+        TransparentWrapper::wrap(
+            <<T::Scalar as Scalar>::Vec3 as crate::bindings::Vector3>::from_bools(v),
+        )
     }
 }
 
 impl<T: Unit> From<glam::BVec4> for Vector4<T> {
     #[inline(always)]
     fn from(v: glam::BVec4) -> Self {
-        Self::from_raw(<<Self as ToRaw>::Raw as crate::bindings::Vector4>::from_bools(v))
+        TransparentWrapper::wrap(
+            <<T::Scalar as Scalar>::Vec4 as crate::bindings::Vector4>::from_bools(v),
+        )
     }
 }
 
 impl<T> Mul<Vector3<T>> for glam::Quat
 where
     T: Unit<Scalar = f32>,
-    T::Scalar: FloatScalar<Vec3f = glam::Vec3>,
 {
     type Output = Vector3<T>;
 
     #[inline]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
-        Vector3::from_raw(self * rhs.to_raw())
+        wrap(self * peel(rhs))
     }
 }
 
 impl<T> Mul<Vector3<T>> for glam::DQuat
 where
     T: Unit<Scalar = f64>,
-    T::Scalar: FloatScalar<Vec3f = glam::DVec3>,
 {
     type Output = Vector3<T>;
 
     #[inline]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
-        Vector3::from_raw(self * rhs.to_raw())
+        wrap(self * peel(rhs))
     }
 }
 
@@ -1061,7 +1060,7 @@ impl<'a, T: Unit> Sum<&'a Vector2<T>> for Vector2<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        Self::from_raw(iter.map(AsRaw::as_raw).sum())
+        wrap(iter.map(peel_ref).sum())
     }
 }
 
@@ -1071,7 +1070,7 @@ impl<'a, T: Unit> Sum<&'a Vector3<T>> for Vector3<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        Self::from_raw(iter.map(AsRaw::as_raw).sum())
+        wrap(iter.map(peel_ref).sum())
     }
 }
 
@@ -1081,7 +1080,7 @@ impl<'a, T: Unit> Sum<&'a Vector4<T>> for Vector4<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        Self::from_raw(iter.map(AsRaw::as_raw).sum())
+        wrap(iter.map(peel_ref).sum())
     }
 }
 
@@ -1091,7 +1090,7 @@ impl<'a, T: Unit> Product<&'a Vector2<T>> for Vector2<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        Self::from_raw(iter.map(AsRaw::as_raw).product())
+        wrap(iter.map(peel_ref).product())
     }
 }
 
@@ -1101,7 +1100,7 @@ impl<'a, T: Unit> Product<&'a Vector3<T>> for Vector3<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        Self::from_raw(iter.map(AsRaw::as_raw).product())
+        wrap(iter.map(peel_ref).product())
     }
 }
 
@@ -1111,7 +1110,7 @@ impl<'a, T: Unit> Product<&'a Vector4<T>> for Vector4<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        Self::from_raw(iter.map(AsRaw::as_raw).product())
+        wrap(iter.map(peel_ref).product())
     }
 }
 
@@ -1663,7 +1662,7 @@ mod tests {
         let x = glam::Vec2::X;
         let rotate_by = glam::Vec2::from_angle(f32::FRAG_PI_2);
         let y = x.rotate(rotate_by);
-        assert_abs_diff_eq!(rotated.to_raw(), y);
+        assert_abs_diff_eq!(peel(rotated), y);
     }
 
     #[test]

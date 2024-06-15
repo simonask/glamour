@@ -1,5 +1,5 @@
+use crate::bindings;
 use crate::traits::marker::PodValue;
-use crate::{bindings, AsRaw, FromRaw, ToRaw};
 
 /// All types that can serve as components of a SIMD type in [`glam`].
 ///
@@ -10,7 +10,6 @@ pub trait Scalar:
     // `Pod` as well.
     PodValue
     + PartialOrd
-    + ToRaw<Raw = Self> + FromRaw + AsRaw
     + core::fmt::Display
     + crate::Unit<Scalar = Self>
     + num_traits::NumOps
@@ -48,23 +47,20 @@ pub trait Scalar:
 }
 
 /// Signed scalar types (`i32`, `f32`, `f64`, etc.).
-pub trait SignedScalar: Scalar<Vec2 = Self::Vec2s, Vec3 = Self::Vec3s, Vec4 = Self::Vec4s> {
+pub trait SignedScalar:
+    Scalar<Vec2: bindings::SignedVector2, Vec3: bindings::SignedVector, Vec4: bindings::SignedVector>
+{
     /// Negative one.
     const NEG_ONE: Self;
-
-    // Note: Hiding these because they are implementation details to aid type inference.
-    #[doc(hidden)]
-    type Vec2s: bindings::SignedVector2<Scalar = Self>;
-    #[doc(hidden)]
-    type Vec3s: bindings::SignedVector<Scalar = Self>;
-    #[doc(hidden)]
-    type Vec4s: bindings::SignedVector<Scalar = Self>;
 }
 
 /// Floating-point scalar types (`f32` and `f64`).
 pub trait FloatScalar:
-    SignedScalar<Vec2s = Self::Vec2f, Vec3s = Self::Vec3f, Vec4s = Self::Vec4f>
-    + num_traits::Float
+    Scalar<
+        Vec2: bindings::FloatVector2<Scalar = Self>,
+        Vec3: bindings::FloatVector3<Scalar = Self>,
+        Vec4: bindings::FloatVector4<Scalar = Self>,
+    > + num_traits::Float
     + approx::RelativeEq<Epsilon = Self>
     + approx::UlpsEq<Epsilon = Self>
 {
@@ -77,35 +73,13 @@ pub trait FloatScalar:
 
     // Note: Hiding these because they are implementation details to aid type inference.
     #[doc(hidden)]
-    type Vec2f: bindings::FloatVector2<Scalar = Self>;
+    type Mat2: bindings::Matrix2<Self>;
     #[doc(hidden)]
-    type Vec3f: bindings::FloatVector3<Scalar = Self>;
+    type Mat3: bindings::Matrix3<Self>;
     #[doc(hidden)]
-    type Vec4f: bindings::FloatVector4<Scalar = Self>;
+    type Mat4: bindings::Matrix4<Self>;
     #[doc(hidden)]
-    type Mat2: bindings::Matrix2<
-        Scalar = Self,
-        Vec2 = Self::Vec2f,
-        Vec3 = Self::Vec3f,
-        Vec4 = Self::Vec4f,
-    >;
-    #[doc(hidden)]
-    type Mat3: bindings::Matrix3<
-        Scalar = Self,
-        Vec2 = Self::Vec2f,
-        Vec3 = Self::Vec3f,
-        Vec4 = Self::Vec4f,
-    >;
-    #[doc(hidden)]
-    type Mat4: bindings::Matrix4<
-        Scalar = Self,
-        Vec2 = Self::Vec2f,
-        Vec3 = Self::Vec3f,
-        Vec4 = Self::Vec4f,
-    >;
-    #[doc(hidden)]
-    type Quat: bindings::Quat<Scalar = Self, Vec3 = Self::Vec3f, Vec4 = Self::Vec4f>
-        + ToRaw<Raw = Self::Quat>;
+    type Quat: bindings::Quat<Self>;
 
     /// True if the number is not NaN and not infinity.
     #[must_use]
@@ -133,17 +107,9 @@ impl Scalar for f32 {
 
 impl SignedScalar for f32 {
     const NEG_ONE: Self = -1.0;
-
-    type Vec2s = glam::Vec2;
-    type Vec3s = glam::Vec3;
-    type Vec4s = glam::Vec4;
 }
 
 impl FloatScalar for f32 {
-    type Vec2f = glam::Vec2;
-    type Vec3f = glam::Vec3;
-    type Vec4f = glam::Vec4;
-
     type Mat2 = glam::Mat2;
     type Mat3 = glam::Mat3;
     type Mat4 = glam::Mat4;
@@ -168,17 +134,9 @@ impl Scalar for f64 {
 
 impl SignedScalar for f64 {
     const NEG_ONE: Self = -1.0;
-
-    type Vec2s = glam::DVec2;
-    type Vec3s = glam::DVec3;
-    type Vec4s = glam::DVec4;
 }
 
 impl FloatScalar for f64 {
-    type Vec2f = glam::DVec2;
-    type Vec3f = glam::DVec3;
-    type Vec4f = glam::DVec4;
-
     type Mat2 = glam::DMat2;
     type Mat3 = glam::DMat3;
     type Mat4 = glam::DMat4;
@@ -203,10 +161,6 @@ impl Scalar for i16 {
 
 impl SignedScalar for i16 {
     const NEG_ONE: Self = -1;
-
-    type Vec2s = glam::I16Vec2;
-    type Vec3s = glam::I16Vec3;
-    type Vec4s = glam::I16Vec4;
 }
 
 impl Scalar for i32 {
@@ -220,10 +174,6 @@ impl Scalar for i32 {
 
 impl SignedScalar for i32 {
     const NEG_ONE: Self = -1;
-
-    type Vec2s = glam::IVec2;
-    type Vec3s = glam::IVec3;
-    type Vec4s = glam::IVec4;
 }
 
 impl Scalar for i64 {
@@ -237,10 +187,6 @@ impl Scalar for i64 {
 
 impl SignedScalar for i64 {
     const NEG_ONE: Self = -1;
-
-    type Vec2s = glam::I64Vec2;
-    type Vec3s = glam::I64Vec3;
-    type Vec4s = glam::I64Vec4;
 }
 
 impl Scalar for u16 {

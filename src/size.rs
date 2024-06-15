@@ -1,9 +1,6 @@
 //! Size vectors
 
-use crate::{
-    bindings::prelude::*, scalar::FloatScalar, AsRaw, FromRaw, Scalar, ToRaw, Unit, Vector2,
-    Vector3,
-};
+use crate::{bindings::prelude::*, scalar::FloatScalar, Scalar, Unit, Vector2, Vector3};
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
 
@@ -37,63 +34,8 @@ pub struct Size3<T: Unit = f32> {
 unsafe impl<T: Unit> Pod for Size3<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> Zeroable for Size3<T> {}
+// SAFETY: This is the guarantee of this crate.
 unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec3> for Size3<T> {}
-
-impl<T: Unit> ToRaw for Size2<T> {
-    type Raw = <T::Scalar as Scalar>::Vec2;
-
-    #[inline]
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: Unit> FromRaw for Size2<T> {
-    #[inline]
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: Unit> AsRaw for Size2<T> {
-    #[inline]
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    #[inline]
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
-}
-
-impl<T: Unit> ToRaw for Size3<T> {
-    type Raw = <T::Scalar as Scalar>::Vec3;
-
-    #[inline]
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: Unit> FromRaw for Size3<T> {
-    #[inline]
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: Unit> AsRaw for Size3<T> {
-    #[inline]
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    #[inline]
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
-}
 
 crate::derive_standard_traits!(Size2 {
     width: T::Scalar,
@@ -133,14 +75,14 @@ macro_rules! impl_size {
         impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
             #[inline]
             fn from(vec: $vector_type<T>) -> Self {
-                Self::from_raw(vec.to_raw())
+                TransparentWrapper::wrap(TransparentWrapper::peel(vec))
             }
         }
 
         impl<T: Unit> From<$base_type_name<T>> for $vector_type<T> {
             #[inline]
             fn from(point: $base_type_name<T>) -> Self {
-                Self::from_raw(point.to_raw())
+                TransparentWrapper::wrap(TransparentWrapper::peel(point))
             }
         }
 
@@ -199,23 +141,23 @@ crate::forward_op_to_raw!(Size2, Add<Self>::add -> Self);
 crate::forward_op_to_raw!(Size3, Add<Self>::add -> Self);
 crate::forward_op_to_raw!(Size2, Sub<Self>::sub -> Self);
 crate::forward_op_to_raw!(Size3, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Size2, Mul<T::Scalar>::mul -> Self);
-crate::forward_op_to_raw!(Size3, Mul<T::Scalar>::mul -> Self);
-crate::forward_op_to_raw!(Size2, Div<T::Scalar>::div -> Self);
-crate::forward_op_to_raw!(Size3, Div<T::Scalar>::div -> Self);
-crate::forward_op_to_raw!(Size2, Rem<T::Scalar>::rem -> Self);
-crate::forward_op_to_raw!(Size3, Rem<T::Scalar>::rem -> Self);
+crate::forward_op_to_raw!(Size2, Mul<@T::Scalar>::mul -> Self);
+crate::forward_op_to_raw!(Size3, Mul<@T::Scalar>::mul -> Self);
+crate::forward_op_to_raw!(Size2, Div<@T::Scalar>::div -> Self);
+crate::forward_op_to_raw!(Size3, Div<@T::Scalar>::div -> Self);
+crate::forward_op_to_raw!(Size2, Rem<@T::Scalar>::rem -> Self);
+crate::forward_op_to_raw!(Size3, Rem<@T::Scalar>::rem -> Self);
 
 crate::forward_op_assign_to_raw!(Size2, AddAssign<Self>::add_assign);
 crate::forward_op_assign_to_raw!(Size3, AddAssign<Self>::add_assign);
 crate::forward_op_assign_to_raw!(Size2, SubAssign<Self>::sub_assign);
 crate::forward_op_assign_to_raw!(Size3, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Size2, MulAssign<T::Scalar>::mul_assign);
-crate::forward_op_assign_to_raw!(Size3, MulAssign<T::Scalar>::mul_assign);
-crate::forward_op_assign_to_raw!(Size2, DivAssign<T::Scalar>::div_assign);
-crate::forward_op_assign_to_raw!(Size3, DivAssign<T::Scalar>::div_assign);
-crate::forward_op_assign_to_raw!(Size2, RemAssign<T::Scalar>::rem_assign);
-crate::forward_op_assign_to_raw!(Size3, RemAssign<T::Scalar>::rem_assign);
+crate::forward_op_assign_to_raw!(Size2, MulAssign<@T::Scalar>::mul_assign);
+crate::forward_op_assign_to_raw!(Size3, MulAssign<@T::Scalar>::mul_assign);
+crate::forward_op_assign_to_raw!(Size2, DivAssign<@T::Scalar>::div_assign);
+crate::forward_op_assign_to_raw!(Size3, DivAssign<@T::Scalar>::div_assign);
+crate::forward_op_assign_to_raw!(Size2, RemAssign<@T::Scalar>::rem_assign);
+crate::forward_op_assign_to_raw!(Size3, RemAssign<@T::Scalar>::rem_assign);
 
 impl<T: Unit> Size2<T> {
     /// All zeroes.
@@ -235,8 +177,8 @@ impl<T: Unit> Size2<T> {
         Self { width, height }
     }
 
-    crate::forward_constructors!(2, glam::Vec2);
-    crate::forward_comparison!(glam::BVec2, glam::Vec2);
+    crate::forward_constructors!(2, Vec2);
+    crate::forward_comparison!(glam::BVec2, Vec2);
 
     crate::casting_interface!(Size2 {
         width: T::Scalar,
@@ -248,11 +190,14 @@ impl<T: Unit> Size2<T> {
     });
     crate::array_interface!(2);
 
-    crate::forward_to_raw!(
-        glam::Vec2 =>
-        #[doc = "Extend with depth component to [`Size3`]."]
-        pub fn extend(self, depth: T::Scalar) -> Size3<T>;
-    );
+    #[doc = "Extend with depth component to [`Size3`]."]
+    pub fn extend(self, depth: T::Scalar) -> Size3<T> {
+        Size3 {
+            width: self.width,
+            height: self.height,
+            depth,
+        }
+    }
 
     /// Calculate the area.
     #[inline]
@@ -310,8 +255,8 @@ impl<T: Unit> Size3<T> {
         }
     }
 
-    crate::forward_constructors!(3, glam::Vec3);
-    crate::forward_comparison!(glam::BVec3, glam::Vec3);
+    crate::forward_constructors!(3, Vec3);
+    crate::forward_comparison!(glam::BVec3, Vec3);
 
     crate::casting_interface!(Size3 {
         width: T::Scalar,
@@ -375,7 +320,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::size;
+    use crate::{peel, size};
 
     use super::*;
 
@@ -485,14 +430,14 @@ mod tests {
             width: 1.0,
             height: 2.0,
         };
-        assert_eq!(s.to_raw(), glam::Vec2 { x: 1.0, y: 2.0 });
+        assert_eq!(peel(s), glam::Vec2 { x: 1.0, y: 2.0 });
         let s = Size3::<f32> {
             width: 1.0,
             height: 2.0,
             depth: 3.0,
         };
         assert_eq!(
-            s.to_raw(),
+            peel(s),
             glam::Vec3 {
                 x: 1.0,
                 y: 2.0,
@@ -500,7 +445,7 @@ mod tests {
             }
         );
         assert_eq!(
-            Size3::<f32>::from_raw(glam::Vec3::new(1.0, 2.0, 3.0)),
+            Size3::<f32>::wrap(glam::Vec3::new(1.0, 2.0, 3.0)),
             Size3 {
                 width: 1.0,
                 height: 2.0,

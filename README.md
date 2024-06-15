@@ -49,7 +49,7 @@ let size: Size2<MyUnit> = Size2 { width: 100.0, height: 200.0 };
 let vector_untyped: &Vector4<f32> = vector.as_untyped();
 
 // Use glam when needed:
-let vector_raw: &glam::Vec4 = vector.as_raw();
+let vector_raw: &glam::Vec4 = bytemuck::TransparentWrapper::peel_ref(&vector);
 ```
 
 [See the documentation module for more examples.](crate::docs::examples)

@@ -10,9 +10,10 @@ use core::{fmt::Debug, marker::PhantomData};
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{cast, Pod, TransparentWrapper, Zeroable};
 
+use crate::peel;
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3, ToRaw,
-    Unit, Vector2, Vector3,
+    bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3, Unit,
+    Vector2, Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
@@ -727,8 +728,7 @@ where
         angle: Angle<Src::Scalar>,
         translation: Vector3<Src>,
     ) -> Self {
-        let rotation =
-            <Src::Scalar as FloatScalar>::Quat::from_axis_angle(axis.to_raw(), angle.to_raw());
+        let rotation = <Src::Scalar as FloatScalar>::Quat::from_axis_angle(peel(axis), peel(angle));
         Self::from_matrix_unchecked(Matrix4::from_scale_rotation_translation(
             scale.to_untyped(),
             rotation,

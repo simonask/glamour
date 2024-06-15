@@ -29,6 +29,7 @@ macro_rules! forward_to_raw {
 }
 
 macro_rules! forward_to_raw_impl {
+    // self (by value)
     (
         $(#[$($attr:meta),*])*
         $visibility:vis
@@ -42,10 +43,29 @@ macro_rules! forward_to_raw_impl {
         $(#[$($attr),*])*
         $visibility
         fn $fn_name(self $(, $arg_name: $arg_ty)*) -> $ret_ty {
-            <$ret_ty>::from_raw(self.to_raw().$fn_name($($arg_name.to_raw()),*))
+            crate::wrap(crate::peel(self).$fn_name($(crate::peel($arg_name)),*))
         }
     };
 
+    // self (by value), do not wrap return
+    (
+        $(#[$($attr:meta),*])*
+        $visibility:vis
+        fn $fn_name:ident (
+            self
+            $(, $arg_name:ident: $arg_ty:ty)* $(,)?
+        ) -> @ $ret_ty:ty;
+    ) => {
+        #[inline]
+        #[must_use]
+        $(#[$($attr),*])*
+        $visibility
+        fn $fn_name(self $(, $arg_name: $arg_ty)*) -> $ret_ty {
+            crate::peel(self).$fn_name($(crate::peel($arg_name)),*)
+        }
+    };
+
+    // &self (by reference)
     (
         $(#[$($attr:meta),*])*
         $visibility:vis
@@ -59,10 +79,11 @@ macro_rules! forward_to_raw_impl {
         $(#[$($attr),*])*
         $visibility
         fn $fn_name(&self, $($arg_name: $arg_ty),*) -> $ret_ty {
-            <$ret_ty>::from_raw(self.as_raw().$fn_name($($arg_name.to_raw()),*))
+            crate::wrap(crate::peel_ref(self).$fn_name($(crate::peel($arg_name)),*))
         }
     };
 
+    // &mut self (by mutable reference)
     (
         $(#[$($attr:meta),*])*
         $visibility:vis
@@ -80,6 +101,7 @@ macro_rules! forward_to_raw_impl {
         }
     };
 
+    // &mut self, no return
     (
         $(#[$($attr:meta),*])*
         $visibility:vis
@@ -95,24 +117,6 @@ macro_rules! forward_to_raw_impl {
             self.as_raw_mut().$fn_name($($arg_name.to_raw()),*)
         }
     };
-
-    (
-        $(#[$($attr:meta),*])*
-        $visibility:vis
-        fn $fn_name:ident(
-            $($arg_name:ident: $arg_ty:ty),* $(,)?
-        ) -> $ret_ty:ty;
-    ) => {
-        #[inline]
-        #[must_use]
-        $(#[$($attr),*])*
-        $visibility
-        fn $fn_name(
-            $($arg_name: $arg_ty),*
-        ) -> $ret_ty {
-            <$ret_ty>::from_raw(<Self as crate::ToRaw>::Raw::$fn_name($($arg_name.to_raw()),*))
-        }
-    };
 }
 
 /// Generate a `core::ops::*` implementation, delegating to underlying raw
@@ -126,8 +130,8 @@ macro_rules! forward_op_to_raw {
 
                 #[inline]
                 fn $op_fn_name(self, other: $scalars) -> $output {
-                    <$output>::from_raw(core::ops::$op_name::$op_fn_name(
-                        self.to_raw(),
+                    crate::wrap(core::ops::$op_name::$op_fn_name(
+                        crate::peel(self),
                         other,
                     ))
                 }
@@ -142,9 +146,24 @@ macro_rules! forward_op_to_raw {
 
             #[inline]
             fn $op_fn_name(self, other: $arg_ty) -> $output {
-                <$output>::from_raw(core::ops::$op_name::$op_fn_name(
-                    self.to_raw(),
-                    other.to_raw(),
+                crate::wrap(core::ops::$op_name::$op_fn_name(
+                    crate::peel(self),
+                    crate::peel(other),
+                ))
+            }
+        }
+    };
+
+    // Implement operation for a generic non-scalar argument, without peeling the rhs.
+    ($base_type_name:ident, $op_name:ident < @ $arg_ty:ty > :: $op_fn_name:ident -> $output:ty) => {
+        impl<T: Unit> core::ops::$op_name<$arg_ty> for $base_type_name<T> {
+            type Output = $output;
+
+            #[inline]
+            fn $op_fn_name(self, other: $arg_ty) -> $output {
+                crate::wrap(core::ops::$op_name::$op_fn_name(
+                    crate::peel(self),
+                    other,
                 ))
             }
         }
@@ -158,7 +177,7 @@ macro_rules! forward_op_assign_to_raw {
             impl<T: Unit<Scalar = $scalars>> core::ops::$op_name<$scalars> for $base_type_name<T> {
                 #[inline]
                 fn $op_fn_name(&mut self, other: $scalars) {
-                    core::ops::$op_name::$op_fn_name(self.as_raw_mut(), other)
+                    core::ops::$op_name::$op_fn_name(crate::peel_mut(self), other)
                 }
             }
         )*
@@ -168,7 +187,17 @@ macro_rules! forward_op_assign_to_raw {
         impl<T: Unit> core::ops::$op_name<$arg_ty> for $base_type_name<T> {
             #[inline]
             fn $op_fn_name(&mut self, other: $arg_ty) {
-                core::ops::$op_name::$op_fn_name(self.as_raw_mut(), other.to_raw())
+                core::ops::$op_name::$op_fn_name(crate::peel_mut(self), crate::peel(other))
+            }
+        }
+    };
+
+
+    ($base_type_name:ident, $op_name:ident < @ $arg_ty:ty > :: $op_fn_name:ident) => {
+        impl<T: Unit> core::ops::$op_name<$arg_ty> for $base_type_name<T> {
+            #[inline]
+            fn $op_fn_name(&mut self, other: $arg_ty) {
+                core::ops::$op_name::$op_fn_name(crate::peel_mut(self), other)
             }
         }
     };
@@ -178,13 +207,12 @@ macro_rules! forward_neg_to_raw {
     ($base_type_name:ident) => {
         impl<T> core::ops::Neg for $base_type_name<T>
         where
-            T: Unit,
-            T::Scalar: SignedScalar,
+            T: Unit<Scalar: SignedScalar>,
         {
             type Output = Self;
 
             fn neg(self) -> Self {
-                Self::from_raw(core::ops::Neg::neg(self.to_raw()))
+                crate::wrap(core::ops::Neg::neg(crate::peel(self)))
             }
         }
     };
@@ -192,53 +220,78 @@ macro_rules! forward_neg_to_raw {
 
 /// from_array, splat, etc.
 macro_rules! forward_constructors {
-    ($dimensions:literal, $see_also_doc_ty:ty) => {
-        crate::forward_to_raw! {
-            $see_also_doc_ty =>
-            #[doc = "Instantiate from array."]
-            pub fn from_array(array: [T::Scalar; $dimensions]) -> Self;
-            #[doc = "Convert to array."]
-            pub fn to_array(self) -> [T::Scalar; $dimensions];
-            #[doc = "Instance with all components set to `scalar`."]
-            pub fn splat(scalar: T::Scalar) -> Self;
+    ($dimensions:literal, $raw:ident) => {
+        #[doc = "Instantiate from array."]
+        pub fn from_array(array: [T::Scalar; $dimensions]) -> Self {
+            crate::wrap(<<T::Scalar as Scalar>::$raw>::from_array(array))
+        }
+        #[doc = "Convert to array."]
+        pub fn to_array(self) -> [T::Scalar; $dimensions] {
+            <<T::Scalar as Scalar>::$raw>::to_array(crate::peel_ref(&self))
+        }
+
+        #[doc = "Instance with all components set to `scalar`."]
+        pub fn splat(scalar: T::Scalar) -> Self {
+            crate::wrap(<<T::Scalar as Scalar>::$raw>::splat(scalar))
         }
 
         #[doc = "Write all components to slice."]
         pub fn write_to_slice(self, slice: &mut [T::Scalar]) {
-            self.to_raw().write_to_slice(slice);
+            crate::peel(self).write_to_slice(slice);
         }
     };
 }
 
 /// cmpeq etc.
 macro_rules! forward_comparison {
-    ($mask:ty, $see_also_doc_ty:ty) => {
-        crate::forward_to_raw! {
-            $see_also_doc_ty =>
-            #[doc = "Return a mask with the result of a component-wise equals comparison."]
-            pub fn cmpeq(self, other: Self) -> $mask;
-            #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
-            pub fn cmpne(self, other: Self) -> $mask;
-            #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
-            pub fn cmpge(self, other: Self) -> $mask;
-            #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
-            pub fn cmpgt(self, other: Self) -> $mask;
-            #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
-            pub fn cmple(self, other: Self) -> $mask;
-            #[doc = "Return a mask with the result of a component-wise less-than comparison."]
-            pub fn cmplt(self, other: Self) -> $mask;
-            #[doc = "Minimum by component."]
-            pub fn min(self, other: Self) -> Self;
-            #[doc = "Maximum by component."]
-            pub fn max(self, other: Self) -> Self;
-            #[doc = "Horizontal minimum (smallest component)."]
-            pub fn min_element(self) -> T::Scalar;
-            #[doc = "Horizontal maximum (largest component)."]
-            pub fn max_element(self) -> T::Scalar;
-            #[doc = "Component-wise clamp."]
-            pub fn clamp(self, min: Self, max: Self) -> Self;
-            #[doc = "Select components from two instances based on a mask."]
-            pub fn select(mask: $mask, a: Self, b: Self) -> Self;
+    ($mask:ty, $t:ident) => {
+        #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        pub fn cmpeq(self, other: Self) -> $mask {
+            crate::peel(self).cmpeq(crate::peel(other))
+        }
+        #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        pub fn cmpne(self, other: Self) -> $mask {
+            crate::peel(self).cmpne(crate::peel(other))
+        }
+        #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        pub fn cmpge(self, other: Self) -> $mask {
+            crate::peel(self).cmpge(crate::peel(other))
+        }
+        #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        pub fn cmpgt(self, other: Self) -> $mask {
+            crate::peel(self).cmpgt(crate::peel(other))
+        }
+        #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        pub fn cmple(self, other: Self) -> $mask {
+            crate::peel(self).cmple(crate::peel(other))
+        }
+        #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        pub fn cmplt(self, other: Self) -> $mask {
+            crate::peel(self).cmplt(crate::peel(other))
+        }
+        #[doc = "Minimum by component."]
+        pub fn min(self, other: Self) -> Self {
+            crate::wrap(crate::peel(self).min(crate::peel(other)))
+        }
+        #[doc = "Maximum by component."]
+        pub fn max(self, other: Self) -> Self {
+            crate::wrap(crate::peel(self).max(crate::peel(other)))
+        }
+        #[doc = "Horizontal minimum (smallest component)."]
+        pub fn min_element(self) -> T::Scalar {
+            crate::peel(self).min_element()
+        }
+        #[doc = "Horizontal maximum (largest component)."]
+        pub fn max_element(self) -> T::Scalar {
+            crate::peel(self).max_element()
+        }
+        #[doc = "Component-wise clamp."]
+        pub fn clamp(self, min: Self, max: Self) -> Self {
+            crate::wrap(crate::peel(self).clamp(crate::peel(min), crate::peel(max)))
+        }
+        #[doc = "Select components from two instances based on a mask."]
+        pub fn select(mask: $mask, a: Self, b: Self) -> Self {
+            crate::wrap(<<T::Scalar as Scalar>::$t>::select(mask, crate::peel(a), crate::peel(b)))
         }
     }
 }
@@ -246,14 +299,9 @@ macro_rules! forward_comparison {
 /// is_finite, round, ceil, etc.
 macro_rules! forward_float_ops {
     ($mask:ty, $see_also_doc_ty:ty) => {
+        // These are the functions that peel the arguments and re-wrap the return values.
         crate::forward_to_raw! {
             $see_also_doc_ty =>
-            #[doc = "True if all components are non-infinity and non-NaN."]
-            pub fn is_finite(&self) -> bool;
-            #[doc = "True if any component is NaN."]
-            pub fn is_nan(&self) -> bool;
-            #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
-            pub fn is_nan_mask(&self) -> $mask;
             #[doc = "Round all components up."]
             pub fn ceil(self) -> Self;
             #[doc = "Round all components down."]
@@ -264,8 +312,24 @@ macro_rules! forward_float_ops {
             pub fn fract(self) -> Self;
             #[doc = "See (e.g.) [`glam::Vec2::fract_gl()`]"]
             pub fn fract_gl(self) -> Self;
-            #[doc = "Linear interpolation."]
-            pub fn lerp(self, other: Self, t: T::Scalar) -> Self;
+        }
+
+        // These functions have custom wrapping.
+        #[doc = "True if all components are non-infinity and non-NaN."]
+        pub fn is_finite(&self) -> bool {
+            crate::peel_ref(self).is_finite()
+        }
+        #[doc = "True if any component is NaN."]
+        pub fn is_nan(&self) -> bool {
+            crate::peel_ref(self).is_nan()
+        }
+        #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        pub fn is_nan_mask(&self) -> $mask {
+            crate::peel_ref(self).is_nan_mask()
+        }
+        #[doc = "Linear interpolation."]
+        pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
+            crate::wrap(crate::peel(self).lerp(crate::peel(other), t))
         }
     };
 }
@@ -273,6 +337,7 @@ macro_rules! forward_float_ops {
 /// normalize, length, etc.
 macro_rules! forward_float_vector_ops {
     ($see_also_doc_ty:ty) => {
+        // These are the functions that peel the arguments and re-wrap the return values.
         crate::forward_to_raw! {
             $see_also_doc_ty =>
             #[doc = "Normalize the vector. Undefined results in the vector's length is (very close to) zero."]
@@ -281,30 +346,12 @@ macro_rules! forward_float_vector_ops {
             pub fn normalize_or_zero(self) -> Self;
             #[doc = "Returns self normalized to length 1.0 if possible, else returns a fallback value."]
             pub fn normalize_or(self, fallback: Self) -> Self;
-            #[doc = "Normalize the vector, returning `None` if the length was already (very close to) zero."]
-            pub fn try_normalize(self) -> Option<Self>;
-            #[doc = "True if the vector is normalized."]
-            pub fn is_normalized(self) -> bool;
-            #[doc = "Length of the vector"]
-            pub fn length(self) -> T::Scalar;
-            #[doc = "Squared length of the vector"]
-            pub fn length_squared(self) -> T::Scalar;
-            #[doc = "Reciprocal length of the vector"]
-            pub fn length_recip(self) -> T::Scalar;
             #[doc = "e^self by component"]
             pub fn exp(self) -> Self;
-            #[doc = "self^n by component"]
-            pub fn powf(self, n: T::Scalar) -> Self;
             #[doc = "1.0/self by component"]
             pub fn recip(self) -> Self;
             #[doc = "self * a + b"]
             pub fn mul_add(self, a: Self, b: Self) -> Self;
-            #[doc = "Clamp length"]
-            pub fn clamp_length(self, min: T::Scalar, max: T::Scalar) -> Self;
-            #[doc = "Clamp length"]
-            pub fn clamp_length_min(self, min: T::Scalar) -> Self;
-            #[doc = "Clamp length"]
-            pub fn clamp_length_max(self, max: T::Scalar) -> Self;
             #[doc = "See (e.g.) [`glam::Vec2::project_onto()`]"]
             pub fn project_onto(self, other: Self) -> Self;
             #[doc = "See (e.g.) [`glam::Vec2::reject_from()`]"]
@@ -313,6 +360,44 @@ macro_rules! forward_float_vector_ops {
             pub fn project_onto_normalized(self, other: Self) -> Self;
             #[doc = "See (e.g.) [`glam::Vec2::reject_from_normalized()`]"]
             pub fn reject_from_normalized(self, other: Self) -> Self;
+        }
+
+        // These functions have custom wrapping.
+        #[doc = "Normalize the vector, returning `None` if the length was already (very close to) zero."]
+        pub fn try_normalize(self) -> Option<Self> {
+            crate::peel(self).try_normalize().map(crate::wrap)
+        }
+        #[doc = "True if the vector is normalized."]
+        pub fn is_normalized(self) -> bool {
+            crate::peel(self).is_normalized()
+        }
+        #[doc = "Squared length of the vector"]
+        pub fn length_squared(self) -> T::Scalar {
+            crate::peel(self).length_squared()
+        }
+        #[doc = "Reciprocal length of the vector"]
+        pub fn length_recip(self) -> T::Scalar {
+            crate::peel(self).length_recip()
+        }
+        #[doc = "Length of the vector"]
+        pub fn length(self) -> T::Scalar {
+            crate::peel(self).length()
+        }
+        #[doc = "self^n by component"]
+        pub fn powf(self, n: T::Scalar) -> Self {
+            crate::wrap(crate::peel(self).powf(n))
+        }
+        #[doc = "Clamp length"]
+        pub fn clamp_length(self, min: T::Scalar, max: T::Scalar) -> Self {
+            crate::wrap(crate::peel(self).clamp_length(min, max))
+        }
+        #[doc = "Clamp length"]
+        pub fn clamp_length_min(self, min: T::Scalar) -> Self {
+            crate::wrap(crate::peel(self).clamp_length_min(min))
+        }
+        #[doc = "Clamp length"]
+        pub fn clamp_length_max(self, max: T::Scalar) -> Self {
+            crate::wrap(crate::peel(self).clamp_length_max(max))
         }
     };
 }
@@ -726,7 +811,7 @@ macro_rules! derive_glam_conversion_traits {
             T: Unit<Scalar = $scalar_ty>,
         {
             fn from(vec: $base_type_name<T>) -> $glam_ty {
-                vec.to_raw()
+                crate::peel(vec)
             }
         }
 
@@ -735,7 +820,7 @@ macro_rules! derive_glam_conversion_traits {
             T: Unit<Scalar = $scalar_ty>
         {
             fn from(vec: $glam_ty) -> $base_type_name<T> {
-                Self::from_raw(vec)
+                crate::wrap(vec)
             }
         }
 
@@ -744,7 +829,7 @@ macro_rules! derive_glam_conversion_traits {
             T: Unit<Scalar = $scalar_ty>
         {
             fn as_ref(&self) -> &$glam_ty {
-                self.as_raw()
+                crate::peel_ref(self)
             }
         }
 
@@ -753,7 +838,7 @@ macro_rules! derive_glam_conversion_traits {
             T: Unit<Scalar = $scalar_ty>
         {
             fn as_mut(&mut self) -> &mut $glam_ty {
-                self.as_raw_mut()
+                crate::peel_mut(self)
             }
         }
 

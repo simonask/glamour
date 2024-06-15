@@ -6,13 +6,13 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, 
 use num_traits::{Float, NumAssignOps};
 
 use crate::{
-    bindings::Quat, prelude::*, scalar::FloatScalar, traits::marker::PodValue, Scalar, Unit,
+    bindings::Quat, peel, prelude::*, scalar::FloatScalar, traits::marker::PodValue, Scalar, Unit,
     Vector3,
 };
 
 /// Angle in radians.
 #[repr(transparent)]
-#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, bytemuck::TransparentWrapper)]
 pub struct Angle<T = f32> {
     /// Angle in radians.
     pub radians: T,
@@ -68,30 +68,6 @@ macro_rules! impl_float_angle_consts {
             const FRAG_PI_8: Self = Self::PI / 8.0;
         }
     };
-}
-
-impl<T> ToRaw for Angle<T> {
-    type Raw = T;
-
-    fn to_raw(self) -> Self::Raw {
-        self.radians
-    }
-}
-
-impl<T> FromRaw for Angle<T> {
-    fn from_raw(raw: Self::Raw) -> Self {
-        Angle { radians: raw }
-    }
-}
-
-impl<T> AsRaw for Angle<T> {
-    fn as_raw(&self) -> &Self::Raw {
-        &self.radians
-    }
-
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        &mut self.radians
-    }
 }
 
 impl_float_angle_consts!(f32);
@@ -447,7 +423,7 @@ where
     #[inline]
     #[must_use]
     pub fn to_rotation(self, axis: Vector3<T>) -> T::Quat {
-        <T::Quat as Quat>::from_axis_angle(axis.to_raw(), self.radians)
+        <T::Quat as Quat<T>>::from_axis_angle(peel(axis), self.radians)
     }
 }
 
@@ -457,6 +433,8 @@ mod tests {
         assert_abs_diff_eq, assert_abs_diff_ne, assert_relative_eq, assert_relative_ne,
         assert_ulps_eq, assert_ulps_ne,
     };
+
+    use crate::{peel_mut, peel_ref};
 
     use super::*;
 
@@ -545,9 +523,9 @@ mod tests {
     #[test]
     fn angle_cast() {
         let mut a = Angle::CIRCLE;
-        let _: &f32 = a.as_raw();
-        let _: &mut f32 = a.as_raw_mut();
-        let _: f32 = a.to_raw();
+        let _: &f32 = peel_ref(&a);
+        let _: &mut f32 = peel_mut(&mut a);
+        let _: f32 = peel(a);
         let _: f32 = a.to_radians();
         let _: Angle = 1.0.into();
     }
