@@ -455,20 +455,29 @@ impl<T: FloatUnit> Vector2<T> {
     crate::forward_float_vector_ops!(glam::Vec2);
 
     #[doc = "Return `(sin(angle), cos(angle)`."]
+    #[must_use]
     pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar> {
         wrap(<<T::Scalar as Scalar>::Vec2>::from_angle(peel(angle)))
     }
     #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
+    #[must_use]
     pub fn rotate(self, rotation: Vector2<T::Scalar>) -> Self {
         wrap(peel(self).rotate(peel(rotation)))
     }
     #[doc = "Returns the angle (in radians) of this vector in the range [-π, +π]."]
+    #[must_use]
     pub fn to_angle(self) -> Angle<T::Scalar> {
         wrap(peel(self).to_angle())
     }
     #[doc = "Angle between this and another vector."]
-    pub fn angle_between(self, other: Self) -> Angle<T::Scalar> {
-        wrap(peel(self).angle_between(peel(other)))
+    #[must_use]
+    pub fn angle_to(self, other: Self) -> Angle<T::Scalar> {
+        wrap(peel(self).angle_to(peel(other)))
+    }
+    #[doc = "Rotate towards `rhs` up to `max_angle`."]
+    #[must_use]
+    pub fn rotate_towards(&self, rhs: Self, max_angle: Angle<T::Scalar>) -> Self {
+        wrap(peel_ref(self).rotate_towards(peel(rhs), peel(max_angle)))
     }
 }
 
@@ -654,7 +663,7 @@ impl<T: FloatUnit> Vector3<T> {
     crate::forward_to_raw!(
         glam::Vec3 =>
         #[doc = "Angle between this and another vector."]
-        pub fn angle_between(self, other: Self) -> Angle<T::Scalar>;
+        pub fn angle_to(self, other: Self) -> Angle<T::Scalar>;
         #[doc = "See (e.g.) [`glam::Vec3::any_orthogonal_vector()`]."]
         pub fn any_orthogonal_vector(&self) -> Self;
         #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_vector()`]."]

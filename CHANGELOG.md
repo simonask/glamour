@@ -12,12 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   implemented for all `T: Unit` where `T::Scalar` is of the appropriate type.
 - The `as_()` method for vectorlike types, implementing casting between units using
   the `as` operator (through `num_traits::AsPrimitive`).
+- Added `rotate_towards()` for 2D float vector types.
 
 ### Breaking changes
 - Bumped MSRV to Rust 1.79.
+- Bumped `glam` to 0.28.0.
 - Removed the `ToRaw` and `AsRaw` traits. Use `bytemuck::TransparentWrapper` instead.
 - Removed `ZERO` and `ONE` associated consts, in favor of `num_traits::{ConstZero, ConstOne}`.
 - Added `<T: Scalar>` bound to `Angle<T>`.
+- `angle_between()` was renamed to `angle_to()` in glam 0.28.0.
 
 ## [0.11.1] - 2024-03-26
 ### Fixed
