@@ -845,7 +845,7 @@ mod tests {
     fn basic() {
         check_2d_and_3d! {
             let a = Transform::IDENTITY;
-            let b = a.clone();
+            let b = a;
             assert_eq!(a, b);
             assert_abs_diff_eq!(a, b);
             assert_relative_eq!(a, b);

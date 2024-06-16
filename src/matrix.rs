@@ -2053,7 +2053,7 @@ mod tests {
 
         let m4 = Mat4::IDENTITY;
 
-        let s = alloc::format!("{:?}", m4);
+        let s = alloc::format!("{m4:?}");
         assert_eq!(s, "[(1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)]");
     }
 

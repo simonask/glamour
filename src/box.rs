@@ -625,7 +625,7 @@ mod tests {
                 min: Point2::new(0.0, 0.5),
                 max: Point2::new(1.0, 2.0),
             }
-        )
+        );
     }
 
     #[test]

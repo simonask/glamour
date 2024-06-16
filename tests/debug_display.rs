@@ -11,7 +11,7 @@ impl<'a> core::fmt::Write for BufWriter<'a> {
         if self.buffer.len() < bytes.len() + self.pos {
             Err(core::fmt::Error)
         } else {
-            (&mut self.buffer[self.pos..self.pos + bytes.len()]).copy_from_slice(bytes);
+            self.buffer[self.pos..self.pos + bytes.len()].copy_from_slice(bytes);
             self.pos += bytes.len();
             Ok(())
         }

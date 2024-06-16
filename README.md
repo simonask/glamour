@@ -4,7 +4,7 @@
 [![Latest Version]][crates.io] [![docs]][docs.rs]
 [![Minimum Supported Rust Version]][Rust 1.68.2]
 
-This crate uses [bytemuck][] to implement a zero-cost[^zero_cost] strongly typed
+This crate uses [bytemuck][] to implement a zero-cost[^1] strongly typed
 interface on top of [glam][].
 
 The API is similar to [euclid][], but more ergonomic (although YMMV).
@@ -19,7 +19,7 @@ allow you to easily drop down to plain `glam` when needed.
 [glam]: https://docs.rs/glam/latest/glam/
 [euclid]: https://docs.rs/euclid/latest/euclid/
 
-[^zero_cost]: Zero-cost at runtime, in release builds. This crate may increase
+[^1]: Zero-cost at runtime, in release builds. This crate may increase
     compile times and make debug builds slower due to increased code size.
 
 # Step-By-Step Quickstart Guide
@@ -138,8 +138,8 @@ let vector_raw: &glam::Vec4 = bytemuck::TransparentWrapper::peel_ref(&vector);
 - Wrapping all of the `glam` API. Instead, we make it really easy (and
   performant) to drop down to `glam` types when needed.
 - Hiding the `glam` API. It's OK to use `glam` types in public APIs.
-- The "AoSoA" pattern ("extra wide" vector types). Use [ultraviolet][uv]
-  instead[^use_uv].
+- The "`AoSoA`" pattern ("extra wide" vector types). Use [ultraviolet][uv]
+  instead`[^use_`uv].
 
 [^use_uv]: Ultraviolet supports `bytemuck` as well, and the types in this
     library are actually compatible with the non-wide vector types in

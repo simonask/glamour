@@ -1740,7 +1740,7 @@ mod tests {
 
         fn write(&mut self, bytes: &[u8]) {
             for byte in bytes {
-                self.0 = self.0.rotate_left(4) ^ *byte as u64;
+                self.0 = self.0.rotate_left(4) ^ u64::from(*byte);
             }
         }
     }

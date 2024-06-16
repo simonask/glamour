@@ -568,9 +568,9 @@ mod tests {
     fn xy_range() {
         let rect = Rect::new((10, 10), (10, 10));
 
-        let x_range = rect.x_range().into_iter();
+        let x_range = rect.x_range();
         assert!(x_range.eq([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]));
-        let y_range = rect.y_range().into_iter();
+        let y_range = rect.y_range();
         assert!(y_range.eq([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]));
     }
 
@@ -649,8 +649,8 @@ mod tests {
         let r: RectF = RectF::new((10.0, 10.0), (10.0, 10.0));
         assert!(r.contains(&PointF::new(10.0, 10.0)));
         assert!(r.contains(&PointF::new(20.0, 20.0)));
-        assert!(!r.contains(&PointF::new(10.0, 9.999999)));
-        assert!(!r.contains(&PointF::new(9.999999, 10.0)));
+        assert!(!r.contains(&PointF::new(10.0, 9.999_999)));
+        assert!(!r.contains(&PointF::new(9.999_999, 10.0)));
     }
 
     #[test]
@@ -660,16 +660,16 @@ mod tests {
         let r = RectF::new((10.0, 10.0), (10.0, 10.0));
         assert!(r.intersects(&PointF::new(10.0, 10.0)));
         assert!(!r.intersects(&PointF::new(20.0, 20.0)));
-        assert!(!r.intersects(&PointF::new(10.0, 9.999999)));
-        assert!(!r.intersects(&PointF::new(9.999999, 10.0)));
+        assert!(!r.intersects(&PointF::new(10.0, 9.999_999)));
+        assert!(!r.intersects(&PointF::new(9.999_999, 10.0)));
 
         assert_eq!(
             r.intersection(&PointF::new(10.0, 10.0)),
             Some(PointF::new(10.0, 10.0))
         );
         assert_eq!(r.intersection(&PointF::new(20.0, 20.0)), None);
-        assert_eq!(r.intersection(&PointF::new(10.0, 9.999999)), None);
-        assert_eq!(r.intersection(&PointF::new(9.999999, 10.0)), None);
+        assert_eq!(r.intersection(&PointF::new(10.0, 9.999_999)), None);
+        assert_eq!(r.intersection(&PointF::new(9.999_999, 10.0)), None);
 
         // r2 covers all of r.
         let r2 = RectF::new((5.0, 5.0), (15.0, 15.0));
@@ -691,7 +691,7 @@ mod tests {
                 origin: (10.0, 10.0).into(),
                 size: (5.0, 5.0).into(),
             })
-        )
+        );
     }
 
     #[test]
@@ -736,7 +736,7 @@ mod tests {
                 origin: (0.5, 0.5).into(),
                 size: (1.5, 1.5).into(),
             }
-        )
+        );
     }
 
     #[test]
