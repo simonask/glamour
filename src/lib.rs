@@ -385,4 +385,15 @@ mod tests {
         let t: Option<Vector4<i32>> = v.try_cast();
         assert_eq!(t, Some(vec4!(3, 0, 1, 2)));
     }
+
+    #[test]
+    fn as_() {
+        let v = Vector4::<UnitF32>::new(core::f32::MAX, 0.0, 1.0, 2.0);
+        let t: Vector4<UnitI32> = v.as_();
+        assert_eq!(t, vec4!(core::i32::MAX, 0, 1, 2));
+
+        let v = Vector4::<UnitF32>::new(3.0, 0.0, 1.0, 2.0);
+        let t: Vector4<UnitI32> = v.as_();
+        assert_eq!(t, vec4!(3, 0, 1, 2));
+    }
 }

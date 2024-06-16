@@ -605,6 +605,18 @@ macro_rules! casting_interface {
             )*
             Some($base_type_name { $($fields),* })
         }
+
+        #[doc = "Cast to a different coordinate space with scalar type conversion through the `as` operator (potentially narrowing or losing precision)."]
+        #[must_use]
+        pub fn as_<T2>(self) -> $base_type_name<T2>
+        where
+            T: Unit<Scalar: num_traits::AsPrimitive<T2::Scalar>>,
+            T2: Unit,
+        {
+            $base_type_name {
+                $($fields: self.$fields.as_()),*
+            }
+        }
     };
 }
 

@@ -1,3 +1,5 @@
+use num_traits::AsPrimitive;
+
 use crate::bindings;
 use crate::traits::marker::PodValue;
 
@@ -45,6 +47,15 @@ pub unsafe trait Scalar:
     #[must_use]
     fn try_cast<T2: Scalar>(self) -> Option<T2> {
         num_traits::NumCast::from(self)
+    }
+
+    /// Cast the scalar through the `as`operator.
+    ///
+    /// This is a convenience method that just calls [`num_traits::AsPrimitive`].
+    #[inline]
+    #[must_use]
+    fn as_<T2>(self) -> T2 where Self: AsPrimitive<T2>, T2: Scalar {
+        AsPrimitive::as_(self)
     }
 }
 

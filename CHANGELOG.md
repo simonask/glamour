@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Convenience traits `FloatUnit`, `IntUnit`, and `SignedUnit`, which have the
   implied trait bounds for the associated scalar type. These traits are automatically
   implemented for all `T: Unit` where `T::Scalar` is of the appropriate type.
+- The `as_()` method for vectorlike types, implementing casting between units using
+  the `as` operator (through `num_traits::AsPrimitive`).
 
 ### Breaking changes
 - Bumped MSRV to Rust 1.79.
