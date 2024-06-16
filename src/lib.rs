@@ -6,7 +6,8 @@
     clippy::inline_always,
     clippy::module_name_repetitions,
     clippy::wildcard_imports,
-    clippy::similar_names
+    clippy::similar_names,
+    clippy::float_cmp
 )]
 #![cfg_attr(coverage, feature(coverage_attribute))]
 
@@ -377,7 +378,7 @@ mod tests {
 
     #[test]
     fn try_cast() {
-        let v = Vector4::<f32>::new(core::f32::MAX, 0.0, 1.0, 2.0);
+        let v = Vector4::<f32>::new(f32::MAX, 0.0, 1.0, 2.0);
         let t: Option<Vector4<i32>> = v.try_cast();
         assert!(t.is_none());
 
@@ -388,9 +389,9 @@ mod tests {
 
     #[test]
     fn as_() {
-        let v = Vector4::<UnitF32>::new(core::f32::MAX, 0.0, 1.0, 2.0);
+        let v = Vector4::<UnitF32>::new(f32::MAX, 0.0, 1.0, 2.0);
         let t: Vector4<UnitI32> = v.as_();
-        assert_eq!(t, vec4!(core::i32::MAX, 0, 1, 2));
+        assert_eq!(t, vec4!(i32::MAX, 0, 1, 2));
 
         let v = Vector4::<UnitF32>::new(3.0, 0.0, 1.0, 2.0);
         let t: Vector4<UnitI32> = v.as_();

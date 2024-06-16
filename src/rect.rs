@@ -633,11 +633,11 @@ mod tests {
 
         // NaN
 
-        let r = RectF::from_size((core::f32::NAN, core::f32::NAN).into());
+        let r = RectF::from_size((f32::NAN, f32::NAN).into());
         assert!(r.is_empty());
         assert!(r.is_negative());
 
-        let r = RectF::new((core::f32::NAN, 1.0), (1.0, 1.0));
+        let r = RectF::new((f32::NAN, 1.0), (1.0, 1.0));
         assert!(!r.is_empty());
         assert!(!r.is_negative());
     }

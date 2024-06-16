@@ -246,50 +246,62 @@ macro_rules! forward_constructors {
 macro_rules! forward_comparison {
     ($mask:ty, $t:ident) => {
         #[doc = "Return a mask with the result of a component-wise equals comparison."]
+        #[must_use]
         pub fn cmpeq(self, other: Self) -> $mask {
             crate::peel(self).cmpeq(crate::peel(other))
         }
         #[doc = "Return a mask with the result of a component-wise not-equal comparison."]
+        #[must_use]
         pub fn cmpne(self, other: Self) -> $mask {
             crate::peel(self).cmpne(crate::peel(other))
         }
         #[doc = "Return a mask with the result of a component-wise greater-than-or-equal comparison."]
+        #[must_use]
         pub fn cmpge(self, other: Self) -> $mask {
             crate::peel(self).cmpge(crate::peel(other))
         }
         #[doc = "Return a mask with the result of a component-wise greater-than comparison."]
+        #[must_use]
         pub fn cmpgt(self, other: Self) -> $mask {
             crate::peel(self).cmpgt(crate::peel(other))
         }
         #[doc = "Return a mask with the result of a component-wise less-than-or-equal comparison."]
+        #[must_use]
         pub fn cmple(self, other: Self) -> $mask {
             crate::peel(self).cmple(crate::peel(other))
         }
         #[doc = "Return a mask with the result of a component-wise less-than comparison."]
+        #[must_use]
         pub fn cmplt(self, other: Self) -> $mask {
             crate::peel(self).cmplt(crate::peel(other))
         }
         #[doc = "Minimum by component."]
+        #[must_use]
         pub fn min(self, other: Self) -> Self {
             crate::wrap(crate::peel(self).min(crate::peel(other)))
         }
         #[doc = "Maximum by component."]
+        #[must_use]
         pub fn max(self, other: Self) -> Self {
             crate::wrap(crate::peel(self).max(crate::peel(other)))
         }
         #[doc = "Horizontal minimum (smallest component)."]
+        #[must_use]
         pub fn min_element(self) -> T::Scalar {
             crate::peel(self).min_element()
         }
         #[doc = "Horizontal maximum (largest component)."]
+        #[must_use]
         pub fn max_element(self) -> T::Scalar {
             crate::peel(self).max_element()
         }
         #[doc = "Component-wise clamp."]
+        #[must_use]
         pub fn clamp(self, min: Self, max: Self) -> Self {
             crate::wrap(crate::peel(self).clamp(crate::peel(min), crate::peel(max)))
         }
         #[doc = "Select components from two instances based on a mask."]
+        #[must_use]
         pub fn select(mask: $mask, a: Self, b: Self) -> Self {
             crate::wrap(<<T::Scalar as Scalar>::$t>::select(mask, crate::peel(a), crate::peel(b)))
         }
@@ -316,18 +328,22 @@ macro_rules! forward_float_ops {
 
         // These functions have custom wrapping.
         #[doc = "True if all components are non-infinity and non-NaN."]
+        #[must_use]
         pub fn is_finite(&self) -> bool {
             crate::peel_ref(self).is_finite()
         }
         #[doc = "True if any component is NaN."]
+        #[must_use]
         pub fn is_nan(&self) -> bool {
             crate::peel_ref(self).is_nan()
         }
         #[doc = "Return a mask where each bit is set if the corresponding component is NaN."]
+        #[must_use]
         pub fn is_nan_mask(&self) -> $mask {
             crate::peel_ref(self).is_nan_mask()
         }
         #[doc = "Linear interpolation."]
+        #[must_use]
         pub fn lerp(self, other: Self, t: T::Scalar) -> Self {
             crate::wrap(crate::peel(self).lerp(crate::peel(other), t))
         }
@@ -364,37 +380,46 @@ macro_rules! forward_float_vector_ops {
 
         // These functions have custom wrapping.
         #[doc = "Normalize the vector, returning `None` if the length was already (very close to) zero."]
+        #[must_use]
         pub fn try_normalize(self) -> Option<Self> {
             crate::peel(self).try_normalize().map(crate::wrap)
         }
         #[doc = "True if the vector is normalized."]
+        #[must_use]
         pub fn is_normalized(self) -> bool {
             crate::peel(self).is_normalized()
         }
         #[doc = "Squared length of the vector"]
+        #[must_use]
         pub fn length_squared(self) -> T::Scalar {
             crate::peel(self).length_squared()
         }
         #[doc = "Reciprocal length of the vector"]
+        #[must_use]
         pub fn length_recip(self) -> T::Scalar {
             crate::peel(self).length_recip()
         }
         #[doc = "Length of the vector"]
+        #[must_use]
         pub fn length(self) -> T::Scalar {
             crate::peel(self).length()
         }
         #[doc = "self^n by component"]
+        #[must_use]
         pub fn powf(self, n: T::Scalar) -> Self {
             crate::wrap(crate::peel(self).powf(n))
         }
         #[doc = "Clamp length"]
+        #[must_use]
         pub fn clamp_length(self, min: T::Scalar, max: T::Scalar) -> Self {
             crate::wrap(crate::peel(self).clamp_length(min, max))
         }
         #[doc = "Clamp length"]
+        #[must_use]
         pub fn clamp_length_min(self, min: T::Scalar) -> Self {
             crate::wrap(crate::peel(self).clamp_length_min(min))
         }
+        #[must_use]
         #[doc = "Clamp length"]
         pub fn clamp_length_max(self, max: T::Scalar) -> Self {
             crate::wrap(crate::peel(self).clamp_length_max(max))

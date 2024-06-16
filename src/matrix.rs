@@ -295,16 +295,19 @@ where
     );
 
     #[doc = "Multiplies two 2x2 matrices."]
+    #[must_use]
     pub fn mul_mat2(&self, other: &Self) -> Self {
         wrap(peel_ref(self).mul_mat2(peel_ref(other)))
     }
 
     #[doc = "Adds two 2x2 matrices."]
+    #[must_use]
     pub fn add_mat2(&self, other: &Self) -> Self {
         wrap(peel_ref(self).add_mat2(peel_ref(other)))
     }
 
     #[doc = "Subtracts two 2x2 matrices."]
+    #[must_use]
     pub fn sub_mat2(&self, other: &Self) -> Self {
         wrap(peel_ref(self).sub_mat2(peel_ref(other)))
     }
@@ -449,41 +452,49 @@ where
     }
 
     #[doc = "2D translation matrix."]
+    #[must_use]
     pub fn from_translation(translation: Vector2<T>) -> Self {
         wrap(<T::Mat3>::from_translation(peel(translation)))
     }
 
     #[doc = "Matrix3 from [`Matrix2`]"]
+    #[must_use]
     pub fn from_mat2(mat2: Matrix2<T>) -> Self {
         wrap(<T::Mat3>::from_mat2(peel(mat2)))
     }
 
     #[doc = "Matrix3 from [`Matrix4`]"]
+    #[must_use]
     pub fn from_mat4(mat4: Matrix4<T>) -> Self {
         wrap(<T::Mat3>::from_mat4(peel(mat4)))
     }
 
     #[doc = "Multiplies two 3x3 matrices."]
+    #[must_use]
     pub fn mul_mat3(&self, other: &Self) -> Self {
         wrap(peel_ref(self).mul_mat3(peel_ref(other)))
     }
 
     #[doc = "Adds two 3x3 matrices."]
+    #[must_use]
     pub fn add_mat3(&self, other: &Self) -> Self {
         wrap(peel_ref(self).add_mat3(peel_ref(other)))
     }
 
     #[doc = "Subtracts two 3x3 matrices."]
+    #[must_use]
     pub fn sub_mat3(&self, other: &Self) -> Self {
         wrap(peel_ref(self).sub_mat3(peel_ref(other)))
     }
 
     #[doc = "Create a `[T; 9]` array storing the data in column-major order."]
+    #[must_use]
     pub fn to_cols_array(&self) -> [T; 9] {
         peel_ref(self).to_cols_array()
     }
 
     #[doc = "Creates a 3x3 matrix from a [T; 9] array stored in column major order."]
+    #[must_use]
     pub fn from_cols_array(array: &[T; 9]) -> Self {
         TransparentWrapper::wrap(<T::Mat3 as bindings::Matrix3<T>>::from_cols_array(array))
     }
@@ -945,7 +956,8 @@ where
         wrap(<T::Mat4>::from_mat3(peel(mat3)))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::look_at_lh()]."]
+    #[must_use]
     pub fn look_at_lh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::look_at_lh(
             peel(eye),
@@ -954,7 +966,8 @@ where
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::look_at_rh()]."]
+    #[must_use]
     pub fn look_at_rh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::look_at_rh(
             peel(eye),
@@ -970,18 +983,23 @@ where
     );
 
     #[doc = "Multiplies two 4x4 matrices."]
+    #[must_use]
     pub fn mul_mat4(&self, other: &Self) -> Self {
         wrap(peel_ref(self).mul_mat4(peel_ref(other)))
     }
     #[doc = "Adds two 4x4 matrices."]
+    #[must_use]
     pub fn add_mat4(&self, other: &Self) -> Self {
         wrap(peel_ref(self).add_mat4(peel_ref(other)))
     }
     #[doc = "Subtracts two 4x4 matrices."]
+    #[must_use]
     pub fn sub_mat4(&self, other: &Self) -> Self {
         wrap(peel_ref(self).sub_mat4(peel_ref(other)))
     }
-    #[doc = ""]
+
+    #[doc = "See [glam::Mat4::perspective_rh_gl()]."]
+    #[must_use]
     pub fn perspective_rh_gl(
         fov_y_radians: Angle<T>,
         aspect_ratio: T,
@@ -996,7 +1014,8 @@ where
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::perspective_lh()]."]
+    #[must_use]
     pub fn perspective_lh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T, z_far: T) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::perspective_lh(
             peel(fov_y_radians),
@@ -1006,7 +1025,8 @@ where
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::perspective_rh()]."]
+    #[must_use]
     pub fn perspective_rh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T, z_far: T) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::perspective_rh(
             peel(fov_y_radians),
@@ -1016,7 +1036,8 @@ where
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::perspective_reverse_lh()]."]
+    #[must_use]
     pub fn perspective_infinite_lh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::perspective_infinite_lh(
             peel(fov_y_radians),
@@ -1025,7 +1046,8 @@ where
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::perspective_reverse_rh()]."]
+    #[must_use]
     pub fn perspective_infinite_reverse_lh(
         fov_y_radians: Angle<T>,
         aspect_ratio: T,
@@ -1040,7 +1062,8 @@ where
         )
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::perspective_reverse_rh()]."]
+    #[must_use]
     pub fn perspective_infinite_rh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::perspective_infinite_rh(
             peel(fov_y_radians),
@@ -1049,7 +1072,8 @@ where
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::perspective_reverse_lh()]."]
+    #[must_use]
     pub fn perspective_infinite_reverse_rh(
         fov_y_radians: Angle<T>,
         aspect_ratio: T,
@@ -1064,21 +1088,24 @@ where
         )
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::orthographic_rh_gl()]."]
+    #[must_use]
     pub fn orthographic_rh_gl(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::orthographic_rh_gl(
             left, right, bottom, top, near, far,
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::orthographic_lh()]."]
+    #[must_use]
     pub fn orthographic_lh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::orthographic_lh(
             left, right, bottom, top, near, far,
         ))
     }
 
-    #[doc = ""]
+    #[doc = "See [glam::Mat4::orthographic_rh()]."]
+    #[must_use]
     pub fn orthographic_rh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::orthographic_rh(
             left, right, bottom, top, near, far,
@@ -1086,11 +1113,13 @@ where
     }
 
     #[doc = "Create a `[T; 16]` array storing the data in column-major order."]
+    #[must_use]
     pub fn to_cols_array(&self) -> [T; 16] {
         peel_ref(self).to_cols_array()
     }
 
     #[doc = "Creates a 4x4 matrix from a [T; 16] array stored in column major order."]
+    #[must_use]
     pub fn from_cols_array(array: &[T; 16]) -> Self {
         wrap(<T::Mat4 as bindings::Matrix4<T>>::from_cols_array(array))
     }

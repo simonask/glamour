@@ -143,6 +143,7 @@ macro_rules! float_point_interface {
             peel(self).distance(peel(other))
         }
         #[doc = "Moves towards rhs based on the value d."]
+        #[must_use]
         pub fn move_towards(self, rhs: Self, d: T::Scalar) -> Self {
             wrap(peel(self).move_towards(peel(rhs), d))
         }
@@ -277,14 +278,17 @@ impl<T: Unit> Point2<T> {
     crate::array_interface!(2);
 
     #[doc = "Extend with z-component to [`Point3`]."]
+    #[must_use]
     pub fn extend(self, z: T::Scalar) -> Point3<T> {
         Point3::new(self.x, self.y, z)
     }
     #[doc = "Replace the x-component with a new value."]
+    #[must_use]
     pub fn with_x(self, x: T::Scalar) -> Self {
         Self { x, y: self.y }
     }
     #[doc = "Replace the y-component with a new value."]
+    #[must_use]
     pub fn with_y(self, y: T::Scalar) -> Self {
         Self { x: self.x, y }
     }
@@ -362,6 +366,7 @@ impl<T: Unit> Point3<T> {
         Point4::new(self.x, self.y, self.z, w)
     }
     #[doc = "Replace the x-component with a new value."]
+    #[must_use]
     pub fn with_x(self, x: T::Scalar) -> Self {
         Self {
             x,
@@ -370,6 +375,7 @@ impl<T: Unit> Point3<T> {
         }
     }
     #[doc = "Replace the y-component with a new value."]
+    #[must_use]
     pub fn with_y(self, y: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -378,6 +384,7 @@ impl<T: Unit> Point3<T> {
         }
     }
     #[doc = "Replace the z-component with a new value."]
+    #[must_use]
     pub fn with_z(self, z: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -462,6 +469,7 @@ impl<T: Unit> Point4<T> {
     );
 
     #[doc = "Replace the x-component with a new value."]
+    #[must_use]
     pub fn with_x(self, x: T::Scalar) -> Self {
         Self {
             x,
@@ -471,6 +479,7 @@ impl<T: Unit> Point4<T> {
         }
     }
     #[doc = "Replace the y-component with a new value."]
+    #[must_use]
     pub fn with_y(self, y: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -480,6 +489,7 @@ impl<T: Unit> Point4<T> {
         }
     }
     #[doc = "Replace the z-component with a new value."]
+    #[must_use]
     pub fn with_z(self, z: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -489,6 +499,7 @@ impl<T: Unit> Point4<T> {
         }
     }
     #[doc = "Replace the w-component with a new value."]
+    #[must_use]
     pub fn with_w(self, w: T::Scalar) -> Self {
         Self {
             x: self.x,

@@ -627,6 +627,7 @@ impl<'de, T: Unit> serde::Deserialize<'de> for Box3<T> {
 }
 
 #[cfg(test)]
+#[allow(clippy::too_many_lines)]
 mod tests {
     use super::*;
     use serde_test::*;

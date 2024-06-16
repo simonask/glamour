@@ -667,11 +667,11 @@ mod tests {
 
         // NaN
 
-        let r = Box2::from_size((core::f32::NAN, core::f32::NAN).into());
+        let r = Box2::from_size((f32::NAN, f32::NAN).into());
         assert!(r.is_empty());
         assert!(r.is_negative());
 
-        let r = Box2::new((core::f32::NAN, 1.0), (1.0, 1.0));
+        let r = Box2::new((f32::NAN, 1.0), (1.0, 1.0));
         assert!(r.is_empty());
         assert!(r.is_negative());
     }
@@ -738,6 +738,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::many_single_char_names)]
     fn intersection() {
         type Box2 = super::Box2<f32>;
         let x = Box2::new((10.0, 10.0), (20.0, 20.0));

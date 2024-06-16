@@ -7,6 +7,8 @@ use crate::traits::marker::PodValue;
 ///
 /// This is implemented for `f32`, `f64`, `i32`, `u32`, `i16`, `u16`, `i64`, and `u64`.
 ///
+/// # Safety
+///
 /// The associated types `Vec2`, `Vec3`, and `Vec4` define how this crate's vector/point/size types are mapped to `glam`
 /// vectors. Vectorlike types using a [`T: Unit`](crate::Unit) go through `T::Scalar` to find which `glam` vector type
 /// to use. Since those types are must be bitwise layout-compatible, this trait is unsafe to implement.
@@ -72,6 +74,8 @@ pub trait SignedScalar:
 }
 
 /// Floating-point scalar types (`f32` and `f64`).
+///
+/// # Safety
 ///
 /// The associated types `Mat2`, `Mat3`, and `Mat4` define how this crate's matrix types are mapped to `glam` matrices.
 /// Matrixlike types using a [`T: Unit`](crate::Unit) go through `T::Scalar` to find which `glam` matrix type to use.
@@ -202,34 +206,31 @@ mod tests {
 
     #[test]
     fn try_cast() {
-        assert_eq!(core::f32::NAN.try_cast::<i32>(), None);
-        assert_eq!(core::f32::INFINITY.try_cast::<i32>(), None);
-        assert_eq!(core::f32::NEG_INFINITY.try_cast::<i32>(), None);
+        assert_eq!(f32::NAN.try_cast::<i32>(), None);
+        assert_eq!(f32::INFINITY.try_cast::<i32>(), None);
+        assert_eq!(f32::NEG_INFINITY.try_cast::<i32>(), None);
         assert_eq!(1.0f32.try_cast::<i32>(), Some(1));
 
-        assert_eq!(core::f32::NAN.try_cast::<u32>(), None);
-        assert_eq!(core::f32::INFINITY.try_cast::<u32>(), None);
-        assert_eq!(core::f32::NEG_INFINITY.try_cast::<u32>(), None);
+        assert_eq!(f32::NAN.try_cast::<u32>(), None);
+        assert_eq!(f32::INFINITY.try_cast::<u32>(), None);
+        assert_eq!(f32::NEG_INFINITY.try_cast::<u32>(), None);
         assert_eq!(1.0f32.try_cast::<u32>(), Some(1));
         assert_eq!((-1.0f32).try_cast::<u32>(), None);
 
-        assert_eq!(core::f64::NAN.try_cast::<i32>(), None);
-        assert_eq!(core::f64::INFINITY.try_cast::<i32>(), None);
-        assert_eq!(core::f64::NEG_INFINITY.try_cast::<i32>(), None);
+        assert_eq!(f64::NAN.try_cast::<i32>(), None);
+        assert_eq!(f64::INFINITY.try_cast::<i32>(), None);
+        assert_eq!(f64::NEG_INFINITY.try_cast::<i32>(), None);
         assert_eq!(1.0f64.try_cast::<i32>(), Some(1));
 
-        assert_eq!(core::f64::NAN.try_cast::<u32>(), None);
-        assert_eq!(core::f64::INFINITY.try_cast::<u32>(), None);
-        assert_eq!(core::f64::NEG_INFINITY.try_cast::<u32>(), None);
+        assert_eq!(f64::NAN.try_cast::<u32>(), None);
+        assert_eq!(f64::INFINITY.try_cast::<u32>(), None);
+        assert_eq!(f64::NEG_INFINITY.try_cast::<u32>(), None);
         assert_eq!(1.0f64.try_cast::<u32>(), Some(1));
 
-        assert!(core::f64::NAN.try_cast::<f32>().unwrap().is_nan());
+        assert!(f64::NAN.try_cast::<f32>().unwrap().is_nan());
 
-        assert_eq!(core::f64::INFINITY.try_cast(), Some(core::f32::INFINITY));
-        assert_eq!(
-            core::f64::NEG_INFINITY.try_cast(),
-            Some(core::f32::NEG_INFINITY)
-        );
+        assert_eq!(f64::INFINITY.try_cast(), Some(f32::INFINITY));
+        assert_eq!(f64::NEG_INFINITY.try_cast(), Some(f32::NEG_INFINITY));
         assert_eq!(1.0f64.try_cast::<f32>(), Some(1.0));
     }
 }

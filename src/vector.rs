@@ -399,26 +399,32 @@ impl<T: Unit> Vector2<T> {
     crate::array_interface!(2);
 
     #[doc = "Dot product"]
+    #[must_use]
     pub fn dot(self, other: Self) -> T::Scalar {
         peel(self).dot(peel(other))
     }
     #[doc = "Extend with z-component to [`Vector3`]."]
+    #[must_use]
     pub fn extend(self, z: T::Scalar) -> Vector3<T> {
         wrap(peel(self).extend(z))
     }
     #[doc = "Replace the x-component with a new value."]
+    #[must_use]
     pub fn with_x(self, x: T::Scalar) -> Self {
         Self { x, y: self.y }
     }
     #[doc = "Replace the y-component with a new value."]
+    #[must_use]
     pub fn with_y(self, y: T::Scalar) -> Self {
         Self { x: self.x, y }
     }
     #[doc = "Returns the sum of all elements of self."]
+    #[must_use]
     pub fn element_sum(self) -> T::Scalar {
         self.x + self.y
     }
     #[doc = "Returns the product of all elements of self."]
+    #[must_use]
     pub fn element_product(self) -> T::Scalar {
         self.x * self.y
     }
@@ -586,14 +592,17 @@ impl<T: Unit> Vector3<T> {
     );
 
     #[doc = "Dot product"]
+    #[must_use]
     pub fn dot(self, other: Self) -> T::Scalar {
         peel(self).dot(peel(other))
     }
     #[doc = "Extend with w-component to [`Vector4`]."]
+    #[must_use]
     pub fn extend(self, w: T::Scalar) -> Vector4<T> {
         wrap(peel(self).extend(w))
     }
     #[doc = "Replace the x-component with a new value."]
+    #[must_use]
     pub fn with_x(self, x: T::Scalar) -> Self {
         Self {
             x,
@@ -602,6 +611,7 @@ impl<T: Unit> Vector3<T> {
         }
     }
     #[doc = "Replace the y-component with a new value."]
+    #[must_use]
     pub fn with_y(self, y: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -610,6 +620,7 @@ impl<T: Unit> Vector3<T> {
         }
     }
     #[doc = "Replace the z-component with a new value."]
+    #[must_use]
     pub fn with_z(self, z: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -811,17 +822,19 @@ impl<T: Unit> Vector4<T> {
     crate::array_interface!(4);
 
     crate::forward_to_raw!(
-    glam::Vec4 =>
-    #[doc = "Truncate to [`Vector3`]."]
-    pub fn truncate(self) -> Vector3<T>;
+        glam::Vec4 =>
+        #[doc = "Truncate to [`Vector3`]."]
+        pub fn truncate(self) -> Vector3<T>;
     );
 
     #[doc = "Dot product"]
+    #[must_use]
     pub fn dot(self, other: Self) -> T::Scalar {
         peel(self).dot(peel(other))
     }
 
     #[doc = "Replace the x-component with a new value."]
+    #[must_use]
     pub fn with_x(self, x: T::Scalar) -> Self {
         Self {
             x,
@@ -831,6 +844,7 @@ impl<T: Unit> Vector4<T> {
         }
     }
     #[doc = "Replace the y-component with a new value."]
+    #[must_use]
     pub fn with_y(self, y: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -840,6 +854,7 @@ impl<T: Unit> Vector4<T> {
         }
     }
     #[doc = "Replace the z-component with a new value."]
+    #[must_use]
     pub fn with_z(self, z: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -849,6 +864,7 @@ impl<T: Unit> Vector4<T> {
         }
     }
     #[doc = "Replace the w-component with a new value."]
+    #[must_use]
     pub fn with_w(self, w: T::Scalar) -> Self {
         Self {
             x: self.x,
@@ -858,10 +874,12 @@ impl<T: Unit> Vector4<T> {
         }
     }
     #[doc = "Returns the sum of all elements of self."]
+    #[must_use]
     pub fn element_sum(self) -> T::Scalar {
         peel(self).element_sum()
     }
     #[doc = "Returns the product of all elements of self."]
+    #[must_use]
     pub fn element_product(self) -> T::Scalar {
         peel(self).element_product()
     }
@@ -1336,17 +1354,17 @@ mod tests {
 
     #[test]
     fn nan() {
-        let v2 = Vec2::new(1.0, core::f32::NAN);
+        let v2 = Vec2::new(1.0, f32::NAN);
         assert!(v2.is_nan());
         assert!(!v2.is_finite());
         assert_eq!(v2.is_nan_mask(), glam::BVec2::new(false, true));
 
-        let v3 = Vec3::new(1.0, core::f32::NAN, 3.0);
+        let v3 = Vec3::new(1.0, f32::NAN, 3.0);
         assert!(v3.is_nan());
         assert!(!v3.is_finite());
         assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
 
-        let v4 = Vec4::new(1.0, 2.0, core::f32::NAN, 4.0);
+        let v4 = Vec4::new(1.0, 2.0, f32::NAN, 4.0);
         assert!(v4.is_nan());
         assert!(!v4.is_finite());
         assert_eq!(

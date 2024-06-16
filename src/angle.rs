@@ -429,12 +429,12 @@ mod tests {
     #[test]
     fn forward_to_float() {
         use super::FloatAngleExt;
-        let s: Angle = FloatAngleExt::asin(1.0);
-        let c: Angle = FloatAngleExt::acos(1.0);
-        let t: Angle = FloatAngleExt::atan(1.0);
-        assert_eq!(s.to_radians(), f32::asin(1.0));
-        assert_eq!(c.to_radians(), f32::acos(1.0));
-        assert_eq!(t.to_radians(), f32::atan(1.0));
+        let s: Angle = FloatAngleExt::asin(1.0f32);
+        let c: Angle = FloatAngleExt::acos(1.0f32);
+        let t: Angle = FloatAngleExt::atan(1.0f32);
+        assert_eq!(s.to_radians(), f32::asin(1.0f32));
+        assert_eq!(c.to_radians(), f32::acos(1.0f32));
+        assert_eq!(t.to_radians(), f32::atan(1.0f32));
 
         assert_eq!(Angle::PI.clone(), Angle::PI);
         assert_eq!(Angle::default(), Angle::from_radians(0.0));
@@ -471,12 +471,9 @@ mod tests {
         let a = Angle::from_radians(1.0);
         let b = Angle::from_radians(-0.5);
         assert_abs_diff_eq!(a + b, Angle::from_radians(0.5));
-        let x: Angle = a * 2.0f32;
-        assert_abs_diff_eq!(x, Angle::from_radians(2.0));
-        let y: Angle = a / 2.0f32;
-        assert_abs_diff_eq!(y, Angle::from_radians(0.5));
-        let z: f32 = a / b;
-        assert_abs_diff_eq!(z, -2.0);
+        assert_abs_diff_eq!(a * 2.0, Angle::from_radians(2.0));
+        assert_abs_diff_eq!(a / 2.0, Angle::from_radians(0.5));
+        assert_abs_diff_eq!(a / b, -2.0);
 
         let mut a = Angle::from_radians(1.0);
         a += Angle::from_radians(2.0);
