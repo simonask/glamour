@@ -17,7 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking changes
 - Bumped MSRV to Rust 1.79.
 - Bumped `glam` to 0.28.0.
-- Removed the `ToRaw` and `AsRaw` traits. Use `bytemuck::TransparentWrapper` instead.
+- Removed the `ToRaw` and `AsRaw` traits. Use a custom `Transparent` instead, similar to
+  `bytemuck::TransparentWrapper`.
 - Removed `ZERO` and `ONE` associated consts, in favor of `num_traits::{ConstZero, ConstOne}`.
 - Added `<T: Scalar>` bound to `Angle<T>`.
 - `angle_between()` was renamed to `angle_to()` in glam 0.28.0.

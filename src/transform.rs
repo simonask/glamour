@@ -8,12 +8,12 @@ use core::ops::Mul;
 use core::{fmt::Debug, marker::PhantomData};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{cast, Pod, TransparentWrapper, Zeroable};
+use bytemuck::{cast, Pod, Zeroable};
 
 use crate::peel;
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3, Unit,
-    Vector2, Vector3,
+    bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3,
+    Transparent, Unit, Vector2, Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
@@ -247,14 +247,8 @@ unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform3<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform3<Src, Dst> {}
-unsafe impl<Src: Unit, Dst: Unit> TransparentWrapper<Matrix3<Src::Scalar>>
-    for Transform2<Src, Dst>
-{
-}
-unsafe impl<Src: Unit, Dst: Unit> TransparentWrapper<Matrix4<Src::Scalar>>
-    for Transform3<Src, Dst>
-{
-}
+unsafe impl<Src: Unit, Dst: Unit> Transparent<Matrix3<Src::Scalar>> for Transform2<Src, Dst> {}
+unsafe impl<Src: Unit, Dst: Unit> Transparent<Matrix4<Src::Scalar>> for Transform3<Src, Dst> {}
 
 impl<Src, Dst> Transform2<Src, Dst>
 where

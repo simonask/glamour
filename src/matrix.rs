@@ -10,14 +10,14 @@ use crate::{
     bindings::{
         self, Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4,
     },
-    peel, peel_mut, peel_ref,
+    peel,
     prelude::*,
     scalar::FloatScalar,
     unit::FloatUnit,
-    wrap, Angle, Point2, Point3, Scalar, Unit, Vector2, Vector3, Vector4,
+    wrap, Angle, Point2, Point3, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use bytemuck::{Pod, Zeroable};
 
 /// 2x2 column-major matrix.
 ///
@@ -31,7 +31,7 @@ pub struct Matrix2<T: Scalar>(Vector4<T>);
 unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
 unsafe impl<T: Scalar> Pod for Matrix2<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat2> for Matrix2<T> {}
+unsafe impl<T: FloatScalar> Transparent<T::Mat2> for Matrix2<T> {}
 
 /// 3x3 column-major matrix.
 ///
@@ -50,7 +50,7 @@ pub struct Matrix3<T: Scalar> {
 unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
 unsafe impl<T: Scalar> Pod for Matrix3<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat3> for Matrix3<T> {}
+unsafe impl<T: FloatScalar> Transparent<T::Mat3> for Matrix3<T> {}
 
 /// 4x4 column-major matrix.
 ///
@@ -70,7 +70,7 @@ pub struct Matrix4<T: Scalar> {
 unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}
 unsafe impl<T: Scalar> Pod for Matrix4<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat4> for Matrix4<T> {}
+unsafe impl<T: FloatScalar> Transparent<T::Mat4> for Matrix4<T> {}
 
 macro_rules! impl_matrix {
     ($base_type_name:ident < $dimensions:literal > => $mat_name:ident [ $axis_vector_ty:ident ]) => {
@@ -130,7 +130,7 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn determinant(&self) -> T {
-                peel_ref(self).determinant()
+                peel(*self).determinant()
             }
 
             #[doc = "True if matrix is invertible."]
@@ -160,28 +160,28 @@ macro_rules! impl_matrix {
             #[inline]
             #[must_use]
             pub fn transpose(&self) -> Self {
-                wrap(peel_ref(self).transpose())
+                wrap(peel(*self).transpose())
             }
 
             #[doc = "True if any element in the matrix is NaN."]
             #[inline]
             #[must_use]
             pub fn is_nan(&self) -> bool {
-                peel_ref(self).is_nan()
+                peel(*self).is_nan()
             }
 
             #[doc = "True if all elements in the matrix are finite (non-infinite, non-NaN)."]
             #[inline]
             #[must_use]
             pub fn is_finite(&self) -> bool {
-                peel_ref(self).is_finite()
+                peel(*self).is_finite()
             }
 
             #[doc = "Takes the absolute value of each element in self"]
             #[inline]
             #[must_use]
             pub fn abs(&self) -> Self {
-                wrap(peel_ref(self).abs())
+                wrap(peel(*self).abs())
             }
         }
 
@@ -256,11 +256,11 @@ where
 
     #[doc = "Get column."]
     pub fn col(&self, index: usize) -> Vector2<T> {
-        wrap(peel_ref(self).col(index))
+        wrap(peel(*self).col(index))
     }
     #[doc = "Get row."]
     pub fn row(&self, index: usize) -> Vector2<T> {
-        wrap(peel_ref(self).row(index))
+        wrap(peel(*self).row(index))
     }
 
     #[doc = "Matrix from columns."]
@@ -297,19 +297,19 @@ where
     #[doc = "Multiplies two 2x2 matrices."]
     #[must_use]
     pub fn mul_mat2(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).mul_mat2(peel_ref(other)))
+        wrap(peel(*self).mul_mat2(&peel(*other)))
     }
 
     #[doc = "Adds two 2x2 matrices."]
     #[must_use]
     pub fn add_mat2(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).add_mat2(peel_ref(other)))
+        wrap(peel(*self).add_mat2(&peel(*other)))
     }
 
     #[doc = "Subtracts two 2x2 matrices."]
     #[must_use]
     pub fn sub_mat2(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).sub_mat2(peel_ref(other)))
+        wrap(peel(*self).sub_mat2(&peel(*other)))
     }
 
     /// Scaling matrix.
@@ -344,7 +344,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_point(&self, point: Point2<T>) -> Point2<T> {
-        wrap(peel_ref(self).mul_vec2(peel(point)))
+        wrap(peel(*self).mul_vec2(peel(point)))
     }
 
     /// Transform 2D vector.
@@ -363,7 +363,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_vector(&self, vector: Vector2<T>) -> Vector2<T> {
-        wrap(peel_ref(self).mul_vec2(peel(vector)))
+        wrap(peel(*self).mul_vec2(peel(vector)))
     }
 }
 
@@ -401,11 +401,11 @@ where
 
     #[doc = "Get column."]
     pub fn col(&self, index: usize) -> Vector3<T> {
-        wrap(peel_ref(self).col(index))
+        wrap(peel(*self).col(index))
     }
     #[doc = "Get row."]
     pub fn row(&self, index: usize) -> Vector3<T> {
-        wrap(peel_ref(self).row(index))
+        wrap(peel(*self).row(index))
     }
 
     crate::forward_to_raw!(
@@ -472,31 +472,31 @@ where
     #[doc = "Multiplies two 3x3 matrices."]
     #[must_use]
     pub fn mul_mat3(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).mul_mat3(peel_ref(other)))
+        wrap(peel(*self).mul_mat3(&peel(*other)))
     }
 
     #[doc = "Adds two 3x3 matrices."]
     #[must_use]
     pub fn add_mat3(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).add_mat3(peel_ref(other)))
+        wrap(peel(*self).add_mat3(&peel(*other)))
     }
 
     #[doc = "Subtracts two 3x3 matrices."]
     #[must_use]
     pub fn sub_mat3(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).sub_mat3(peel_ref(other)))
+        wrap(peel(*self).sub_mat3(&peel(*other)))
     }
 
     #[doc = "Create a `[T; 9]` array storing the data in column-major order."]
     #[must_use]
     pub fn to_cols_array(&self) -> [T; 9] {
-        peel_ref(self).to_cols_array()
+        peel(*self).to_cols_array()
     }
 
     #[doc = "Creates a 3x3 matrix from a [T; 9] array stored in column major order."]
     #[must_use]
     pub fn from_cols_array(array: &[T; 9]) -> Self {
-        TransparentWrapper::wrap(<T::Mat3 as bindings::Matrix3<T>>::from_cols_array(array))
+        wrap(<T::Mat3 as bindings::Matrix3<T>>::from_cols_array(array))
     }
 
     /// Transform 2D point.
@@ -516,7 +516,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_point<U: Unit<Scalar = T>>(&self, point: Point2<U>) -> Point2<U> {
-        wrap(peel_ref(self).transform_point2(peel(point)))
+        wrap(peel(*self).transform_point2(peel(point)))
     }
 
     /// Transform 2D vector.
@@ -526,7 +526,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_vector<U: Unit<Scalar = T>>(&self, vector: Vector2<U>) -> Vector2<U> {
-        wrap(peel_ref(self).transform_vector2(peel(vector)))
+        wrap(peel(*self).transform_vector2(peel(vector)))
     }
 }
 
@@ -680,7 +680,7 @@ where
 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: T) {
-        *peel_mut(self) *= rhs;
+        *self = wrap(peel(*self) * rhs);
     }
 }
 
@@ -692,7 +692,7 @@ where
 
     #[inline(always)]
     fn mul(self, rhs: Vector2<T>) -> Vector2<T> {
-        wrap(peel_ref(&self).mul_vec2(peel(rhs)))
+        wrap(peel(self).mul_vec2(peel(rhs)))
     }
 }
 
@@ -714,7 +714,7 @@ where
 {
     #[inline(always)]
     fn div_assign(&mut self, rhs: T) {
-        *peel_mut(self) /= rhs;
+        *self = wrap(peel(*self) / rhs);
     }
 }
 
@@ -749,7 +749,7 @@ where
 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: T) {
-        *peel_mut(self) *= rhs;
+        *self = *self * rhs;
     }
 }
 
@@ -784,7 +784,7 @@ where
 {
     #[inline(always)]
     fn div_assign(&mut self, rhs: T) {
-        *peel_mut(self) /= rhs;
+        *self = *self / rhs;
     }
 }
 
@@ -806,7 +806,7 @@ where
 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: T) {
-        *peel_mut(self) *= rhs;
+        *self = *self * rhs;
     }
 }
 
@@ -828,7 +828,7 @@ where
 {
     #[inline(always)]
     fn div_assign(&mut self, rhs: T) {
-        *peel_mut(self) /= rhs;
+        *self = *self / rhs;
     }
 }
 
@@ -841,7 +841,7 @@ where
     #[inline]
     #[must_use]
     fn mul(self, rhs: Vector4<T>) -> Self::Output {
-        wrap(peel_ref(&self).mul_vec4(peel(rhs)))
+        wrap(peel(self).mul_vec4(peel(rhs)))
     }
 }
 
@@ -883,11 +883,11 @@ where
 
     #[doc = "Get column."]
     pub fn col(&self, index: usize) -> Vector4<T> {
-        wrap(peel_ref(self).col(index))
+        wrap(peel(*self).col(index))
     }
     #[doc = "Get row."]
     pub fn row(&self, index: usize) -> Vector4<T> {
-        wrap(peel_ref(self).row(index))
+        wrap(peel(*self).row(index))
     }
 
     #[doc = "Matrix from columns."]
@@ -985,17 +985,17 @@ where
     #[doc = "Multiplies two 4x4 matrices."]
     #[must_use]
     pub fn mul_mat4(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).mul_mat4(peel_ref(other)))
+        wrap(peel(*self).mul_mat4(&peel(*other)))
     }
     #[doc = "Adds two 4x4 matrices."]
     #[must_use]
     pub fn add_mat4(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).add_mat4(peel_ref(other)))
+        wrap(peel(*self).add_mat4(&peel(*other)))
     }
     #[doc = "Subtracts two 4x4 matrices."]
     #[must_use]
     pub fn sub_mat4(&self, other: &Self) -> Self {
-        wrap(peel_ref(self).sub_mat4(peel_ref(other)))
+        wrap(peel(*self).sub_mat4(&peel(*other)))
     }
 
     #[doc = "See [glam::Mat4::perspective_rh_gl()]."]
@@ -1115,7 +1115,7 @@ where
     #[doc = "Create a `[T; 16]` array storing the data in column-major order."]
     #[must_use]
     pub fn to_cols_array(&self) -> [T; 16] {
-        peel_ref(self).to_cols_array()
+        peel(*self).to_cols_array()
     }
 
     #[doc = "Creates a 4x4 matrix from a [T; 16] array stored in column major order."]
@@ -1134,7 +1134,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_point(&self, point: Point3<T>) -> Point3<T> {
-        wrap(peel_ref(self).transform_point3(peel(point)))
+        wrap(peel(*self).transform_point3(peel(point)))
     }
 
     /// Transform 3D vector.
@@ -1144,7 +1144,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_vector<U: Unit<Scalar = T>>(&self, vector: Vector3<U>) -> Vector3<U> {
-        wrap(peel_ref(self).transform_vector3(peel(vector)))
+        wrap(peel(*self).transform_vector3(peel(vector)))
     }
 
     /// Project 3D point.
@@ -1156,7 +1156,7 @@ where
     #[inline]
     #[must_use]
     pub fn project_point<U: Unit<Scalar = T>>(&self, point: Point3<U>) -> Point3<U> {
-        wrap(peel_ref(self).project_point3(peel(point)))
+        wrap(peel(*self).project_point3(peel(point)))
     }
 }
 
@@ -1189,11 +1189,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_eq(peel_ref(other), epsilon)
+        peel(*self).abs_diff_eq(&peel(*other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_ne(peel_ref(other), epsilon)
+        peel(*self).abs_diff_ne(&peel(*other), epsilon)
     }
 }
 
@@ -1257,11 +1257,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_eq(peel_ref(other), epsilon)
+        peel(*self).abs_diff_eq(&peel(*other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_ne(peel_ref(other), epsilon)
+        peel(*self).abs_diff_ne(&peel(*other), epsilon)
     }
 }
 
@@ -1325,11 +1325,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_eq(peel_ref(other), epsilon)
+        peel(*self).abs_diff_eq(&peel(*other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_ne(peel_ref(other), epsilon)
+        peel(*self).abs_diff_ne(&peel(*other), epsilon)
     }
 }
 

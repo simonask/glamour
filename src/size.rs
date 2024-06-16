@@ -1,10 +1,11 @@
 //! Size vectors
 
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, unit::FloatUnit, Scalar, Unit, Vector2, Vector3,
+    bindings::prelude::*, rewrap, scalar::FloatScalar, unit::FloatUnit, Scalar, Transparent, Unit,
+    Vector2, Vector3,
 };
 
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use bytemuck::{Pod, Zeroable};
 use num_traits::{ConstOne, ConstZero};
 
 /// 2D size.
@@ -20,7 +21,7 @@ pub struct Size2<T: Unit = f32> {
 unsafe impl<T: Unit> Pod for Size2<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> Zeroable for Size2<T> {}
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec2> for Size2<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec2> for Size2<T> {}
 
 /// 3D size.
 #[repr(C)]
@@ -38,7 +39,7 @@ unsafe impl<T: Unit> Pod for Size3<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> Zeroable for Size3<T> {}
 // SAFETY: This is the guarantee of this crate.
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec3> for Size3<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec3> for Size3<T> {}
 
 crate::derive_standard_traits!(Size2 {
     width: T::Scalar,
@@ -78,14 +79,14 @@ macro_rules! impl_size {
         impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
             #[inline]
             fn from(vec: $vector_type<T>) -> Self {
-                TransparentWrapper::wrap(TransparentWrapper::peel(vec))
+                rewrap(vec)
             }
         }
 
         impl<T: Unit> From<$base_type_name<T>> for $vector_type<T> {
             #[inline]
             fn from(point: $base_type_name<T>) -> Self {
-                TransparentWrapper::wrap(TransparentWrapper::peel(point))
+                rewrap(point)
             }
         }
 

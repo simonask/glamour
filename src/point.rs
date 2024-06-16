@@ -9,7 +9,7 @@
 //! points yields a vector, while subtracting a vector from a point yields
 //! another point.
 
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use bytemuck::{Pod, Zeroable};
 use num_traits::{ConstOne, ConstZero};
 
 use crate::{
@@ -17,7 +17,7 @@ use crate::{
     peel, rewrap,
     scalar::{FloatScalar, SignedScalar},
     unit::{FloatUnit, IntUnit},
-    wrap, Scalar, Unit, Vector2, Vector3, Vector4,
+    wrap, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
 };
 use core::ops::Mul;
 
@@ -37,7 +37,7 @@ unsafe impl<T: Unit> Zeroable for Point2<T> {}
 // SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point2<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec2> for Point2<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec2> for Point2<T> {}
 
 /// 3D point.
 ///
@@ -57,7 +57,7 @@ pub struct Point3<T: Unit = f32> {
 unsafe impl<T: Unit> Zeroable for Point3<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point3<T> {}
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec3> for Point3<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec3> for Point3<T> {}
 
 /// 4D point.
 ///
@@ -87,7 +87,7 @@ pub struct Point4<T: Unit = f32> {
 unsafe impl<T: Unit> Zeroable for Point4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point4<T> {}
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec4> for Point4<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec4> for Point4<T> {}
 
 macro_rules! point_interface {
     ($base_type_name:ident, $vector_type:ident) => {

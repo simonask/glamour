@@ -1,6 +1,9 @@
 //! Common convenience traits.
 
 pub mod marker;
+mod transparent;
+
+pub use transparent::*;
 
 /// General trait for the `contains()` method.
 ///

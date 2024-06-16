@@ -1,11 +1,12 @@
 //! Generic angles.
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use bytemuck::{Pod, Zeroable};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
 use crate::{
-    bindings::Quat, peel, scalar::FloatScalar, traits::marker::PodValue, Scalar, Unit, Vector3,
+    bindings::Quat, peel, scalar::FloatScalar, traits::marker::PodValue, Scalar, Transparent, Unit,
+    Vector3,
 };
 
 /// Angle in radians.
@@ -17,7 +18,7 @@ pub struct Angle<T: Scalar = f32> {
 }
 unsafe impl<T: Scalar> Zeroable for Angle<T> {}
 unsafe impl<T: Scalar> Pod for Angle<T> {}
-unsafe impl<T: Scalar> TransparentWrapper<T> for Angle<T> {}
+unsafe impl<T: Scalar> Transparent<T> for Angle<T> {}
 
 /// Strongly typed angle constants.
 ///

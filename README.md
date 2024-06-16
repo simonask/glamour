@@ -49,7 +49,7 @@ let size: Size2<MyUnit> = Size2 { width: 100.0, height: 200.0 };
 let vector_untyped: &Vector4<f32> = vector.as_untyped();
 
 // Use glam when needed:
-let vector_raw: &glam::Vec4 = bytemuck::TransparentWrapper::peel_ref(&vector);
+let vector_raw: &glam::Vec4 = glamour::Transparent::peel_ref(&vector);
 ```
 
 [See the documentation module for more examples.](crate::docs::examples)
@@ -141,7 +141,6 @@ let vector_raw: &glam::Vec4 = bytemuck::TransparentWrapper::peel_ref(&vector);
 - The "`AoSoA`" pattern ("extra wide" vector types). Use [ultraviolet][uv]
   instead`[^use_`uv].
 
-[^use_uv]: Ultraviolet supports `bytemuck` as well, and the types in this
     library are actually compatible with the non-wide vector types in
     Ultraviolet, so it may actually just work (using `bytemuck::cast()` and
     friends), but no guarantees.

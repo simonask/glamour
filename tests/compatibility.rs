@@ -1,5 +1,4 @@
-use bytemuck::TransparentWrapper;
-use glamour::prelude::*;
+use glamour::{peel_mut, peel_ref, prelude::*};
 
 #[test]
 fn into_iter() {
@@ -9,13 +8,6 @@ fn into_iter() {
         c += i;
     }
     assert_eq!(c, 10);
-}
-
-fn peel_ref<T, U: TransparentWrapper<T>>(u: &U) -> &T {
-    U::peel_ref(u)
-}
-fn peel_mut<T, U: TransparentWrapper<T>>(u: &mut U) -> &mut T {
-    U::peel_mut(u)
 }
 
 #[test]

@@ -11,13 +11,13 @@
 use core::iter::{Product, Sum};
 use core::ops::Mul;
 
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use bytemuck::{Pod, Zeroable};
 use num_traits::identities::{ConstOne, ConstZero};
 
 use crate::scalar::{FloatScalar, SignedScalar};
 use crate::unit::{FloatUnit, IntUnit, SignedUnit};
 use crate::{bindings::prelude::*, Point2, Point3, Point4, Scalar, Size2, Size3, Unit};
-use crate::{peel, peel_ref, wrap, Angle};
+use crate::{peel, peel_ref, wrap, Angle, Transparent};
 
 /// Vector swizzling by const generics.
 ///
@@ -60,7 +60,7 @@ unsafe impl<T: Unit> Zeroable for Vector2<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector2<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec2> for Vector2<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec2> for Vector2<T> {}
 
 /// 3D vector.
 ///
@@ -81,14 +81,17 @@ unsafe impl<T: Unit> Zeroable for Vector3<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector3<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec3> for Vector3<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec3> for Vector3<T> {}
 
 /// 4D vector.
 ///
-/// Alignment: This is always 16-byte aligned. [`glam::DVec4`] is only 8-byte
-/// aligned (for some reason), and integer vectors are only 4-byte aligned,
-/// which means that reference-casting from those glam types to `Vector4` type
-/// will fail (but not the other way around - see [`Vector4::as_raw()`]).
+/// # Alignment
+///
+/// This is always 16-byte aligned. [`glam::DVec4`] is only 8-byte aligned (for some reason), and integer vectors are
+/// only 4-byte aligned, which means that reference-casting from those glam types to `Vector4` type will fail (but not
+/// the other way around - see [`Vector4::as_raw()`]).
+///
+/// This also means that smaller integer types (i16 etc.) will be over-aligned, consuming much more memory.
 #[cfg_attr(
     any(
         not(any(feature = "scalar-math", target_arch = "spirv")),
@@ -112,7 +115,7 @@ unsafe impl<T: Unit> Zeroable for Vector4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector4<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec4> for Vector4<T> {}
+unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec4> for Vector4<T> {}
 
 macro_rules! vector_interface {
     ($point_ty:ident $(, $size_ty:ident)?) => {
