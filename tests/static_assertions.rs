@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 use glamour::{prelude::*, traits::marker::PodValue, Unit};

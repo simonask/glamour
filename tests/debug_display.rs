@@ -158,7 +158,7 @@ fn transform_debug() {
     }
 
     let t2 = Transform2::<TestSrc, TestDst>::IDENTITY;
-    let t3 = Transform3::<TestSrc, TestDst>::IDENTITY;
+    let t3 = Transform3::<TestSrc, TestDst2>::IDENTITY;
 
     let s2 = alloc::format!("{:?}", t2);
     let s3 = alloc::format!("{:?}", t3);
