@@ -312,7 +312,6 @@ pub trait FloatVector2: SignedVector2 + FloatVector {
 }
 
 pub trait FloatVector3: Vector3 + FloatVector {
-    fn angle_to(self, rhs: Self) -> Self::Scalar;
     fn any_orthogonal_vector(&self) -> Self;
     fn any_orthonormal_vector(&self) -> Self;
     fn any_orthonormal_pair(&self) -> (Self, Self);
@@ -491,14 +490,12 @@ impl FloatVector2 for glam::DVec2 {
 }
 
 impl FloatVector3 for glam::Vec3 {
-    forward_impl!(glam::Vec3 => fn angle_to(self, other: Self) -> f32);
     forward_impl!(glam::Vec3 => fn any_orthogonal_vector(&self) -> Self);
     forward_impl!(glam::Vec3 => fn any_orthonormal_vector(&self) -> Self);
     forward_impl!(glam::Vec3 => fn any_orthonormal_pair(&self) -> (Self, Self));
     forward_impl!(glam::Vec3 => fn is_nan_mask(self) -> glam::BVec3);
 }
 impl FloatVector3 for glam::DVec3 {
-    forward_impl!(glam::DVec3 => fn angle_to(self, other: Self) -> f64);
     forward_impl!(glam::DVec3 => fn any_orthogonal_vector(&self) -> Self);
     forward_impl!(glam::DVec3 => fn any_orthonormal_vector(&self) -> Self);
     forward_impl!(glam::DVec3 => fn any_orthonormal_pair(&self) -> (Self, Self));

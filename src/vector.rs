@@ -662,8 +662,6 @@ impl<T: FloatUnit> Vector3<T> {
 
     crate::forward_to_raw!(
         glam::Vec3 =>
-        #[doc = "Angle between this and another vector."]
-        pub fn angle_to(self, other: Self) -> Angle<T::Scalar>;
         #[doc = "See (e.g.) [`glam::Vec3::any_orthogonal_vector()`]."]
         pub fn any_orthogonal_vector(&self) -> Self;
         #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_vector()`]."]
