@@ -660,14 +660,12 @@ macro_rules! derive_standard_traits {
 
         impl<T> Eq for $base_type_name<T>
         where
-            T: Unit,
-            T::Scalar: Eq
+            T: Unit<Scalar: Eq>,
         {}
 
         impl<T> core::hash::Hash for $base_type_name<T>
         where
-            T: Unit,
-            T::Scalar: core::hash::Hash
+            T: Unit<Scalar: core::hash::Hash>,
         {
             fn hash<H>(&self, state: &mut H)
             where
@@ -696,9 +694,7 @@ macro_rules! derive_standard_traits {
             }
         }
 
-        impl<T: Unit> approx::RelativeEq<Self> for $base_type_name<T>
-        where
-            T::Scalar: approx::RelativeEq,
+        impl<T: Unit<Scalar: approx::RelativeEq>> approx::RelativeEq<Self> for $base_type_name<T>
         {
             #[must_use]
             fn default_max_relative() -> Self::Epsilon {
@@ -716,9 +712,7 @@ macro_rules! derive_standard_traits {
             }
         }
 
-        impl<T: Unit> approx::UlpsEq<Self> for $base_type_name<T>
-        where
-            T::Scalar: approx::UlpsEq,
+        impl<T: Unit<Scalar: approx::UlpsEq>> approx::UlpsEq<Self> for $base_type_name<T>
         {
             #[must_use]
             fn default_max_ulps() -> u32 {

@@ -3,8 +3,8 @@
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{
-    scalar::FloatScalar,
     traits::{Contains, Intersection},
+    unit::FloatUnit,
     Point2, Point3, Rect, Size2, Union, Unit, Vector2,
 };
 
@@ -409,11 +409,7 @@ impl<T: Unit> Union<Box2<T>> for Box2<T> {
     }
 }
 
-impl<T> Box2<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Box2<T> {
     /// Round coordinates to the nearest integer.
     ///
     /// Note: This function makes no attempt to avoid creating "degenerate"
@@ -489,11 +485,7 @@ where
     }
 }
 
-impl<T> Box3<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Box3<T> {
     /// Round coordinates to the nearest integer.
     ///
     /// Note: This function makes no attempt to avoid creating "degenerate"

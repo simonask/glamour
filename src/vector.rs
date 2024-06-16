@@ -12,14 +12,11 @@ use core::iter::{Product, Sum};
 use core::ops::Mul;
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
-use num_traits::Float;
+use num_traits::identities::{ConstOne, ConstZero};
 
-use crate::scalar::SignedScalar;
-use crate::unit::{FloatUnit, SignedUnit};
-use crate::{
-    bindings::prelude::*, scalar::FloatScalar, scalar::IntScalar, Point2, Point3, Point4, Scalar,
-    Size2, Size3, Unit,
-};
+use crate::scalar::{FloatScalar, SignedScalar};
+use crate::unit::{FloatUnit, IntUnit, SignedUnit};
+use crate::{bindings::prelude::*, Point2, Point3, Point4, Scalar, Size2, Size3, Unit};
 use crate::{peel, peel_ref, wrap, Angle};
 
 /// Vector swizzling by const generics.
@@ -437,24 +434,21 @@ impl<T: Unit> Vector2<T> {
     vector_interface!(Point2, Size2);
 }
 
-impl<T> Vector2<T>
-where
-    T: FloatUnit,
-{
+impl<T: FloatUnit> Vector2<T> {
     /// All NaN.
     pub const NAN: Self = Vector2 {
-        x: <T::Scalar as FloatScalar>::NAN,
-        y: <T::Scalar as FloatScalar>::NAN,
+        x: T::Scalar::NAN,
+        y: T::Scalar::NAN,
     };
     /// All positive infinity.
     pub const INFINITY: Self = Vector2 {
-        x: <T::Scalar as FloatScalar>::INFINITY,
-        y: <T::Scalar as FloatScalar>::INFINITY,
+        x: T::Scalar::INFINITY,
+        y: T::Scalar::INFINITY,
     };
     /// All negative infinity.
     pub const NEG_INFINITY: Self = Vector2 {
-        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        x: T::Scalar::NEG_INFINITY,
+        y: T::Scalar::NEG_INFINITY,
     };
 
     crate::forward_float_ops!(glam::BVec2, glam::Vec2);
@@ -478,11 +472,7 @@ where
     }
 }
 
-impl<T> Vector2<T>
-where
-    T: Unit,
-    T::Scalar: IntScalar,
-{
+impl<T: IntUnit> Vector2<T> {
     int_vector_interface!(glam::IVec2);
 }
 
@@ -638,28 +628,24 @@ impl<T: Unit> Vector3<T> {
     vector_interface!(Point3, Size3);
 }
 
-impl<T> Vector3<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Vector3<T> {
     /// All NaN.
     pub const NAN: Self = Vector3 {
-        x: <T::Scalar as FloatScalar>::NAN,
-        y: <T::Scalar as FloatScalar>::NAN,
-        z: <T::Scalar as FloatScalar>::NAN,
+        x: T::Scalar::NAN,
+        y: T::Scalar::NAN,
+        z: T::Scalar::NAN,
     };
     /// All positive infinity.
     pub const INFINITY: Self = Vector3 {
-        x: <T::Scalar as FloatScalar>::INFINITY,
-        y: <T::Scalar as FloatScalar>::INFINITY,
-        z: <T::Scalar as FloatScalar>::INFINITY,
+        x: T::Scalar::INFINITY,
+        y: T::Scalar::INFINITY,
+        z: T::Scalar::INFINITY,
     };
     /// All negative infinity.
     pub const NEG_INFINITY: Self = Vector3 {
-        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        x: T::Scalar::NEG_INFINITY,
+        y: T::Scalar::NEG_INFINITY,
+        z: T::Scalar::NEG_INFINITY,
     };
 
     crate::forward_float_ops!(glam::BVec3, glam::Vec3);
@@ -684,19 +670,11 @@ where
     }
 }
 
-impl<T> Vector3<T>
-where
-    T: Unit,
-    T::Scalar: IntScalar,
-{
+impl<T: IntUnit> Vector3<T> {
     int_vector_interface!(glam::IVec3);
 }
 
-impl<T> Vector3<T>
-where
-    T: Unit,
-    T::Scalar: SignedScalar,
-{
+impl<T: SignedUnit> Vector3<T> {
     /// All negative one.
     pub const NEG_ONE: Self = Vector3 {
         x: T::Scalar::NEG_ONE,
@@ -732,10 +710,7 @@ where
     );
 }
 
-impl<T> Vector3<T>
-where
-    T: Unit<Scalar = f32>,
-{
+impl<T: Unit<Scalar = f32>> Vector3<T> {
     /// Create from SIMD-aligned [`glam::Vec3A`].
     ///
     /// See [the design limitations](crate::docs::design#vector-overalignment)
@@ -895,48 +870,38 @@ impl<T: Unit> Vector4<T> {
     vector_interface!(Point4);
 }
 
-impl<T> Vector4<T>
-where
-    T: Unit<Scalar: FloatScalar>,
-{
+impl<T: FloatUnit> Vector4<T> {
     /// All NaN.
     pub const NAN: Self = Vector4 {
-        x: <T::Scalar as FloatScalar>::NAN,
-        y: <T::Scalar as FloatScalar>::NAN,
-        z: <T::Scalar as FloatScalar>::NAN,
-        w: <T::Scalar as FloatScalar>::NAN,
+        x: T::Scalar::NAN,
+        y: T::Scalar::NAN,
+        z: T::Scalar::NAN,
+        w: T::Scalar::NAN,
     };
     /// All positive infinity.
     pub const INFINITY: Self = Vector4 {
-        x: <T::Scalar as FloatScalar>::INFINITY,
-        y: <T::Scalar as FloatScalar>::INFINITY,
-        z: <T::Scalar as FloatScalar>::INFINITY,
-        w: <T::Scalar as FloatScalar>::INFINITY,
+        x: T::Scalar::INFINITY,
+        y: T::Scalar::INFINITY,
+        z: T::Scalar::INFINITY,
+        w: T::Scalar::INFINITY,
     };
     /// All negative infinity.
     pub const NEG_INFINITY: Self = Vector4 {
-        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        w: <T::Scalar as FloatScalar>::NEG_INFINITY,
+        x: T::Scalar::NEG_INFINITY,
+        y: T::Scalar::NEG_INFINITY,
+        z: T::Scalar::NEG_INFINITY,
+        w: T::Scalar::NEG_INFINITY,
     };
 
     crate::forward_float_ops!(glam::BVec4, glam::Vec4);
     crate::forward_float_vector_ops!(glam::Vec4);
 }
 
-impl<T> Vector4<T>
-where
-    T: Unit<Scalar: IntScalar>,
-{
+impl<T: IntUnit> Vector4<T> {
     int_vector_interface!(glam::IVec4);
 }
 
-impl<T> Vector4<T>
-where
-    T: Unit,
-    T::Scalar: SignedScalar,
-{
+impl<T: SignedUnit> Vector4<T> {
     /// All negative one.
     pub const NEG_ONE: Self = Vector4 {
         x: T::Scalar::NEG_ONE,
@@ -1006,27 +971,21 @@ where
 impl<T: Unit> From<glam::BVec2> for Vector2<T> {
     #[inline(always)]
     fn from(v: glam::BVec2) -> Self {
-        TransparentWrapper::wrap(
-            <<T::Scalar as Scalar>::Vec2 as crate::bindings::Vector2>::from_bools(v),
-        )
+        wrap(<<T::Scalar as Scalar>::Vec2>::from_bools(v))
     }
 }
 
 impl<T: Unit> From<glam::BVec3> for Vector3<T> {
     #[inline(always)]
     fn from(v: glam::BVec3) -> Self {
-        TransparentWrapper::wrap(
-            <<T::Scalar as Scalar>::Vec3 as crate::bindings::Vector3>::from_bools(v),
-        )
+        wrap(<<T::Scalar as Scalar>::Vec3>::from_bools(v))
     }
 }
 
 impl<T: Unit> From<glam::BVec4> for Vector4<T> {
     #[inline(always)]
     fn from(v: glam::BVec4) -> Self {
-        TransparentWrapper::wrap(
-            <<T::Scalar as Scalar>::Vec4 as crate::bindings::Vector4>::from_bools(v),
-        )
+        wrap(<<T::Scalar as Scalar>::Vec4>::from_bools(v))
     }
 }
 

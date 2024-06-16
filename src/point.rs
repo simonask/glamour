@@ -10,11 +10,13 @@
 //! another point.
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use num_traits::{ConstOne, ConstZero};
 
 use crate::{
     bindings::prelude::*,
     peel, rewrap,
-    scalar::{FloatScalar, IntScalar, SignedScalar},
+    scalar::{FloatScalar, SignedScalar},
+    unit::{FloatUnit, IntUnit},
     wrap, Scalar, Unit, Vector2, Vector3, Vector4,
 };
 use core::ops::Mul;
@@ -290,11 +292,7 @@ impl<T: Unit> Point2<T> {
     point_interface!(Point2, Vector2);
 }
 
-impl<T> Point2<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Point2<T> {
     /// All NaN.
     pub const NAN: Self = Self {
         x: <T::Scalar as FloatScalar>::NAN,
@@ -315,11 +313,7 @@ where
     float_point_interface!(glam::Vec2);
 }
 
-impl<T> Point2<T>
-where
-    T: Unit,
-    T::Scalar: IntScalar,
-{
+impl<T: IntUnit> Point2<T> {
     int_point_interface!(Vector2<T>, glam::IVec2);
 }
 
@@ -395,11 +389,7 @@ impl<T: Unit> Point3<T> {
     point_interface!(Point3, Vector3);
 }
 
-impl<T> Point3<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Point3<T> {
     /// All NaN.
     pub const NAN: Self = Self {
         x: <T::Scalar as FloatScalar>::NAN,
@@ -423,11 +413,7 @@ where
     float_point_interface!(glam::Vec3);
 }
 
-impl<T> Point3<T>
-where
-    T: Unit,
-    T::Scalar: IntScalar,
-{
+impl<T: IntUnit> Point3<T> {
     int_point_interface!(Vector3<T>, glam::IVec3);
 }
 
@@ -515,11 +501,7 @@ impl<T: Unit> Point4<T> {
     point_interface!(Point4, Vector4);
 }
 
-impl<T> Point4<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Point4<T> {
     /// All NaN.
     pub const NAN: Self = Self {
         x: <T::Scalar as FloatScalar>::NAN,
@@ -546,11 +528,7 @@ where
     float_point_interface!(glam::Vec4);
 }
 
-impl<T> Point4<T>
-where
-    T: Unit,
-    T::Scalar: IntScalar,
-{
+impl<T: IntUnit> Point4<T> {
     int_point_interface!(Vector4<T>, glam::IVec4);
 }
 

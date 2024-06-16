@@ -1,11 +1,12 @@
 //! 2D axis-aligned rectangles
 
 use approx::AbsDiffEq;
+use num_traits::ConstZero;
 
 use crate::{
-    scalar::FloatScalar,
     traits::{Contains, Intersection, Union},
-    Box2, Point2, Scalar, Size2, Unit, Vector2,
+    unit::FloatUnit,
+    Box2, Point2, Size2, Unit, Vector2,
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
@@ -214,8 +215,7 @@ impl<T: Unit> Rect<T> {
 
 impl<T> Rect<T>
 where
-    T: Unit,
-    T::Scalar: FloatScalar,
+    T: FloatUnit,
 {
     /// True if the rect only contains finite and non-NaN coordinates.
     #[inline]
@@ -302,9 +302,7 @@ where
 
 impl<T> AbsDiffEq<(Point2<T>, Size2<T>)> for Rect<T>
 where
-    T: Unit,
-    T::Scalar: AbsDiffEq,
-    <T::Scalar as AbsDiffEq>::Epsilon: Copy,
+    T: Unit<Scalar: AbsDiffEq<Epsilon: Copy>>,
 {
     type Epsilon = <T::Scalar as approx::AbsDiffEq>::Epsilon;
 
@@ -326,9 +324,7 @@ where
 
 impl<T> approx::RelativeEq<(Point2<T>, Size2<T>)> for Rect<T>
 where
-    T: Unit,
-    T::Scalar: approx::RelativeEq,
-    <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy,
+    T: Unit<Scalar: approx::RelativeEq<Epsilon: Copy>>,
 {
     #[must_use]
     fn default_max_relative() -> Self::Epsilon {

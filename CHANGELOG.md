@@ -6,8 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- Convenience traits `FloatUnit`, `IntUnit`, and `SignedUnit`, which have the
+  implied trait bounds for the associated scalar type. These traits are automatically
+  implemented for all `T: Unit` where `T::Scalar` is of the appropriate type.
+
 ### Breaking changes
 - Bumped MSRV to Rust 1.79.
+- Removed the `ToRaw` and `AsRaw` traits. Use `bytemuck::TransparentWrapper` instead.
+- Removed `ZERO` and `ONE` associated consts, in favor of `num_traits::{ConstZero, ConstOne}`.
+- Added `<T: Scalar>` bound to `Angle<T>`.
 
 ## [0.11.1] - 2024-03-26
 ### Fixed

@@ -13,6 +13,7 @@ use crate::{
     peel, peel_mut, peel_ref,
     prelude::*,
     scalar::FloatScalar,
+    unit::FloatUnit,
     wrap, Angle, Point2, Point3, Scalar, Unit, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
@@ -23,10 +24,11 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 /// Bitwise compatible with [`glam::Mat2`] / [`glam::DMat2`].
 ///
 /// Alignment: Always 16-byte aligned.
-#[derive(Clone, Copy, PartialEq, Eq, Zeroable)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub struct Matrix2<T: Scalar>(Vector4<T>);
 
+unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
 unsafe impl<T: Scalar> Pod for Matrix2<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
 unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat2> for Matrix2<T> {}
@@ -37,7 +39,7 @@ unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat2> for Matrix2<T> {}
 ///
 /// Alignment: Same as `T`.
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroable)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct Matrix3<T: Scalar> {
     pub x_axis: Vector3<T>,
@@ -45,6 +47,7 @@ pub struct Matrix3<T: Scalar> {
     pub z_axis: Vector3<T>,
 }
 
+unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
 unsafe impl<T: Scalar> Pod for Matrix3<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
 unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat3> for Matrix3<T> {}
@@ -55,7 +58,7 @@ unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat3> for Matrix3<T> {}
 ///
 /// Alignment: Always 16-byte aligned.
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq, Eq, Zeroable)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct Matrix4<T: Scalar> {
     pub x_axis: Vector4<T>,
@@ -64,6 +67,7 @@ pub struct Matrix4<T: Scalar> {
     pub w_axis: Vector4<T>,
 }
 
+unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}
 unsafe impl<T: Scalar> Pod for Matrix4<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
 unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat4> for Matrix4<T> {}
@@ -740,8 +744,7 @@ where
 
 impl<T> Mul<Vector3<T>> for Matrix3<T::Scalar>
 where
-    T: Unit,
-    T::Scalar: FloatScalar,
+    T: FloatUnit,
 {
     type Output = Vector3<T>;
 
@@ -820,8 +823,7 @@ where
 
 impl<T> Mul<Vector4<T>> for Matrix4<T::Scalar>
 where
-    T: Unit,
-    T::Scalar: FloatScalar,
+    T: FloatUnit,
 {
     type Output = Vector4<T>;
 
