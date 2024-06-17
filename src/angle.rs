@@ -18,7 +18,9 @@ pub struct Angle<T: Scalar = f32> {
 }
 unsafe impl<T: Scalar> Zeroable for Angle<T> {}
 unsafe impl<T: Scalar> Pod for Angle<T> {}
-unsafe impl<T: Scalar> Transparent<T> for Angle<T> {}
+unsafe impl<T: Scalar> Transparent for Angle<T> {
+    type Wrapped = T;
+}
 
 /// Strongly typed angle constants.
 ///

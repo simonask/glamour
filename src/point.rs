@@ -37,7 +37,9 @@ unsafe impl<T: Unit> Zeroable for Point2<T> {}
 // SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point2<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec2> for Point2<T> {}
+unsafe impl<T: Unit> Transparent for Point2<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec2;
+}
 
 /// 3D point.
 ///
@@ -57,7 +59,9 @@ pub struct Point3<T: Unit = f32> {
 unsafe impl<T: Unit> Zeroable for Point3<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point3<T> {}
-unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec3> for Point3<T> {}
+unsafe impl<T: Unit> Transparent for Point3<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec3;
+}
 
 /// 4D point.
 ///
@@ -87,7 +91,9 @@ pub struct Point4<T: Unit = f32> {
 unsafe impl<T: Unit> Zeroable for Point4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point4<T> {}
-unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec4> for Point4<T> {}
+unsafe impl<T: Unit> Transparent for Point4<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec4;
+}
 
 macro_rules! point_interface {
     ($base_type_name:ident, $vector_type:ident) => {

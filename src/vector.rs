@@ -60,7 +60,9 @@ unsafe impl<T: Unit> Zeroable for Vector2<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector2<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec2> for Vector2<T> {}
+unsafe impl<T: Unit> Transparent for Vector2<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec2;
+}
 
 /// 3D vector.
 ///
@@ -81,7 +83,9 @@ unsafe impl<T: Unit> Zeroable for Vector3<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector3<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec3> for Vector3<T> {}
+unsafe impl<T: Unit> Transparent for Vector3<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec3;
+}
 
 /// 4D vector.
 ///
@@ -115,7 +119,9 @@ unsafe impl<T: Unit> Zeroable for Vector4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector4<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> Transparent<<T::Scalar as Scalar>::Vec4> for Vector4<T> {}
+unsafe impl<T: Unit> Transparent for Vector4<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec4;
+}
 
 macro_rules! vector_interface {
     ($point_ty:ident $(, $size_ty:ident)?) => {

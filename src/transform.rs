@@ -247,8 +247,12 @@ unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform3<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform3<Src, Dst> {}
-unsafe impl<Src: Unit, Dst: Unit> Transparent<Matrix3<Src::Scalar>> for Transform2<Src, Dst> {}
-unsafe impl<Src: Unit, Dst: Unit> Transparent<Matrix4<Src::Scalar>> for Transform3<Src, Dst> {}
+unsafe impl<Src: Unit, Dst: Unit> Transparent for Transform2<Src, Dst> {
+    type Wrapped = Matrix3<Src::Scalar>;
+}
+unsafe impl<Src: Unit, Dst: Unit> Transparent for Transform3<Src, Dst> {
+    type Wrapped = Matrix4<Src::Scalar>;
+}
 
 impl<Src, Dst> Transform2<Src, Dst>
 where

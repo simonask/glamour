@@ -31,7 +31,9 @@ pub struct Matrix2<T: Scalar>(Vector4<T>);
 unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
 unsafe impl<T: Scalar> Pod for Matrix2<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> Transparent<T::Mat2> for Matrix2<T> {}
+unsafe impl<T: FloatScalar> Transparent for Matrix2<T> {
+    type Wrapped = T::Mat2;
+}
 
 /// 3x3 column-major matrix.
 ///
@@ -50,7 +52,9 @@ pub struct Matrix3<T: Scalar> {
 unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
 unsafe impl<T: Scalar> Pod for Matrix3<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> Transparent<T::Mat3> for Matrix3<T> {}
+unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
+    type Wrapped = T::Mat3;
+}
 
 /// 4x4 column-major matrix.
 ///
@@ -70,7 +74,9 @@ pub struct Matrix4<T: Scalar> {
 unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}
 unsafe impl<T: Scalar> Pod for Matrix4<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> Transparent<T::Mat4> for Matrix4<T> {}
+unsafe impl<T: FloatScalar> Transparent for Matrix4<T> {
+    type Wrapped = T::Mat4;
+}
 
 macro_rules! impl_matrix {
     ($base_type_name:ident < $dimensions:literal > => $mat_name:ident [ $axis_vector_ty:ident ]) => {
