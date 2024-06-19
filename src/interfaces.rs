@@ -1,5 +1,7 @@
-/// Interface for all vectorlike things.
-macro_rules! vector_base_interface {
+//! Definitions of the glam API, i.e., which methods from glam should be mapped into the public API.
+
+/// Everything that absolutely every SIMD-like type implements.
+macro_rules! simd_base_interface {
     ($mode:tt) => {
         crate::interface! {
             $mode =>
@@ -15,8 +17,6 @@ macro_rules! vector_base_interface {
             fn min_element(self) -> scalar;
             /// Max element.
             fn max_element(self) -> scalar;
-            /// Dot product.
-            fn dot(self, other: Self) -> scalar;
             /// Write this vector type to a slice.
             fn write_to_slice(self, slice: mut_scalar_slice);
             /// Replace x component.
@@ -30,10 +30,22 @@ macro_rules! vector_base_interface {
         }
     };
 }
+pub(crate) use simd_base_interface;
+
+/// Interface for all geometric vectorlike things.
+macro_rules! vector_base_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Dot product.
+            fn dot(self, other: Self) -> scalar;
+        }
+    };
+}
 pub(crate) use vector_base_interface;
 
 /// Interface for all vectorlike things with signed components.
-macro_rules! vector_signed_interface {
+macro_rules! simd_signed_interface {
     ($mode:tt) => {
         crate::interface! {
             $mode =>
@@ -44,7 +56,7 @@ macro_rules! vector_signed_interface {
         }
     };
 }
-pub(crate) use vector_signed_interface;
+pub(crate) use simd_signed_interface;
 
 /// Interface for all vectorlike things with integer components.
 macro_rules! vector_integer_interface {
@@ -72,23 +84,13 @@ macro_rules! vector_integer_interface {
 }
 pub(crate) use vector_integer_interface;
 
-/// Interface for all vectorlike things with floating-point components.
-macro_rules! vector_float_base_interface {
+/// Interface for all simd-like things with floating-point components.
+macro_rules! simd_float_base_interface {
     ($mode:tt) => {
         crate::interface! {
             $mode =>
             /// Round all components up.
             fn ceil(self) -> Self;
-            /// Clamp length
-            fn clamp_length_max(self, min: scalar) -> Self;
-            /// Clamp length
-            fn clamp_length_min(self, min: scalar) -> Self;
-            /// Clamp length
-            fn clamp_length(self, min: scalar, max: scalar) -> Self;
-            /// Compute the squared euclidean distance between two points in space.
-            fn distance_squared(self, other: Self) -> scalar;
-            /// Computes the Euclidean distance between two points in space.
-            fn distance(self, other: Self) -> scalar;
             /// e^self by component
             fn exp(self) -> Self;
             /// Round all components down.
@@ -101,49 +103,83 @@ macro_rules! vector_float_base_interface {
             fn is_finite(self) -> bool;
             /// True if any component is NaN.
             fn is_nan(self) -> bool;
-            /// True if the vector is normalized.
-            fn is_normalized(self) -> bool;
-            /// Reciprocal length of the vector
-            fn length_recip(self) -> scalar;
         }
         // split to avoid recursion limit
         crate::interface! {
             $mode =>
-            /// Squared length of the vector
-            fn length_squared(self) -> scalar;
-            /// Length of the vector
-            fn length(self) -> scalar;
             #[doc = "Linear interpolation."]
             fn lerp(self, rhs: Self, s: scalar) -> Self;
-            /// self * a + b
-            fn mul_add(self, a: Self, b: Self) -> Self;
-            /// Normalize the vector, returning zero if the length was already (very close to) zero.
-            fn normalize_or_zero(self) -> Self;
-            /// Normalize the vector. Undefined results in the vector's length is (very close to) zero.
-            fn normalize(self) -> Self;
-            /// Returns self normalized to length 1.0 if possible, else returns a fallback value.
-            fn normalize_or(self, fallback: Self) -> Self;
             /// self^n by component
             fn powf(self, n: scalar) -> Self;
         }
         // split to avoid recursion limit
         crate::interface! {
             $mode =>
+            /// 1.0/self by component
+            fn recip(self) -> Self;
+            #[doc = "Round all components."]
+            fn round(self) -> Self;
+        }
+    };
+}
+pub(crate) use simd_float_base_interface;
+
+/// Interface for all geometric vector-like things with floating-point components.
+macro_rules! vector_float_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Clamp length
+            fn clamp_length_max(self, min: scalar) -> Self;
+            /// Clamp length
+            fn clamp_length_min(self, min: scalar) -> Self;
+            /// Clamp length
+            fn clamp_length(self, min: scalar, max: scalar) -> Self;
+            /// Length of the vector
+            fn length(self) -> scalar;
+            /// Squared length of the vector
+            fn length_squared(self) -> scalar;
+            /// Reciprocal length of the vector
+            fn length_recip(self) -> scalar;
+            /// self * a + b
+            fn mul_add(self, a: Self, b: Self) -> Self;
+        }
+        // split to avoid recursion limit
+        crate::interface! {
+            $mode =>
+            /// Normalize the vector, returning zero if the length was already (very close to) zero.
+            fn normalize_or_zero(self) -> Self;
+            /// Normalize the vector. Undefined results in the vector's length is (very close to) zero.
+            fn normalize(self) -> Self;
+            /// Returns self normalized to length 1.0 if possible, else returns a fallback value.
+            fn normalize_or(self, fallback: Self) -> Self;
+            /// Normalize the vector, returning `None` if the length was already (very close to) zero.
+            fn try_normalize(self) -> opt_self;
+            /// True if the vector is normalized.
+            fn is_normalized(self) -> bool;
             /// See (e.g.) [`glam::Vec2::project_onto_normalized()`]
             fn project_onto_normalized(self, other: Self) -> Self;
             /// See (e.g.) [`glam::Vec2::project_onto()`]
             fn project_onto(self, other: Self) -> Self;
-            /// 1.0/self by component
-            fn recip(self) -> Self;
             /// See (e.g.) [`glam::Vec2::reject_from_normalized()`]
             fn reject_from_normalized(self, other: Self) -> Self;
             /// See (e.g.) [`glam::Vec2::reject_from()`]
             fn reject_from(self, other: Self) -> Self;
-            #[doc = "Round all components."]
-            fn round(self) -> Self;
-            /// Normalize the vector, returning `None` if the length was already (very close to) zero.
-            fn try_normalize(self) -> opt_self;
-            /// Calculates the midpoint between self and rhs.
+        }
+    };
+}
+pub(crate) use vector_float_interface;
+
+/// Interface for all geometric point-like things with floating-point components.
+macro_rules! point_float_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Compute the squared euclidean distance between two points in space.
+            fn distance_squared(self, other: Self) -> scalar;
+            /// Computes the Euclidean distance between two points in space.
+            fn distance(self, other: Self) -> scalar;
+            /// Calculates the midpoint between `self` and `rhs`.
             ///
             /// See (e.g.) [`glam::Vec2::midpoint()`].
             fn midpoint(self, rhs: Self) -> Self;
@@ -154,9 +190,9 @@ macro_rules! vector_float_base_interface {
         }
     };
 }
-pub(crate) use vector_float_base_interface;
+pub(crate) use point_float_interface;
 
-macro_rules! vector2_base_interface {
+macro_rules! simd2_base_interface {
     ($mode:tt) => {
         crate::interface! {
             $mode =>
@@ -187,9 +223,9 @@ macro_rules! vector2_base_interface {
         }
     };
 }
-pub(crate) use vector2_base_interface;
+pub(crate) use simd2_base_interface;
 
-macro_rules! vector3_base_interface {
+macro_rules! simd3_base_interface {
     ($mode:tt) => {
         crate::interface! {
             $mode =>
@@ -201,8 +237,6 @@ macro_rules! vector3_base_interface {
             fn extend(self, w: scalar) -> vec4;
             /// Creates a 2D vector by removing the `z` component.
             fn truncate(self) -> vec2;
-            /// Cross product.
-            fn cross(self, other: Self) -> Self;
             /// Returns a vector mask containing the result of a == comparison for each element of `self` and `rhs`.
             fn cmpeq(self, rhs: Self) -> bvec3;
             /// Returns a vector mask containing the result of a != comparison for each element of `self` and `rhs`.
@@ -226,9 +260,21 @@ macro_rules! vector3_base_interface {
         }
     };
 }
-pub(crate) use vector3_base_interface;
+pub(crate) use simd3_base_interface;
 
-macro_rules! vector4_base_interface {
+/// Interface for all 3D geometric vectorlike types.
+macro_rules! vector3_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Cross product.
+            fn cross(self, other: Self) -> Self;
+        }
+    };
+}
+pub(crate) use vector3_interface;
+
+macro_rules! simd4_base_interface {
     ($mode:tt) => {
         crate::interface! {
             $mode =>
@@ -263,7 +309,7 @@ macro_rules! vector4_base_interface {
         }
     };
 }
-pub(crate) use vector4_base_interface;
+pub(crate) use simd4_base_interface;
 
 macro_rules! vector2_signed_interface {
     ($mode:tt) => {
@@ -279,6 +325,17 @@ macro_rules! vector2_signed_interface {
 }
 pub(crate) use vector2_signed_interface;
 
+macro_rules! simd2_float_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Return a mask where each bit is set if the corresponding component is NaN.
+            fn is_nan_mask(self) -> bvec2;
+        }
+    };
+}
+pub(crate) use simd2_float_interface;
+
 macro_rules! vector2_float_interface {
     ($mode:tt) => {
         crate::interface! {
@@ -291,14 +348,23 @@ macro_rules! vector2_float_interface {
             fn angle_to(self, rhs: Self) -> scalar;
             /// See (e.g.) [`glam::Vec2::rotate()`].
             fn rotate(self, other: Self) -> Self;
-            /// Return a mask where each bit is set if the corresponding component is NaN.
-            fn is_nan_mask(self) -> bvec2;
             /// See (e.g.) [`glam::Vec2::rotate_towards()`].
             fn rotate_towards(&self, rhs: Self, max_angle: angle) -> Self;
         }
     };
 }
 pub(crate) use vector2_float_interface;
+
+macro_rules! simd3_float_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Return a mask where each bit is set if the corresponding component is NaN.
+            fn is_nan_mask(self) -> bvec3;
+        }
+    };
+}
+pub(crate) use simd3_float_interface;
 
 macro_rules! vector3_float_interface {
     ($mode:tt) => {
@@ -310,14 +376,12 @@ macro_rules! vector3_float_interface {
             fn any_orthonormal_vector(&self) -> Self;
             /// See (e.g.) [`glam::Vec3::any_orthonormal_pair()`].
             fn any_orthonormal_pair(&self) -> (Self, Self);
-            /// Return a boolean mask where `true` indicates that the component is NaN.
-            fn is_nan_mask(self) -> bvec3;
         }
     };
 }
 pub(crate) use vector3_float_interface;
 
-macro_rules! vector4_float_interface {
+macro_rules! simd4_float_interface {
     ($mode:tt) => {
         crate::interface! {
             $mode =>
@@ -326,7 +390,7 @@ macro_rules! vector4_float_interface {
         }
     };
 }
-pub(crate) use vector4_float_interface;
+pub(crate) use simd4_float_interface;
 
 macro_rules! matrix_base_interface {
     ($mode:tt) => {

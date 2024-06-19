@@ -54,10 +54,10 @@ mod impl_traits;
 mod impl_vectorlike;
 mod interfaces;
 
+#[doc(hidden)]
+pub use traits::{peel, peel_mut, peel_ref, rewrap, wrap};
 #[doc(no_inline)]
-pub use traits::{
-    peel, peel_mut, peel_ref, rewrap, wrap, Contains, Intersection, Transparent, Union,
-};
+pub use traits::{Contains, Intersection, Transparent, Union};
 
 /// Convenience glob import.
 ///

@@ -1,3 +1,4 @@
+/// Generate the public Matrix interfaces.
 macro_rules! matrixlike {
     ($base_type_name:ident, $n:tt) => {
         impl<T: crate::FloatScalar> $base_type_name<T> {

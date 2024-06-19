@@ -31,6 +31,7 @@ pub trait Vector:
 {
     /// The component type of this `glam` vector.
     type Scalar: Scalar;
+    crate::interfaces::simd_base_interface!(trait_decl);
     crate::interfaces::vector_base_interface!(trait_decl);
 }
 
@@ -38,19 +39,20 @@ macro_rules! impl_vector {
     ($glam_ty:ty, $scalar:ty, $mask:ident) => {
         impl Vector for $glam_ty {
             type Scalar = $scalar;
+            crate::interfaces::simd_base_interface!(trait_impl);
             crate::interfaces::vector_base_interface!(trait_impl);
         }
     };
 }
 
 pub trait SignedVector: Vector + Neg<Output = Self> {
-    crate::interfaces::vector_signed_interface!(trait_decl);
+    crate::interfaces::simd_signed_interface!(trait_decl);
 }
 
 macro_rules! impl_signed_vector {
     ($glam_ty:ty) => {
         impl SignedVector for $glam_ty {
-            crate::interfaces::vector_signed_interface!(trait_impl);
+            crate::interfaces::simd_signed_interface!(trait_impl);
         }
     };
 }
@@ -73,49 +75,55 @@ pub trait FloatVector:
     + approx::UlpsEq
     + approx::RelativeEq<Epsilon = Self::Scalar>
 {
-    crate::interfaces::vector_float_base_interface!(trait_decl);
+    crate::interfaces::simd_float_base_interface!(trait_decl);
+    crate::interfaces::vector_float_interface!(trait_decl);
+    crate::interfaces::point_float_interface!(trait_decl);
 }
 
 macro_rules! impl_float_vector {
     ($glam_ty:ty, $scalar:ty) => {
         impl FloatVector for $glam_ty {
-            crate::interfaces::vector_float_base_interface!(trait_impl);
+            crate::interfaces::simd_float_base_interface!(trait_impl);
+            crate::interfaces::vector_float_interface!(trait_impl);
+            crate::interfaces::point_float_interface!(trait_impl);
         }
     };
 }
 
 pub trait Vector2: Vector + From<glam::BVec2> {
-    crate::interfaces::vector2_base_interface!(trait_decl);
+    crate::interfaces::simd2_base_interface!(trait_decl);
 }
 
 macro_rules! impl_vector2 {
     ($glam_ty:ty, $vec3_ty:ty) => {
         impl Vector2 for $glam_ty {
-            crate::interfaces::vector2_base_interface!(trait_impl);
+            crate::interfaces::simd2_base_interface!(trait_impl);
         }
     };
 }
 
 pub trait Vector3: Vector + From<glam::BVec3> {
-    crate::interfaces::vector3_base_interface!(trait_decl);
+    crate::interfaces::simd3_base_interface!(trait_decl);
+    crate::interfaces::vector3_interface!(trait_decl);
 }
 
 macro_rules! impl_vector3 {
     ($glam_ty:ty, $vec2_ty:ty, $vec4_ty:ty) => {
         impl Vector3 for $glam_ty {
-            crate::interfaces::vector3_base_interface!(trait_impl);
+            crate::interfaces::simd3_base_interface!(trait_impl);
+            crate::interfaces::vector3_interface!(trait_impl);
         }
     };
 }
 
 pub trait Vector4: Vector + From<glam::BVec4> {
-    crate::interfaces::vector4_base_interface!(trait_decl);
+    crate::interfaces::simd4_base_interface!(trait_decl);
 }
 
 macro_rules! impl_vector4 {
     ($glam_ty:ty, $vec3_ty:ty) => {
         impl Vector4 for $glam_ty {
-            crate::interfaces::vector4_base_interface!(trait_impl);
+            crate::interfaces::simd4_base_interface!(trait_impl);
         }
     };
 }
@@ -125,15 +133,17 @@ pub trait SignedVector2: SignedVector + Vector2 {
 }
 
 pub trait FloatVector2: SignedVector2 + FloatVector {
+    crate::interfaces::simd2_float_interface!(trait_decl);
     crate::interfaces::vector2_float_interface!(trait_decl);
 }
 
 pub trait FloatVector3: Vector3 + FloatVector {
+    crate::interfaces::simd3_float_interface!(trait_decl);
     crate::interfaces::vector3_float_interface!(trait_decl);
 }
 
 pub trait FloatVector4: Vector4 + FloatVector {
-    crate::interfaces::vector4_float_interface!(trait_decl);
+    crate::interfaces::simd4_float_interface!(trait_decl);
 }
 
 impl_vector!(glam::Vec2, f32, BVec2);
@@ -277,17 +287,21 @@ impl SignedVector2 for glam::I64Vec2 {
 }
 
 impl FloatVector2 for glam::Vec2 {
+    crate::interfaces::simd2_float_interface!(trait_impl);
     crate::interfaces::vector2_float_interface!(trait_impl);
 }
 
 impl FloatVector2 for glam::DVec2 {
+    crate::interfaces::simd2_float_interface!(trait_impl);
     crate::interfaces::vector2_float_interface!(trait_impl);
 }
 
 impl FloatVector3 for glam::Vec3 {
+    crate::interfaces::simd3_float_interface!(trait_impl);
     crate::interfaces::vector3_float_interface!(trait_impl);
 }
 impl FloatVector3 for glam::DVec3 {
+    crate::interfaces::simd3_float_interface!(trait_impl);
     crate::interfaces::vector3_float_interface!(trait_impl);
 }
 impl FloatVector4 for glam::Vec4 {
@@ -296,7 +310,7 @@ impl FloatVector4 for glam::Vec4 {
     }
 }
 impl FloatVector4 for glam::DVec4 {
-    crate::interfaces::vector4_float_interface!(trait_impl);
+    crate::interfaces::simd4_float_interface!(trait_impl);
 }
 
 #[cfg(not(feature = "scalar-math"))]

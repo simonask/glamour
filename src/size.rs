@@ -112,8 +112,8 @@ macro_rules! impl_size {
 impl_size!(Size2 [2] => Vec2, Vector2);
 impl_size!(Size3 [3] => Vec3, Vector3);
 
-crate::impl_vectorlike::vectorlike!(Size2, 2);
-crate::impl_vectorlike::vectorlike!(Size3, 3);
+crate::impl_vectorlike::sizelike!(Size2, 2);
+crate::impl_vectorlike::sizelike!(Size3, 3);
 
 crate::impl_ops::size_ops!(Size2);
 crate::impl_ops::size_ops!(Size3);

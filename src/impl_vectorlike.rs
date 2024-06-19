@@ -1,29 +1,29 @@
-/// This macro implements *everything* for a vectorlike type.
+/// This macro implements *everything* for a simdlike type.
 ///
 /// - Bindings to methods in `glam` (everything in `crate::interfaces`).
 /// - Swizzle methods
 /// - Additional public APIs that do not map directly to operations in `glam`, like trait imlps.
 ///
-/// This also selects additional methods for each vectorlike type, such as "pointlike"-specific types etc.
-macro_rules! vectorlike {
+/// This also selects additional methods for each simdlike type, such as "pointlike"-specific types etc.
+macro_rules! simdlike {
     ($base_type_name:ident, $n:tt) => {
         impl<T: crate::Unit> $base_type_name<T> {
-            crate::interfaces::vector_base_interface!(struct);
+            crate::interfaces::simd_base_interface!(struct);
             crate::impl_vectorlike::arraylike_interface!($n);
             crate::impl_vectorlike::casting_interface!($base_type_name, $n);
             crate::impl_vectorlike::tuple_interface!($base_type_name, $n);
         }
         impl<T: crate::FloatUnit> $base_type_name<T> {
-            crate::interfaces::vector_float_base_interface!(struct);
+            crate::interfaces::simd_float_base_interface!(struct);
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
-            crate::interfaces::vector_signed_interface!(struct);
+            crate::interfaces::simd_signed_interface!(struct);
         }
         impl<T: crate::IntUnit> $base_type_name<T> {
             crate::interfaces::vector_integer_interface!(struct);
         }
         crate::impl_vectorlike::impl_swizzle_interface!($base_type_name, $n);
-        crate::impl_vectorlike::vectorlike!(@for_size $base_type_name, $n);
+        crate::impl_vectorlike::simdlike!(@for_size $base_type_name, $n);
         crate::impl_traits::impl_basic_traits_vectorlike!($base_type_name, $n);
     };
     (@for_size $base_type_name:ident, 2) => {
@@ -48,7 +48,7 @@ macro_rules! vectorlike {
             /// The unit axes.
             pub const AXES: [Self; 2] = [Self::X, Self::Y];
 
-            crate::interfaces::vector2_base_interface!(struct);
+            crate::interfaces::simd2_base_interface!(struct);
         }
         impl<T: crate::FloatUnit> $base_type_name<T> {
             /// All NaN.
@@ -66,7 +66,7 @@ macro_rules! vectorlike {
                 <T::Scalar as FloatScalar>::NEG_INFINITY,
                 <T::Scalar as FloatScalar>::NEG_INFINITY,
             );
-            crate::interfaces::vector2_float_interface!(struct);
+            crate::interfaces::simd2_float_interface!(struct);
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             /// All negative one.
@@ -86,8 +86,6 @@ macro_rules! vectorlike {
                 T::Scalar::ZERO,
                 <T::Scalar as crate::SignedScalar>::NEG_ONE,
             );
-
-            crate::interfaces::vector2_signed_interface!(struct);
         }
     };
     (@for_size $base_type_name:ident, 3) => {
@@ -121,7 +119,7 @@ macro_rules! vectorlike {
             /// The unit axes.
             pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
 
-            crate::interfaces::vector3_base_interface!(struct);
+            crate::interfaces::simd3_base_interface!(struct);
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             /// All negative one.
@@ -171,7 +169,7 @@ macro_rules! vectorlike {
                 <T::Scalar as FloatScalar>::NEG_INFINITY,
                 <T::Scalar as FloatScalar>::NEG_INFINITY,
             );
-            crate::interfaces::vector3_float_interface!(struct);
+            crate::interfaces::simd3_float_interface!(struct);
         }
     };
     (@for_size $base_type_name:ident, 4) => {
@@ -216,7 +214,7 @@ macro_rules! vectorlike {
             /// The unit axes.
             pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
 
-            crate::interfaces::vector4_base_interface!(struct);
+            crate::interfaces::simd4_base_interface!(struct);
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             /// All negative one.
@@ -281,11 +279,56 @@ macro_rules! vectorlike {
                 <T::Scalar as FloatScalar>::NEG_INFINITY,
                 <T::Scalar as FloatScalar>::NEG_INFINITY,
             );
-            crate::interfaces::vector4_float_interface!(struct);
+            crate::interfaces::simd4_float_interface!(struct);
         }
     };
 }
+pub(crate) use simdlike;
+
+macro_rules! vectorlike {
+    ($base_type_name:ident, $n:tt) => {
+        crate::impl_vectorlike::simdlike!($base_type_name, $n);
+        crate::impl_vectorlike::vectorlike!(@for_size $base_type_name, $n);
+
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::vector_base_interface!(struct);
+        }
+
+        impl<T: crate::FloatUnit> $base_type_name<T> {
+            crate::interfaces::vector_float_interface!(struct);
+        }
+    };
+    (@for_size $base_type_name:ident, 2) => {
+        impl<T: crate::SignedUnit> $base_type_name<T> {
+            crate::interfaces::vector2_signed_interface!(struct);
+        }
+        impl<T: crate::FloatUnit> $base_type_name<T> {
+            crate::interfaces::vector2_float_interface!(struct);
+        }
+    };
+    (@for_size $base_type_name:ident, 3) => {
+        impl<T: crate::FloatUnit> $base_type_name<T> {
+            crate::interfaces::vector3_float_interface!(struct);
+        }
+    };
+    (@for_size $base_type_name:ident, 4) => {};
+}
 pub(crate) use vectorlike;
+macro_rules! pointlike {
+    ($base_type_name:ident, $n:tt) => {
+        crate::impl_vectorlike::simdlike!($base_type_name, $n);
+        impl<T: crate::FloatUnit> $base_type_name<T> {
+            crate::interfaces::point_float_interface!(struct);
+        }
+    };
+}
+pub(crate) use pointlike;
+macro_rules! sizelike {
+    ($base_type_name:ident, $n:tt) => {
+        crate::impl_vectorlike::simdlike!($base_type_name, $n);
+    };
+}
+pub(crate) use sizelike;
 
 macro_rules! tuple_interface {
     (Size2, 2) => {

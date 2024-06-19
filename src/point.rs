@@ -142,7 +142,7 @@ impl<T: Unit> Point2<T> {
     point_interface!(Point2, Vector2);
 }
 
-crate::impl_vectorlike::vectorlike!(Point2, 2);
+crate::impl_vectorlike::pointlike!(Point2, 2);
 
 impl<T: Unit> Point3<T> {
     /// New point.
@@ -153,7 +153,7 @@ impl<T: Unit> Point3<T> {
     point_interface!(Point3, Vector3);
 }
 
-crate::impl_vectorlike::vectorlike!(Point3, 3);
+crate::impl_vectorlike::pointlike!(Point3, 3);
 
 impl<T: Unit> Point4<T> {
     /// New point.
@@ -164,7 +164,7 @@ impl<T: Unit> Point4<T> {
     point_interface!(Point4, Vector4);
 }
 
-crate::impl_vectorlike::vectorlike!(Point4, 4);
+crate::impl_vectorlike::pointlike!(Point4, 4);
 
 impl<T> Point3<T>
 where
