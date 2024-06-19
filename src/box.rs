@@ -75,7 +75,7 @@ impl<T: Unit> Box2<T> {
     };
 
     /// New 2D box from min/max coordinates.
-    pub fn new(min: Point2<T>, max: Point2<T>) -> Self {
+    pub const fn new(min: Point2<T>, max: Point2<T>) -> Self {
         Box2 { min, max }
     }
 
@@ -283,11 +283,8 @@ impl<T: Unit> Box3<T> {
     };
 
     /// New 2D box from min/max coordinates.
-    pub fn new(min: impl Into<Point3<T>>, max: impl Into<Point3<T>>) -> Self {
-        Box3 {
-            min: min.into(),
-            max: max.into(),
-        }
+    pub const fn new(min: Point3<T>, max: Point3<T>) -> Self {
+        Box3 { min, max }
     }
 }
 
