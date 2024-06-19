@@ -14,8 +14,8 @@ use core::ops::Mul;
 use bytemuck::{Pod, Zeroable};
 use num_traits::identities::{ConstOne, ConstZero};
 
-use crate::scalar::{FloatScalar, SignedScalar};
-use crate::unit::{FloatUnit, SignedUnit};
+use crate::scalar::FloatScalar;
+use crate::unit::FloatUnit;
 use crate::{bindings::prelude::*, Point2, Point3, Point4, Scalar, Size2, Size3, Unit};
 use crate::{peel, peel_ref, wrap, Transparent};
 
