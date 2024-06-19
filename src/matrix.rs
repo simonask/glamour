@@ -1608,6 +1608,11 @@ mod tests {
         assert_eq!(crate::peel(m2 * m2), crate::peel(m2) * crate::peel(m2));
         assert_eq!(crate::peel(m3 * m3), crate::peel(m3) * crate::peel(m3));
         assert_eq!(crate::peel(m4 * m4), crate::peel(m4) * crate::peel(m4));
+
+        assert_eq!(
+            crate::peel(m2 * Vector2::<f32>::new(2.0, 2.0)),
+            crate::peel(m2) * crate::peel(Vector2::<f32>::new(2.0, 2.0))
+        );
     }
 
     #[test]

@@ -528,7 +528,7 @@ mod tests {
     fn equality() {
         use crate::{Point2, Size2};
         let a = RectF::new(Point2::new(0.0, 0.0), Size2::new(1.0, 1.0));
-        let b = a.translate((1.0, 1.0).into());
+        let b = a.translate((0.0, 1.0).into());
 
         assert_abs_diff_eq!(a, a);
         assert_relative_eq!(a, a);
