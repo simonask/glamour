@@ -542,7 +542,7 @@ macro_rules! casting_interface {
             T: Unit<Scalar: num_traits::AsPrimitive<T2::Scalar>>,
             T2: Unit,
         {
-            $base_type_name::from_array(self.to_array().map(num_traits::AsPrimitive::as_))
+            $base_type_name::from_array(self.to_array().map(crate::Scalar::as_))
         }
 
         crate::impl_vectorlike::casting_interface!(@try_cast $base_type_name, $n);
