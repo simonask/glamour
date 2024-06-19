@@ -8,11 +8,12 @@ use core::ops::Mul;
 use core::{fmt::Debug, marker::PhantomData};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{cast, Pod, TransparentWrapper, Zeroable};
+use bytemuck::{cast, Pod, Zeroable};
 
+use crate::peel;
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3, ToRaw,
-    Unit, Vector2, Vector3,
+    bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3,
+    Transparent, Unit, Vector2, Vector3,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
@@ -246,13 +247,11 @@ unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform2<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Zeroable for Transform3<Src, Dst> {}
 unsafe impl<Src: Unit, Dst: Unit> Pod for Transform3<Src, Dst> {}
-unsafe impl<Src: Unit, Dst: Unit> TransparentWrapper<Matrix3<Src::Scalar>>
-    for Transform2<Src, Dst>
-{
+unsafe impl<Src: Unit, Dst: Unit> Transparent for Transform2<Src, Dst> {
+    type Wrapped = Matrix3<Src::Scalar>;
 }
-unsafe impl<Src: Unit, Dst: Unit> TransparentWrapper<Matrix4<Src::Scalar>>
-    for Transform3<Src, Dst>
-{
+unsafe impl<Src: Unit, Dst: Unit> Transparent for Transform3<Src, Dst> {
+    type Wrapped = Matrix4<Src::Scalar>;
 }
 
 impl<Src, Dst> Transform2<Src, Dst>
@@ -727,8 +726,7 @@ where
         angle: Angle<Src::Scalar>,
         translation: Vector3<Src>,
     ) -> Self {
-        let rotation =
-            <Src::Scalar as FloatScalar>::Quat::from_axis_angle(axis.to_raw(), angle.to_raw());
+        let rotation = <Src::Scalar as FloatScalar>::Quat::from_axis_angle(peel(axis), peel(angle));
         Self::from_matrix_unchecked(Matrix4::from_scale_rotation_translation(
             scale.to_untyped(),
             rotation,
@@ -743,7 +741,7 @@ where
     #[inline]
     #[must_use]
     pub fn map_vector(&self, vector: Vector3<Src>) -> Vector3<Dst> {
-        cast(self.matrix.transform_vector(vector.to_untyped()))
+        cast(self.matrix.transform_vector3(vector.to_untyped()))
     }
 
     /// Map point from `Src` to `Dst`, including perspective correction.
@@ -753,7 +751,7 @@ where
     #[inline]
     #[must_use]
     pub fn map_point(&self, point: Point3<Src>) -> Point3<Dst> {
-        cast(self.matrix.project_point(point))
+        cast(self.matrix.project_point3(point.to_untyped()))
     }
 
     /// Invert the matrix.
@@ -845,7 +843,7 @@ mod tests {
     fn basic() {
         check_2d_and_3d! {
             let a = Transform::IDENTITY;
-            let b = a.clone();
+            let b = a;
             assert_eq!(a, b);
             assert_abs_diff_eq!(a, b);
             assert_relative_eq!(a, b);
@@ -911,5 +909,14 @@ mod tests {
                     .then_translate((1.0, 1.0, 1.0).into())
             );
         }
+    }
+
+    #[test]
+    fn gaslight_coverage() {
+        fn clone_me<T: Clone>(v: &T) -> T {
+            v.clone()
+        }
+        _ = clone_me(&Transform2::<f32, f32>::IDENTITY);
+        _ = clone_me(&Transform3::<f32, f32>::IDENTITY);
     }
 }

@@ -19,7 +19,7 @@ space" vs. "view space".
 
 The [Euclid][euclid] crate is a popular example of a library that implements
 this, but it comes with a few limitations. In particular, it doesn't support
-[`bytemuck`][bytemuck], which prevents mapping SIMD math types directly into
+[`bytemuck`], which prevents mapping SIMD math types directly into
 GPU buffers in safe code.
 
 [`glam`][glam] is a somewhat smaller library with a strong focus on
@@ -85,6 +85,6 @@ as long as those values remain 100% bitwise compatible with one of the
 fundamental primitive types mentioned above.
 
 All of this type juggling is only possible in safe code due to the particular
-guarantees of the [`bytemuck::Pod`](bytemuck::Pod) trait. In _theory_ those
+guarantees of the [`bytemuck::Pod`] trait. In _theory_ those
 casts come with some overhead, because they check the alignment and size of all
 casts, but the compiler should be able to optimize away all of those checks.

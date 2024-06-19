@@ -11,7 +11,7 @@ impl<'a> core::fmt::Write for BufWriter<'a> {
         if self.buffer.len() < bytes.len() + self.pos {
             Err(core::fmt::Error)
         } else {
-            (&mut self.buffer[self.pos..self.pos + bytes.len()]).copy_from_slice(bytes);
+            self.buffer[self.pos..self.pos + bytes.len()].copy_from_slice(bytes);
             self.pos += bytes.len();
             Ok(())
         }
@@ -40,41 +40,41 @@ fn vector_debug() {
 
     assert_eq!(
         alloc::format!("{:?}", untyped_f32),
-        "Vector2<f32> { x: 123.0, y: 456.0 }"
+        "Vector2 { x: 123.0, y: 456.0 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_f64),
-        "Vector2<f64> { x: 123.0, y: 456.0 }"
+        "Vector2 { x: 123.0, y: 456.0 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_u16),
-        "Vector2<u16> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_i16),
-        "Vector2<i16> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_u32),
-        "Vector2<u32> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_i32),
-        "Vector2<i32> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_u64),
-        "Vector2<u64> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_i64),
-        "Vector2<i64> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
 
     assert_eq!(
         alloc::format!("{:#?}", untyped_i32),
         r#"
-Vector2<i32> {
+Vector2 {
     x: 123,
     y: 456,
 }"#
@@ -104,20 +104,14 @@ Vector2 {
     enum CustomName {}
     impl Unit for CustomName {
         type Scalar = i32;
-        fn name() -> Option<&'static str> {
-            Some("Custom")
-        }
     }
 
     let custom: Vector2<CustomName> = Vector2 { x: 123, y: 456 };
-    assert_eq!(
-        alloc::format!("{:?}", custom),
-        "Vector2<Custom> { x: 123, y: 456 }"
-    );
+    assert_eq!(alloc::format!("{:?}", custom), "Vector2 { x: 123, y: 456 }");
     assert_eq!(
         alloc::format!("{:#?}", custom),
         r#"
-Vector2<Custom> {
+Vector2 {
     x: 123,
     y: 456,
 }"#
@@ -158,7 +152,7 @@ fn transform_debug() {
     }
 
     let t2 = Transform2::<TestSrc, TestDst>::IDENTITY;
-    let t3 = Transform3::<TestSrc, TestDst>::IDENTITY;
+    let t3 = Transform3::<TestSrc, TestDst2>::IDENTITY;
 
     let s2 = alloc::format!("{:?}", t2);
     let s3 = alloc::format!("{:?}", t3);

@@ -3,19 +3,23 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{Pod, Zeroable};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
-use num_traits::{Float, NumAssignOps};
 
 use crate::{
-    bindings::Quat, prelude::*, scalar::FloatScalar, traits::marker::PodValue, Scalar, Unit,
+    bindings::Quat, peel, scalar::FloatScalar, traits::marker::PodValue, Scalar, Transparent, Unit,
     Vector3,
 };
 
 /// Angle in radians.
 #[repr(transparent)]
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Angle<T = f32> {
+pub struct Angle<T: Scalar = f32> {
     /// Angle in radians.
     pub radians: T,
+}
+unsafe impl<T: Scalar> Zeroable for Angle<T> {}
+unsafe impl<T: Scalar> Pod for Angle<T> {}
+unsafe impl<T: Scalar> Transparent for Angle<T> {
+    type Wrapped = T;
 }
 
 /// Strongly typed angle constants.
@@ -70,30 +74,6 @@ macro_rules! impl_float_angle_consts {
     };
 }
 
-impl<T> ToRaw for Angle<T> {
-    type Raw = T;
-
-    fn to_raw(self) -> Self::Raw {
-        self.radians
-    }
-}
-
-impl<T> FromRaw for Angle<T> {
-    fn from_raw(raw: Self::Raw) -> Self {
-        Angle { radians: raw }
-    }
-}
-
-impl<T> AsRaw for Angle<T> {
-    fn as_raw(&self) -> &Self::Raw {
-        &self.radians
-    }
-
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        &mut self.radians
-    }
-}
-
 impl_float_angle_consts!(f32);
 impl_float_angle_consts!(f64);
 
@@ -111,7 +91,7 @@ macro_rules! forward_to_float_as_angle {
 }
 
 /// Convenience trait to create strongly typed angles from floats.
-pub trait FloatAngleExt: num_traits::Float + AngleConsts + PodValue {
+pub trait FloatAngleExt: FloatScalar + AngleConsts + PodValue {
     forward_to_float_as_angle!(
         #[doc = "asin()"]
         fn asin(self) -> Angle<Self>
@@ -158,24 +138,14 @@ impl<T: Scalar + AngleConsts> core::fmt::Debug for Angle<T> {
     }
 }
 
-unsafe impl<T: Zeroable> Zeroable for Angle<T> {}
-unsafe impl<T: Pod> Pod for Angle<T> {}
-
 impl<T> Unit for Angle<T>
 where
     T: Scalar + AngleConsts,
 {
     type Scalar = T;
-
-    fn name() -> Option<&'static str> {
-        Some("Angle")
-    }
 }
 
-impl<T> AbsDiffEq for Angle<T>
-where
-    T: AbsDiffEq,
-{
+impl<T: Scalar> AbsDiffEq for Angle<T> {
     type Epsilon = T::Epsilon;
 
     #[inline]
@@ -194,10 +164,7 @@ where
     }
 }
 
-impl<T> UlpsEq for Angle<T>
-where
-    T: UlpsEq,
-{
+impl<T: FloatScalar> UlpsEq for Angle<T> {
     #[inline]
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
@@ -214,10 +181,7 @@ where
     }
 }
 
-impl<T> RelativeEq for Angle<T>
-where
-    T: RelativeEq,
-{
+impl<T: FloatScalar> RelativeEq for Angle<T> {
     #[inline]
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
@@ -272,7 +236,7 @@ macro_rules! forward_to_unit_as_self {
     };
 }
 
-impl<T: Float> Angle<T> {
+impl<T: FloatScalar> Angle<T> {
     /// Angle from radians.
     #[inline]
     #[must_use]
@@ -327,7 +291,7 @@ impl<T: Float> Angle<T> {
         fn max(self, other: Self) -> Self);
 }
 
-impl<T: Float + AngleConsts> Angle<T> {
+impl<T: FloatScalar + AngleConsts> Angle<T> {
     /// 2π
     pub const CIRCLE: Self = Self::TAU;
     /// π
@@ -336,7 +300,7 @@ impl<T: Float + AngleConsts> Angle<T> {
     pub const QUARTER_CIRCLE: Self = Self::FRAG_PI_2;
 }
 
-impl<T> From<T> for Angle<T> {
+impl<T: Scalar> From<T> for Angle<T> {
     fn from(radians: T) -> Self {
         Angle { radians }
     }
@@ -344,7 +308,7 @@ impl<T> From<T> for Angle<T> {
 
 macro_rules! forward_op_scalar {
     ($trait_name:ident, $op:ident) => {
-        impl<T: Float> $trait_name<T> for Angle<T> {
+        impl<T: FloatScalar> $trait_name<T> for Angle<T> {
             type Output = Self;
 
             fn $op(self, rhs: T) -> Self {
@@ -358,7 +322,7 @@ macro_rules! forward_op_scalar {
 
 macro_rules! forward_op_scalar_assign {
     ($trait_name:ident, $op:ident) => {
-        impl<T: Float + NumAssignOps> $trait_name<T> for Angle<T> {
+        impl<T: FloatScalar> $trait_name<T> for Angle<T> {
             fn $op(&mut self, rhs: T) {
                 self.radians.$op(rhs);
             }
@@ -368,7 +332,7 @@ macro_rules! forward_op_scalar_assign {
 
 macro_rules! forward_op_self {
     ($trait_name:ident, $op:ident) => {
-        impl<T: Float> $trait_name for Angle<T> {
+        impl<T: FloatScalar> $trait_name for Angle<T> {
             type Output = Self;
 
             fn $op(self, rhs: Self) -> Self {
@@ -382,7 +346,7 @@ macro_rules! forward_op_self {
 
 macro_rules! forward_op_self_assign {
     ($trait_name:ident, $op:ident) => {
-        impl<T: Float + NumAssignOps> $trait_name for Angle<T> {
+        impl<T: FloatScalar> $trait_name for Angle<T> {
             fn $op(&mut self, rhs: Self) {
                 self.radians.$op(rhs.radians);
             }
@@ -404,7 +368,7 @@ forward_op_self_assign!(AddAssign, add_assign);
 forward_op_self_assign!(SubAssign, sub_assign);
 forward_op_self_assign!(RemAssign, rem_assign);
 
-impl<T: Div<Output = T>> Div<Angle<T>> for Angle<T> {
+impl<T: Scalar> Div<Angle<T>> for Angle<T> {
     type Output = T;
 
     fn div(self, rhs: Angle<T>) -> Self::Output {
@@ -412,7 +376,7 @@ impl<T: Div<Output = T>> Div<Angle<T>> for Angle<T> {
     }
 }
 
-impl<T: AngleConsts> AngleConsts for Angle<T> {
+impl<T: FloatScalar + AngleConsts> AngleConsts for Angle<T> {
     const PI: Self = Angle { radians: T::PI };
     const TAU: Self = Angle { radians: T::TAU };
 
@@ -439,15 +403,12 @@ impl<T: AngleConsts> AngleConsts for Angle<T> {
     };
 }
 
-impl<T> Angle<T>
-where
-    T: FloatScalar,
-{
+impl<T: FloatScalar> Angle<T> {
     /// Create quaternion from this angle and an axis vector.
     #[inline]
     #[must_use]
     pub fn to_rotation(self, axis: Vector3<T>) -> T::Quat {
-        <T::Quat as Quat>::from_axis_angle(axis.to_raw(), self.radians)
+        <T::Quat as Quat<T>>::from_axis_angle(peel(axis), self.radians)
     }
 }
 
@@ -458,6 +419,8 @@ mod tests {
         assert_ulps_eq, assert_ulps_ne,
     };
 
+    use crate::{peel_mut, peel_ref};
+
     use super::*;
 
     type Angle = super::Angle<f32>;
@@ -465,12 +428,12 @@ mod tests {
     #[test]
     fn forward_to_float() {
         use super::FloatAngleExt;
-        let s: Angle = FloatAngleExt::asin(1.0);
-        let c: Angle = FloatAngleExt::acos(1.0);
-        let t: Angle = FloatAngleExt::atan(1.0);
-        assert_eq!(s.to_radians(), f32::asin(1.0));
-        assert_eq!(c.to_radians(), f32::acos(1.0));
-        assert_eq!(t.to_radians(), f32::atan(1.0));
+        let s: Angle = FloatAngleExt::asin(1.0f32);
+        let c: Angle = FloatAngleExt::acos(1.0f32);
+        let t: Angle = FloatAngleExt::atan(1.0f32);
+        assert_eq!(s.to_radians(), f32::asin(1.0f32));
+        assert_eq!(c.to_radians(), f32::acos(1.0f32));
+        assert_eq!(t.to_radians(), f32::atan(1.0f32));
 
         assert_eq!(Angle::PI.clone(), Angle::PI);
         assert_eq!(Angle::default(), Angle::from_radians(0.0));
@@ -507,12 +470,9 @@ mod tests {
         let a = Angle::from_radians(1.0);
         let b = Angle::from_radians(-0.5);
         assert_abs_diff_eq!(a + b, Angle::from_radians(0.5));
-        let x: Angle = a * 2.0f32;
-        assert_abs_diff_eq!(x, Angle::from_radians(2.0));
-        let y: Angle = a / 2.0f32;
-        assert_abs_diff_eq!(y, Angle::from_radians(0.5));
-        let z: f32 = a / b;
-        assert_abs_diff_eq!(z, -2.0);
+        assert_abs_diff_eq!(a * 2.0, Angle::from_radians(2.0));
+        assert_abs_diff_eq!(a / 2.0, Angle::from_radians(0.5));
+        assert_abs_diff_eq!(a / b, -2.0);
 
         let mut a = Angle::from_radians(1.0);
         a += Angle::from_radians(2.0);
@@ -545,9 +505,9 @@ mod tests {
     #[test]
     fn angle_cast() {
         let mut a = Angle::CIRCLE;
-        let _: &f32 = a.as_raw();
-        let _: &mut f32 = a.as_raw_mut();
-        let _: f32 = a.to_raw();
+        let _: &f32 = peel_ref(&a);
+        let _: &mut f32 = peel_mut(&mut a);
+        let _: f32 = peel(a);
         let _: f32 = a.to_radians();
         let _: Angle = 1.0.into();
     }

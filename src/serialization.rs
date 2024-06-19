@@ -627,7 +627,10 @@ impl<'de, T: Unit> serde::Deserialize<'de> for Box3<T> {
 }
 
 #[cfg(test)]
+#[allow(clippy::too_many_lines)]
 mod tests {
+    use crate::point;
+
     use super::*;
     use serde_test::*;
 
@@ -1324,7 +1327,7 @@ mod tests {
 
     #[test]
     fn rect() {
-        let rect = Rect::<f32>::new((10.0, 20.0), (30.0, 40.0));
+        let rect = Rect::<f32>::from_origin_and_size((10.0, 20.0), (30.0, 40.0));
         assert_ser_tokens(
             &rect,
             &[
@@ -1379,11 +1382,35 @@ mod tests {
         );
         let deserialized: Rect<f32> = serde_json::from_str(&serialized).unwrap();
         assert_eq!(rect, deserialized);
+
+        assert_de_tokens_error::<Rect<f32>>(
+            &[Token::Map { len: Some(2) }, Token::I8(123)],
+            "invalid type: integer `123`, expected a field name",
+        );
+        assert_de_tokens_error::<Rect<f32>>(
+            &[
+                Token::Map { len: Some(2) },
+                Token::Str("origin"),
+                Token::Map { len: Some(2) },
+                Token::Str("x"),
+                Token::F32(1.0),
+                Token::Str("y"),
+                Token::F32(1.0),
+                Token::MapEnd,
+                Token::Str("supposed to be size"),
+                Token::Map { len: Some(2) },
+            ],
+            "unknown field `supposed to be size`, expected `origin` or `size`",
+        );
+        assert_de_tokens_error::<Rect<f32>>(
+            &[Token::I8(123)],
+            "invalid type: integer `123`, expected a mapping with `origin` and `size` fields",
+        );
     }
 
     #[test]
     fn box2() {
-        let box2 = Box2::<f32>::new((10.0, 20.0), (30.0, 40.0));
+        let box2 = Box2::<f32>::from_min_max((10.0, 20.0), (30.0, 40.0));
         assert_ser_tokens(
             &box2,
             &[
@@ -1438,11 +1465,35 @@ mod tests {
         );
         let deserialized: Box2<f32> = serde_json::from_str(&serialized).unwrap();
         assert_eq!(box2, deserialized);
+
+        assert_de_tokens_error::<Box2<f32>>(
+            &[Token::Map { len: Some(2) }, Token::I8(123)],
+            "invalid type: integer `123`, expected a field name",
+        );
+        assert_de_tokens_error::<Box2<f32>>(
+            &[
+                Token::Map { len: Some(2) },
+                Token::Str("min"),
+                Token::Map { len: Some(2) },
+                Token::Str("x"),
+                Token::F32(1.0),
+                Token::Str("y"),
+                Token::F32(1.0),
+                Token::MapEnd,
+                Token::Str("supposed to be max"),
+                Token::Map { len: Some(2) },
+            ],
+            "unknown field `supposed to be max`, expected `min` or `max`",
+        );
+        assert_de_tokens_error::<Box2<f32>>(
+            &[Token::I8(123)],
+            "invalid type: integer `123`, expected a mapping with `min` and `max` fields",
+        );
     }
 
     #[test]
     fn box3() {
-        let box3 = Box3::<f32>::new((10.0, 20.0, 30.0), (40.0, 50.0, 60.0));
+        let box3 = Box3::<f32>::new(point!(10.0, 20.0, 30.0), point!(40.0, 50.0, 60.0));
         assert_ser_tokens(
             &box3,
             &[
@@ -1503,5 +1554,31 @@ mod tests {
         );
         let deserialized: Box3<f32> = serde_json::from_str(&serialized).unwrap();
         assert_eq!(box3, deserialized);
+
+        assert_de_tokens_error::<Box3<f32>>(
+            &[Token::Map { len: Some(2) }, Token::I8(123)],
+            "invalid type: integer `123`, expected a field name",
+        );
+        assert_de_tokens_error::<Box3<f32>>(
+            &[
+                Token::Map { len: Some(2) },
+                Token::Str("min"),
+                Token::Map { len: Some(2) },
+                Token::Str("x"),
+                Token::F32(1.0),
+                Token::Str("y"),
+                Token::F32(1.0),
+                Token::Str("z"),
+                Token::F32(1.0),
+                Token::MapEnd,
+                Token::Str("supposed to be max"),
+                Token::Map { len: Some(2) },
+            ],
+            "unknown field `supposed to be max`, expected `min` or `max`",
+        );
+        assert_de_tokens_error::<Box3<f32>>(
+            &[Token::I8(123)],
+            "invalid type: integer `123`, expected a mapping with `min` and `max` fields",
+        );
     }
 }

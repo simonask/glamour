@@ -6,7 +6,8 @@
     clippy::inline_always,
     clippy::module_name_repetitions,
     clippy::wildcard_imports,
-    clippy::similar_names
+    clippy::similar_names,
+    clippy::float_cmp
 )]
 #![cfg_attr(coverage, feature(coverage_attribute))]
 
@@ -26,7 +27,6 @@ mod size;
 pub mod traits;
 
 mod compat;
-mod raw;
 mod transform;
 mod unit;
 mod vector;
@@ -38,19 +38,26 @@ pub use angle::{Angle, AngleConsts, FloatAngleExt};
 pub use matrix::{Matrix2, Matrix3, Matrix4};
 pub use point::{Point2, Point3, Point4};
 pub use r#box::{Box2, Box3};
-pub use raw::*;
 pub use rect::Rect;
 pub use scalar::{FloatScalar, Scalar, SignedScalar};
 pub use size::{Size2, Size3};
 pub use transform::{Transform2, Transform3, TransformMap};
-pub use unit::Unit;
+pub use unit::{FloatUnit, IntUnit, SignedUnit, Unit};
 pub use vector::{Swizzle, Vector2, Vector3, Vector4};
 
-mod macros;
-use macros::*;
+mod forward;
+use forward::*;
 
+mod impl_matrixlike;
+mod impl_ops;
+mod impl_traits;
+mod impl_vectorlike;
+mod interfaces;
+
+#[doc(hidden)]
+pub use traits::{peel, peel_mut, peel_ref, rewrap, wrap};
 #[doc(no_inline)]
-pub use traits::{Contains, Intersection, Union};
+pub use traits::{Contains, Intersection, Transparent, Union};
 
 /// Convenience glob import.
 ///
@@ -58,9 +65,9 @@ pub use traits::{Contains, Intersection, Union};
 pub mod prelude {
     #[doc(no_inline)]
     pub use super::{
-        Angle, AngleConsts as _, AsRaw, Box2, Box3, FloatAngleExt as _, FromRaw, Matrix2, Matrix3,
-        Matrix4, Point2, Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, ToRaw,
-        Unit, Vector2, Vector3, Vector4,
+        Angle, AngleConsts as _, Box2, Box3, FloatAngleExt as _, Matrix2, Matrix3, Matrix4, Point2,
+        Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, Unit, Vector2, Vector3,
+        Vector4,
     };
     #[doc(no_inline)]
     pub use super::{Transform2, Transform3, TransformMap as _};
@@ -351,7 +358,7 @@ mod tests {
         let v1 = <Vector2>::new(123.0, 456.0);
         let v2 = Vector2 { x: 2.0, y: 3.0 };
         let v3 = v1 + v2;
-        assert_eq!(v3, (125.0, 459.0));
+        assert_eq!(v3, vec2!(125.0, 459.0));
     }
 
     #[test]
@@ -362,12 +369,39 @@ mod tests {
 
     #[test]
     fn try_cast() {
-        let v = Vector4::<f32>::new(core::f32::MAX, 0.0, 1.0, 2.0);
+        let v = Vector4::<f32>::new(f32::MAX, 0.0, 1.0, 2.0);
         let t: Option<Vector4<i32>> = v.try_cast();
         assert!(t.is_none());
 
         let v = Vector4::<f32>::new(3.0, 0.0, 1.0, 2.0);
         let t: Option<Vector4<i32>> = v.try_cast();
         assert_eq!(t, Some(vec4!(3, 0, 1, 2)));
+
+        let v = Vector3::<f32>::new(f32::MAX, 0.0, 1.0);
+        let t: Option<Vector3<i32>> = v.try_cast();
+        assert!(t.is_none());
+
+        let v = Vector3::<f32>::new(3.0, 0.0, 1.0);
+        let t: Option<Vector3<i32>> = v.try_cast();
+        assert_eq!(t, Some(vec3!(3, 0, 1)));
+
+        let v = Vector2::<f32>::new(f32::MAX, 0.0);
+        let t: Option<Vector2<i32>> = v.try_cast();
+        assert!(t.is_none());
+
+        let v = Vector2::<f32>::new(3.0, 0.0);
+        let t: Option<Vector2<i32>> = v.try_cast();
+        assert_eq!(t, Some(vec2!(3, 0)));
+    }
+
+    #[test]
+    fn as_() {
+        let v = Vector4::<UnitF32>::new(f32::MAX, 0.0, 1.0, 2.0);
+        let t: Vector4<UnitI32> = v.as_();
+        assert_eq!(t, vec4!(i32::MAX, 0, 1, 2));
+
+        let v = Vector4::<UnitF32>::new(3.0, 0.0, 1.0, 2.0);
+        let t: Vector4<UnitI32> = v.as_();
+        assert_eq!(t, vec4!(3, 0, 1, 2));
     }
 }

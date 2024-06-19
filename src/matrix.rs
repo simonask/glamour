@@ -8,12 +8,14 @@ use core::ops::{Div, DivAssign, Mul, MulAssign};
 
 use crate::{
     bindings::{Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4},
+    peel, peel_ref,
     prelude::*,
     scalar::FloatScalar,
-    Angle, Point2, Point3, Scalar, Unit, Vector2, Vector3, Vector4,
+    unit::FloatUnit,
+    wrap, Point2, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use bytemuck::{Pod, Zeroable};
 
 /// 2x2 column-major matrix.
 ///
@@ -21,34 +23,14 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 ///
 /// Alignment: Always 16-byte aligned.
 #[derive(Clone, Copy, PartialEq, Eq)]
+#[repr(C)]
 pub struct Matrix2<T: Scalar>(Vector4<T>);
 
 unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
 unsafe impl<T: Scalar> Pod for Matrix2<T> {}
-unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat2> for Matrix2<T> {}
-
-impl<T: FloatScalar> ToRaw for Matrix2<T> {
-    type Raw = T::Mat2;
-
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: FloatScalar> FromRaw for Matrix2<T> {
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: FloatScalar> AsRaw for Matrix2<T> {
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
+// SAFETY: This is the fundamental guarantee of this crate.
+unsafe impl<T: FloatScalar> Transparent for Matrix2<T> {
+    type Wrapped = T::Mat2;
 }
 
 /// 3x3 column-major matrix.
@@ -67,30 +49,9 @@ pub struct Matrix3<T: Scalar> {
 
 unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
 unsafe impl<T: Scalar> Pod for Matrix3<T> {}
-unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat3> for Matrix3<T> {}
-
-impl<T: FloatScalar> ToRaw for Matrix3<T> {
-    type Raw = T::Mat3;
-
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: FloatScalar> FromRaw for Matrix3<T> {
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: FloatScalar> AsRaw for Matrix3<T> {
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
+// SAFETY: This is the fundamental guarantee of this crate.
+unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
+    type Wrapped = T::Mat3;
 }
 
 /// 4x4 column-major matrix.
@@ -98,6 +59,7 @@ impl<T: FloatScalar> AsRaw for Matrix3<T> {
 /// Bitwise compatible with [`glam::Mat4`] / [`glam::DMat4`].
 ///
 /// Alignment: Always 16-byte aligned.
+#[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct Matrix4<T: Scalar> {
@@ -109,145 +71,13 @@ pub struct Matrix4<T: Scalar> {
 
 unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}
 unsafe impl<T: Scalar> Pod for Matrix4<T> {}
-unsafe impl<T: FloatScalar> TransparentWrapper<T::Mat4> for Matrix4<T> {}
-
-impl<T: FloatScalar> ToRaw for Matrix4<T> {
-    type Raw = T::Mat4;
-
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: FloatScalar> FromRaw for Matrix4<T> {
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: FloatScalar> AsRaw for Matrix4<T> {
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
+// SAFETY: This is the fundamental guarantee of this crate.
+unsafe impl<T: FloatScalar> Transparent for Matrix4<T> {
+    type Wrapped = T::Mat4;
 }
 
 macro_rules! impl_matrix {
     ($base_type_name:ident < $dimensions:literal > => $mat_name:ident [ $axis_vector_ty:ident ]) => {
-        impl<T> $base_type_name<T>
-        where
-            T: FloatScalar,
-        {
-            #[doc = "Create from rows with implicit conversion."]
-            #[inline]
-            #[must_use]
-            pub fn with_rows<U>(rows: [U; $dimensions]) -> Self
-            where
-                U: Into<$axis_vector_ty<T>>,
-            {
-                Self::with_cols(rows).transpose()
-            }
-
-            #[doc = "Create from columns with implicit conversion."]
-            #[inline]
-            #[must_use]
-            pub fn with_cols<U>(rows: [U; $dimensions]) -> Self
-            where
-                U: Into<$axis_vector_ty<T>>,
-            {
-                bytemuck::cast(rows.map(Into::into))
-            }
-
-            #[doc = "Get column vectors."]
-            #[inline]
-            #[must_use]
-            pub fn to_cols(&self) -> [$axis_vector_ty<T>; $dimensions] {
-                bytemuck::cast(*self)
-            }
-
-            #[doc = "Get row vectors."]
-            #[inline]
-            #[must_use]
-            pub fn to_rows(&self) -> [$axis_vector_ty<T>; $dimensions] {
-                self.transpose().to_cols()
-            }
-
-            #[doc = "Get column vectors as slice."]
-            #[inline]
-            #[must_use]
-            pub fn as_cols(&self) -> &[$axis_vector_ty<T>; $dimensions] {
-                bytemuck::cast_ref(self)
-            }
-
-            #[doc = "Get column vectors as slice."]
-            #[inline]
-            #[must_use]
-            pub fn as_cols_mut(&mut self) -> &mut [$axis_vector_ty<T>; $dimensions] {
-                bytemuck::cast_mut(self)
-            }
-
-            #[doc = "Matrix determinant."]
-            #[inline]
-            #[must_use]
-            pub fn determinant(&self) -> T {
-                self.as_raw().determinant()
-            }
-
-            #[doc = "True if matrix is invertible."]
-            #[doc = ""]
-            #[doc = "This is equivalent to checking if the determinant is finite and non-zero."]
-            #[inline]
-            #[must_use]
-            pub fn is_invertible(&self) -> bool {
-                let d = self.determinant();
-                d != T::ZERO && num_traits::Float::is_finite(d)
-            }
-
-            #[doc = "Return the inverse matrix, if invertible."]
-            #[doc = ""]
-            #[doc = "If the matrix is not invertible, this returns `None`."]
-            #[inline]
-            #[must_use]
-            pub fn try_inverse(&self) -> Option<Self> {
-                if self.is_invertible() {
-                    Some(self.inverse())
-                } else {
-                    None
-                }
-            }
-
-            #[doc = "Return the transposed matrix."]
-            #[inline]
-            #[must_use]
-            pub fn transpose(&self) -> Self {
-                Self::from_raw(self.as_raw().transpose())
-            }
-
-            #[doc = "True if any element in the matrix is NaN."]
-            #[inline]
-            #[must_use]
-            pub fn is_nan(&self) -> bool {
-                self.as_raw().is_nan()
-            }
-
-            #[doc = "True if all elements in the matrix are finite (non-infinite, non-NaN)."]
-            #[inline]
-            #[must_use]
-            pub fn is_finite(&self) -> bool {
-                self.as_raw().is_finite()
-            }
-
-            #[doc = "Takes the absolute value of each element in self"]
-            #[inline]
-            #[must_use]
-            pub fn abs(&self) -> Self {
-                Self::from_raw(self.as_raw().abs())
-            }
-        }
-
         impl<T> Default for $base_type_name<T>
         where
             T: FloatScalar,
@@ -310,92 +140,14 @@ where
     pub const IDENTITY: Self = Self(vec4!(T::ONE, T::ZERO, T::ZERO, T::ONE));
 }
 
+crate::impl_matrixlike::matrixlike!(Matrix2, 2);
+
 impl<T> Matrix2<T>
 where
     T: FloatScalar,
 {
     /// All NaNs.
     pub const NAN: Self = Self(Vector4::NAN);
-
-    crate::forward_to_raw!(
-        glam::Mat2 =>
-        #[doc = "Get column."]
-        pub fn col(&self, index: usize) -> Vector2<T>;
-        #[doc = "Get row."]
-        pub fn row(&self, index: usize) -> Vector2<T>;
-        #[doc = "Matrix from columns."]
-        pub fn from_cols(x_axis: Vector2<T>, y_axis: Vector2<T>) -> Self;
-        #[doc = "Matrix from diagonal."]
-        pub fn from_diagonal(diagonal: Vector2<T>) -> Self;
-        #[doc = "Rotation matrix."]
-        pub fn from_angle(angle: Angle<T>) -> Self;
-        #[doc = "Matrix from (non-uniform) scale and angle."]
-        pub fn from_scale_angle(scale: Vector2<T>, angle: Angle<T>) -> Self;
-        #[doc = "Matrix2 from [`Matrix3`]"]
-        pub fn from_mat3(mat3: Matrix3<T>) -> Self;
-        #[doc = "Inverse matrix"]
-        pub fn inverse(&self) -> Self;
-        #[doc = "Multiplies two 2x2 matrices."]
-        pub fn mul_mat2(&self, other: &Self) -> Self;
-        #[doc = "Adds two 2x2 matrices."]
-        pub fn add_mat2(&self, other: &Self) -> Self;
-        #[doc = "Subtracts two 2x2 matrices."]
-        pub fn sub_mat2(&self, other: &Self) -> Self;
-    );
-
-    /// Scaling matrix.
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let matrix = Matrix2::<f32>::from_scale((2.0, 3.0).into());
-    /// assert_eq!(matrix.row(0), vec2!(2.0, 0.0));
-    /// assert_eq!(matrix.row(1), vec2!(0.0, 3.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn from_scale(scale: Vector2<T>) -> Self {
-        Self::from_scale_angle(scale, Angle::<T>::default())
-    }
-
-    /// Transform 2D point.
-    ///
-    /// See [`glam::Mat2::mul_vec2()`] or
-    /// [`glam::DMat2::mul_vec2()`] (depending on the scalar).
-    ///
-    /// #### Example
-    ///
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let matrix = Matrix2::<f32>::from_angle(Angle::<f32>::from_degrees(90.0));
-    /// let point = Point2::<f32> { x: 1.0, y: 0.0 };
-    /// let rotated = matrix.transform_point(point);
-    /// approx::assert_abs_diff_eq!(rotated, point!(0.0, 1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn transform_point(&self, point: Point2<T>) -> Point2<T> {
-        Point2::from_raw(self.as_raw().mul_vec2(point.to_raw()))
-    }
-
-    /// Transform 2D vector.
-    ///
-    /// See [`glam::Mat2::mul_vec2()`] or
-    /// [`glam::DMat2::mul_vec2()`] (depending on the scalar).
-    ///
-    /// #### Example
-    /// ```rust
-    /// # use glamour::prelude::*;
-    /// let matrix = Matrix2::<f32>::from_angle(Angle::<f32>::from_degrees(90.0));
-    /// let vector = Vector2::<f32> { x: 1.0, y: 0.0 };
-    /// let rotated = matrix.transform_vector(vector);
-    /// approx::assert_abs_diff_eq!(rotated, vec2!(0.0, 1.0));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn transform_vector(&self, vector: Vector2<T>) -> Vector2<T> {
-        Vector2::from_raw(self.as_raw().mul_vec2(vector.to_raw()))
-    }
 }
 
 impl<T> Matrix3<T>
@@ -430,49 +182,6 @@ where
         z_axis: Vector3::Z,
     };
 
-    crate::forward_to_raw!(
-        glam::Mat3 =>
-        #[doc = "Get column."]
-        pub fn col(&self, index: usize) -> Vector3<T>;
-        #[doc = "Get row."]
-        pub fn row(&self, index: usize) -> Vector3<T>;
-        #[doc = "Matrix from columns."]
-        pub fn from_cols(x_axis: Vector3<T>, y_axis: Vector3<T>, z_axis: Vector3<T>) -> Self;
-        #[doc = "Matrix from diagonal."]
-        pub fn from_diagonal(diagonal: Vector3<T>) -> Self;
-        #[doc = "Affine 2D rotation matrix."]
-        pub fn from_angle(angle: Angle<T>) -> Self;
-        #[doc = "2D non-uniform scaling matrix."]
-        pub fn from_scale(scale: Vector2<T>) -> Self;
-        #[doc = "2D affine transformation matrix."]
-        pub fn from_scale_angle_translation(
-            scale: Vector2<T>,
-            angle: Angle<T>,
-            translation: Vector2<T>
-        ) -> Self;
-        #[doc = "2D translation matrix."]
-        pub fn from_translation(translation: Vector2<T>) -> Self;
-        #[doc = "Matrix3 from [`Matrix2`]"]
-        pub fn from_mat2(mat2: Matrix2<T>) -> Self;
-        #[doc = "Matrix3 from [`Matrix4`]"]
-        pub fn from_mat4(mat4: Matrix4<T>) -> Self;
-        #[doc = "Inverse matrix"]
-        pub fn inverse(&self) -> Self;
-        #[doc = "Multiplies two 3x3 matrices."]
-        pub fn mul_mat3(&self, other: &Self) -> Self;
-        #[doc = "Adds two 3x3 matrices."]
-        pub fn add_mat3(&self, other: &Self) -> Self;
-        #[doc = "Subtracts two 3x3 matrices."]
-        pub fn sub_mat3(&self, other: &Self) -> Self;
-        #[doc = "Create a `[T; 9]` array storing the data in column-major order."]
-        pub fn to_cols_array(&self) -> [T; 9];
-    );
-
-    #[doc = "Creates a 3x3 matrix from a [T; 9] array stored in column major order."]
-    pub fn from_cols_array(array: &[T; 9]) -> Self {
-        Self::from_raw(<Self as ToRaw>::Raw::from_cols_array(array))
-    }
-
     /// Transform 2D point.
     ///
     /// See [`glam::Mat3::transform_point2()`] or
@@ -490,7 +199,7 @@ where
     #[inline]
     #[must_use]
     pub fn transform_point<U: Unit<Scalar = T>>(&self, point: Point2<U>) -> Point2<U> {
-        Point2::from_raw(self.as_raw().transform_point2(point.to_raw()))
+        wrap(peel(*self).transform_point2(peel(point)))
     }
 
     /// Transform 2D vector.
@@ -500,19 +209,21 @@ where
     #[inline]
     #[must_use]
     pub fn transform_vector<U: Unit<Scalar = T>>(&self, vector: Vector2<U>) -> Vector2<U> {
-        Vector2::from_raw(self.as_raw().transform_vector2(vector.to_raw()))
+        wrap(peel(*self).transform_vector2(peel(vector)))
     }
 }
 
+crate::impl_matrixlike::matrixlike!(Matrix3, 3);
+
 impl From<glam::Mat2> for Matrix2<f32> {
     fn from(mat: glam::Mat2) -> Self {
-        Self::from_raw(mat)
+        wrap(mat)
     }
 }
 
 impl From<Matrix2<f32>> for glam::Mat2 {
     fn from(mat: Matrix2<f32>) -> Self {
-        mat.to_raw()
+        peel(mat)
     }
 }
 
@@ -530,37 +241,37 @@ impl<T: Scalar> From<Matrix2<T>> for [T; 4] {
 
 impl From<glam::DMat2> for Matrix2<f64> {
     fn from(mat: glam::DMat2) -> Self {
-        Self::from_raw(mat)
+        wrap(mat)
     }
 }
 
 impl From<Matrix2<f64>> for glam::DMat2 {
     fn from(mat: Matrix2<f64>) -> Self {
-        mat.to_raw()
+        peel(mat)
     }
 }
 
 impl From<glam::Mat3A> for Matrix3<f32> {
     fn from(mat: glam::Mat3A) -> Self {
-        Self::from_raw(mat.into())
+        wrap(mat.into())
     }
 }
 
 impl From<Matrix3<f32>> for glam::Mat3A {
     fn from(mat: Matrix3<f32>) -> Self {
-        mat.to_raw().into()
+        peel(mat).into()
     }
 }
 
 impl From<glam::Mat3> for Matrix3<f32> {
     fn from(mat: glam::Mat3) -> Self {
-        Self::from_raw(mat)
+        wrap(mat)
     }
 }
 
 impl From<Matrix3<f32>> for glam::Mat3 {
     fn from(mat: Matrix3<f32>) -> Self {
-        mat.to_raw()
+        peel(mat)
     }
 }
 
@@ -578,25 +289,25 @@ impl<T: FloatScalar> From<Matrix3<T>> for [T; 9] {
 
 impl From<glam::DMat3> for Matrix3<f64> {
     fn from(mat: glam::DMat3) -> Self {
-        Self::from_raw(mat)
+        wrap(mat)
     }
 }
 
 impl From<Matrix3<f64>> for glam::DMat3 {
     fn from(mat: Matrix3<f64>) -> Self {
-        mat.to_raw()
+        peel(mat)
     }
 }
 
 impl From<glam::Mat4> for Matrix4<f32> {
     fn from(mat: glam::Mat4) -> Self {
-        Self::from_raw(mat)
+        wrap(mat)
     }
 }
 
 impl From<Matrix4<f32>> for glam::Mat4 {
     fn from(mat: Matrix4<f32>) -> Self {
-        mat.to_raw()
+        peel(mat)
     }
 }
 
@@ -614,13 +325,13 @@ impl<T: FloatScalar> From<Matrix4<T>> for [T; 16] {
 
 impl From<glam::DMat4> for Matrix4<f64> {
     fn from(mat: glam::DMat4) -> Self {
-        Self::from_raw(mat)
+        wrap(mat)
     }
 }
 
 impl From<Matrix4<f64>> for glam::DMat4 {
     fn from(mat: Matrix4<f64>) -> Self {
-        mat.to_raw()
+        peel(mat)
     }
 }
 
@@ -632,7 +343,7 @@ where
 
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self::Output {
-        Self::from_raw(self.to_raw() * rhs.to_raw())
+        wrap(peel(self) * peel(rhs))
     }
 }
 
@@ -644,7 +355,7 @@ where
 
     #[inline(always)]
     fn mul(self, rhs: T) -> Self::Output {
-        Self::from_raw(self.to_raw() * rhs)
+        wrap(peel(self) * rhs)
     }
 }
 
@@ -654,7 +365,7 @@ where
 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: T) {
-        *self.as_raw_mut() *= rhs;
+        *self = wrap(peel(*self) * rhs);
     }
 }
 
@@ -666,7 +377,7 @@ where
 
     #[inline(always)]
     fn mul(self, rhs: Vector2<T>) -> Vector2<T> {
-        Vector2::from_raw(self.to_raw() * rhs.to_raw())
+        wrap(peel(self).mul_vec2(peel(rhs)))
     }
 }
 
@@ -678,7 +389,7 @@ where
 
     #[inline(always)]
     fn div(self, rhs: T) -> Self::Output {
-        Self::from_raw(self.to_raw() / rhs)
+        wrap(peel(self) / rhs)
     }
 }
 
@@ -688,7 +399,7 @@ where
 {
     #[inline(always)]
     fn div_assign(&mut self, rhs: T) {
-        *self.as_raw_mut() /= rhs;
+        *self = wrap(peel(*self) / rhs);
     }
 }
 
@@ -701,7 +412,7 @@ where
     #[inline]
     #[must_use]
     fn mul(self, rhs: Self) -> Self::Output {
-        Matrix3::from_raw(self.to_raw() * rhs.to_raw())
+        wrap(peel(self) * peel(rhs))
     }
 }
 
@@ -713,7 +424,7 @@ where
 
     #[inline(always)]
     fn mul(self, rhs: T) -> Self::Output {
-        Self::from_raw(self.to_raw() * rhs)
+        wrap(peel(self) * rhs)
     }
 }
 
@@ -723,21 +434,20 @@ where
 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: T) {
-        *self.as_raw_mut() *= rhs;
+        *self = *self * rhs;
     }
 }
 
 impl<T> Mul<Vector3<T>> for Matrix3<T::Scalar>
 where
-    T: Unit,
-    T::Scalar: FloatScalar,
+    T: FloatUnit,
 {
     type Output = Vector3<T>;
 
     #[inline]
     #[must_use]
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
-        Vector3::from_raw(self.to_raw() * rhs.to_raw())
+        wrap(peel(self).mul_vec3(peel(rhs)))
     }
 }
 
@@ -749,7 +459,7 @@ where
 
     #[inline(always)]
     fn div(self, rhs: T) -> Self::Output {
-        Self::from_raw(self.to_raw() / rhs)
+        wrap(peel(self) / rhs)
     }
 }
 
@@ -759,7 +469,7 @@ where
 {
     #[inline(always)]
     fn div_assign(&mut self, rhs: T) {
-        *self.as_raw_mut() /= rhs;
+        *self = *self / rhs;
     }
 }
 
@@ -771,7 +481,7 @@ where
 
     #[inline(always)]
     fn mul(self, rhs: T) -> Self::Output {
-        Self::from_raw(self.to_raw() * rhs)
+        wrap(peel(self) * rhs)
     }
 }
 
@@ -781,7 +491,7 @@ where
 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: T) {
-        *self.as_raw_mut() *= rhs;
+        *self = *self * rhs;
     }
 }
 
@@ -793,7 +503,7 @@ where
 
     #[inline(always)]
     fn div(self, rhs: T) -> Self::Output {
-        Self::from_raw(self.to_raw() / rhs)
+        wrap(peel(self) / rhs)
     }
 }
 
@@ -803,21 +513,20 @@ where
 {
     #[inline(always)]
     fn div_assign(&mut self, rhs: T) {
-        *self.as_raw_mut() /= rhs;
+        *self = *self / rhs;
     }
 }
 
 impl<T> Mul<Vector4<T>> for Matrix4<T::Scalar>
 where
-    T: Unit,
-    T::Scalar: FloatScalar,
+    T: FloatUnit,
 {
     type Output = Vector4<T>;
 
     #[inline]
     #[must_use]
     fn mul(self, rhs: Vector4<T>) -> Self::Output {
-        Vector4::from_raw(self.to_raw() * rhs.to_raw())
+        wrap(peel(self).mul_vec4(peel(rhs)))
     }
 }
 
@@ -845,10 +554,10 @@ where
     /// ```rust
     /// # use glamour::prelude::*;
     /// let matrix = Matrix4::<f32>::IDENTITY;
-    /// assert_eq!(matrix.row(0), (1.0, 0.0, 0.0, 0.0));
-    /// assert_eq!(matrix.row(1), (0.0, 1.0, 0.0, 0.0));
-    /// assert_eq!(matrix.row(2), (0.0, 0.0, 1.0, 0.0));
-    /// assert_eq!(matrix.row(3), (0.0, 0.0, 0.0, 1.0));
+    /// assert_eq!(matrix.row(0), vec4!(1.0, 0.0, 0.0, 0.0));
+    /// assert_eq!(matrix.row(1), vec4!(0.0, 1.0, 0.0, 0.0));
+    /// assert_eq!(matrix.row(2), vec4!(0.0, 0.0, 1.0, 0.0));
+    /// assert_eq!(matrix.row(3), vec4!(0.0, 0.0, 0.0, 1.0));
     /// ```
     pub const IDENTITY: Self = Self {
         x_axis: Vector4::X,
@@ -856,141 +565,9 @@ where
         z_axis: Vector4::Z,
         w_axis: Vector4::W,
     };
-
-    crate::forward_to_raw!(
-        glam::Mat4 =>
-        #[doc = "Get column."]
-        pub fn col(&self, index: usize) -> Vector4<T>;
-        #[doc = "Get row."]
-        pub fn row(&self, index: usize) -> Vector4<T>;
-        #[doc = "Matrix from columns."]
-        pub fn from_cols(
-            x_axis: Vector4<T>,
-            y_axis: Vector4<T>,
-            z_axis: Vector4<T>,
-            w_axis: Vector4<T>
-        ) -> Self;
-        #[doc = "Matrix from diagonal."]
-        pub fn from_diagonal(diagonal: Vector4<T>) -> Self;
-        #[doc = "Affine 3D rotation matrix."]
-        pub fn from_axis_angle(axis: Vector3<T>, angle: Angle<T>) -> Self;
-        #[doc = "Scaling matrix."]
-        pub fn from_scale(scale: Vector3<T>) -> Self;
-        #[doc = "3D affine transformation matrix."]
-        pub fn from_rotation_translation(rotation: T::Quat, translation: Vector3<T>) -> Self;
-        #[doc = "3D translation matrix."]
-        pub fn from_translation(translation: Vector3<T>) -> Self;
-        #[doc = "3D affine transformation matrix."]
-        pub fn from_scale_rotation_translation(
-            scale: Vector3<T>,
-            rotation: T::Quat,
-            translation: Vector3<T>
-        ) -> Self;
-        #[doc = "Rotation matrix."]
-        pub fn from_quat(quat: T::Quat) -> Self;
-        #[doc = "Matrix4 from [`Matrix3`]"]
-        pub fn from_mat3(mat3: Matrix3<T>) -> Self;
-        #[doc = "Inverse matrix"]
-        pub fn inverse(&self) -> Self;
-        #[doc = "Multiplies two 4x4 matrices."]
-        pub fn mul_mat4(&self, other: &Self) -> Self;
-        #[doc = "Adds two 4x4 matrices."]
-        pub fn add_mat4(&self, other: &Self) -> Self;
-        #[doc = "Subtracts two 4x4 matrices."]
-        pub fn sub_mat4(&self, other: &Self) -> Self;
-        #[doc = ""]
-        pub fn look_at_lh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self;
-        #[doc = ""]
-        pub fn look_at_rh(eye: Point3<T>, center: Point3<T>, up: Vector3<T>) -> Self;
-        #[doc = ""]
-        pub fn perspective_rh_gl(
-            fov_y_radians: Angle<T>,
-            aspect_ratio: T,
-            z_near: T,
-            z_far: T
-        ) -> Self;
-        #[doc = ""]
-        pub fn perspective_lh(
-            fov_y_radians: Angle<T>,
-            aspect_ratio: T,
-            z_near: T,
-            z_far: T
-        ) -> Self;
-        #[doc = ""]
-        pub fn perspective_rh(
-            fov_y_radians: Angle<T>,
-            aspect_ratio: T,
-            z_near: T,
-            z_far: T
-        ) -> Self;
-        #[doc = ""]
-        pub fn perspective_infinite_lh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T)
-        -> Self;
-        #[doc = ""]
-        pub fn perspective_infinite_reverse_lh(
-            fov_y_radians: Angle<T>,
-            aspect_ratio: T,
-            z_near: T
-        ) -> Self;
-        #[doc = ""]
-        pub fn perspective_infinite_rh(fov_y_radians: Angle<T>, aspect_ratio: T, z_near: T)
-        -> Self;
-        #[doc = ""]
-        pub fn perspective_infinite_reverse_rh(
-            fov_y_radians: Angle<T>,
-            aspect_ratio: T,
-            z_near: T
-        ) -> Self;
-        #[doc = ""]
-        pub fn orthographic_rh_gl(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
-        #[doc = ""]
-        pub fn orthographic_lh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
-        #[doc = ""]
-        pub fn orthographic_rh(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self;
-        #[doc = "Create a `[T; 16]` array storing the data in column-major order."]
-        pub fn to_cols_array(&self) -> [T; 16];
-    );
-
-    #[doc = "Creates a 4x4 matrix from a [T; 16] array stored in column major order."]
-    pub fn from_cols_array(array: &[T; 16]) -> Self {
-        Self::from_raw(<Self as ToRaw>::Raw::from_cols_array(array))
-    }
-
-    /// Transform 3D point.
-    ///
-    /// This assumes that the matrix is a valid affine matrix, and does not
-    /// perform perspective correction.
-    ///
-    /// See [`glam::Mat4::transform_point3()`] or
-    /// [`glam::DMat4::transform_point3()`] (depending on the scalar).
-    #[inline]
-    #[must_use]
-    pub fn transform_point(&self, point: Point3<T>) -> Point3<T> {
-        Point3::from_raw(self.as_raw().transform_point3(point.to_raw()))
-    }
-
-    /// Transform 3D vector.
-    ///
-    /// See [`glam::Mat4::transform_vector3()`] or
-    /// [`glam::DMat4::transform_vector3()`] (depending on the scalar).
-    #[inline]
-    #[must_use]
-    pub fn transform_vector<U: Unit<Scalar = T>>(&self, vector: Vector3<U>) -> Vector3<U> {
-        Vector3::from_raw(self.as_raw().transform_vector3(vector.to_raw()))
-    }
-
-    /// Project 3D point.
-    ///
-    /// Transform the point, including perspective correction.
-    ///
-    /// See [`glam::Mat4::project_point3()`] or
-    /// [`glam::DMat4::project_point3()`] (depending on the scalar).
-    #[inline]
-    #[must_use]
-    pub fn project_point<U: Unit<Scalar = T>>(&self, point: Point3<U>) -> Point3<U> {
-        Point3::from_raw(self.as_raw().project_point3(point.to_raw()))
-    }
 }
+
+crate::impl_matrixlike::matrixlike!(Matrix4, 4);
 
 impl<T> Mul for Matrix4<T>
 where
@@ -1001,7 +578,7 @@ where
     #[inline]
     #[must_use]
     fn mul(self, rhs: Self) -> Self::Output {
-        Matrix4::from_raw(self.to_raw() * rhs.to_raw())
+        wrap(peel(self) * peel(rhs))
     }
 }
 
@@ -1021,11 +598,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.as_raw().abs_diff_eq(other.as_raw(), epsilon)
+        peel_ref(self).abs_diff_eq(peel_ref(other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.as_raw().abs_diff_ne(other.as_raw(), epsilon)
+        peel_ref(self).abs_diff_ne(peel_ref(other), epsilon)
     }
 }
 
@@ -1044,8 +621,7 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.to_cols()
-            .relative_eq(&other.to_cols(), epsilon, max_relative)
+        peel_ref(self).relative_eq(peel_ref(other), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -1054,26 +630,21 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.to_cols()
-            .relative_ne(&other.to_cols(), epsilon, max_relative)
+        peel_ref(self).relative_ne(peel_ref(other), epsilon, max_relative)
     }
 }
 
-impl<T> UlpsEq for Matrix2<T>
-where
-    T: FloatScalar,
-    T::Epsilon: Clone,
-{
+impl<T: FloatScalar> UlpsEq for Matrix2<T> {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.to_cols().ulps_eq(&other.to_cols(), epsilon, max_ulps)
+        peel_ref(self).ulps_eq(peel_ref(other), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.to_cols().ulps_ne(&other.to_cols(), epsilon, max_ulps)
+        peel_ref(self).ulps_ne(peel_ref(other), epsilon, max_ulps)
     }
 }
 
@@ -1089,11 +660,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.as_raw().abs_diff_eq(other.as_raw(), epsilon)
+        peel(*self).abs_diff_eq(&peel(*other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.as_raw().abs_diff_ne(other.as_raw(), epsilon)
+        peel(*self).abs_diff_ne(&peel(*other), epsilon)
     }
 }
 
@@ -1112,8 +683,7 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.to_cols()
-            .relative_eq(&other.to_cols(), epsilon, max_relative)
+        peel_ref(self).relative_eq(peel_ref(other), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -1122,26 +692,21 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.to_cols()
-            .relative_ne(&other.to_cols(), epsilon, max_relative)
+        peel_ref(self).relative_ne(peel_ref(other), epsilon, max_relative)
     }
 }
 
-impl<T> UlpsEq for Matrix3<T>
-where
-    T: FloatScalar,
-    T::Epsilon: Clone,
-{
+impl<T: FloatScalar> UlpsEq for Matrix3<T> {
     fn default_max_ulps() -> u32 {
         T::default_max_ulps()
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.to_cols().ulps_eq(&other.to_cols(), epsilon, max_ulps)
+        peel_ref(self).ulps_eq(peel_ref(other), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.to_cols().ulps_ne(&other.to_cols(), epsilon, max_ulps)
+        peel_ref(self).ulps_ne(peel_ref(other), epsilon, max_ulps)
     }
 }
 
@@ -1157,19 +722,15 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.as_raw().abs_diff_eq(other.as_raw(), epsilon)
+        peel_ref(self).abs_diff_eq(peel_ref(other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        self.as_raw().abs_diff_ne(other.as_raw(), epsilon)
+        peel_ref(self).abs_diff_ne(peel_ref(other), epsilon)
     }
 }
 
-impl<T> RelativeEq for Matrix4<T>
-where
-    T: FloatScalar,
-    T::Epsilon: Clone,
-{
+impl<T: FloatScalar> RelativeEq for Matrix4<T> {
     fn default_max_relative() -> Self::Epsilon {
         T::default_max_relative()
     }
@@ -1180,8 +741,7 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.to_cols()
-            .relative_eq(&other.to_cols(), epsilon, max_relative)
+        peel_ref(self).relative_eq(peel_ref(other), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -1190,12 +750,11 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.to_cols()
-            .relative_ne(&other.to_cols(), epsilon, max_relative)
+        peel_ref(self).relative_ne(peel_ref(other), epsilon, max_relative)
     }
 }
 
-impl<T> UlpsEq for Matrix4<T>
+impl<T: FloatScalar> UlpsEq for Matrix4<T>
 where
     T: FloatScalar,
     T::Epsilon: Clone,
@@ -1205,11 +764,11 @@ where
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.to_cols().ulps_eq(&other.to_cols(), epsilon, max_ulps)
+        peel_ref(self).ulps_eq(peel_ref(other), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        self.to_cols().ulps_ne(&other.to_cols(), epsilon, max_ulps)
+        peel_ref(self).ulps_ne(peel_ref(other), epsilon, max_ulps)
     }
 }
 
@@ -1239,90 +798,102 @@ mod tests {
     type DVec4 = Vector4<f64>;
 
     #[test]
+    fn from_rows() {
+        let from_rows = Mat2::from_rows(vec2!(1.0, 2.0), vec2!(3.0, 4.0));
+        assert_eq!(from_rows, Mat2::from_cols(vec2!(1.0, 3.0), vec2!(2.0, 4.0)));
+    }
+
+    #[test]
     fn from_scale() {
-        let m2 = Mat2::from_scale(Vec2::new(2.0, 3.0));
         let m3 = Mat3::from_scale(Vec2::new(2.0, 3.0));
         let m4 = Mat4::from_scale(Vec3::new(2.0, 3.0, 4.0));
 
-        assert_eq!(m2, Mat2::with_rows([(2.0, 0.0), (0.0, 3.0)]));
         assert_eq!(
             m3,
-            Mat3::with_rows([(2.0, 0.0, 0.0), (0.0, 3.0, 0.0), (0.0, 0.0, 1.0)])
+            Mat3::from_rows(
+                (2.0, 0.0, 0.0).into(),
+                (0.0, 3.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            )
         );
         assert_eq!(
             m4,
-            Mat4::with_rows([
-                (2.0, 0.0, 0.0, 0.0),
-                (0.0, 3.0, 0.0, 0.0),
-                (0.0, 0.0, 4.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
-            ])
+            Mat4::from_rows(
+                (2.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 3.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 4.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            )
         );
 
-        assert_eq!(m2 * Vec2::ONE, vec2!(2.0, 3.0));
         assert_eq!(m3 * Vec3::ONE, vec3!(2.0, 3.0, 1.0));
 
-        let m2 = DMat2::from_scale(DVec2::new(2.0, 3.0));
         let m3 = DMat3::from_scale(DVec2::new(2.0, 3.0));
         let m4 = DMat4::from_scale(DVec3::new(2.0, 3.0, 4.0));
 
-        assert_eq!(m2, DMat2::with_rows([(2.0, 0.0), (0.0, 3.0)]));
         assert_eq!(
             m3,
-            DMat3::with_rows([(2.0, 0.0, 0.0), (0.0, 3.0, 0.0), (0.0, 0.0, 1.0)])
+            DMat3::from_rows(
+                (2.0, 0.0, 0.0).into(),
+                (0.0, 3.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            )
         );
         assert_eq!(
             m4,
-            DMat4::with_rows([
-                (2.0, 0.0, 0.0, 0.0),
-                (0.0, 3.0, 0.0, 0.0),
-                (0.0, 0.0, 4.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
-            ])
+            DMat4::from_rows(
+                (2.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 3.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 4.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            )
         );
 
-        assert_eq!(m2 * DVec2::ONE, vec2!(2.0, 3.0));
         assert_eq!(m3 * DVec3::ONE, vec3!(2.0, 3.0, 1.0));
     }
 
     #[test]
     fn from_angle() {
-        let m2 = Mat2::from_angle(Angle::from_degrees(90.0));
         let m3 = Mat3::from_angle(Angle::from_degrees(90.0));
         let m4 = Mat4::from_axis_angle(Vec3::Z, Angle::from_degrees(90.0));
 
-        assert_abs_diff_eq!(m2, Mat2::with_rows([(0.0, -1.0), (1.0, 0.0)]));
         assert_abs_diff_eq!(
             m3,
-            Mat3::with_rows([(0.0, -1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)])
+            Mat3::from_rows(
+                (0.0, -1.0, 0.0).into(),
+                (1.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            )
         );
         assert_abs_diff_eq!(
             m4,
-            Mat4::with_rows([
-                (0.0, -1.0, 0.0, 0.0),
-                (1.0, 0.0, 0.0, 0.0),
-                (0.0, 0.0, 1.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
-            ])
+            Mat4::from_rows(
+                (0.0, -1.0, 0.0, 0.0).into(),
+                (1.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            )
         );
 
-        let m2 = DMat2::from_angle(Angle::from_degrees(90.0));
         let m3 = DMat3::from_angle(Angle::from_degrees(90.0));
         let m4 = DMat4::from_axis_angle(Vector3::Z, Angle::from_degrees(90.0));
 
-        assert_abs_diff_eq!(m2, DMat2::with_rows([(0.0, -1.0), (1.0, 0.0)]));
         assert_abs_diff_eq!(
             m3,
-            DMat3::with_rows([(0.0, -1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)])
+            DMat3::from_rows(
+                (0.0, -1.0, 0.0).into(),
+                (1.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0).into()
+            )
         );
         assert_abs_diff_eq!(
             m4,
-            DMat4::with_rows([
-                (0.0, -1.0, 0.0, 0.0),
-                (1.0, 0.0, 0.0, 0.0),
-                (0.0, 0.0, 1.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
-            ])
+            DMat4::from_rows(
+                (0.0, -1.0, 0.0, 0.0).into(),
+                (1.0, 0.0, 0.0, 0.0).into(),
+                (0.0, 0.0, 1.0, 0.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into()
+            )
         );
     }
 
@@ -1333,16 +904,20 @@ mod tests {
 
         assert_eq!(
             m3,
-            Mat3::with_rows([(1.0, 0.0, 2.0), (0.0, 1.0, 3.0), (0.0, 0.0, 1.0),])
+            Mat3::from_rows(
+                (1.0, 0.0, 2.0).into(),
+                (0.0, 1.0, 3.0).into(),
+                (0.0, 0.0, 1.0).into()
+            )
         );
         assert_eq!(
             m4,
-            Mat4::with_rows([
-                (1.0, 0.0, 0.0, 2.0),
-                (0.0, 1.0, 0.0, 3.0),
-                (0.0, 0.0, 1.0, 4.0),
-                (0.0, 0.0, 0.0, 1.0),
-            ])
+            Mat4::from_rows(
+                (1.0, 0.0, 0.0, 2.0).into(),
+                (0.0, 1.0, 0.0, 3.0).into(),
+                (0.0, 0.0, 1.0, 4.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into(),
+            )
         );
 
         let m3 = DMat3::from_translation(Vector2::new(2.0, 3.0));
@@ -1350,16 +925,20 @@ mod tests {
 
         assert_eq!(
             m3,
-            DMat3::with_rows([(1.0, 0.0, 2.0), (0.0, 1.0, 3.0), (0.0, 0.0, 1.0),])
+            DMat3::from_rows(
+                (1.0, 0.0, 2.0).into(),
+                (0.0, 1.0, 3.0).into(),
+                (0.0, 0.0, 1.0).into()
+            )
         );
         assert_eq!(
             m4,
-            DMat4::with_rows([
-                (1.0, 0.0, 0.0, 2.0),
-                (0.0, 1.0, 0.0, 3.0),
-                (0.0, 0.0, 1.0, 4.0),
-                (0.0, 0.0, 0.0, 1.0),
-            ])
+            DMat4::from_rows(
+                (1.0, 0.0, 0.0, 2.0).into(),
+                (0.0, 1.0, 0.0, 3.0).into(),
+                (0.0, 0.0, 1.0, 4.0).into(),
+                (0.0, 0.0, 0.0, 1.0).into(),
+            )
         );
     }
 
@@ -1402,7 +981,7 @@ mod tests {
             assert_abs_diff_eq!(
                 Mat4::from_scale_rotation_translation(
                     scale,
-                    glam::Quat::from_axis_angle(axis.to_raw(), angle.to_raw()),
+                    glam::Quat::from_axis_angle(peel(axis), peel(angle)),
                     translation
                 ),
                 Mat4::from_translation(translation)
@@ -1421,7 +1000,7 @@ mod tests {
             assert_abs_diff_eq!(
                 DMat4::from_scale_rotation_translation(
                     scale,
-                    glam::DQuat::from_axis_angle(axis.to_raw(), angle.to_raw()),
+                    glam::DQuat::from_axis_angle(peel(axis), peel(angle)),
                     translation
                 ),
                 DMat4::from_translation(translation)
@@ -1434,67 +1013,62 @@ mod tests {
 
     #[test]
     fn to_cols() {
-        assert_eq!(Mat2::IDENTITY.to_cols(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(Mat2::IDENTITY.to_cols_array(), [1.0, 0.0, 0.0, 1.0]);
         assert_eq!(
-            Mat3::IDENTITY.to_cols(),
-            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+            Mat3::IDENTITY.to_cols_array(),
+            [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
         );
         assert_eq!(
-            Mat4::IDENTITY.to_cols(),
+            Mat4::IDENTITY.to_cols_array_2d(),
             [
-                (1.0, 0.0, 0.0, 0.0),
-                (0.0, 1.0, 0.0, 0.0),
-                (0.0, 0.0, 1.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0]
             ]
         );
 
-        assert_eq!(DMat2::IDENTITY.to_cols(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(DMat2::IDENTITY.to_cols_array(), [1.0, 0.0, 0.0, 1.0]);
         assert_eq!(
-            DMat3::IDENTITY.to_cols(),
-            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+            DMat3::IDENTITY.to_cols_array(),
+            [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
         );
         assert_eq!(
-            DMat4::IDENTITY.to_cols(),
+            DMat4::IDENTITY.to_cols_array_2d(),
             [
-                (1.0, 0.0, 0.0, 0.0),
-                (0.0, 1.0, 0.0, 0.0),
-                (0.0, 0.0, 1.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0]
             ]
         );
     }
 
     #[test]
     fn to_rows() {
-        assert_eq!(Mat2::IDENTITY.to_rows(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(Mat2::IDENTITY.to_rows_array(), [1.0, 0.0, 0.0, 1.0]);
         assert_eq!(
-            Mat3::IDENTITY.to_rows(),
-            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+            Mat3::IDENTITY.to_rows_array_2d(),
+            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         );
         assert_eq!(
-            Mat4::IDENTITY.to_rows(),
+            Mat4::IDENTITY.to_rows_array_2d(),
             [
-                (1.0, 0.0, 0.0, 0.0),
-                (0.0, 1.0, 0.0, 0.0),
-                (0.0, 0.0, 1.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0]
             ]
         );
 
-        assert_eq!(DMat2::IDENTITY.to_rows(), [(1.0, 0.0), (0.0, 1.0)]);
+        assert_eq!(DMat2::IDENTITY.to_rows_array(), [1.0, 0.0, 0.0, 1.0]);
         assert_eq!(
-            DMat3::IDENTITY.to_rows(),
-            [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+            DMat3::IDENTITY.to_rows_array(),
+            [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
         );
         assert_eq!(
-            DMat4::IDENTITY.to_rows(),
-            [
-                (1.0, 0.0, 0.0, 0.0),
-                (0.0, 1.0, 0.0, 0.0),
-                (0.0, 0.0, 1.0, 0.0),
-                (0.0, 0.0, 0.0, 1.0)
-            ]
+            DMat4::IDENTITY.to_rows_array(),
+            [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
         );
     }
 
@@ -1580,15 +1154,12 @@ mod tests {
 
     #[test]
     fn transform() {
-        let v2 = Vec2::new(1.0, 2.0);
         let v3 = Vec3::new(1.0, 2.0, 3.0);
         let v4 = Vec4::new(1.0, 2.0, 3.0, 4.0);
 
-        let mat2 = Mat2::from_scale((2.0, 2.0).into());
         let mat3 = Mat3::from_scale((2.0, 2.0).into());
         let mat4 = Mat4::from_scale((2.0, 2.0, 2.0).into());
 
-        assert_eq!(mat2 * v2, mat2.transform_vector(v2));
         assert_eq!(mat3 * v3, Vec3::new(2.0, 4.0, 3.0));
         assert_eq!(mat4 * v4, Vec4::new(2.0, 4.0, 6.0, 4.0));
     }
@@ -1599,11 +1170,9 @@ mod tests {
         let v3 = DVec3::new(1.0, 2.0, 3.0);
         let v4 = DVec4::new(1.0, 2.0, 3.0, 4.0);
 
-        let mat2 = DMat2::from_scale((2.0, 2.0).into());
         let mat3 = DMat3::from_scale((2.0, 2.0).into());
         let mat4 = DMat4::from_scale((2.0, 2.0, 2.0).into());
 
-        assert_eq!(mat2 * v2, mat2.transform_vector(v2));
         assert_eq!(mat3 * v3, mat3.transform_vector(v2).extend(3.0));
         assert_eq!(mat4 * v4, DVec4::new(2.0, 4.0, 6.0, 4.0));
     }
@@ -1673,28 +1242,28 @@ mod tests {
         assert!(!DMat3::NAN.is_finite());
         assert!(!DMat4::NAN.is_finite());
 
-        assert!(!DMat4::with_rows([
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, f64::NAN),
-        ])
+        assert!(!DMat4::from_rows(
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, f64::NAN).into(),
+        )
         .is_finite());
 
-        assert!(!DMat4::with_rows([
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, f64::INFINITY),
-        ])
+        assert!(!DMat4::from_rows(
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, f64::INFINITY).into(),
+        )
         .is_finite());
 
-        assert!(!DMat4::with_rows([
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, 1.0),
-            (1.0, 1.0, 1.0, f64::NEG_INFINITY),
-        ])
+        assert!(!DMat4::from_rows(
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, 1.0).into(),
+            (1.0, 1.0, 1.0, f64::NEG_INFINITY).into(),
+        )
         .is_finite());
     }
 
@@ -1755,7 +1324,11 @@ mod tests {
 
     #[test]
     fn mat3a() {
-        let mat3 = Mat3::with_cols([(1.0, 2.0, 3.0), (4.0, 5.0, 6.0), (7.0, 8.0, 9.0)]);
+        let mat3 = Mat3::from_cols(
+            (1.0, 2.0, 3.0).into(),
+            (4.0, 5.0, 6.0).into(),
+            (7.0, 8.0, 9.0).into(),
+        );
         let mat3a: glam::Mat3A = mat3.into();
         assert_eq!(
             mat3a,
@@ -1772,12 +1345,11 @@ mod tests {
     #[test]
     fn mat4_constructors() {
         assert_eq!(
-            Matrix4::<f32>::look_at_lh(
+            peel(Matrix4::<f32>::look_at_lh(
                 point3!(1.0, 2.0, 3.0),
                 point3!(4.0, 5.0, 6.0),
                 vec3!(1.0, 0.0, 0.0)
-            )
-            .to_raw(),
+            )),
             glam::Mat4::look_at_lh(
                 (1.0, 2.0, 3.0).into(),
                 (4.0, 5.0, 6.0).into(),
@@ -1785,12 +1357,11 @@ mod tests {
             )
         );
         assert_eq!(
-            Matrix4::<f32>::look_at_rh(
+            peel(Matrix4::<f32>::look_at_rh(
                 point3!(1.0, 2.0, 3.0),
                 point3!(4.0, 5.0, 6.0),
                 vec3!(1.0, 0.0, 0.0)
-            )
-            .to_raw(),
+            )),
             glam::Mat4::look_at_rh(
                 (1.0, 2.0, 3.0).into(),
                 (4.0, 5.0, 6.0).into(),
@@ -1799,55 +1370,54 @@ mod tests {
         );
         assert_eq!(
             Matrix4::<f32>::perspective_rh_gl(Angle::new(1.0), 2.0, 3.0, 4.0),
-            Matrix4::from_raw(glam::Mat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
+            wrap(glam::Mat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
             Matrix4::<f32>::perspective_lh(Angle::new(1.0), 2.0, 3.0, 4.0),
-            Matrix4::from_raw(glam::Mat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
+            wrap(glam::Mat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
             Matrix4::<f32>::perspective_rh(Angle::new(1.0), 2.0, 3.0, 4.0),
-            Matrix4::from_raw(glam::Mat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
+            wrap(glam::Mat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
             Matrix4::<f32>::perspective_infinite_lh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::Mat4::perspective_infinite_lh(1.0, 2.0, 3.0))
+            wrap(glam::Mat4::perspective_infinite_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f32>::perspective_infinite_reverse_lh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::Mat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
+            wrap(glam::Mat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f32>::perspective_infinite_rh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::Mat4::perspective_infinite_rh(1.0, 2.0, 3.0))
+            wrap(glam::Mat4::perspective_infinite_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f32>::perspective_infinite_reverse_rh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::Mat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
+            wrap(glam::Mat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f32>::orthographic_rh_gl(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
-            Matrix4::from_raw(glam::Mat4::orthographic_rh_gl(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+            wrap(glam::Mat4::orthographic_rh_gl(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
         );
         assert_eq!(
             Matrix4::<f32>::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
-            Matrix4::from_raw(glam::Mat4::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+            wrap(glam::Mat4::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
         );
         assert_eq!(
             Matrix4::<f32>::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
-            Matrix4::from_raw(glam::Mat4::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+            wrap(glam::Mat4::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
         );
     }
 
     #[test]
     fn dmat4_constructors() {
         assert_eq!(
-            Matrix4::<f64>::look_at_lh(
+            peel(Matrix4::<f64>::look_at_lh(
                 point3!(1.0, 2.0, 3.0),
                 point3!(4.0, 5.0, 6.0),
                 vec3!(1.0, 0.0, 0.0)
-            )
-            .to_raw(),
+            )),
             glam::DMat4::look_at_lh(
                 (1.0, 2.0, 3.0).into(),
                 (4.0, 5.0, 6.0).into(),
@@ -1855,12 +1425,11 @@ mod tests {
             )
         );
         assert_eq!(
-            Matrix4::<f64>::look_at_rh(
+            peel(Matrix4::<f64>::look_at_rh(
                 point3!(1.0, 2.0, 3.0),
                 point3!(4.0, 5.0, 6.0),
                 vec3!(1.0, 0.0, 0.0)
-            )
-            .to_raw(),
+            )),
             glam::DMat4::look_at_rh(
                 (1.0, 2.0, 3.0).into(),
                 (4.0, 5.0, 6.0).into(),
@@ -1869,45 +1438,45 @@ mod tests {
         );
         assert_eq!(
             Matrix4::<f64>::perspective_rh_gl(Angle::new(1.0), 2.0, 3.0, 4.0),
-            Matrix4::from_raw(glam::DMat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
+            wrap(glam::DMat4::perspective_rh_gl(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
             Matrix4::<f64>::perspective_lh(Angle::new(1.0), 2.0, 3.0, 4.0),
-            Matrix4::from_raw(glam::DMat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
+            wrap(glam::DMat4::perspective_lh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
             Matrix4::<f64>::perspective_rh(Angle::new(1.0), 2.0, 3.0, 4.0),
-            Matrix4::from_raw(glam::DMat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
+            wrap(glam::DMat4::perspective_rh(1.0, 2.0, 3.0, 4.0))
         );
         assert_eq!(
             Matrix4::<f64>::perspective_infinite_lh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::DMat4::perspective_infinite_lh(1.0, 2.0, 3.0))
+            wrap(glam::DMat4::perspective_infinite_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f64>::perspective_infinite_reverse_lh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::DMat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
+            wrap(glam::DMat4::perspective_infinite_reverse_lh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f64>::perspective_infinite_rh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::DMat4::perspective_infinite_rh(1.0, 2.0, 3.0))
+            wrap(glam::DMat4::perspective_infinite_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f64>::perspective_infinite_reverse_rh(Angle::new(1.0), 2.0, 3.0),
-            Matrix4::from_raw(glam::DMat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
+            wrap(glam::DMat4::perspective_infinite_reverse_rh(1.0, 2.0, 3.0))
         );
         assert_eq!(
             Matrix4::<f64>::orthographic_rh_gl(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
-            Matrix4::from_raw(glam::DMat4::orthographic_rh_gl(
+            wrap(glam::DMat4::orthographic_rh_gl(
                 1.0, 2.0, 3.0, 4.0, 5.0, 6.0
             ))
         );
         assert_eq!(
             Matrix4::<f64>::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
-            Matrix4::from_raw(glam::DMat4::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+            wrap(glam::DMat4::orthographic_lh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
         );
         assert_eq!(
             Matrix4::<f64>::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
-            Matrix4::from_raw(glam::DMat4::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
+            wrap(glam::DMat4::orthographic_rh(1.0, 2.0, 3.0, 4.0, 5.0, 6.0))
         );
     }
 
@@ -1918,7 +1487,7 @@ mod tests {
 
         let m4 = Mat4::IDENTITY;
 
-        let s = alloc::format!("{:?}", m4);
+        let s = alloc::format!("{m4:?}");
         assert_eq!(s, "[(1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)]");
     }
 
@@ -2035,6 +1604,15 @@ mod tests {
         assert_eq!(m2_copy, m2 * 2.0);
         assert_eq!(m3_copy, m3 * 2.0);
         assert_eq!(m4_copy, m4 * 2.0);
+
+        assert_eq!(crate::peel(m2 * m2), crate::peel(m2) * crate::peel(m2));
+        assert_eq!(crate::peel(m3 * m3), crate::peel(m3) * crate::peel(m3));
+        assert_eq!(crate::peel(m4 * m4), crate::peel(m4) * crate::peel(m4));
+
+        assert_eq!(
+            crate::peel(m2 * Vector2::<f32>::new(2.0, 2.0)),
+            crate::peel(m2) * crate::peel(Vector2::<f32>::new(2.0, 2.0))
+        );
     }
 
     #[test]

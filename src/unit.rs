@@ -1,3 +1,5 @@
+use crate::{scalar::IntScalar, FloatScalar, SignedScalar};
+
 use super::Scalar;
 
 /// The name of a coordinate space.
@@ -31,67 +33,57 @@ pub trait Unit: 'static {
     /// One of the vector component types of glam: `f32`, `f64`, `i32`, or
     /// `u32`.
     type Scalar: Scalar;
-
-    /// Human-readable name of this coordinate space, used in debugging. `None`
-    /// by default.
-    #[must_use]
-    fn name() -> Option<&'static str> {
-        None
-    }
 }
+
+/// Convenience trait implemented for all [`Unit`]s with an integer scalar type.
+///
+/// Due to implied associated type bounds, this can be used in trait bounds to enable all integer operations in generic
+/// code.
+pub trait IntUnit: Unit<Scalar: IntScalar> {}
+impl<T> IntUnit for T where T: Unit<Scalar: IntScalar> {}
+
+/// Convenience trait implemented for all [`Unit`]s with a signed scalar type.
+///
+/// Due to implied associated type bounds, this can be used in trait bounds to enable all signed operations in generic
+/// code.
+pub trait SignedUnit: Unit<Scalar: SignedScalar> {}
+impl<T> SignedUnit for T where T: Unit<Scalar: SignedScalar> {}
+
+/// Convenience trait implemented for all [`Unit`]s with a floating-point scalar type.
+///
+/// Due to implied associated type bounds, this can be used in trait bounds to enable all floating-point operations in
+/// generic code.
+pub trait FloatUnit: Unit<Scalar: FloatScalar> {}
+impl<T> FloatUnit for T where T: Unit<Scalar: FloatScalar> {}
 
 impl Unit for f32 {
     type Scalar = f32;
-    fn name() -> Option<&'static str> {
-        Some("f32")
-    }
 }
 
 impl Unit for f64 {
     type Scalar = f64;
-    fn name() -> Option<&'static str> {
-        Some("f64")
-    }
 }
 
 impl Unit for i16 {
     type Scalar = i16;
-    fn name() -> Option<&'static str> {
-        Some("i16")
-    }
 }
 
 impl Unit for i32 {
     type Scalar = i32;
-    fn name() -> Option<&'static str> {
-        Some("i32")
-    }
 }
 
 impl Unit for u16 {
     type Scalar = u16;
-    fn name() -> Option<&'static str> {
-        Some("u16")
-    }
 }
 
 impl Unit for u32 {
     type Scalar = u32;
-    fn name() -> Option<&'static str> {
-        Some("u32")
-    }
 }
 
 impl Unit for i64 {
     type Scalar = i64;
-    fn name() -> Option<&'static str> {
-        Some("i64")
-    }
 }
 
 impl Unit for u64 {
     type Scalar = u64;
-    fn name() -> Option<&'static str> {
-        Some("u64")
-    }
 }

@@ -1,11 +1,12 @@
 //! Size vectors
 
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, AsRaw, FromRaw, Scalar, ToRaw, Unit, Vector2,
-    Vector3,
+    bindings::prelude::*, rewrap, scalar::FloatScalar, unit::FloatUnit, Scalar, Transparent, Unit,
+    Vector2, Vector3,
 };
 
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use bytemuck::{Pod, Zeroable};
+use num_traits::{ConstOne, ConstZero};
 
 /// 2D size.
 #[repr(C)]
@@ -20,7 +21,9 @@ pub struct Size2<T: Unit = f32> {
 unsafe impl<T: Unit> Pod for Size2<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> Zeroable for Size2<T> {}
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec2> for Size2<T> {}
+unsafe impl<T: Unit> Transparent for Size2<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec2;
+}
 
 /// 3D size.
 #[repr(C)]
@@ -37,110 +40,24 @@ pub struct Size3<T: Unit = f32> {
 unsafe impl<T: Unit> Pod for Size3<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> Zeroable for Size3<T> {}
-unsafe impl<T: Unit> TransparentWrapper<<T::Scalar as Scalar>::Vec3> for Size3<T> {}
-
-impl<T: Unit> ToRaw for Size2<T> {
-    type Raw = <T::Scalar as Scalar>::Vec2;
-
-    #[inline]
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
+// SAFETY: This is the guarantee of this crate.
+unsafe impl<T: Unit> Transparent for Size3<T> {
+    type Wrapped = <T::Scalar as Scalar>::Vec3;
 }
-
-impl<T: Unit> FromRaw for Size2<T> {
-    #[inline]
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: Unit> AsRaw for Size2<T> {
-    #[inline]
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    #[inline]
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
-}
-
-impl<T: Unit> ToRaw for Size3<T> {
-    type Raw = <T::Scalar as Scalar>::Vec3;
-
-    #[inline]
-    fn to_raw(self) -> Self::Raw {
-        bytemuck::cast(self)
-    }
-}
-
-impl<T: Unit> FromRaw for Size3<T> {
-    #[inline]
-    fn from_raw(raw: Self::Raw) -> Self {
-        bytemuck::cast(raw)
-    }
-}
-
-impl<T: Unit> AsRaw for Size3<T> {
-    #[inline]
-    fn as_raw(&self) -> &Self::Raw {
-        bytemuck::cast_ref(self)
-    }
-
-    #[inline]
-    fn as_raw_mut(&mut self) -> &mut Self::Raw {
-        bytemuck::cast_mut(self)
-    }
-}
-
-crate::derive_standard_traits!(Size2 {
-    width: T::Scalar,
-    height: T::Scalar
-});
-crate::derive_standard_traits!(Size3 {
-    width: T::Scalar,
-    height: T::Scalar,
-    depth: T::Scalar
-});
-
-crate::derive_array_conversion_traits!(Size2, 2);
-crate::derive_array_conversion_traits!(Size3, 3);
-
-crate::derive_tuple_conversion_traits!(Size2 {
-    width: T::Scalar,
-    height: T::Scalar
-});
-crate::derive_tuple_conversion_traits!(Size3 {
-    width: T::Scalar,
-    height: T::Scalar,
-    depth: T::Scalar
-});
-
-crate::derive_glam_conversion_traits!(Size2 {
-    width: T::Scalar,
-    height: T::Scalar
-});
-crate::derive_glam_conversion_traits!(Size3 {
-    width: T::Scalar,
-    height: T::Scalar,
-    depth: T::Scalar
-});
 
 macro_rules! impl_size {
-    ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $vector_type:ident) => {
+    ($base_type_name:ident [ $dimensions:tt ] => $vec_ty:ident, $vector_type:ident) => {
         impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
             #[inline]
             fn from(vec: $vector_type<T>) -> Self {
-                Self::from_raw(vec.to_raw())
+                rewrap(vec)
             }
         }
 
         impl<T: Unit> From<$base_type_name<T>> for $vector_type<T> {
             #[inline]
             fn from(point: $base_type_name<T>) -> Self {
-                Self::from_raw(point.to_raw())
+                rewrap(point)
             }
         }
 
@@ -195,64 +112,17 @@ macro_rules! impl_size {
 impl_size!(Size2 [2] => Vec2, Vector2);
 impl_size!(Size3 [3] => Vec3, Vector3);
 
-crate::forward_op_to_raw!(Size2, Add<Self>::add -> Self);
-crate::forward_op_to_raw!(Size3, Add<Self>::add -> Self);
-crate::forward_op_to_raw!(Size2, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Size3, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Size2, Mul<T::Scalar>::mul -> Self);
-crate::forward_op_to_raw!(Size3, Mul<T::Scalar>::mul -> Self);
-crate::forward_op_to_raw!(Size2, Div<T::Scalar>::div -> Self);
-crate::forward_op_to_raw!(Size3, Div<T::Scalar>::div -> Self);
-crate::forward_op_to_raw!(Size2, Rem<T::Scalar>::rem -> Self);
-crate::forward_op_to_raw!(Size3, Rem<T::Scalar>::rem -> Self);
+crate::impl_vectorlike::sizelike!(Size2, 2);
+crate::impl_vectorlike::sizelike!(Size3, 3);
 
-crate::forward_op_assign_to_raw!(Size2, AddAssign<Self>::add_assign);
-crate::forward_op_assign_to_raw!(Size3, AddAssign<Self>::add_assign);
-crate::forward_op_assign_to_raw!(Size2, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Size3, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Size2, MulAssign<T::Scalar>::mul_assign);
-crate::forward_op_assign_to_raw!(Size3, MulAssign<T::Scalar>::mul_assign);
-crate::forward_op_assign_to_raw!(Size2, DivAssign<T::Scalar>::div_assign);
-crate::forward_op_assign_to_raw!(Size3, DivAssign<T::Scalar>::div_assign);
-crate::forward_op_assign_to_raw!(Size2, RemAssign<T::Scalar>::rem_assign);
-crate::forward_op_assign_to_raw!(Size3, RemAssign<T::Scalar>::rem_assign);
+crate::impl_ops::size_ops!(Size2);
+crate::impl_ops::size_ops!(Size3);
 
 impl<T: Unit> Size2<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        width: T::Scalar::ZERO,
-        height: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        width: T::Scalar::ONE,
-        height: T::Scalar::ONE,
-    };
-
     /// New size.
-    pub fn new(width: T::Scalar, height: T::Scalar) -> Self {
+    pub const fn new(width: T::Scalar, height: T::Scalar) -> Self {
         Self { width, height }
     }
-
-    crate::forward_constructors!(2, glam::Vec2);
-    crate::forward_comparison!(glam::BVec2, glam::Vec2);
-
-    crate::casting_interface!(Size2 {
-        width: T::Scalar,
-        height: T::Scalar
-    });
-    crate::tuple_interface!(Size2 {
-        width: T::Scalar,
-        height: T::Scalar
-    });
-    crate::array_interface!(2);
-
-    crate::forward_to_raw!(
-        glam::Vec2 =>
-        #[doc = "Extend with depth component to [`Size3`]."]
-        pub fn extend(self, depth: T::Scalar) -> Size3<T>;
-    );
 
     /// Calculate the area.
     #[inline]
@@ -262,74 +132,15 @@ impl<T: Unit> Size2<T> {
     }
 }
 
-impl<T> Size2<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
-    /// All NaN.
-    pub const NAN: Self = Self {
-        width: <T::Scalar as FloatScalar>::NAN,
-        height: <T::Scalar as FloatScalar>::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Self {
-        width: <T::Scalar as FloatScalar>::INFINITY,
-        height: <T::Scalar as FloatScalar>::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Self {
-        width: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        height: <T::Scalar as FloatScalar>::NEG_INFINITY,
-    };
-
-    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
-}
-
 impl<T: Unit> Size3<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        width: T::Scalar::ZERO,
-        height: T::Scalar::ZERO,
-        depth: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        width: T::Scalar::ONE,
-        height: T::Scalar::ONE,
-        depth: T::Scalar::ONE,
-    };
-
     /// New size.
-    pub fn new(width: T::Scalar, height: T::Scalar, depth: T::Scalar) -> Self {
+    pub const fn new(width: T::Scalar, height: T::Scalar, depth: T::Scalar) -> Self {
         Self {
             width,
             height,
             depth,
         }
     }
-
-    crate::forward_constructors!(3, glam::Vec3);
-    crate::forward_comparison!(glam::BVec3, glam::Vec3);
-
-    crate::casting_interface!(Size3 {
-        width: T::Scalar,
-        height: T::Scalar,
-        depth: T::Scalar
-    });
-    crate::tuple_interface!(Size3 {
-        width: T::Scalar,
-        height: T::Scalar,
-        depth: T::Scalar
-    });
-    crate::array_interface!(3);
-
-    crate::forward_to_raw!(
-        glam::Vec3 =>
-        #[doc = "Truncate to [`Size2`]."]
-        pub fn truncate(self) -> Size2<T>;
-    );
 
     /// Calculate the volume.
     #[inline]
@@ -346,36 +157,27 @@ impl<T: Unit> Size3<T> {
     }
 }
 
-impl<T> Size3<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
-    /// All NaN.
-    pub const NAN: Self = Self {
-        width: <T::Scalar as FloatScalar>::NAN,
-        height: <T::Scalar as FloatScalar>::NAN,
-        depth: <T::Scalar as FloatScalar>::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Self {
-        width: <T::Scalar as FloatScalar>::INFINITY,
-        height: <T::Scalar as FloatScalar>::INFINITY,
-        depth: <T::Scalar as FloatScalar>::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Self {
-        width: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        height: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        depth: <T::Scalar as FloatScalar>::NEG_INFINITY,
-    };
-
-    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
+impl<T: Unit> core::fmt::Debug for Size2<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Size2")
+            .field("width", &self.width)
+            .field("height", &self.height)
+            .finish()
+    }
+}
+impl<T: Unit> core::fmt::Debug for Size3<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Size3")
+            .field("width", &self.width)
+            .field("height", &self.height)
+            .field("depth", &self.depth)
+            .finish()
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::size;
+    use crate::{peel, size};
 
     use super::*;
 
@@ -383,10 +185,10 @@ mod tests {
     fn arithmetic() {
         let mut a: Size2<f32> = size!(100.0, 200.0);
         let b: Size2<f32> = a - size!(50.0, 100.0);
-        assert_eq!(b, (50.0, 100.0));
+        assert_eq!(b, size!(50.0, 100.0));
         a -= size!(50.0, 100.0);
-        assert_eq!(a, (50.0, 100.0));
-        assert_eq!(a + size!(2.0, 3.0), (52.0, 103.0));
+        assert_eq!(a, size!(50.0, 100.0));
+        assert_eq!(a + size!(2.0, 3.0), size!(52.0, 103.0));
         a += size!(100.0, 200.0);
         assert_eq!(a, size!(150.0, 300.0));
     }
@@ -485,14 +287,14 @@ mod tests {
             width: 1.0,
             height: 2.0,
         };
-        assert_eq!(s.to_raw(), glam::Vec2 { x: 1.0, y: 2.0 });
+        assert_eq!(peel(s), glam::Vec2 { x: 1.0, y: 2.0 });
         let s = Size3::<f32> {
             width: 1.0,
             height: 2.0,
             depth: 3.0,
         };
         assert_eq!(
-            s.to_raw(),
+            peel(s),
             glam::Vec3 {
                 x: 1.0,
                 y: 2.0,
@@ -500,7 +302,7 @@ mod tests {
             }
         );
         assert_eq!(
-            Size3::<f32>::from_raw(glam::Vec3::new(1.0, 2.0, 3.0)),
+            Size3::<f32>::wrap(glam::Vec3::new(1.0, 2.0, 3.0)),
             Size3 {
                 width: 1.0,
                 height: 2.0,
@@ -559,5 +361,19 @@ mod tests {
                 depth: 4.0
             }
         );
+    }
+
+    #[test]
+    fn gaslight_coverage() {
+        extern crate alloc;
+        _ = alloc::format!("{:?}", Size2::<f32>::ZERO);
+        _ = alloc::format!("{:?}", Size3::<f32>::ZERO);
+        assert_eq!(Size2::<f32>::from_tuple((1.0, 2.0)), Size2::new(1.0, 2.0));
+        assert_eq!(
+            Size3::<f32>::from_tuple((1.0, 2.0, 3.0)),
+            Size3::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(Size2::<f32>::ZERO.to_tuple(), (0.0, 0.0));
+        assert_eq!(Size3::<f32>::ZERO.to_tuple(), (0.0, 0.0, 0.0));
     }
 }

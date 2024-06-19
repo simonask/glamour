@@ -3,9 +3,10 @@
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{
-    scalar::FloatScalar,
+    rewrap,
     traits::{Contains, Intersection},
-    Point2, Point3, Rect, Size2, Union, Unit, Vector2,
+    unit::FloatUnit,
+    IntUnit, Point2, Point3, Rect, Size2, Union, Unit, Vector2,
 };
 
 /// 2D axis-aligned box represented as "min" and "max" points.
@@ -36,23 +37,29 @@ unsafe impl<T: Unit> bytemuck::Pod for Box3<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> bytemuck::Zeroable for Box3<T> {}
 
-crate::derive_standard_traits!(Box2 {
-    min: Point2<T>,
-    max: Point2<T>
-});
-crate::derive_standard_traits!(Box3 {
-    min: Point3<T>,
-    max: Point3<T>
-});
+impl<T: Unit> Clone for Box2<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+impl<T: Unit> Clone for Box3<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+impl<T: Unit> Copy for Box2<T> {}
+impl<T: Unit> Copy for Box3<T> {}
 
-crate::derive_tuple_conversion_traits!(Box2 {
-    min: Point2<T>,
-    max: Point2<T>
-});
-crate::derive_tuple_conversion_traits!(Box3 {
-    min: Point3<T>,
-    max: Point3<T>
-});
+impl<T: Unit> Default for Box2<T> {
+    fn default() -> Self {
+        Box2::ZERO
+    }
+}
+impl<T: Unit> Default for Box3<T> {
+    fn default() -> Self {
+        Box3::ZERO
+    }
+}
 
 impl<T: Unit> Box2<T> {
     /// Zero-sized box.
@@ -61,22 +68,21 @@ impl<T: Unit> Box2<T> {
         max: Point2::ZERO,
     };
 
+    /// Box with minimum at `(0, 0)` and maximum at `(1, 1)`.
+    pub const ONE: Self = Self {
+        min: Point2::ZERO,
+        max: Point2::ONE,
+    };
+
     /// New 2D box from min/max coordinates.
-    pub fn new(min: impl Into<Point2<T>>, max: impl Into<Point2<T>>) -> Self {
-        Box2 {
-            min: min.into(),
-            max: max.into(),
-        }
+    pub const fn new(min: Point2<T>, max: Point2<T>) -> Self {
+        Box2 { min, max }
     }
 
-    crate::casting_interface!(Box2 {
-        min: Point2<T>,
-        max: Point2<T>
-    });
-    crate::tuple_interface!(Box2 {
-        min: Point2<T>,
-        max: Point2<T>
-    });
+    /// New 2D box from type-inferred min and max.
+    pub fn from_min_max(min: impl Into<Point2<T>>, max: impl Into<Point2<T>>) -> Self {
+        Self::new(min.into(), max.into())
+    }
 
     /// Create from [`Rect`].
     ///
@@ -103,7 +109,7 @@ impl<T: Unit> Box2<T> {
     pub fn from_size(size: Size2<T>) -> Self {
         Box2 {
             min: Point2::ZERO,
-            max: size.to_vector().to_point(),
+            max: rewrap(size),
         }
     }
 
@@ -270,22 +276,16 @@ impl<T: Unit> Box3<T> {
         max: Point3::ZERO,
     };
 
-    /// New 2D box from min/max coordinates.
-    pub fn new(min: impl Into<Point3<T>>, max: impl Into<Point3<T>>) -> Self {
-        Box3 {
-            min: min.into(),
-            max: max.into(),
-        }
-    }
+    /// Box with minimum at `(0, 0, 0)` and maximum at `(1, 1, 1)`.
+    pub const ONE: Self = Self {
+        min: Point3::ZERO,
+        max: Point3::ONE,
+    };
 
-    crate::casting_interface!(Box3 {
-        min: Point3<T>,
-        max: Point3<T>
-    });
-    crate::tuple_interface!(Box3 {
-        min: Point3<T>,
-        max: Point3<T>
-    });
+    /// New 2D box from min/max coordinates.
+    pub const fn new(min: Point3<T>, max: Point3<T>) -> Self {
+        Box3 { min, max }
+    }
 }
 
 impl<T: Unit> From<Box2<T>> for Rect<T> {
@@ -409,11 +409,7 @@ impl<T: Unit> Union<Box2<T>> for Box2<T> {
     }
 }
 
-impl<T> Box2<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Box2<T> {
     /// Round coordinates to the nearest integer.
     ///
     /// Note: This function makes no attempt to avoid creating "degenerate"
@@ -422,10 +418,10 @@ where
     /// ### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let b = Box2::<f32>::new((0.3, 0.3), (2.7, 2.7));
+    /// let b = Box2::<f32>::new(point!(0.3, 0.3), point!(2.7, 2.7));
     /// let rounded = b.round();
-    /// assert_eq!(rounded.min, (0.0, 0.0));
-    /// assert_eq!(rounded.max, (3.0, 3.0));
+    /// assert_eq!(rounded.min, point!(0.0, 0.0));
+    /// assert_eq!(rounded.max, point!(3.0, 3.0));
     /// ```
     #[inline]
     #[must_use]
@@ -444,10 +440,10 @@ where
     /// ### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let b = Box2::<f32>::new((0.3, 0.3), (2.7, 2.7));
+    /// let b = Box2::<f32>::new(point!(0.3, 0.3), point!(2.7, 2.7));
     /// let rounded = b.round_in();
-    /// assert_eq!(rounded.min, (1.0, 1.0));
-    /// assert_eq!(rounded.max, (2.0, 2.0));
+    /// assert_eq!(rounded.min, point!(1.0, 1.0));
+    /// assert_eq!(rounded.max, point!(2.0, 2.0));
     /// ```
     #[inline]
     #[must_use]
@@ -466,10 +462,10 @@ where
     /// ### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let b = Box2::<f32>::new((0.7, 0.7), (1.4, 1.4));
+    /// let b = Box2::<f32>::new(point!(0.7, 0.7), point!(1.4, 1.4));
     /// let rounded = b.round_out();
-    /// assert_eq!(rounded.min, (0.0, 0.0));
-    /// assert_eq!(rounded.max, (2.0, 2.0));
+    /// assert_eq!(rounded.min, point!(0.0, 0.0));
+    /// assert_eq!(rounded.max, point!(2.0, 2.0));
     /// ```
     #[inline]
     #[must_use]
@@ -489,11 +485,7 @@ where
     }
 }
 
-impl<T> Box3<T>
-where
-    T: Unit,
-    T::Scalar: FloatScalar,
-{
+impl<T: FloatUnit> Box3<T> {
     /// Round coordinates to the nearest integer.
     ///
     /// Note: This function makes no attempt to avoid creating "degenerate"
@@ -502,10 +494,10 @@ where
     /// ### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let b = Box3::<f32>::new((0.3, 0.3, 0.3), (2.7, 2.7, 2.7));
+    /// let b = Box3::<f32>::new(point!(0.3, 0.3, 0.3), point!(2.7, 2.7, 2.7));
     /// let rounded = b.round();
-    /// assert_eq!(rounded.min, (0.0, 0.0, 0.0));
-    /// assert_eq!(rounded.max, (3.0, 3.0, 3.0));
+    /// assert_eq!(rounded.min, point!(0.0, 0.0, 0.0));
+    /// assert_eq!(rounded.max, point!(3.0, 3.0, 3.0));
     /// ```
     #[inline]
     #[must_use]
@@ -524,10 +516,10 @@ where
     /// ### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let b = Box3::<f32>::new((0.3, 0.3, 0.3), (2.7, 2.7, 2.7));
+    /// let b = Box3::<f32>::new(point!(0.3, 0.3, 0.3), point!(2.7, 2.7, 2.7));
     /// let rounded = b.round_in();
-    /// assert_eq!(rounded.min, (1.0, 1.0, 1.0));
-    /// assert_eq!(rounded.max, (2.0, 2.0, 2.0));
+    /// assert_eq!(rounded.min, point!(1.0, 1.0, 1.0));
+    /// assert_eq!(rounded.max, point!(2.0, 2.0, 2.0));
     /// ```
     #[inline]
     #[must_use]
@@ -546,10 +538,10 @@ where
     /// ### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let b = Box3::<f32>::new((0.7, 0.7, 0.7), (1.4, 1.4, 1.4));
+    /// let b = Box3::<f32>::new(point!(0.7, 0.7, 0.7), point!(1.4, 1.4, 1.4));
     /// let rounded = b.round_out();
-    /// assert_eq!(rounded.min, (0.0, 0.0, 0.0));
-    /// assert_eq!(rounded.max, (2.0, 2.0, 2.0));
+    /// assert_eq!(rounded.min, point!(0.0, 0.0, 0.0));
+    /// assert_eq!(rounded.max, point!(2.0, 2.0, 2.0));
     /// ```
     #[inline]
     #[must_use]
@@ -569,9 +561,152 @@ where
     }
 }
 
+impl<T: Unit> PartialEq for Box2<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.min == other.min && self.max == other.max
+    }
+}
+impl<T: IntUnit> Eq for Box2<T> {}
+
+impl<T: Unit> PartialEq for Box3<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.min == other.min && self.max == other.max
+    }
+}
+impl<T: IntUnit> Eq for Box3<T> {}
+
+impl<T: FloatUnit> approx::AbsDiffEq for Box2<T> {
+    type Epsilon = T::Scalar;
+
+    fn default_epsilon() -> Self::Epsilon {
+        T::Scalar::default_epsilon()
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.min.abs_diff_eq(&other.min, epsilon) && self.max.abs_diff_eq(&other.max, epsilon)
+    }
+
+    fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.min.abs_diff_ne(&other.min, epsilon) || self.max.abs_diff_ne(&other.max, epsilon)
+    }
+}
+impl<T: FloatUnit> approx::RelativeEq for Box2<T> {
+    fn default_max_relative() -> Self::Epsilon {
+        T::Scalar::default_max_relative()
+    }
+
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.min.relative_eq(&other.min, epsilon, max_relative)
+            && self.max.relative_eq(&other.max, epsilon, max_relative)
+    }
+
+    fn relative_ne(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.min.relative_ne(&other.min, epsilon, max_relative)
+            || self.max.relative_ne(&other.max, epsilon, max_relative)
+    }
+}
+impl<T: FloatUnit> approx::UlpsEq for Box2<T> {
+    fn default_max_ulps() -> u32 {
+        T::Scalar::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.min.ulps_eq(&other.min, epsilon, max_ulps)
+            && self.max.ulps_eq(&other.max, epsilon, max_ulps)
+    }
+
+    fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.min.ulps_ne(&other.min, epsilon, max_ulps)
+            || self.max.ulps_ne(&other.max, epsilon, max_ulps)
+    }
+}
+
+impl<T: FloatUnit> approx::AbsDiffEq for Box3<T> {
+    type Epsilon = T::Scalar;
+
+    fn default_epsilon() -> Self::Epsilon {
+        T::Scalar::default_epsilon()
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.min.abs_diff_eq(&other.min, epsilon) && self.max.abs_diff_eq(&other.max, epsilon)
+    }
+
+    fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.min.abs_diff_ne(&other.min, epsilon) || self.max.abs_diff_ne(&other.max, epsilon)
+    }
+}
+impl<T: FloatUnit> approx::RelativeEq for Box3<T> {
+    fn default_max_relative() -> Self::Epsilon {
+        T::Scalar::default_max_relative()
+    }
+
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.min.relative_eq(&other.min, epsilon, max_relative)
+            && self.max.relative_eq(&other.max, epsilon, max_relative)
+    }
+
+    fn relative_ne(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.min.relative_ne(&other.min, epsilon, max_relative)
+            || self.max.relative_ne(&other.max, epsilon, max_relative)
+    }
+}
+impl<T: FloatUnit> approx::UlpsEq for Box3<T> {
+    fn default_max_ulps() -> u32 {
+        T::Scalar::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.min.ulps_eq(&other.min, epsilon, max_ulps)
+            && self.max.ulps_eq(&other.max, epsilon, max_ulps)
+    }
+
+    fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.min.ulps_ne(&other.min, epsilon, max_ulps)
+            || self.max.ulps_ne(&other.max, epsilon, max_ulps)
+    }
+}
+
+impl<T: Unit> core::fmt::Debug for Box2<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Box2")
+            .field("min", &self.min)
+            .field("max", &self.max)
+            .finish()
+    }
+}
+impl<T: Unit> core::fmt::Debug for Box3<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Box3")
+            .field("min", &self.min)
+            .field("max", &self.max)
+            .finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use approx::assert_abs_diff_eq;
+    use approx::{assert_abs_diff_eq, assert_ulps_eq};
 
     use crate::vec2;
 
@@ -584,7 +719,7 @@ mod tests {
 
     #[test]
     fn from_rect() {
-        let r = Rect::new((10.0, 12.0), (5.0, 6.0));
+        let r = Rect::new((10.0, 12.0).into(), (5.0, 6.0).into());
         let b = Box2::from_rect(r);
         let b2 = Box2::from_origin_and_size((10.0, 12.0).into(), (5.0, 6.0).into());
         assert_abs_diff_eq!(b, b2);
@@ -633,7 +768,7 @@ mod tests {
                 min: Point2::new(0.0, 0.5),
                 max: Point2::new(1.0, 2.0),
             }
-        )
+        );
     }
 
     #[test]
@@ -669,17 +804,17 @@ mod tests {
         assert!(r.is_empty());
         assert!(!r.is_negative());
 
-        let r = Box2::new((1.0, 1.0), (-0.0, -0.0));
+        let r = Box2::new((1.0, 1.0).into(), (-0.0, -0.0).into());
         assert!(r.is_empty());
         assert!(r.is_negative());
 
         // NaN
 
-        let r = Box2::from_size((core::f32::NAN, core::f32::NAN).into());
+        let r = Box2::from_size((f32::NAN, f32::NAN).into());
         assert!(r.is_empty());
         assert!(r.is_negative());
 
-        let r = Box2::new((core::f32::NAN, 1.0), (1.0, 1.0));
+        let r = Box2::new((f32::NAN, 1.0).into(), (1.0, 1.0).into());
         assert!(r.is_empty());
         assert!(r.is_negative());
     }
@@ -740,28 +875,29 @@ mod tests {
 
     #[test]
     fn contains() {
-        let b = Box2::new((-1.0, -1.0), (1.0, 1.0));
+        let b = Box2::new((-1.0, -1.0).into(), (1.0, 1.0).into());
         assert!(b.contains(&Point2::new(-1.0, 0.0)));
         assert!(b.contains(&Point2::new(1.0, 1.0)));
     }
 
     #[test]
+    #[allow(clippy::many_single_char_names)]
     fn intersection() {
         type Box2 = super::Box2<f32>;
-        let x = Box2::new((10.0, 10.0), (20.0, 20.0));
+        let x = Box2::new((10.0, 10.0).into(), (20.0, 20.0).into());
 
         {
             // No intersection
             assert!(x.intersection(&Point2::new(0.0, 0.0)).is_none());
 
-            let nw = Box2::new((0.0, 0.0), (10.0, 10.0));
-            let n = Box2::new((10.0, 0.0), (20.0, 10.0));
-            let ne = Box2::new((20.0, 0.0), (30.0, 10.0));
-            let e = Box2::new((20.0, 10.0), (30.0, 20.0));
-            let se = Box2::new((20.0, 20.0), (30.0, 30.0));
-            let s = Box2::new((10.0, 20.0), (20.0, 30.0));
-            let sw = Box2::new((0.0, 20.0), (10.0, 30.0));
-            let w = Box2::new((0.0, 10.0), (10.0, 20.0));
+            let nw = Box2::new((0.0, 0.0).into(), (10.0, 10.0).into());
+            let n = Box2::new((10.0, 0.0).into(), (20.0, 10.0).into());
+            let ne = Box2::new((20.0, 0.0).into(), (30.0, 10.0).into());
+            let e = Box2::new((20.0, 10.0).into(), (30.0, 20.0).into());
+            let se = Box2::new((20.0, 20.0).into(), (30.0, 30.0).into());
+            let s = Box2::new((10.0, 20.0).into(), (20.0, 30.0).into());
+            let sw = Box2::new((0.0, 20.0).into(), (10.0, 30.0).into());
+            let w = Box2::new((0.0, 10.0).into(), (10.0, 20.0).into());
 
             assert_eq!(x.intersection(&nw), None);
             assert_eq!(x.intersection(&n), None);
@@ -822,14 +958,14 @@ mod tests {
             );
 
             // Intersections
-            let nw = Box2::new((0.0, 0.0), (11.0, 11.0));
-            let n = Box2::new((11.0, 0.0), (19.0, 11.0));
-            let ne = Box2::new((19.0, 0.0), (29.0, 11.0));
-            let e = Box2::new((19.0, 11.0), (30.0, 29.0));
-            let se = Box2::new((19.0, 19.0), (30.0, 30.0));
-            let s = Box2::new((11.0, 19.0), (19.0, 30.0));
-            let sw = Box2::new((0.0, 19.0), (11.0, 30.0));
-            let w = Box2::new((0.0, 11.0), (11.0, 19.0));
+            let nw = Box2::new((0.0, 0.0).into(), (11.0, 11.0).into());
+            let n = Box2::new((11.0, 0.0).into(), (19.0, 11.0).into());
+            let ne = Box2::new((19.0, 0.0).into(), (29.0, 11.0).into());
+            let e = Box2::new((19.0, 11.0).into(), (30.0, 29.0).into());
+            let se = Box2::new((19.0, 19.0).into(), (30.0, 30.0).into());
+            let s = Box2::new((11.0, 19.0).into(), (19.0, 30.0).into());
+            let sw = Box2::new((0.0, 19.0).into(), (11.0, 30.0).into());
+            let w = Box2::new((0.0, 11.0).into(), (11.0, 19.0).into());
 
             assert!(nw.intersects(&x));
             assert!(n.intersects(&x));
@@ -862,8 +998,8 @@ mod tests {
 
     #[test]
     fn intersection_contained() {
-        let large = Box2::new((0.0, 0.0), (100.0, 100.0));
-        let small = Box2::new((10.0, 10.0), (90.0, 90.0));
+        let large = Box2::new((0.0, 0.0).into(), (100.0, 100.0).into());
+        let small = Box2::new((10.0, 10.0).into(), (90.0, 90.0).into());
         assert!(large.intersects(&small));
         assert!(small.intersects(&large));
         assert_eq!(large.intersection(&small), Some(small));
@@ -878,9 +1014,9 @@ mod tests {
 
     #[test]
     fn intersection_partial() {
-        let large = Box2::new((0.0, 0.0), (100.0, 100.0));
-        let small = Box2::new((90.0, 10.0), (110.0, 20.0));
-        let expected = Box2::new((90.0, 10.0), (100.0, 20.0));
+        let large = Box2::new((0.0, 0.0).into(), (100.0, 100.0).into());
+        let small = Box2::new((90.0, 10.0).into(), (110.0, 20.0).into());
+        let expected = Box2::new((90.0, 10.0).into(), (100.0, 20.0).into());
         assert!(large.intersects(&small));
         assert!(small.intersects(&large));
         assert_eq!(large.intersection(&small), Some(expected));
@@ -950,5 +1086,33 @@ mod tests {
                 max: (2.0, 2.0, 2.0).into(),
             }
         );
+    }
+
+    #[test]
+    fn gaslight_coverage() {
+        use approx::*;
+        fn clone_me<T: Clone>(b: &T) -> T {
+            b.clone()
+        }
+        _ = clone_me(&Box2::default());
+        _ = clone_me(&Box3::default());
+
+        assert_abs_diff_eq!(Box2::ZERO, Box2::ZERO);
+        assert_abs_diff_ne!(Box2::ZERO, Box2::ONE);
+        assert_relative_eq!(Box2::ZERO, Box2::ZERO);
+        assert_relative_ne!(Box2::ZERO, Box2::ONE);
+        assert_ulps_eq!(Box2::ZERO, Box2::ZERO);
+        assert_ulps_ne!(Box2::ZERO, Box2::ONE);
+
+        assert_abs_diff_eq!(Box3::ZERO, Box3::ZERO);
+        assert_abs_diff_ne!(Box3::ZERO, Box3::ONE);
+        assert_relative_eq!(Box3::ZERO, Box3::ZERO);
+        assert_relative_ne!(Box3::ZERO, Box3::ONE);
+        assert_ulps_eq!(Box3::ZERO, Box3::ZERO);
+        assert_ulps_ne!(Box3::ZERO, Box3::ONE);
+
+        extern crate alloc;
+        _ = alloc::format!("{:?}", Box2::default());
+        _ = alloc::format!("{:?}", Box3::default());
     }
 }

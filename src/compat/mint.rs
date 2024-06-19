@@ -146,7 +146,7 @@ macro_rules! impl_conv_mat {
     ($glamour_ty:ident { $($col:ident),* }, $mint_ty:ident < $scalar:ty >) => {
         impl From<$glamour_ty<$scalar>> for mint::$mint_ty<$scalar> {
             fn from(m: $glamour_ty<$scalar>) -> Self {
-                let [$($col),*] = m.to_cols();
+                let [$($col),*] = m.to_cols_array_2d();
                  mint::$mint_ty { $($col: $col.into()),* }
             }
         }

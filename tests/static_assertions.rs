@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 use glamour::{prelude::*, traits::marker::PodValue, Unit};
@@ -32,13 +34,12 @@ trait AssertVectorLike<Unit>:
     + MulAssign
     + DivAssign
     + RemAssign
-    + AbsDiffEq
 {
 }
 
 trait AssertEq: Eq {}
 
-trait AssertFloatVectorLike<T>: AssertVectorLike<T> + RelativeEq + UlpsEq {}
+trait AssertFloatVectorLike<T>: AssertVectorLike<T> + AbsDiffEq + RelativeEq + UlpsEq {}
 
 trait AssertPointLike<Unit, DiffType>:
     Sub<Self, Output = DiffType> + Add<DiffType, Output = Self> + Sized
@@ -319,19 +320,6 @@ const _CHECK_TYPES: () = {
     impl AssertTuple4<i32> for Vector4<UnitI32> {}
     impl AssertTuple4<u32> for Point4<UnitU32> {}
     impl AssertTuple4<u32> for Vector4<UnitU32> {}
-    impl AssertTuple2<Point2<UnitF32>> for Box2<UnitF32> {}
-    impl AssertTuple2<Point2<UnitF64>> for Box2<UnitF64> {}
-    impl AssertTuple2<Point2<UnitI32>> for Box2<UnitI32> {}
-    impl AssertTuple2<Point2<UnitU32>> for Box2<UnitU32> {}
-    impl AssertTuple2<Point3<UnitF32>> for Box3<UnitF32> {}
-    impl AssertTuple2<Point3<UnitF64>> for Box3<UnitF64> {}
-    impl AssertTuple2<Point3<UnitI32>> for Box3<UnitI32> {}
-    impl AssertTuple2<Point3<UnitU32>> for Box3<UnitU32> {}
-
-    impl AssertConversion<(Point2<UnitF32>, Size2<UnitF32>)> for Rect<UnitF32> {}
-    impl AssertConversion<(Point2<UnitF64>, Size2<UnitF64>)> for Rect<UnitF64> {}
-    impl AssertConversion<(Point2<UnitI32>, Size2<UnitI32>)> for Rect<UnitI32> {}
-    impl AssertConversion<(Point2<UnitU32>, Size2<UnitU32>)> for Rect<UnitU32> {}
 
     impl AssertMatrixLike<Vector2<f32>> for Matrix2<f32> {}
     impl AssertMatrixLike<Vector3<f32>> for Matrix3<f32> {}
