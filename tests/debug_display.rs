@@ -104,9 +104,6 @@ Vector2 {
     enum CustomName {}
     impl Unit for CustomName {
         type Scalar = i32;
-        fn name() -> Option<&'static str> {
-            Some("Custom")
-        }
     }
 
     let custom: Vector2<CustomName> = Vector2 { x: 123, y: 456 };

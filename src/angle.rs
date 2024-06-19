@@ -143,10 +143,6 @@ where
     T: Scalar + AngleConsts,
 {
     type Scalar = T;
-
-    fn name() -> Option<&'static str> {
-        Some("Angle")
-    }
 }
 
 impl<T: Scalar> AbsDiffEq for Angle<T> {

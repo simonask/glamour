@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `ZERO` and `ONE` associated consts, in favor of `num_traits::{ConstZero, ConstOne}`.
 - Added `<T: Scalar>` bound to `Angle<T>`.
 - `angle_between()` was renamed to `angle_to()` in glam 0.28.0.
+- Removed `Unit::name()` method, which had a doubtful use case.
 
 ### Internal changes
 - Major cleanup of codegen macros, which enables exact and robust mapping to `glam` APIs.
