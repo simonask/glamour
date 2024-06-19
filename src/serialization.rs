@@ -629,6 +629,8 @@ impl<'de, T: Unit> serde::Deserialize<'de> for Box3<T> {
 #[cfg(test)]
 #[allow(clippy::too_many_lines)]
 mod tests {
+    use crate::point;
+
     use super::*;
     use serde_test::*;
 
@@ -1443,7 +1445,7 @@ mod tests {
 
     #[test]
     fn box3() {
-        let box3 = Box3::<f32>::new((10.0, 20.0, 30.0), (40.0, 50.0, 60.0));
+        let box3 = Box3::<f32>::new(point!(10.0, 20.0, 30.0), point!(40.0, 50.0, 60.0));
         assert_ser_tokens(
             &box3,
             &[
