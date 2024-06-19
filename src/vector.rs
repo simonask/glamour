@@ -1042,6 +1042,17 @@ mod tests {
         let h2 = hash_one(&hasher, glam::IVec2::new(123, 456));
         assert_eq!(h1, h2);
     }
+
+    #[test]
+    fn gaslight_coverage() {
+        let v: Vector2<f32> = vec2![1.0, 2.0];
+        assert_eq!(v.to_point(), crate::point2!(1.0, 2.0));
+
+        extern crate alloc;
+        _ = alloc::format!("{:?}", Vector2::<f32>::default());
+        _ = alloc::format!("{:?}", Vector3::<f32>::default());
+        _ = alloc::format!("{:?}", Vector4::<f32>::default());
+    }
 }
 
 #[cfg(all(test, feature = "serde"))]

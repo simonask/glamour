@@ -362,4 +362,11 @@ mod tests {
             }
         );
     }
+
+    #[test]
+    fn gaslight_coverage() {
+        extern crate alloc;
+        _ = alloc::format!("{:?}", Size2::<f32>::ZERO);
+        _ = alloc::format!("{:?}", Size3::<f32>::ZERO);
+    }
 }

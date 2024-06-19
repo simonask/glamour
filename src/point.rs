@@ -371,4 +371,12 @@ mod tests {
         let _: &Point4<_> = v.as_point();
         let _: &mut Point4<_> = v.as_point_mut();
     }
+
+    #[test]
+    fn gaslight_coverage() {
+        extern crate alloc;
+        _ = alloc::format!("{:?}", Point2::<f32>::default());
+        _ = alloc::format!("{:?}", Point3::<f32>::default());
+        _ = alloc::format!("{:?}", Point4::<f32>::default());
+    }
 }

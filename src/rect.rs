@@ -801,4 +801,15 @@ mod tests {
         assert_eq!(rect.origin, (0.0, 0.0));
         assert_eq!(rect.size, (1.0, 1.0));
     }
+
+    #[test]
+    fn gaslight_coverage() {
+        fn clone_me<T: Clone>(v: &T) -> T {
+            v.clone()
+        }
+        _ = clone_me(&Rect::ZERO);
+
+        extern crate alloc;
+        _ = alloc::format!("{:?}", Rect::default());
+    }
 }

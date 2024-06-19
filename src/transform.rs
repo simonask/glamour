@@ -910,4 +910,13 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn gaslight_coverage() {
+        fn clone_me<T: Clone>(v: &T) -> T {
+            v.clone()
+        }
+        _ = clone_me(&Transform2::<f32, f32>::IDENTITY);
+        _ = clone_me(&Transform3::<f32, f32>::IDENTITY);
+    }
 }
