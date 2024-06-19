@@ -13,11 +13,8 @@ use bytemuck::{Pod, Zeroable};
 use num_traits::{ConstOne, ConstZero};
 
 use crate::{
-    bindings::prelude::*,
-    peel, rewrap,
-    scalar::{FloatScalar, SignedScalar},
-    unit::FloatUnit,
-    wrap, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
+    bindings::prelude::*, peel, rewrap, scalar::FloatScalar, unit::FloatUnit, wrap, Scalar,
+    Transparent, Unit, Vector2, Vector3, Vector4,
 };
 use core::ops::Mul;
 
@@ -132,40 +129,11 @@ macro_rules! point_interface {
     };
 }
 
-crate::macros::forward_op_to_raw!(Point2, Add<Vector2<T>>::add -> Self);
-crate::macros::forward_op_to_raw!(Point3, Add<Vector3<T>>::add -> Self);
-crate::macros::forward_op_to_raw!(Point4, Add<Vector4<T>>::add -> Self);
-crate::macros::forward_op_to_raw!(Point2, Sub<Vector2<T>>::sub -> Self);
-crate::macros::forward_op_to_raw!(Point3, Sub<Vector3<T>>::sub -> Self);
-crate::macros::forward_op_to_raw!(Point4, Sub<Vector4<T>>::sub -> Self);
-crate::macros::forward_op_to_raw!(Point2, Sub<Self>::sub -> Vector2<T>);
-crate::macros::forward_op_to_raw!(Point3, Sub<Self>::sub -> Vector3<T>);
-crate::macros::forward_op_to_raw!(Point4, Sub<Self>::sub -> Vector4<T>);
-
-crate::macros::forward_neg_to_raw!(Point2);
-crate::macros::forward_neg_to_raw!(Point3);
-crate::macros::forward_neg_to_raw!(Point4);
-
-crate::macros::forward_op_assign_to_raw!(Point2, AddAssign<Vector2<T>>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Point3, AddAssign<Vector3<T>>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Point4, AddAssign<Vector4<T>>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Point2, SubAssign<Vector2<T>>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Point3, SubAssign<Vector3<T>>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Point4, SubAssign<Vector4<T>>::sub_assign);
+crate::impl_ops::point_ops!(Point2, Vector2);
+crate::impl_ops::point_ops!(Point3, Vector3);
+crate::impl_ops::point_ops!(Point4, Vector4);
 
 impl<T: Unit> Point2<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ONE,
-    };
-
     /// New point.
     pub const fn new(x: T::Scalar, y: T::Scalar) -> Self {
         Point2 { x, y }
@@ -176,41 +144,9 @@ impl<T: Unit> Point2<T> {
 
 crate::impl_vectorlike::vectorlike!(Point2, 2);
 
-impl<T: FloatUnit> Point2<T> {
-    /// All NaN.
-    pub const NAN: Self = Self {
-        x: <T::Scalar as FloatScalar>::NAN,
-        y: <T::Scalar as FloatScalar>::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Self {
-        x: <T::Scalar as FloatScalar>::INFINITY,
-        y: <T::Scalar as FloatScalar>::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Self {
-        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
-    };
-}
-
 impl<T: Unit> Point3<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ONE,
-        z: T::Scalar::ONE,
-    };
-
     /// New point.
-    pub fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar) -> Self {
+    pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar) -> Self {
         Point3 { x, y, z }
     }
 
@@ -219,46 +155,9 @@ impl<T: Unit> Point3<T> {
 
 crate::impl_vectorlike::vectorlike!(Point3, 3);
 
-impl<T: FloatUnit> Point3<T> {
-    /// All NaN.
-    pub const NAN: Self = Self {
-        x: <T::Scalar as FloatScalar>::NAN,
-        y: <T::Scalar as FloatScalar>::NAN,
-        z: <T::Scalar as FloatScalar>::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Self {
-        x: <T::Scalar as FloatScalar>::INFINITY,
-        y: <T::Scalar as FloatScalar>::INFINITY,
-        z: <T::Scalar as FloatScalar>::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Self {
-        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
-    };
-}
-
 impl<T: Unit> Point4<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ONE,
-        z: T::Scalar::ONE,
-        w: T::Scalar::ONE,
-    };
-
     /// New point.
-    pub fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar, w: T::Scalar) -> Self {
+    pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar, w: T::Scalar) -> Self {
         Point4 { x, y, z, w }
     }
 
@@ -266,30 +165,6 @@ impl<T: Unit> Point4<T> {
 }
 
 crate::impl_vectorlike::vectorlike!(Point4, 4);
-
-impl<T: FloatUnit> Point4<T> {
-    /// All NaN.
-    pub const NAN: Self = Self {
-        x: <T::Scalar as FloatScalar>::NAN,
-        y: <T::Scalar as FloatScalar>::NAN,
-        z: <T::Scalar as FloatScalar>::NAN,
-        w: <T::Scalar as FloatScalar>::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Self {
-        x: <T::Scalar as FloatScalar>::INFINITY,
-        y: <T::Scalar as FloatScalar>::INFINITY,
-        z: <T::Scalar as FloatScalar>::INFINITY,
-        w: <T::Scalar as FloatScalar>::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Self {
-        x: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        y: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        z: <T::Scalar as FloatScalar>::NEG_INFINITY,
-        w: <T::Scalar as FloatScalar>::NEG_INFINITY,
-    };
-}
 
 impl<T> Point3<T>
 where

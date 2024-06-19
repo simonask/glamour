@@ -45,12 +45,11 @@ pub use transform::{Transform2, Transform3, TransformMap};
 pub use unit::{FloatUnit, IntUnit, SignedUnit, Unit};
 pub use vector::{Swizzle, Vector2, Vector3, Vector4};
 
-mod macros;
-
 mod forward;
 use forward::*;
 
 mod impl_matrixlike;
+mod impl_ops;
 mod impl_traits;
 mod impl_vectorlike;
 mod interfaces;

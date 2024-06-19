@@ -115,43 +115,12 @@ impl_size!(Size3 [3] => Vec3, Vector3);
 crate::impl_vectorlike::vectorlike!(Size2, 2);
 crate::impl_vectorlike::vectorlike!(Size3, 3);
 
-crate::macros::forward_op_to_raw!(Size2, Add<Self>::add -> Self);
-crate::macros::forward_op_to_raw!(Size3, Add<Self>::add -> Self);
-crate::macros::forward_op_to_raw!(Size2, Sub<Self>::sub -> Self);
-crate::macros::forward_op_to_raw!(Size3, Sub<Self>::sub -> Self);
-crate::macros::forward_op_to_raw!(Size2, Mul<@T::Scalar>::mul -> Self);
-crate::macros::forward_op_to_raw!(Size3, Mul<@T::Scalar>::mul -> Self);
-crate::macros::forward_op_to_raw!(Size2, Div<@T::Scalar>::div -> Self);
-crate::macros::forward_op_to_raw!(Size3, Div<@T::Scalar>::div -> Self);
-crate::macros::forward_op_to_raw!(Size2, Rem<@T::Scalar>::rem -> Self);
-crate::macros::forward_op_to_raw!(Size3, Rem<@T::Scalar>::rem -> Self);
-
-crate::macros::forward_op_assign_to_raw!(Size2, AddAssign<Self>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Size3, AddAssign<Self>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Size2, SubAssign<Self>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Size3, SubAssign<Self>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Size2, MulAssign<@T::Scalar>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Size3, MulAssign<@T::Scalar>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Size2, DivAssign<@T::Scalar>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Size3, DivAssign<@T::Scalar>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Size2, RemAssign<@T::Scalar>::rem_assign);
-crate::macros::forward_op_assign_to_raw!(Size3, RemAssign<@T::Scalar>::rem_assign);
+crate::impl_ops::size_ops!(Size2);
+crate::impl_ops::size_ops!(Size3);
 
 impl<T: Unit> Size2<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        width: T::Scalar::ZERO,
-        height: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        width: T::Scalar::ONE,
-        height: T::Scalar::ONE,
-    };
-
     /// New size.
-    pub fn new(width: T::Scalar, height: T::Scalar) -> Self {
+    pub const fn new(width: T::Scalar, height: T::Scalar) -> Self {
         Self { width, height }
     }
 
@@ -163,41 +132,9 @@ impl<T: Unit> Size2<T> {
     }
 }
 
-impl<T: FloatUnit> Size2<T> {
-    /// All NaN.
-    pub const NAN: Self = Self {
-        width: T::Scalar::NAN,
-        height: T::Scalar::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Self {
-        width: T::Scalar::INFINITY,
-        height: T::Scalar::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Self {
-        width: T::Scalar::NEG_INFINITY,
-        height: T::Scalar::NEG_INFINITY,
-    };
-}
-
 impl<T: Unit> Size3<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        width: T::Scalar::ZERO,
-        height: T::Scalar::ZERO,
-        depth: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        width: T::Scalar::ONE,
-        height: T::Scalar::ONE,
-        depth: T::Scalar::ONE,
-    };
-
     /// New size.
-    pub fn new(width: T::Scalar, height: T::Scalar, depth: T::Scalar) -> Self {
+    pub const fn new(width: T::Scalar, height: T::Scalar, depth: T::Scalar) -> Self {
         Self {
             width,
             height,
@@ -218,27 +155,6 @@ impl<T: Unit> Size3<T> {
     pub fn with_depth(self, depth: T::Scalar) -> Self {
         Self { depth, ..self }
     }
-}
-
-impl<T: FloatUnit> Size3<T> {
-    /// All NaN.
-    pub const NAN: Self = Self {
-        width: T::Scalar::NAN,
-        height: T::Scalar::NAN,
-        depth: T::Scalar::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Self {
-        width: T::Scalar::INFINITY,
-        height: T::Scalar::INFINITY,
-        depth: T::Scalar::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Self {
-        width: T::Scalar::NEG_INFINITY,
-        height: T::Scalar::NEG_INFINITY,
-        depth: T::Scalar::NEG_INFINITY,
-    };
 }
 
 impl<T: Unit> core::fmt::Debug for Size2<T> {

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the `as` operator (through `num_traits::AsPrimitive`).
 - Added `rotate_towards()` for 2D float vector types.
 - Added `Rect::from_origin_and_size()` which takes its arguments as `impl Into`.
+- Made several vectorlike constructors `const`.
 
 ### Breaking changes
 - Bumped MSRV to Rust 1.79.

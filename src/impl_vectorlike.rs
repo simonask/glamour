@@ -28,28 +28,259 @@ macro_rules! vectorlike {
     };
     (@for_size $base_type_name:ident, 2) => {
         impl<T: crate::Unit> $base_type_name<T> {
+            /// All zeroes.
+            pub const ZERO: Self = Self::new(T::Scalar::ZERO, T::Scalar::ZERO);
+            /// All ones.
+            pub const ONE: Self = Self::new(T::Scalar::ONE, T::Scalar::ONE);
+
+            /// Unit vector in the direction of the X axis.
+            pub const X: Self = Self::new(
+                T::Scalar::ONE,
+                T::Scalar::ZERO,
+            );
+
+            /// Unit vector in the direction of the Y axis.
+            pub const Y: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ONE,
+            );
+
+            /// The unit axes.
+            pub const AXES: [Self; 2] = [Self::X, Self::Y];
+
             crate::interfaces::vector2_base_interface!(struct);
         }
         impl<T: crate::FloatUnit> $base_type_name<T> {
+            /// All NaN.
+            pub const NAN: Self = Self::new(
+                <T::Scalar as FloatScalar>::NAN,
+                <T::Scalar as FloatScalar>::NAN,
+            );
+            /// All positive infinity.
+            pub const INFINITY: Self = Self::new(
+                <T::Scalar as FloatScalar>::INFINITY,
+                <T::Scalar as FloatScalar>::INFINITY,
+            );
+            /// All negative infinity.
+            pub const NEG_INFINITY: Self = Self::new(
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+            );
             crate::interfaces::vector2_float_interface!(struct);
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
+            /// All negative one.
+            pub const NEG_ONE: Self = Self::new(
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+            );
+
+            /// (-1, 0)
+            pub const NEG_X: Self = Self::new(
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                T::Scalar::ZERO,
+            );
+
+            /// (0, -1)
+            pub const NEG_Y: Self = Self::new(
+                T::Scalar::ZERO,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+            );
+
             crate::interfaces::vector2_signed_interface!(struct);
         }
     };
     (@for_size $base_type_name:ident, 3) => {
         impl<T: crate::Unit> $base_type_name<T> {
+            /// All zeroes.
+            pub const ZERO: Self = Self::new(T::Scalar::ZERO, T::Scalar::ZERO, T::Scalar::ZERO);
+            /// All ones.
+            pub const ONE: Self = Self::new(T::Scalar::ONE, T::Scalar::ONE, T::Scalar::ONE);
+
+            /// Unit vector in the direction of the X axis.
+            pub const X: Self = Self::new(
+                T::Scalar::ONE,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+            );
+
+            /// Unit vector in the direction of the Y axis.
+            pub const Y: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ONE,
+                T::Scalar::ZERO,
+            );
+
+            /// Unit vector in the direction of the Z axis.
+            pub const Z: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                T::Scalar::ONE,
+            );
+
+            /// The unit axes.
+            pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
+
             crate::interfaces::vector3_base_interface!(struct);
         }
+        impl<T: crate::SignedUnit> $base_type_name<T> {
+            /// All negative one.
+            pub const NEG_ONE: Self = Self::new(
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+            );
+
+            /// (-1, 0, 0)
+            pub const NEG_X: Self = Self::new(
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+            );
+
+            /// (0, -1, 0)
+            pub const NEG_Y: Self = Self::new(
+                T::Scalar::ZERO,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                T::Scalar::ZERO,
+            );
+
+            /// (0, 0, -1)
+            pub const NEG_Z: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+            );
+        }
         impl<T: crate::FloatUnit> $base_type_name<T> {
+            /// All NaN.
+            pub const NAN: Self = Self::new(
+                <T::Scalar as FloatScalar>::NAN,
+                <T::Scalar as FloatScalar>::NAN,
+                <T::Scalar as FloatScalar>::NAN,
+            );
+            /// All positive infinity.
+            pub const INFINITY: Self = Self::new(
+                <T::Scalar as FloatScalar>::INFINITY,
+                <T::Scalar as FloatScalar>::INFINITY,
+                <T::Scalar as FloatScalar>::INFINITY,
+            );
+            /// All negative infinity.
+            pub const NEG_INFINITY: Self = Self::new(
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+            );
             crate::interfaces::vector3_float_interface!(struct);
         }
     };
     (@for_size $base_type_name:ident, 4) => {
         impl<T: crate::Unit> $base_type_name<T> {
+            /// All zeroes.
+            pub const ZERO: Self = Self::new(T::Scalar::ZERO, T::Scalar::ZERO, T::Scalar::ZERO, T::Scalar::ZERO);
+            /// All ones.
+            pub const ONE: Self = Self::new(T::Scalar::ONE, T::Scalar::ONE, T::Scalar::ONE, T::Scalar::ZERO);
+
+            /// Unit vector in the direction of the X axis.
+            pub const X: Self = Self::new(
+                T::Scalar::ONE,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+            );
+
+            /// Unit vector in the direction of the Y axis.
+            pub const Y: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ONE,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+            );
+
+            /// Unit vector in the direction of the Z axis.
+            pub const Z: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                T::Scalar::ONE,
+                T::Scalar::ZERO,
+            );
+
+            /// Unit vector in the direction of the W axis.
+            pub const W: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                T::Scalar::ONE,
+            );
+
+            /// The unit axes.
+            pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
+
             crate::interfaces::vector4_base_interface!(struct);
         }
+        impl<T: crate::SignedUnit> $base_type_name<T> {
+            /// All negative one.
+            pub const NEG_ONE: Self = Self::new(
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+            );
+
+            /// (-1, 0, 0, 0)
+            pub const NEG_X: Self = Self::new(
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+            );
+
+            /// (0, -1, 0, 0)
+            pub const NEG_Y: Self = Self::new(
+                T::Scalar::ZERO,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+            );
+
+            /// (0, 0, -1, 0)
+            pub const NEG_Z: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+                T::Scalar::ZERO,
+            );
+
+            /// (0, 0, 0, -1)
+            pub const NEG_W: Self = Self::new(
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                T::Scalar::ZERO,
+                <T::Scalar as crate::SignedScalar>::NEG_ONE,
+            );
+        }
         impl<T: crate::FloatUnit> $base_type_name<T> {
+            /// All NaN.
+            pub const NAN: Self = Self::new(
+                <T::Scalar as FloatScalar>::NAN,
+                <T::Scalar as FloatScalar>::NAN,
+                <T::Scalar as FloatScalar>::NAN,
+                <T::Scalar as FloatScalar>::NAN,
+            );
+            /// All positive infinity.
+            pub const INFINITY: Self = Self::new(
+                <T::Scalar as FloatScalar>::INFINITY,
+                <T::Scalar as FloatScalar>::INFINITY,
+                <T::Scalar as FloatScalar>::INFINITY,
+                <T::Scalar as FloatScalar>::INFINITY,
+            );
+            /// All negative infinity.
+            pub const NEG_INFINITY: Self = Self::new(
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+                <T::Scalar as FloatScalar>::NEG_INFINITY,
+            );
             crate::interfaces::vector4_float_interface!(struct);
         }
     };

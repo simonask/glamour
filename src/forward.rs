@@ -1,3 +1,5 @@
+//! Macros for generating fn signatures and implementations for mapping public API types to glam.
+
 macro_rules! forward_fn {
     (
         $mode:tt =>

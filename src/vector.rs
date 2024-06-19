@@ -185,96 +185,11 @@ macro_rules! vector_conversion_to_other_units {
     };
 }
 
-crate::macros::forward_op_to_raw!(Vector2, Add<Self>::add -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Add<Self>::add -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Add<Self>::add -> Self);
-crate::macros::forward_op_to_raw!(Vector2, Sub<Self>::sub -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Sub<Self>::sub -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Sub<Self>::sub -> Self);
-crate::macros::forward_op_to_raw!(Vector2, Mul<Self>::mul -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Mul<Self>::mul -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Mul<Self>::mul -> Self);
-crate::macros::forward_op_to_raw!(Vector2, Div<Self>::div -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Div<Self>::div -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Div<Self>::div -> Self);
-crate::macros::forward_op_to_raw!(Vector2, Rem<Self>::rem -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Rem<Self>::rem -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Rem<Self>::rem -> Self);
-
-crate::macros::forward_neg_to_raw!(Vector2);
-crate::macros::forward_neg_to_raw!(Vector3);
-crate::macros::forward_neg_to_raw!(Vector4);
-
-crate::macros::forward_op_to_raw!(Vector2, Mul<[f32, f64, i32, u32]>::mul -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Mul<[f32, f64, i32, u32]>::mul -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Mul<[f32, f64, i32, u32]>::mul -> Self);
-crate::macros::forward_op_to_raw!(Vector2, Div<[f32, f64, i32, u32]>::div -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Div<[f32, f64, i32, u32]>::div -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Div<[f32, f64, i32, u32]>::div -> Self);
-crate::macros::forward_op_to_raw!(Vector2, Rem<[f32, f64, i32, u32]>::rem -> Self);
-crate::macros::forward_op_to_raw!(Vector3, Rem<[f32, f64, i32, u32]>::rem -> Self);
-crate::macros::forward_op_to_raw!(Vector4, Rem<[f32, f64, i32, u32]>::rem -> Self);
-
-crate::macros::forward_op_assign_to_raw!(Vector2, AddAssign<Self>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, AddAssign<Self>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, AddAssign<Self>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, SubAssign<Self>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, SubAssign<Self>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, SubAssign<Self>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, MulAssign<Self>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, MulAssign<Self>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, MulAssign<Self>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, DivAssign<Self>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, DivAssign<Self>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, DivAssign<Self>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, RemAssign<Self>::rem_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, RemAssign<Self>::rem_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, RemAssign<Self>::rem_assign);
-
-crate::macros::forward_op_assign_to_raw!(Vector2, AddAssign<[f32, f64, i32, u32]>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, AddAssign<[f32, f64, i32, u32]>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, AddAssign<[f32, f64, i32, u32]>::add_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, SubAssign<[f32, f64, i32, u32]>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, SubAssign<[f32, f64, i32, u32]>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, SubAssign<[f32, f64, i32, u32]>::sub_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, MulAssign<[f32, f64, i32, u32]>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, MulAssign<[f32, f64, i32, u32]>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, MulAssign<[f32, f64, i32, u32]>::mul_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, DivAssign<[f32, f64, i32, u32]>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, DivAssign<[f32, f64, i32, u32]>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, DivAssign<[f32, f64, i32, u32]>::div_assign);
-crate::macros::forward_op_assign_to_raw!(Vector2, RemAssign<[f32, f64, i32, u32]>::rem_assign);
-crate::macros::forward_op_assign_to_raw!(Vector3, RemAssign<[f32, f64, i32, u32]>::rem_assign);
-crate::macros::forward_op_assign_to_raw!(Vector4, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+crate::impl_ops::vector_ops!(Vector2);
+crate::impl_ops::vector_ops!(Vector3);
+crate::impl_ops::vector_ops!(Vector4);
 
 impl<T: Unit> Vector2<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ONE,
-    };
-
-    /// Unit vector in the direction of the X axis.
-    pub const X: Self = Vector2 {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ZERO,
-    };
-
-    /// Unit vector in the direction of the Y axis.
-    pub const Y: Self = Vector2 {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ONE,
-    };
-
-    /// The unit axes.
-    pub const AXES: [Self; 2] = [Self::X, Self::Y];
-
     /// New vector.
     pub const fn new(x: T::Scalar, y: T::Scalar) -> Self {
         Self { x, y }
@@ -285,80 +200,7 @@ impl<T: Unit> Vector2<T> {
 
 crate::impl_vectorlike::vectorlike!(Vector2, 2);
 
-impl<T: FloatUnit> Vector2<T> {
-    /// All NaN.
-    pub const NAN: Self = Vector2 {
-        x: T::Scalar::NAN,
-        y: T::Scalar::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Vector2 {
-        x: T::Scalar::INFINITY,
-        y: T::Scalar::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Vector2 {
-        x: T::Scalar::NEG_INFINITY,
-        y: T::Scalar::NEG_INFINITY,
-    };
-}
-
-impl<T: SignedUnit> Vector2<T> {
-    /// All negative one.
-    pub const NEG_ONE: Self = Vector2 {
-        x: T::Scalar::NEG_ONE,
-        y: T::Scalar::NEG_ONE,
-    };
-
-    /// (-1, 0)
-    pub const NEG_X: Self = Vector2 {
-        x: T::Scalar::NEG_ONE,
-        y: T::Scalar::ZERO,
-    };
-    /// (0, -1)
-    pub const NEG_Y: Self = Vector2 {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::NEG_ONE,
-    };
-}
-
 impl<T: Unit> Vector3<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ONE,
-        z: T::Scalar::ONE,
-    };
-
-    /// Unit vector in the direction of the X axis.
-    pub const X: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-    };
-    /// Unit vector in the direction of the Y axis.
-    pub const Y: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ONE,
-        z: T::Scalar::ZERO,
-    };
-    /// Unit vector in the direction of the Z axis.
-    pub const Z: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ONE,
-    };
-
-    /// The unit axes.
-    pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
-
     /// New vector.
     pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar) -> Self {
         Self { x, y, z }
@@ -367,55 +209,6 @@ impl<T: Unit> Vector3<T> {
     vector_conversion_to_other_units!(Point3, Size3);
 }
 crate::impl_vectorlike::vectorlike!(Vector3, 3);
-
-impl<T: FloatUnit> Vector3<T> {
-    /// All NaN.
-    pub const NAN: Self = Vector3 {
-        x: T::Scalar::NAN,
-        y: T::Scalar::NAN,
-        z: T::Scalar::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Vector3 {
-        x: T::Scalar::INFINITY,
-        y: T::Scalar::INFINITY,
-        z: T::Scalar::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Vector3 {
-        x: T::Scalar::NEG_INFINITY,
-        y: T::Scalar::NEG_INFINITY,
-        z: T::Scalar::NEG_INFINITY,
-    };
-}
-
-impl<T: SignedUnit> Vector3<T> {
-    /// All negative one.
-    pub const NEG_ONE: Self = Vector3 {
-        x: T::Scalar::NEG_ONE,
-        y: T::Scalar::NEG_ONE,
-        z: T::Scalar::NEG_ONE,
-    };
-
-    /// (-1, 0, 0)
-    pub const NEG_X: Self = Vector3 {
-        x: T::Scalar::NEG_ONE,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-    };
-    /// (0, -1, 0)
-    pub const NEG_Y: Self = Vector3 {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::NEG_ONE,
-        z: T::Scalar::ZERO,
-    };
-    /// (0, 0, -1)
-    pub const NEG_Z: Self = Vector3 {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::NEG_ONE,
-    };
-}
 
 impl<T: Unit<Scalar = f32>> Vector3<T> {
     /// Create from SIMD-aligned [`glam::Vec3A`].
@@ -440,54 +233,6 @@ impl<T: Unit<Scalar = f32>> Vector3<T> {
 }
 
 impl<T: Unit> Vector4<T> {
-    /// All zeroes.
-    pub const ZERO: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::ZERO,
-    };
-
-    /// All ones.
-    pub const ONE: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ONE,
-        z: T::Scalar::ONE,
-        w: T::Scalar::ONE,
-    };
-
-    /// Unit vector in the direction of the X axis.
-    pub const X: Self = Self {
-        x: T::Scalar::ONE,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::ZERO,
-    };
-    /// Unit vector in the direction of the Y axis.
-    pub const Y: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ONE,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::ZERO,
-    };
-    /// Unit vector in the direction of the Z axis.
-    pub const Z: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ONE,
-        w: T::Scalar::ZERO,
-    };
-    /// Unit vector in the direction of the W axis.
-    pub const W: Self = Self {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::ONE,
-    };
-
-    /// The unit axes.
-    pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
-
     /// New vector.
     pub const fn new(x: T::Scalar, y: T::Scalar, z: T::Scalar, w: T::Scalar) -> Self {
         Self { x, y, z, w }
@@ -497,69 +242,6 @@ impl<T: Unit> Vector4<T> {
 }
 
 crate::impl_vectorlike::vectorlike!(Vector4, 4);
-
-impl<T: FloatUnit> Vector4<T> {
-    /// All NaN.
-    pub const NAN: Self = Vector4 {
-        x: T::Scalar::NAN,
-        y: T::Scalar::NAN,
-        z: T::Scalar::NAN,
-        w: T::Scalar::NAN,
-    };
-    /// All positive infinity.
-    pub const INFINITY: Self = Vector4 {
-        x: T::Scalar::INFINITY,
-        y: T::Scalar::INFINITY,
-        z: T::Scalar::INFINITY,
-        w: T::Scalar::INFINITY,
-    };
-    /// All negative infinity.
-    pub const NEG_INFINITY: Self = Vector4 {
-        x: T::Scalar::NEG_INFINITY,
-        y: T::Scalar::NEG_INFINITY,
-        z: T::Scalar::NEG_INFINITY,
-        w: T::Scalar::NEG_INFINITY,
-    };
-}
-
-impl<T: SignedUnit> Vector4<T> {
-    /// All negative one.
-    pub const NEG_ONE: Self = Vector4 {
-        x: T::Scalar::NEG_ONE,
-        y: T::Scalar::NEG_ONE,
-        z: T::Scalar::NEG_ONE,
-        w: T::Scalar::NEG_ONE,
-    };
-
-    /// (-1, 0, 0, 0)
-    pub const NEG_X: Self = Vector4 {
-        x: T::Scalar::NEG_ONE,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::ZERO,
-    };
-    /// (0, -1, 0, 0)
-    pub const NEG_Y: Self = Vector4 {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::NEG_ONE,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::ZERO,
-    };
-    /// (0, 0, -1, 0)
-    pub const NEG_Z: Self = Vector4 {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::NEG_ONE,
-        w: T::Scalar::ZERO,
-    };
-    /// (0, 0, 0, -1)
-    pub const NEG_W: Self = Vector4 {
-        x: T::Scalar::ZERO,
-        y: T::Scalar::ZERO,
-        z: T::Scalar::ZERO,
-        w: T::Scalar::NEG_ONE,
-    };
-}
 
 impl<T: Unit> From<glam::BVec2> for Vector2<T> {
     #[inline(always)]

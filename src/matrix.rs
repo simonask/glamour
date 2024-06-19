@@ -7,14 +7,12 @@
 use core::ops::{Div, DivAssign, Mul, MulAssign};
 
 use crate::{
-    bindings::{
-        self, Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4,
-    },
+    bindings::{Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4},
     peel, peel_ref,
     prelude::*,
     scalar::FloatScalar,
     unit::FloatUnit,
-    wrap, Angle, Point2, Point3, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
+    wrap, Point2, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{Pod, Zeroable};
