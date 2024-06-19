@@ -483,6 +483,54 @@ impl<T: FloatUnit> Box2<T> {
         let max = self.max.lerp(other.max, t);
         Box2 { min, max }
     }
+
+    /// Bitcast an untyped instance to self.
+    #[inline]
+    #[must_use]
+    pub fn from_untyped(untyped: Box2<T::Scalar>) -> Self {
+        Box2 {
+            min: Point2::from_untyped(untyped.min),
+            max: Point2::from_untyped(untyped.max),
+        }
+    }
+
+    /// Bitcast to an untyped scalar unit.
+    #[inline]
+    #[must_use]
+    pub fn to_untyped(self) -> Box2<T::Scalar> {
+        Box2 {
+            min: self.min.to_untyped(),
+            max: self.max.to_untyped(),
+        }
+    }
+
+    /// Cast to a different coordinate space with scalar type conversion. Returns `None` if any component could not be
+    /// converted to the target scalar type.
+    #[inline]
+    #[must_use]
+    pub fn try_cast<T2>(self) -> Option<Box2<T2>>
+    where
+        T2: Unit,
+    {
+        Some(Box2 {
+            min: self.min.try_cast()?,
+            max: self.max.try_cast()?,
+        })
+    }
+
+    /// Cast to a different coordinate space with scalar type conversion through the `as` operator (potentially
+    /// narrowing or losing precision).
+    #[must_use]
+    pub fn as_<T2>(self) -> Box2<T2>
+    where
+        T: Unit<Scalar: num_traits::AsPrimitive<T2::Scalar>>,
+        T2: Unit,
+    {
+        Box2 {
+            min: self.min.as_(),
+            max: self.max.as_(),
+        }
+    }
 }
 
 impl<T: FloatUnit> Box3<T> {
@@ -558,6 +606,54 @@ impl<T: FloatUnit> Box3<T> {
         let min = self.min.lerp(other.min, t);
         let max = self.max.lerp(other.max, t);
         Box3 { min, max }
+    }
+
+    /// Bitcast an untyped instance to self.
+    #[inline]
+    #[must_use]
+    pub fn from_untyped(untyped: Box3<T::Scalar>) -> Self {
+        Box3 {
+            min: Point3::from_untyped(untyped.min),
+            max: Point3::from_untyped(untyped.max),
+        }
+    }
+
+    /// Bitcast to an untyped scalar unit.
+    #[inline]
+    #[must_use]
+    pub fn to_untyped(self) -> Box3<T::Scalar> {
+        Box3 {
+            min: self.min.to_untyped(),
+            max: self.max.to_untyped(),
+        }
+    }
+
+    /// Cast to a different coordinate space with scalar type conversion. Returns `None` if any component could not be
+    /// converted to the target scalar type.
+    #[inline]
+    #[must_use]
+    pub fn try_cast<T2>(self) -> Option<Box3<T2>>
+    where
+        T2: Unit,
+    {
+        Some(Box3 {
+            min: self.min.try_cast()?,
+            max: self.max.try_cast()?,
+        })
+    }
+
+    /// Cast to a different coordinate space with scalar type conversion through the `as` operator (potentially
+    /// narrowing or losing precision).
+    #[must_use]
+    pub fn as_<T2>(self) -> Box3<T2>
+    where
+        T: Unit<Scalar: num_traits::AsPrimitive<T2::Scalar>>,
+        T2: Unit,
+    {
+        Box3 {
+            min: self.min.as_(),
+            max: self.max.as_(),
+        }
     }
 }
 
@@ -715,6 +811,7 @@ mod tests {
     type Box2 = super::Box2<f32>;
     type Box3 = super::Box3<f32>;
     type IBox2 = super::Box2<i32>;
+    type IBox3 = super::Box3<i32>;
     type Rect = super::Rect<f32>;
 
     #[test]
@@ -1086,6 +1183,25 @@ mod tests {
                 max: (2.0, 2.0, 2.0).into(),
             }
         );
+    }
+
+    #[test]
+    fn casting() {
+        let b = Box2::new((0.0, 0.0).into(), (1.0, 1.0).into());
+        let b2 = b.try_cast::<i32>().unwrap();
+        assert_eq!(b2, IBox2::new((0, 0).into(), (1, 1).into()));
+        assert_eq!(b.as_(), IBox2::new((0, 0).into(), (1, 1).into()));
+
+        assert_eq!(b.to_untyped(), b);
+        assert_eq!(Box2::from_untyped(b), b);
+
+        let b = Box3::new((0.0, 0.0, 0.0).into(), (1.0, 1.0, 1.0).into());
+        let b2 = b.try_cast::<i32>().unwrap();
+        assert_eq!(b2, IBox3::new((0, 0, 0).into(), (1, 1, 1).into()));
+        assert_eq!(b.as_(), IBox3::new((0, 0, 0).into(), (1, 1, 1).into()));
+
+        assert_eq!(b.to_untyped(), b);
+        assert_eq!(Box3::from_untyped(b), b);
     }
 
     #[test]
