@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -7,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
 - Convenience traits `FloatUnit`, `IntUnit`, and `SignedUnit`, which have the
   implied trait bounds for the associated scalar type. These traits are automatically
   implemented for all `T: Unit` where `T::Scalar` is of the appropriate type.
@@ -17,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made several vectorlike constructors `const`.
 
 ### Breaking changes
+
 - Bumped MSRV to Rust 1.79.
 - Bumped `glam` to 0.28.0.
 - Many matrix methods were out of sync with the `glam` API. These interfaces now match exactly.
@@ -30,15 +33,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `Unit::name()` method, which had a doubtful use case.
 
 ### Internal changes
+
 - Major cleanup of codegen macros, which enables exact and robust mapping to `glam` APIs.
 
 ## [0.11.1] - 2024-03-26
+
 ### Fixed
+
 - Deserialization of `Rect`, `Box2`, and `Box3` relied on borrowed strings for
   field names, which is incompatible with some formats.
 
 ## [0.11.0] - 2024-03-26
+
 ### Added
+
 - `fract_gl()`, and made `fract()` available on points and sizes as well.
 - `with_x()`, `with_y()`, etc., as well as `with_width()` and `with_height()`
   for size types.
@@ -53,12 +61,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `Mul`, `MulAssign`, `Div`, `DivAssign` by scalars for matrix types.
 
 ### Breaking changes
+
 - Bumped dependency on `glam` to 0.27.0.
 - Minimum Supported Rust Version bumped to 1.68.2 for `impl From<bool> for
   {f32,f64}` support.
 
 ## [0.10.3] - 2024-03-25
+
 ### Changes
+
 - Serialization/deserialization are now manually implemented for all types,
   instead of relying on `#[derive(Serialize, Deserialize)]`.
 - Vector types, size types, rects, and boxes can now be deserialized from
@@ -68,34 +79,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the `serde` feature in `nostd` environments.
 
 ## [0.10.2] - 2024-02-22
+
 ### Added
+
 - The traits `SignedScalar` and `FloatScalar` are now public.
 
 ## [0.10.1] - 2024-01-08
+
 ### Added
+
 - `Transform2::from_matrix_unchecked()` and `Transform3::from_matrix_unchecked()` are now const fns.
 
 ## [0.10.0] - 2023-12-27
+
 ### Added
+
 - Added support for 16-bit integer scalars, via `glam::I16Vec{N}` etc.
 - Added `Vector2::to_angle()` for floating-point scalars.
 - Implement `AsRef<[[T; N]; N]>` for matrix types (as well as `AsMut` and `From` counterparts).
 
 ### Breaking changes
+
 - Bumped dependency on `glam` to 0.25.0.
 
 ### Internal changes
+
 - No longer implement `encase` traits via `glam`. This is for maintenance purposes, because the `glam` dependency of
   `encase` is often outdated.
 
 ## [0.9.0] - 2023-11-22
+
 ### Added
+
 - Missing `truncate()` method for `Vector3`.
 - Added `Size2::is_empty()` and `Size3::is_empty()`.
 - Implementation of `Product` for `Vector2`, `Vector3`, and `Vector4`.
 - Implemented `bytemuck::TransparentWrapper` for applicable types.
 
 ### Breaking changes
+
 - Changed the field structure of `Matrix2`, `Matrix3`, and `Matrix4` to match `glam`.
 - Changed the implementations of `Rect::is_empty()`, `BoxN::is_empty()`, `Rect::is_negative()` to match
   the behavior of `euclid`.
@@ -109,19 +131,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Criterion relies on a version of `regex` that only works with that version.
 
 ### Internal changes
+
 - Simplified handling of bitmasks, making it more clear in documentation that the `glam::BVec*`
   types are indeed used directly.
 - Removed the meaningless `is_finite()` trait method from `Scalar`, moved it to `FloatScalar` instead.
 
 ## [0.8.1] - 2023-10-27
+
 ### Added
+
 - Missing `truncate()` method for `Vector4`.
 
 ### Fixes
+
 - Fix lints caught by newer version of clippy.
 
 ## [0.8.0] - 2023-07-04
+
 ### Added
+
 - Support for `i64` and `u64` scalar types based on `glam::I64VecN` and `glam::U64VecN`.
 - Added `INFINITY` and `NEG_INFINITY` associated constants to vector types, and also added the missing `NAN` associated
   constant to `PointN` and `SizeN`.
@@ -129,22 +157,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   This enables the interchangeable use of glamour/glam types in hash maps.
 
 ### Breaking changes
+
 - Bumped `encase` dependency to 0.6.0.
 
 ## [0.7.1] - 2023-04-11
+
 ### Added
+
 - Implement `Hash` for integer-based types.
 
 ## [0.7.0] - 2023-04-11
+
 ### Breaking Changes
+
 - Bumped dependency on `glam` to 0.23.0.
 - Bumped dependency on `encase` to 0.5.0.
 
 ## [0.6.0] - 2023-01-25
+
 ### Added
+
 - Exposed glam's `core-simd` feature.
 
 ### Breaking Changes
+
 - Bumped the dependency on `glam` to 0.22.0.
 - Bumped the dependency on `encase` to 0.4.1.
 - Removed the `glam_0_20` and `bevy_0_7` features, since newer versions of Bevy
@@ -153,7 +189,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   type aliases), those changes are now reflected.
 
 ## [0.5.0] - 2022-10-23
+
 ### Added
+
 - Almost 100% of the glam vector and matrix APIs are covered.
 - Added doc links to glam equivalents for almost all methods.
 - Conversion to/from glam types formalized in `ToRaw`/`FromRaw` traits.
@@ -162,11 +200,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Box2`/`Box3` rounding (in, out, normal).
 
 ### Removed
+
 - The `Primitive` trait is removed, as `Scalar` is no longer directly
   customizable. The rationale is that it introduced more complexity than it was
   worth.
 
 ### Breaking Changes
+
 - Major trait reorganization. The `Scalar` trait is no longer customizable.
 - `Angle<T>` can no longer appear as the component type of a vector.
 - Replaced `Lerp` trait with regular methods.
@@ -174,28 +214,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Unit::Scalar` bounds.
 
 ### Bugfixes
+
 - `Rect::round_out()` now converts to `Box2` before rounding, which gives
   correct results.
 
 ### Internal changes
+
 - Major simplification of traits and macros. It should be way easier to grok the
   code.
 
 ## [0.4.1] - 2022-07-26
+
 ### Added
+
 - Conversion to/from glam 0.20.0 types (gated behind the `glam_0_20` feature).
 - New feature: `bevy_0_7_0`. Bevy uses glam 0.20.0, but `glamour` uses 0.21.
   Enable the feature to integrate `glamour` with Bevy 0.7 types.
 - Added missing `Into`/`From` implementations for matrix types.
 
 ## [0.4.0] - 2022-06-27
+
 ### Added
+
 - Added APIs mirroring new additions in `glam` 0.21.1: `Vector2::from_angle()`,
   `Vector2::rotate()`, `NEG_*` constants for signed vector types.
 - Feature: `scalar-math`, which is required if `glam` is built with its
   `scalar-math` feature. This feature affects alignment of vector types.
 
 ### Changed
+
 - Bumped `glam` version to 0.21.1. Note that this version introduced breaking
   changes.
 - Fixed alignment of 4-component types to match `glam` exactly. Previously, it
@@ -206,13 +253,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `glam`.
 
 ### Breaking Changes
+
 - All `new` methods now receive parameters as `impl Into`.
 - Minimum supported Rust version bumped to 1.61.0, because of support for
   generic `const fn` methods.
 - `glam` 0.21.1 contains breaking changes:
-  https://github.com/bitshifter/glam-rs/blob/main/CHANGELOG.md#breaking-changes.
+  <https://github.com/bitshifter/glam-rs/blob/main/CHANGELOG.md#breaking-changes>.
 
 ### Internal changes
+
 - Renamed the `ValueSemantics` marker trait to `PodValue`.
 - Added `BVec` associated types to `Primitive`.
 - Cleaned up implementation macros, removed the `impl_as_tuple` macro (because
@@ -220,22 +269,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cleaned up some trait bounds for documentation clarity.
 
 ## [0.3.1] - 2022-04-25
+
 ### Added
+
 - Added `length_squared` and `normalize_or_zero` for vectors (#16).
 
 ## [0.3.0] - 2022-04-19
+
 ### Added
+
 - Constructor macros.
 - Support for `glam::Quat` and `glam::DQuat` in `Angle<T>`, `Vector3<T>`, and
   `Point3<T>`.
 
 ### Removed
+
 - `Vector4::max_element_w()` (no longer needed).
 - Implementations of `AbsDiffEq` (et al) with tuple right-hand side.
 - `Scalar::min()`, `Scalar::max()`, and `Scalar::two()`, as they are unneeded.
 - `VectorN::two()`, as it was only used in two places.
 
 ## Changed
+
 - Bumped `glam` dependency to 0.20.5, which fixes the scalar math implementation
   of `Vec4::max_element()`.
 - Changed methods returning constants (`T::zero()`, `T::one()`, `T::nan()`,
@@ -246,6 +301,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2022-04-12
 
 ### Added
+
 - Implemented `approx::AbsDiffEq`, `approx::RelativeEq`, and `approx::UlpsEq`
   for more types (even where `glam` doesn't implement them).
 - Added `signum()` methods.
@@ -258,6 +314,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Very, very many tests.
 
 ### Fixed
+
 - `Rect::is_empty()`, `Rect::is_negative()`, `Box2::is_empty()`, and
   `Box2::is_negative()` now return true when containing non-finite components.
 - `Box2::contains(point)` did not return true for coordinates exactly on the
@@ -268,6 +325,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a transform. Use `Transform::from_matrix_unchecked()` to skip this check.
 
 ### Changed
+
 - Bumped Minimum Supported Rust Version to 1.56.0 because we want to use edition
   2021.
 - Add CI workflows.
@@ -289,10 +347,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Simplified the trait bounds for `Transform2` and `Transform3`.
 
 ## [0.1.1] - 2022-04-04
+
 ### Fixed
+
 - Missing trait bounds on `Scalar` and `MatrixN` caused the `serde` feature to
   not compile.
-
 
 ## [0.1.0] - 2022-04-04
 
