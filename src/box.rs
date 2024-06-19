@@ -706,7 +706,7 @@ impl<T: Unit> core::fmt::Debug for Box3<T> {
 
 #[cfg(test)]
 mod tests {
-    use approx::assert_abs_diff_eq;
+    use approx::{assert_abs_diff_eq, assert_ulps_eq};
 
     use crate::vec2;
 
@@ -1086,5 +1086,33 @@ mod tests {
                 max: (2.0, 2.0, 2.0).into(),
             }
         );
+    }
+
+    #[test]
+    fn gaslight_coverage() {
+        use approx::*;
+        fn clone_me<T: Clone>(b: &T) -> T {
+            b.clone()
+        }
+        _ = clone_me(&Box2::default());
+        _ = clone_me(&Box3::default());
+
+        assert_abs_diff_eq!(Box2::ZERO, Box2::ZERO);
+        assert_abs_diff_ne!(Box2::ZERO, Box2::ONE);
+        assert_relative_eq!(Box2::ZERO, Box2::ZERO);
+        assert_relative_ne!(Box2::ZERO, Box2::ONE);
+        assert_ulps_eq!(Box2::ZERO, Box2::ZERO);
+        assert_ulps_ne!(Box2::ZERO, Box2::ONE);
+
+        assert_abs_diff_eq!(Box3::ZERO, Box3::ZERO);
+        assert_abs_diff_ne!(Box3::ZERO, Box3::ONE);
+        assert_relative_eq!(Box3::ZERO, Box3::ZERO);
+        assert_relative_ne!(Box3::ZERO, Box3::ONE);
+        assert_ulps_eq!(Box3::ZERO, Box3::ZERO);
+        assert_ulps_ne!(Box3::ZERO, Box3::ONE);
+
+        extern crate alloc;
+        _ = alloc::format!("{:?}", Box2::default());
+        _ = alloc::format!("{:?}", Box3::default());
     }
 }
