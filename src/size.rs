@@ -368,5 +368,12 @@ mod tests {
         extern crate alloc;
         _ = alloc::format!("{:?}", Size2::<f32>::ZERO);
         _ = alloc::format!("{:?}", Size3::<f32>::ZERO);
+        assert_eq!(Size2::<f32>::from_tuple((1.0, 2.0)), Size2::new(1.0, 2.0));
+        assert_eq!(
+            Size3::<f32>::from_tuple((1.0, 2.0, 3.0)),
+            Size3::new(1.0, 2.0, 3.0)
+        );
+        assert_eq!(Size2::<f32>::ZERO.to_tuple(), (0.0, 0.0));
+        assert_eq!(Size3::<f32>::ZERO.to_tuple(), (0.0, 0.0, 0.0));
     }
 }
