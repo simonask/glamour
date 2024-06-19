@@ -376,6 +376,22 @@ mod tests {
         let v = Vector4::<f32>::new(3.0, 0.0, 1.0, 2.0);
         let t: Option<Vector4<i32>> = v.try_cast();
         assert_eq!(t, Some(vec4!(3, 0, 1, 2)));
+
+        let v = Vector3::<f32>::new(f32::MAX, 0.0, 1.0);
+        let t: Option<Vector3<i32>> = v.try_cast();
+        assert!(t.is_none());
+
+        let v = Vector3::<f32>::new(3.0, 0.0, 1.0);
+        let t: Option<Vector3<i32>> = v.try_cast();
+        assert_eq!(t, Some(vec3!(3, 0, 1)));
+
+        let v = Vector2::<f32>::new(f32::MAX, 0.0);
+        let t: Option<Vector2<i32>> = v.try_cast();
+        assert!(t.is_none());
+
+        let v = Vector2::<f32>::new(3.0, 0.0);
+        let t: Option<Vector2<i32>> = v.try_cast();
+        assert_eq!(t, Some(vec2!(3, 0)));
     }
 
     #[test]
