@@ -1045,10 +1045,11 @@ mod tests {
 
     #[test]
     fn gaslight_coverage() {
+        extern crate alloc;
+
         let v: Vector2<f32> = vec2![1.0, 2.0];
         assert_eq!(v.to_point(), crate::point2!(1.0, 2.0));
 
-        extern crate alloc;
         _ = alloc::format!("{:?}", Vector2::<f32>::default());
         _ = alloc::format!("{:?}", Vector3::<f32>::default());
         _ = alloc::format!("{:?}", Vector4::<f32>::default());
