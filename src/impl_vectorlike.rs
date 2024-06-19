@@ -47,8 +47,6 @@ macro_rules! simdlike {
 
             /// The unit axes.
             pub const AXES: [Self; 2] = [Self::X, Self::Y];
-
-            crate::interfaces::simd2_base_interface!(struct);
         }
         impl<T: crate::FloatUnit> $base_type_name<T> {
             /// All NaN.
@@ -118,8 +116,6 @@ macro_rules! simdlike {
 
             /// The unit axes.
             pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
-
-            crate::interfaces::simd3_base_interface!(struct);
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             /// All negative one.
@@ -213,8 +209,6 @@ macro_rules! simdlike {
 
             /// The unit axes.
             pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
-
-            crate::interfaces::simd4_base_interface!(struct);
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             /// All negative one.
@@ -299,6 +293,9 @@ macro_rules! vectorlike {
         }
     };
     (@for_size $base_type_name:ident, 2) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd2_base_interface!(struct, vec3);
+        }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             crate::interfaces::vector2_signed_interface!(struct);
         }
@@ -307,18 +304,44 @@ macro_rules! vectorlike {
         }
     };
     (@for_size $base_type_name:ident, 3) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd3_base_interface!(struct, vec2, vec4);
+        }
         impl<T: crate::FloatUnit> $base_type_name<T> {
             crate::interfaces::vector3_float_interface!(struct);
         }
     };
-    (@for_size $base_type_name:ident, 4) => {};
+    (@for_size $base_type_name:ident, 4) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd4_base_interface!(struct, vec3);
+        }
+    };
 }
 pub(crate) use vectorlike;
 macro_rules! pointlike {
     ($base_type_name:ident, $n:tt) => {
         crate::impl_vectorlike::simdlike!($base_type_name, $n);
+        crate::impl_vectorlike::pointlike!(@for_size $base_type_name, $n);
         impl<T: crate::FloatUnit> $base_type_name<T> {
             crate::interfaces::point_float_interface!(struct);
+        }
+    };
+    (@for_size $base_type_name:ident, 2) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd2_base_interface!(struct, point3);
+        }
+    };
+    (@for_size $base_type_name:ident, 3) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd3_base_interface!(struct, point2, point4);
+        }
+        impl<T: crate::FloatUnit> $base_type_name<T> {
+            crate::interfaces::vector3_float_interface!(struct);
+        }
+    };
+    (@for_size $base_type_name:ident, 4) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd4_base_interface!(struct, point3);
         }
     };
 }
@@ -326,6 +349,20 @@ pub(crate) use pointlike;
 macro_rules! sizelike {
     ($base_type_name:ident, $n:tt) => {
         crate::impl_vectorlike::simdlike!($base_type_name, $n);
+        crate::impl_vectorlike::sizelike!(@for_size $base_type_name, $n);
+    };
+    (@for_size $base_type_name:ident, 2) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd2_base_interface!(struct, size3);
+        }
+    };
+    (@for_size $base_type_name:ident, 3) => {
+        impl<T: crate::Unit> $base_type_name<T> {
+            crate::interfaces::simd3_base_interface!(struct, size2, vec4);
+        }
+        impl<T: crate::FloatUnit> $base_type_name<T> {
+            crate::interfaces::vector3_float_interface!(struct);
+        }
     };
 }
 pub(crate) use sizelike;

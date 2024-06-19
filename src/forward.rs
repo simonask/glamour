@@ -341,6 +341,9 @@ macro_rules! forward_ty {
     ($mode:tt bvec4) => { glam::BVec4 };
     ($mode:tt Self) => { Self };
     ($mode:tt ($a:tt, $b:tt)) => { (crate::forward_ty!($mode $a), crate::forward_ty!($mode $b)) };
+
+    // These renames exist because the macros become significantly simpler when all types can be matched by a single
+    // `tt`.
     ($mode:tt ref_self) => { &Self };
     ($mode:tt opt_self) => { Option<Self> };
     ($mode:tt ref_scalar_array_4) => { &[crate::forward_ty!($mode scalar); 4] };

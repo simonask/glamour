@@ -193,7 +193,7 @@ macro_rules! point_float_interface {
 pub(crate) use point_float_interface;
 
 macro_rules! simd2_base_interface {
-    ($mode:tt) => {
+    ($mode:tt, $larger:tt) => {
         crate::interface! {
             $mode =>
             /// Creates a new vector from an array.
@@ -201,7 +201,7 @@ macro_rules! simd2_base_interface {
             /// `[x, y]`
             fn to_array(&self) -> [scalar; 2];
             /// Creates a 3D vector from self and the given z value.
-            fn extend(self, z: scalar) -> vec3;
+            fn extend(self, z: scalar) -> $larger;
             /// Returns a vector mask containing the result of a == comparison for each element of `self` and `rhs`.
             fn cmpeq(self, rhs: Self) -> bvec2;
             /// Returns a vector mask containing the result of a != comparison for each element of `self` and `rhs`.
@@ -226,7 +226,7 @@ macro_rules! simd2_base_interface {
 pub(crate) use simd2_base_interface;
 
 macro_rules! simd3_base_interface {
-    ($mode:tt) => {
+    ($mode:tt, $smaller:tt, $larger:tt) => {
         crate::interface! {
             $mode =>
             /// Creates a new vector from an array.
@@ -234,9 +234,9 @@ macro_rules! simd3_base_interface {
             /// `[x, y, z]`
             fn to_array(&self) -> [scalar; 3];
             /// Creates a 3D vector from `self` and the given `w` value.
-            fn extend(self, w: scalar) -> vec4;
+            fn extend(self, w: scalar) -> $larger;
             /// Creates a 2D vector by removing the `z` component.
-            fn truncate(self) -> vec2;
+            fn truncate(self) -> $smaller;
             /// Returns a vector mask containing the result of a == comparison for each element of `self` and `rhs`.
             fn cmpeq(self, rhs: Self) -> bvec3;
             /// Returns a vector mask containing the result of a != comparison for each element of `self` and `rhs`.
@@ -275,7 +275,7 @@ macro_rules! vector3_interface {
 pub(crate) use vector3_interface;
 
 macro_rules! simd4_base_interface {
-    ($mode:tt) => {
+    ($mode:tt, $smaller:tt) => {
         crate::interface! {
             $mode =>
             /// Creates a new vector from an array.
@@ -283,7 +283,7 @@ macro_rules! simd4_base_interface {
             /// `[x, y, z, w]`
             fn to_array(&self) -> [scalar; 4];
             /// Creates a 3D vector by removing the `w` component.
-            fn truncate(self) -> vec3;
+            fn truncate(self) -> $smaller;
             /// Returns a vector mask containing the result of a == comparison for each element of `self` and `rhs`.
             fn cmpeq(self, rhs: Self) -> bvec4;
             /// Returns a vector mask containing the result of a != comparison for each element of `self` and `rhs`.

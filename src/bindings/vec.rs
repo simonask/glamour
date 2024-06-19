@@ -91,39 +91,39 @@ macro_rules! impl_float_vector {
 }
 
 pub trait Vector2: Vector + From<glam::BVec2> {
-    crate::interfaces::simd2_base_interface!(trait_decl);
+    crate::interfaces::simd2_base_interface!(trait_decl, vec3);
 }
 
 macro_rules! impl_vector2 {
     ($glam_ty:ty, $vec3_ty:ty) => {
         impl Vector2 for $glam_ty {
-            crate::interfaces::simd2_base_interface!(trait_impl);
+            crate::interfaces::simd2_base_interface!(trait_impl, vec3);
         }
     };
 }
 
 pub trait Vector3: Vector + From<glam::BVec3> {
-    crate::interfaces::simd3_base_interface!(trait_decl);
+    crate::interfaces::simd3_base_interface!(trait_decl, vec2, vec4);
     crate::interfaces::vector3_interface!(trait_decl);
 }
 
 macro_rules! impl_vector3 {
     ($glam_ty:ty, $vec2_ty:ty, $vec4_ty:ty) => {
         impl Vector3 for $glam_ty {
-            crate::interfaces::simd3_base_interface!(trait_impl);
+            crate::interfaces::simd3_base_interface!(trait_impl, vec2, vec4);
             crate::interfaces::vector3_interface!(trait_impl);
         }
     };
 }
 
 pub trait Vector4: Vector + From<glam::BVec4> {
-    crate::interfaces::simd4_base_interface!(trait_decl);
+    crate::interfaces::simd4_base_interface!(trait_decl, vec3);
 }
 
 macro_rules! impl_vector4 {
     ($glam_ty:ty, $vec3_ty:ty) => {
         impl Vector4 for $glam_ty {
-            crate::interfaces::simd4_base_interface!(trait_impl);
+            crate::interfaces::simd4_base_interface!(trait_impl, vec3);
         }
     };
 }

@@ -816,12 +816,13 @@ mod tests {
 
     #[test]
     fn gaslight_coverage() {
+        extern crate alloc;
+
         fn clone_me<T: Clone>(v: &T) -> T {
             v.clone()
         }
         _ = clone_me(&Rect::ZERO);
 
-        extern crate alloc;
         _ = alloc::format!("{:?}", Rect::default());
     }
 }

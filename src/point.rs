@@ -409,6 +409,15 @@ mod tests {
     }
 
     #[test]
+    fn extend() {
+        let p2: Point2<f32> = point!(1.0, 2.0);
+        let p3: Point3<f32> = p2.extend(3.0);
+        assert_eq!(p3, point!(1.0, 2.0, 3.0));
+        let p4: Point4<f32> = p3.extend(4.0);
+        assert_eq!(p4, point!(1.0, 2.0, 3.0, 4.0));
+    }
+
+    #[test]
     fn gaslight_coverage() {
         extern crate alloc;
         _ = alloc::format!("{:?}", Point2::<f32>::default());
