@@ -1052,6 +1052,20 @@ mod tests {
         _ = alloc::format!("{:?}", Vector2::<f32>::default());
         _ = alloc::format!("{:?}", Vector3::<f32>::default());
         _ = alloc::format!("{:?}", Vector4::<f32>::default());
+
+        let _: (f32, f32) = Vector2::<f32>::ZERO.into();
+        let _: (f32, f32) = Vector2::<f32>::ZERO.to_tuple();
+        let _: (f32, f32, f32) = Vector3::<f32>::ZERO.into();
+        let _: (f32, f32, f32) = Vector3::<f32>::ZERO.to_tuple();
+        let _: (f32, f32, f32, f32) = Vector4::<f32>::ZERO.into();
+        let _: (f32, f32, f32, f32) = Vector4::<f32>::ZERO.to_tuple();
+
+        _ = Vector2::<f32>::from((0.0, 0.0));
+        _ = Vector3::<f32>::from((0.0, 0.0, 0.0));
+        _ = Vector4::<f32>::from((0.0, 0.0, 0.0, 0.0));
+        _ = Vector2::<f32>::from_tuple((0.0, 0.0));
+        _ = Vector3::<f32>::from_tuple((0.0, 0.0, 0.0));
+        _ = Vector4::<f32>::from_tuple((0.0, 0.0, 0.0, 0.0));
     }
 }
 
