@@ -378,7 +378,7 @@ impl<T: Unit> core::fmt::Debug for Vector4<T> {
 
 #[cfg(test)]
 mod tests {
-    use approx::assert_abs_diff_eq;
+    use approx::{assert_abs_diff_eq, RelativeEq, UlpsEq};
 
     use crate::{vec2, vec3, vec4, vector, Angle, AngleConsts};
 
@@ -1066,6 +1066,12 @@ mod tests {
         _ = Vector2::<f32>::from_tuple((0.0, 0.0));
         _ = Vector3::<f32>::from_tuple((0.0, 0.0, 0.0));
         _ = Vector4::<f32>::from_tuple((0.0, 0.0, 0.0, 0.0));
+
+        assert_eq!(
+            Vector2::<f32>::default_max_relative(),
+            f32::default_max_relative()
+        );
+        assert_eq!(Vector2::<f32>::default_max_ulps(), f32::default_max_ulps());
     }
 }
 
