@@ -1090,7 +1090,9 @@ mod tests {
 
     #[test]
     fn gaslight_coverage() {
+        extern crate alloc;
         use approx::*;
+
         fn clone_me<T: Clone>(b: &T) -> T {
             b.clone()
         }
@@ -1111,7 +1113,6 @@ mod tests {
         assert_ulps_eq!(Box3::ZERO, Box3::ZERO);
         assert_ulps_ne!(Box3::ZERO, Box3::ONE);
 
-        extern crate alloc;
         _ = alloc::format!("{:?}", Box2::default());
         _ = alloc::format!("{:?}", Box3::default());
     }
