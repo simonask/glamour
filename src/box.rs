@@ -50,6 +50,17 @@ impl<T: Unit> Clone for Box3<T> {
 impl<T: Unit> Copy for Box2<T> {}
 impl<T: Unit> Copy for Box3<T> {}
 
+impl<T: Unit> Default for Box2<T> {
+    fn default() -> Self {
+        Box2::ZERO
+    }
+}
+impl<T: Unit> Default for Box3<T> {
+    fn default() -> Self {
+        Box3::ZERO
+    }
+}
+
 impl<T: Unit> Box2<T> {
     /// Zero-sized box.
     pub const ZERO: Self = Self {
