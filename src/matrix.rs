@@ -1598,6 +1598,10 @@ mod tests {
         assert_eq!(m2_copy, m2 * 2.0);
         assert_eq!(m3_copy, m3 * 2.0);
         assert_eq!(m4_copy, m4 * 2.0);
+
+        assert_eq!(crate::peel(m2 * m2), crate::peel(m2) * crate::peel(m2));
+        assert_eq!(crate::peel(m3 * m3), crate::peel(m3) * crate::peel(m3));
+        assert_eq!(crate::peel(m4 * m4), crate::peel(m4) * crate::peel(m4));
     }
 
     #[test]
