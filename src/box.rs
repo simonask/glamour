@@ -68,6 +68,12 @@ impl<T: Unit> Box2<T> {
         max: Point2::ZERO,
     };
 
+    /// Box with minimum at `(0, 0)` and maximum at `(1, 1)`.
+    pub const ONE: Self = Self {
+        min: Point2::ZERO,
+        max: Point2::ONE,
+    };
+
     /// New 2D box from min/max coordinates.
     pub fn new(min: Point2<T>, max: Point2<T>) -> Self {
         Box2 { min, max }
@@ -268,6 +274,12 @@ impl<T: Unit> Box3<T> {
     pub const ZERO: Self = Self {
         min: Point3::ZERO,
         max: Point3::ZERO,
+    };
+
+    /// Box with minimum at `(0, 0, 0)` and maximum at `(1, 1, 1)`.
+    pub const ONE: Self = Self {
+        min: Point3::ZERO,
+        max: Point3::ONE,
     };
 
     /// New 2D box from min/max coordinates.
