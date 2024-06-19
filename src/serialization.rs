@@ -1325,7 +1325,7 @@ mod tests {
 
     #[test]
     fn rect() {
-        let rect = Rect::<f32>::new((10.0, 20.0), (30.0, 40.0));
+        let rect = Rect::<f32>::from_origin_and_size((10.0, 20.0), (30.0, 40.0));
         assert_ser_tokens(
             &rect,
             &[
@@ -1384,7 +1384,7 @@ mod tests {
 
     #[test]
     fn box2() {
-        let box2 = Box2::<f32>::new((10.0, 20.0), (30.0, 40.0));
+        let box2 = Box2::<f32>::from_min_max((10.0, 20.0), (30.0, 40.0));
         assert_ser_tokens(
             &box2,
             &[

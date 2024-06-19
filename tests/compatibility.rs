@@ -394,8 +394,8 @@ fn from_into_glam() {
     let i: glam::IVec4 = i.into();
     let u: glam::UVec4 = u.into();
 
-    assert_eq!(Into::<Vector4<f32>>::into(f), (1.0, 2.0, 3.0, 4.0));
-    assert_eq!(Into::<Vector4<f64>>::into(d), (1.0, 2.0, 3.0, 4.0));
-    assert_eq!(Into::<Vector4<i32>>::into(i), (1, 2, 3, 4));
-    assert_eq!(Into::<Vector4<u32>>::into(u), (1, 2, 3, 4));
+    assert_eq!(Into::<Vector4<f32>>::into(f), vec4!(1.0, 2.0, 3.0, 4.0));
+    assert_eq!(Into::<Vector4<f64>>::into(d), vec4!(1.0, 2.0, 3.0, 4.0));
+    assert_eq!(Into::<Vector4<i32>>::into(i), vec4!(1, 2, 3, 4));
+    assert_eq!(Into::<Vector4<u32>>::into(u), vec4!(1, 2, 3, 4));
 }

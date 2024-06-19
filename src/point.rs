@@ -16,7 +16,7 @@ use crate::{
     bindings::prelude::*,
     peel, rewrap,
     scalar::{FloatScalar, SignedScalar},
-    unit::{FloatUnit, IntUnit},
+    unit::FloatUnit,
     wrap, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
 };
 use core::ops::Mul;
@@ -132,126 +132,26 @@ macro_rules! point_interface {
     };
 }
 
-macro_rules! float_point_interface {
-    ($see_also_doc_ty:ty) => {
-        crate::forward_to_raw!(
-            $see_also_doc_ty =>
-            #[doc = "Midpoint between two points"]
-            pub fn midpoint(self, rhs: Self) -> Self;
-        );
+crate::macros::forward_op_to_raw!(Point2, Add<Vector2<T>>::add -> Self);
+crate::macros::forward_op_to_raw!(Point3, Add<Vector3<T>>::add -> Self);
+crate::macros::forward_op_to_raw!(Point4, Add<Vector4<T>>::add -> Self);
+crate::macros::forward_op_to_raw!(Point2, Sub<Vector2<T>>::sub -> Self);
+crate::macros::forward_op_to_raw!(Point3, Sub<Vector3<T>>::sub -> Self);
+crate::macros::forward_op_to_raw!(Point4, Sub<Vector4<T>>::sub -> Self);
+crate::macros::forward_op_to_raw!(Point2, Sub<Self>::sub -> Vector2<T>);
+crate::macros::forward_op_to_raw!(Point3, Sub<Self>::sub -> Vector3<T>);
+crate::macros::forward_op_to_raw!(Point4, Sub<Self>::sub -> Vector4<T>);
 
-        #[doc = "Distance squared"]
-        pub fn distance_squared(self, other: Self) -> T::Scalar {
-            peel(self).distance_squared(peel(other))
-        }
-        #[doc = "Distance"]
-        pub fn distance(self, other: Self) -> T::Scalar {
-            peel(self).distance(peel(other))
-        }
-        #[doc = "Moves towards rhs based on the value d."]
-        #[must_use]
-        pub fn move_towards(self, rhs: Self, d: T::Scalar) -> Self {
-            wrap(peel(self).move_towards(peel(rhs), d))
-        }
-    };
-}
+crate::macros::forward_neg_to_raw!(Point2);
+crate::macros::forward_neg_to_raw!(Point3);
+crate::macros::forward_neg_to_raw!(Point4);
 
-macro_rules! int_point_interface {
-    ($vector:ty, $see_also_doc_ty:ty) => {
-        crate::forward_to_raw!(
-            $see_also_doc_ty =>
-            #[doc = "Returns a vector containing the saturating addition of self and rhs."]
-            pub fn saturating_add(self, rhs: $vector) -> Self;
-            #[doc = "Returns a vector containing the saturating subtraction of self and rhs."]
-            pub fn saturating_sub(self, rhs: $vector) -> Self;
-            #[doc = "Returns a vector containing the saturating multiplication of self and rhs."]
-            pub fn saturating_mul(self, rhs: $vector) -> Self;
-            #[doc = "Returns a vector containing the saturating division of self and rhs."]
-            pub fn saturating_div(self, rhs: $vector) -> Self;
-            #[doc = "Returns a vector containing the wrapping addition of self and rhs."]
-            pub fn wrapping_add(self, rhs: $vector) -> Self;
-            #[doc = "Returns a vector containing the wrapping subtraction of self and rhs."]
-            pub fn wrapping_sub(self, rhs: $vector) -> Self;
-            #[doc = "Returns a vector containing the wrapping multiplication of self and rhs."]
-            pub fn wrapping_mul(self, rhs: $vector) -> Self;
-            #[doc = "Returns a vector containing the wrapping division of self and rhs."]
-            pub fn wrapping_div(self, rhs: $vector) -> Self;
-        );
-    };
-}
-
-crate::forward_op_to_raw!(Point2, Add<Vector2<T>>::add -> Self);
-crate::forward_op_to_raw!(Point3, Add<Vector3<T>>::add -> Self);
-crate::forward_op_to_raw!(Point4, Add<Vector4<T>>::add -> Self);
-crate::forward_op_to_raw!(Point2, Sub<Vector2<T>>::sub -> Self);
-crate::forward_op_to_raw!(Point3, Sub<Vector3<T>>::sub -> Self);
-crate::forward_op_to_raw!(Point4, Sub<Vector4<T>>::sub -> Self);
-crate::forward_op_to_raw!(Point2, Sub<Self>::sub -> Vector2<T>);
-crate::forward_op_to_raw!(Point3, Sub<Self>::sub -> Vector3<T>);
-crate::forward_op_to_raw!(Point4, Sub<Self>::sub -> Vector4<T>);
-
-crate::forward_neg_to_raw!(Point2);
-crate::forward_neg_to_raw!(Point3);
-crate::forward_neg_to_raw!(Point4);
-
-crate::forward_op_assign_to_raw!(Point2, AddAssign<Vector2<T>>::add_assign);
-crate::forward_op_assign_to_raw!(Point3, AddAssign<Vector3<T>>::add_assign);
-crate::forward_op_assign_to_raw!(Point4, AddAssign<Vector4<T>>::add_assign);
-crate::forward_op_assign_to_raw!(Point2, SubAssign<Vector2<T>>::sub_assign);
-crate::forward_op_assign_to_raw!(Point3, SubAssign<Vector3<T>>::sub_assign);
-crate::forward_op_assign_to_raw!(Point4, SubAssign<Vector4<T>>::sub_assign);
-
-crate::derive_standard_traits!(Point2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::derive_standard_traits!(Point3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::derive_standard_traits!(Point4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
-
-crate::derive_array_conversion_traits!(Point2, 2);
-crate::derive_array_conversion_traits!(Point3, 3);
-crate::derive_array_conversion_traits!(Point4, 4);
-
-crate::derive_tuple_conversion_traits!(Point2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::derive_tuple_conversion_traits!(Point3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::derive_tuple_conversion_traits!(Point4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
-
-crate::derive_glam_conversion_traits!(Point2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::derive_glam_conversion_traits!(Point3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::derive_glam_conversion_traits!(Point4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
+crate::macros::forward_op_assign_to_raw!(Point2, AddAssign<Vector2<T>>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Point3, AddAssign<Vector3<T>>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Point4, AddAssign<Vector4<T>>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Point2, SubAssign<Vector2<T>>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Point3, SubAssign<Vector3<T>>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Point4, SubAssign<Vector4<T>>::sub_assign);
 
 impl<T: Unit> Point2<T> {
     /// All zeroes.
@@ -271,36 +171,10 @@ impl<T: Unit> Point2<T> {
         Point2 { x, y }
     }
 
-    crate::forward_constructors!(2, Vec2);
-    crate::forward_comparison!(glam::BVec2, Vec2);
-    crate::casting_interface!(Point2 {
-        x: T::Scalar,
-        y: T::Scalar
-    });
-    crate::tuple_interface!(Point2 {
-        x: T::Scalar,
-        y: T::Scalar
-    });
-    crate::array_interface!(2);
-
-    #[doc = "Extend with z-component to [`Point3`]."]
-    #[must_use]
-    pub fn extend(self, z: T::Scalar) -> Point3<T> {
-        Point3::new(self.x, self.y, z)
-    }
-    #[doc = "Replace the x-component with a new value."]
-    #[must_use]
-    pub fn with_x(self, x: T::Scalar) -> Self {
-        Self { x, y: self.y }
-    }
-    #[doc = "Replace the y-component with a new value."]
-    #[must_use]
-    pub fn with_y(self, y: T::Scalar) -> Self {
-        Self { x: self.x, y }
-    }
-
     point_interface!(Point2, Vector2);
 }
+
+crate::impl_vectorlike::vectorlike!(Point2, 2);
 
 impl<T: FloatUnit> Point2<T> {
     /// All NaN.
@@ -318,13 +192,6 @@ impl<T: FloatUnit> Point2<T> {
         x: <T::Scalar as FloatScalar>::NEG_INFINITY,
         y: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
-
-    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
-    float_point_interface!(glam::Vec2);
-}
-
-impl<T: IntUnit> Point2<T> {
-    int_point_interface!(Vector2<T>, glam::IVec2);
 }
 
 impl<T: Unit> Point3<T> {
@@ -347,60 +214,10 @@ impl<T: Unit> Point3<T> {
         Point3 { x, y, z }
     }
 
-    crate::forward_constructors!(3, Vec3);
-    crate::forward_comparison!(glam::BVec3, Vec3);
-    crate::casting_interface!(Point3 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar
-    });
-    crate::tuple_interface!(Point3 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar
-    });
-    crate::array_interface!(3);
-
-    crate::forward_to_raw!(
-        glam::Vec3 =>
-        #[doc = "Truncate to [`Point2`]."]
-        pub fn truncate(self) -> Point2<T>;
-    );
-
-    #[doc = "Extend with w-component to [`Point4`]."]
-    pub fn extend(self, w: T::Scalar) -> Point4<T> {
-        Point4::new(self.x, self.y, self.z, w)
-    }
-    #[doc = "Replace the x-component with a new value."]
-    #[must_use]
-    pub fn with_x(self, x: T::Scalar) -> Self {
-        Self {
-            x,
-            y: self.y,
-            z: self.z,
-        }
-    }
-    #[doc = "Replace the y-component with a new value."]
-    #[must_use]
-    pub fn with_y(self, y: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y,
-            z: self.z,
-        }
-    }
-    #[doc = "Replace the z-component with a new value."]
-    #[must_use]
-    pub fn with_z(self, z: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z,
-        }
-    }
-
     point_interface!(Point3, Vector3);
 }
+
+crate::impl_vectorlike::vectorlike!(Point3, 3);
 
 impl<T: FloatUnit> Point3<T> {
     /// All NaN.
@@ -421,13 +238,6 @@ impl<T: FloatUnit> Point3<T> {
         y: <T::Scalar as FloatScalar>::NEG_INFINITY,
         z: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
-
-    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
-    float_point_interface!(glam::Vec3);
-}
-
-impl<T: IntUnit> Point3<T> {
-    int_point_interface!(Vector3<T>, glam::IVec3);
 }
 
 impl<T: Unit> Point4<T> {
@@ -452,71 +262,10 @@ impl<T: Unit> Point4<T> {
         Point4 { x, y, z, w }
     }
 
-    crate::forward_constructors!(4, Vec4);
-    crate::forward_comparison!(glam::BVec4, Vec4);
-    crate::casting_interface!(Point4 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar,
-        w: T::Scalar
-    });
-    crate::tuple_interface!(Point4 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar,
-        w: T::Scalar
-    });
-    crate::array_interface!(4);
-
-    crate::forward_to_raw!(
-        glam::Vec4 =>
-        #[doc = "Truncate to [`Point3`]."]
-        pub fn truncate(self) -> Point3<T>;
-    );
-
-    #[doc = "Replace the x-component with a new value."]
-    #[must_use]
-    pub fn with_x(self, x: T::Scalar) -> Self {
-        Self {
-            x,
-            y: self.y,
-            z: self.z,
-            w: self.w,
-        }
-    }
-    #[doc = "Replace the y-component with a new value."]
-    #[must_use]
-    pub fn with_y(self, y: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y,
-            z: self.z,
-            w: self.w,
-        }
-    }
-    #[doc = "Replace the z-component with a new value."]
-    #[must_use]
-    pub fn with_z(self, z: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z,
-            w: self.w,
-        }
-    }
-    #[doc = "Replace the w-component with a new value."]
-    #[must_use]
-    pub fn with_w(self, w: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z: self.z,
-            w,
-        }
-    }
-
     point_interface!(Point4, Vector4);
 }
+
+crate::impl_vectorlike::vectorlike!(Point4, 4);
 
 impl<T: FloatUnit> Point4<T> {
     /// All NaN.
@@ -540,13 +289,6 @@ impl<T: FloatUnit> Point4<T> {
         z: <T::Scalar as FloatScalar>::NEG_INFINITY,
         w: <T::Scalar as FloatScalar>::NEG_INFINITY,
     };
-
-    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
-    float_point_interface!(glam::Vec4);
-}
-
-impl<T: IntUnit> Point4<T> {
-    int_point_interface!(Vector4<T>, glam::IVec4);
 }
 
 impl<T> Point3<T>
@@ -571,24 +313,6 @@ where
     #[must_use]
     pub fn to_vec3a(self) -> glam::Vec3A {
         self.into()
-    }
-}
-
-impl<T> From<glam::Vec3A> for Point3<T>
-where
-    T: Unit<Scalar = f32>,
-{
-    fn from(v: glam::Vec3A) -> Self {
-        wrap(v.into())
-    }
-}
-
-impl<T> From<Point3<T>> for glam::Vec3A
-where
-    T: Unit<Scalar = f32>,
-{
-    fn from(v: Point3<T>) -> Self {
-        peel(v).into()
     }
 }
 
@@ -655,6 +379,34 @@ impl<T: Unit> From<Point4<T>> for Vector4<T> {
     }
 }
 
+impl<T: Unit> core::fmt::Debug for Point2<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Point2")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .finish()
+    }
+}
+impl<T: Unit> core::fmt::Debug for Point3<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Point3")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .field("z", &self.z)
+            .finish()
+    }
+}
+impl<T: Unit> core::fmt::Debug for Point4<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Point4")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .field("z", &self.z)
+            .field("w", &self.w)
+            .finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::point;
@@ -668,7 +420,7 @@ mod tests {
         let p = Point::ONE;
         let q = Point::ONE;
         let v: Vector3<f32> = q - p;
-        assert_eq!(v, Vector3::ZERO);
+        assert_eq!(v, Vector3::<f32>::ZERO);
     }
 
     #[test]

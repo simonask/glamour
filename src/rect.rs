@@ -6,7 +6,7 @@ use num_traits::ConstZero;
 use crate::{
     traits::{Contains, Intersection, Union},
     unit::FloatUnit,
-    Box2, Point2, Size2, Unit, Vector2,
+    Box2, IntUnit, Point2, Size2, Unit, Vector2,
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
@@ -23,14 +23,18 @@ unsafe impl<T: Unit> bytemuck::Pod for Rect<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`
 unsafe impl<T: Unit> bytemuck::Zeroable for Rect<T> {}
 
-crate::derive_standard_traits!(Rect {
-    origin: Point2<T>,
-    size: Size2<T>
-});
-crate::derive_tuple_conversion_traits!(Rect {
-    origin: Point2<T>,
-    size: Size2<T>
-});
+impl<T: Unit> Clone for Rect<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+impl<T: Unit> Copy for Rect<T> {}
+
+impl<T: Unit> Default for Rect<T> {
+    fn default() -> Self {
+        Self::ZERO
+    }
+}
 
 impl<T: Unit> Rect<T> {
     /// Zero rect (origin = 0.0, size = 0.0).
@@ -40,21 +44,19 @@ impl<T: Unit> Rect<T> {
     };
 
     /// New Rect from origin/size.
-    pub fn new(origin: impl Into<Point2<T>>, size: impl Into<Size2<T>>) -> Rect<T> {
-        Rect {
-            origin: origin.into(),
-            size: size.into(),
-        }
+    pub fn new(origin: Point2<T>, size: Size2<T>) -> Rect<T> {
+        Rect { origin, size }
     }
 
-    crate::casting_interface!(Rect {
-        origin: Point2<T>,
-        size: Size2<T>
-    });
-    crate::tuple_interface!(Rect {
-        origin: Point2<T>,
-        size: Size2<T>
-    });
+    /// Create a Rect from origin and size.
+    ///
+    /// This is similar to `new()`, except that the arguments are converted via `Into` for convenience.
+    pub fn from_origin_and_size(
+        origin: impl Into<Point2<T>>,
+        size: impl Into<Size2<T>>,
+    ) -> Rect<T> {
+        Self::new(origin.into(), size.into())
+    }
 
     /// Rect at (0.0, 0.0) with `size`.
     #[inline]
@@ -171,10 +173,10 @@ impl<T: Unit> Rect<T> {
     ///
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let r = Rect::<f32>::new((10.0, 10.0), (10.0, 10.0));
+    /// let r = Rect::<f32>::from_origin_and_size((10.0, 10.0), (10.0, 10.0));
     /// let r = r.inflate((10.0, 10.0).into());
-    /// assert_eq!(r.origin, (0.0, 0.0));
-    /// assert_eq!(r.size, (30.0, 30.0));
+    /// assert_eq!(r.origin, point!(0.0, 0.0));
+    /// assert_eq!(r.size, size!(30.0, 30.0));
     /// ```
     #[must_use]
     pub fn inflate(&self, by: Size2<T>) -> Self {
@@ -211,12 +213,23 @@ impl<T: Unit> Rect<T> {
     pub fn is_negative(&self) -> bool {
         !(self.size.width >= T::Scalar::ZERO && self.size.height >= T::Scalar::ZERO)
     }
+
+    /// Convert to (origin, size) tuple.
+    #[inline]
+    #[must_use]
+    pub fn to_tuple(self) -> (Point2<T>, Size2<T>) {
+        (self.origin, self.size)
+    }
+
+    /// New rect from (origin, size) tuple.
+    #[inline]
+    #[must_use]
+    pub fn from_tuple((origin, size): (Point2<T>, Size2<T>)) -> Self {
+        Self::new(origin, size)
+    }
 }
 
-impl<T> Rect<T>
-where
-    T: FloatUnit,
-{
+impl<T: FloatUnit> Rect<T> {
     /// True if the rect only contains finite and non-NaN coordinates.
     #[inline]
     #[must_use]
@@ -232,9 +245,9 @@ where
     ///
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let r = Rect::<f32>::new((0.51, 0.49), (0.51, 0.49));
+    /// let r = Rect::<f32>::from_origin_and_size((0.51, 0.49), (0.51, 0.49));
     /// let r = r.round();
-    /// assert_eq!(r, Rect::<f32>::new((1.0, 0.0), (1.0, 0.0)));
+    /// assert_eq!(r, Rect::<f32>::new(point!(1.0, 0.0), size!(1.0, 0.0)));
     /// ```
     #[inline]
     #[must_use]
@@ -257,9 +270,9 @@ where
     ///
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let r = Rect::<f32>::new((0.51, 0.49), (1.51, 1.49));
+    /// let r = Rect::<f32>::from_origin_and_size((0.51, 0.49), (1.51, 1.49));
     /// let r = r.round_in();
-    /// assert_eq!(r, Rect::<f32>::new((1.0, 1.0), (1.0, 0.0)));
+    /// assert_eq!(r, Rect::<f32>::new(point!(1.0, 1.0), size!(1.0, 0.0)));
     /// ```
     #[inline]
     #[must_use]
@@ -279,9 +292,9 @@ where
     /// #### Example
     /// ```rust
     /// # use glamour::prelude::*;
-    /// let r = Rect::<f32>::new((0.51, 0.49), (1.51, 1.49));
+    /// let r = Rect::<f32>::from_origin_and_size((0.51, 0.49), (1.51, 1.49));
     /// let r = r.round_out();
-    /// assert_eq!(r, Rect::new((0.0, 0.0), (3.0, 2.0)));
+    /// assert_eq!(r, Rect::new(point!(0.0, 0.0), size!(3.0, 2.0)));
     /// ```
     #[inline]
     #[must_use]
@@ -300,10 +313,15 @@ where
     }
 }
 
-impl<T> AbsDiffEq<(Point2<T>, Size2<T>)> for Rect<T>
-where
-    T: Unit<Scalar: AbsDiffEq<Epsilon: Copy>>,
-{
+impl<T: Unit> PartialEq for Rect<T> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.origin == other.origin && self.size == other.size
+    }
+}
+impl<T: IntUnit> Eq for Rect<T> {}
+
+impl<T: FloatUnit> AbsDiffEq for Rect<T> {
     type Epsilon = <T::Scalar as approx::AbsDiffEq>::Epsilon;
 
     #[must_use]
@@ -312,20 +330,19 @@ where
     }
 
     #[must_use]
-    fn abs_diff_eq(&self, other: &(Point2<T>, Size2<T>), epsilon: Self::Epsilon) -> bool {
-        self.abs_diff_eq(&Self::from_tuple(*other), epsilon)
+    fn abs_diff_eq(&self, other: &Rect<T>, epsilon: Self::Epsilon) -> bool {
+        self.origin.abs_diff_eq(&other.origin, epsilon)
+            && self.size.abs_diff_eq(&other.size, epsilon)
     }
 
     #[must_use]
-    fn abs_diff_ne(&self, other: &(Point2<T>, Size2<T>), epsilon: Self::Epsilon) -> bool {
-        self.abs_diff_ne(&Self::from_tuple(*other), epsilon)
+    fn abs_diff_ne(&self, other: &Rect<T>, epsilon: Self::Epsilon) -> bool {
+        self.origin.abs_diff_ne(&other.origin, epsilon)
+            || self.size.abs_diff_ne(&other.size, epsilon)
     }
 }
 
-impl<T> approx::RelativeEq<(Point2<T>, Size2<T>)> for Rect<T>
-where
-    T: Unit<Scalar: approx::RelativeEq<Epsilon: Copy>>,
-{
+impl<T: FloatUnit> approx::RelativeEq for Rect<T> {
     #[must_use]
     fn default_max_relative() -> Self::Epsilon {
         T::Scalar::default_max_relative()
@@ -334,52 +351,44 @@ where
     #[must_use]
     fn relative_eq(
         &self,
-        other: &(Point2<T>, Size2<T>),
+        other: &Rect<T>,
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.relative_eq(&Self::from_tuple(*other), epsilon, max_relative)
+        self.origin
+            .relative_eq(&other.origin, epsilon, max_relative)
+            && self.size.relative_eq(&other.size, epsilon, max_relative)
     }
 
     #[must_use]
     fn relative_ne(
         &self,
-        other: &(Point2<T>, Size2<T>),
+        other: &Rect<T>,
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.relative_ne(&Self::from_tuple(*other), epsilon, max_relative)
+        self.origin
+            .relative_ne(&other.origin, epsilon, max_relative)
+            || self.size.relative_ne(&other.size, epsilon, max_relative)
     }
 }
 
-impl<T: Unit> approx::UlpsEq<(Point2<T>, Size2<T>)> for Rect<T>
-where
-    T::Scalar: approx::UlpsEq,
-    <T::Scalar as approx::AbsDiffEq>::Epsilon: Copy,
-{
+impl<T: FloatUnit> approx::UlpsEq for Rect<T> {
     #[must_use]
     fn default_max_ulps() -> u32 {
         T::Scalar::default_max_ulps()
     }
 
     #[must_use]
-    fn ulps_eq(
-        &self,
-        other: &(Point2<T>, Size2<T>),
-        epsilon: Self::Epsilon,
-        max_ulps: u32,
-    ) -> bool {
-        self.ulps_eq(&Self::from_tuple(*other), epsilon, max_ulps)
+    fn ulps_eq(&self, other: &Rect<T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.origin.ulps_eq(&other.origin, epsilon, max_ulps)
+            && self.size.ulps_eq(&other.size, epsilon, max_ulps)
     }
 
     #[must_use]
-    fn ulps_ne(
-        &self,
-        other: &(Point2<T>, Size2<T>),
-        epsilon: Self::Epsilon,
-        max_ulps: u32,
-    ) -> bool {
-        self.ulps_ne(&Self::from_tuple(*other), epsilon, max_ulps)
+    fn ulps_ne(&self, other: &Rect<T>, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.origin.ulps_ne(&other.origin, epsilon, max_ulps)
+            || self.size.ulps_ne(&other.size, epsilon, max_ulps)
     }
 }
 
@@ -472,6 +481,15 @@ where
     }
 }
 
+impl<T: Unit> core::fmt::Debug for Rect<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Rect")
+            .field("origin", &self.origin)
+            .field("size", &self.size)
+            .finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use approx::{
@@ -503,7 +521,7 @@ mod tests {
         assert_eq!(from_size.width(), 100);
         assert_eq!(from_size.height(), 200);
 
-        let (_origin, _size) = from_size.into();
+        let (_origin, _size) = from_size.to_tuple();
     }
 
     #[test]
@@ -518,18 +536,11 @@ mod tests {
         assert_abs_diff_ne!(a, b);
         assert_relative_ne!(a, b);
         assert_ulps_ne!(a, b);
-
-        assert_abs_diff_eq!(a, a.to_tuple());
-        assert_relative_eq!(a, a.to_tuple());
-        assert_ulps_eq!(a, a.to_tuple());
-        assert_abs_diff_ne!(a, b.to_tuple());
-        assert_relative_ne!(a, b.to_tuple());
-        assert_ulps_ne!(a, b.to_tuple());
     }
 
     #[test]
     fn from_box() {
-        let b = Box2::new((100, 200), (300, 400));
+        let b = Box2::new((100, 200).into(), (300, 400).into());
         let r = Rect::from_box(b);
         assert_eq!(r.origin, (100, 200));
         assert_eq!(r.size, (200, 200));
@@ -543,7 +554,7 @@ mod tests {
         let points: [Point; 1] = [(100, 100)].map(Point::from);
 
         let r = Rect::from_points(points);
-        assert_eq!(r, Rect::new((100, 100), (0, 0)));
+        assert_eq!(r, Rect::from_origin_and_size((100, 100), (0, 0)));
 
         let points: [Point; 10] = [
             (-10, 10),
@@ -566,7 +577,7 @@ mod tests {
 
     #[test]
     fn xy_range() {
-        let rect = Rect::new((10, 10), (10, 10));
+        let rect = Rect::from_origin_and_size((10, 10), (10, 10));
 
         let x_range = rect.x_range();
         assert!(x_range.eq([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]));
@@ -576,7 +587,7 @@ mod tests {
 
     #[test]
     fn corners() {
-        let r = Rect::new((10, 11), (12, 13));
+        let r = Rect::from_origin_and_size((10, 11), (12, 13));
         let [nw, ne, se, sw] = r.corners();
         assert_eq!(nw, (10, 11));
         assert_eq!(ne, (22, 11));
@@ -586,22 +597,22 @@ mod tests {
 
     #[test]
     fn center() {
-        let r = Rect::from(((10, 19).into(), (100, 200).into()));
+        let r = Rect::from_origin_and_size((10, 19), (100, 200));
         assert_eq!(r.center(), (60, 119));
 
-        let r = Rect::from(((-10, -10).into(), (20, 20).into()));
+        let r = Rect::from_origin_and_size((-10, -10), (20, 20));
         assert_eq!(r.center(), (0, 0));
 
-        let r = Rect::from(((0, 0).into(), (-1, -1).into()));
+        let r = Rect::from_origin_and_size((0, 0), (-1, -1));
         assert_eq!(r.center(), (0, 0));
 
-        let r = Rect::from(((0, 0).into(), (-2, -2).into()));
+        let r = Rect::from_origin_and_size((0, 0), (-2, -2));
         assert_eq!(r.center(), (-1, -1));
     }
 
     #[test]
     fn translate() {
-        let r = Rect::from(((10, 20).into(), (11, 12).into()));
+        let r = Rect::from_origin_and_size((10, 20), (11, 12));
         let r = r.translate(crate::Vector2::new(2, 3));
         assert_eq!(r.origin, (12, 23));
         assert_eq!(r.size, (11, 12));
@@ -627,7 +638,7 @@ mod tests {
         assert!(r.is_empty());
         assert!(!r.is_negative());
 
-        let r = RectF::new((1.0, 1.0), (-0.0, -0.0));
+        let r = RectF::from_origin_and_size((1.0, 1.0), (-0.0, -0.0));
         assert!(r.is_empty());
         assert!(!r.is_negative());
 
@@ -637,7 +648,7 @@ mod tests {
         assert!(r.is_empty());
         assert!(r.is_negative());
 
-        let r = RectF::new((f32::NAN, 1.0), (1.0, 1.0));
+        let r = RectF::from_origin_and_size((f32::NAN, 1.0), (1.0, 1.0));
         assert!(!r.is_empty());
         assert!(!r.is_negative());
     }
@@ -646,7 +657,7 @@ mod tests {
     fn contains() {
         use super::Contains;
 
-        let r: RectF = RectF::new((10.0, 10.0), (10.0, 10.0));
+        let r: RectF = RectF::from_origin_and_size((10.0, 10.0), (10.0, 10.0));
         assert!(r.contains(&PointF::new(10.0, 10.0)));
         assert!(r.contains(&PointF::new(20.0, 20.0)));
         assert!(!r.contains(&PointF::new(10.0, 9.999_999)));
@@ -657,7 +668,7 @@ mod tests {
     fn intersection() {
         use super::Intersection;
 
-        let r = RectF::new((10.0, 10.0), (10.0, 10.0));
+        let r = RectF::from_origin_and_size((10.0, 10.0), (10.0, 10.0));
         assert!(r.intersects(&PointF::new(10.0, 10.0)));
         assert!(!r.intersects(&PointF::new(20.0, 20.0)));
         assert!(!r.intersects(&PointF::new(10.0, 9.999_999)));
@@ -672,7 +683,7 @@ mod tests {
         assert_eq!(r.intersection(&PointF::new(9.999_999, 10.0)), None);
 
         // r2 covers all of r.
-        let r2 = RectF::new((5.0, 5.0), (15.0, 15.0));
+        let r2 = RectF::from_origin_and_size((5.0, 5.0), (15.0, 15.0));
         assert!(r2.intersects(&r));
         assert_eq!(
             r2.intersection(&r),
@@ -683,7 +694,7 @@ mod tests {
         );
 
         // r2 covers the lower bound of r.
-        let r2 = RectF::new((5.0, 5.0), (10.0, 10.0));
+        let r2 = RectF::from_origin_and_size((5.0, 5.0), (10.0, 10.0));
         assert!(r2.intersects(&r));
         assert_eq!(
             r2.intersection(&r),
@@ -698,7 +709,7 @@ mod tests {
     fn union() {
         use super::Union;
 
-        let r = RectF::new((10.0, 10.0), (10.0, 10.0));
+        let r = RectF::from_origin_and_size((10.0, 10.0), (10.0, 10.0));
 
         assert_eq!(r.union(RectF::ZERO), r);
         assert_eq!(RectF::ZERO.union(r), r);
@@ -728,8 +739,8 @@ mod tests {
 
     #[test]
     fn lerp() {
-        let src = RectF::new((0.0, 0.0), (1.0, 1.0));
-        let dst = RectF::new((1.0, 1.0), (2.0, 2.0));
+        let src = RectF::from_origin_and_size((0.0, 0.0), (1.0, 1.0));
+        let dst = RectF::from_origin_and_size((1.0, 1.0), (2.0, 2.0));
         assert_eq!(
             src.lerp(dst, 0.5),
             RectF {
@@ -741,7 +752,7 @@ mod tests {
 
     #[test]
     fn area() {
-        let r = RectF::new((-1.0, -1.0), (10.0, 10.0));
+        let r = RectF::from_origin_and_size((-1.0, -1.0), (10.0, 10.0));
         assert_eq!(r.area(), 100.0);
         assert_eq!(r.size.area(), r.area());
     }
@@ -751,10 +762,10 @@ mod tests {
         assert!(RectF::ZERO.is_finite());
         assert!(RectF::new(super::Point2::ZERO, super::Size2::ONE).is_finite());
 
-        let r = RectF::new((-1.0, -1.0), (10.0, f32::NAN));
+        let r = RectF::from_origin_and_size((-1.0, -1.0), (10.0, f32::NAN));
         assert!(!r.is_finite());
 
-        let r = RectF::new((-1.0, f32::NAN), (10.0, 10.0));
+        let r = RectF::from_origin_and_size((-1.0, f32::NAN), (10.0, 10.0));
         assert!(!r.is_finite());
     }
 
@@ -778,15 +789,15 @@ mod tests {
 
     #[test]
     fn round_out() {
-        let rect = RectF::new((0.8, 0.8), (0.1, 0.1)).round_out();
+        let rect = RectF::from_origin_and_size((0.8, 0.8), (0.1, 0.1)).round_out();
         assert_eq!(rect.origin, (0.0, 0.0));
         assert_eq!(rect.size, (1.0, 1.0));
 
-        let rect = RectF::new((0.8, 0.8), (0.3, 0.3)).round_out();
+        let rect = RectF::from_origin_and_size((0.8, 0.8), (0.3, 0.3)).round_out();
         assert_eq!(rect.origin, (0.0, 0.0));
         assert_eq!(rect.size, (2.0, 2.0));
 
-        let rect = RectF::new((0.1, 0.1), (0.3, 0.3)).round_out();
+        let rect = RectF::from_origin_and_size((0.1, 0.1), (0.3, 0.3)).round_out();
         assert_eq!(rect.origin, (0.0, 0.0));
         assert_eq!(rect.size, (1.0, 1.0));
     }

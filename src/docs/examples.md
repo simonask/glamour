@@ -45,8 +45,8 @@ let view_to_world = ViewToWorld::from_scale(Vector3::splat(2.0));
 let world_point = view_to_world.map(point);
 let world_vector = view_to_world.map(vector);
 
-assert_eq!(world_point, (200.0, 400.0, 600.0));
-assert_eq!(world_vector, (100.0, 0.0, 0.0));
+assert_eq!(world_point, point!(200.0, 400.0, 600.0));
+assert_eq!(world_vector, vector!(100.0, 0.0, 0.0));
 ```
 
 ## Boolean masks
@@ -62,5 +62,5 @@ let b = Vector { x: 2.0, y: 1.0, z: 1.0, w: 1.6};
 /// Get the component-wise maximums.
 let mask = a.cmpge(b);
 let c = Vector::select(mask, a, b);
-assert_eq!(c, (2.0, 2.0, 100.0, 1.6));
+assert_eq!(c, vec4!(2.0, 2.0, 100.0, 1.6));
 ```

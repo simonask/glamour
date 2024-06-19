@@ -42,12 +42,25 @@ pub trait Unit: 'static {
     }
 }
 
+/// Convenience trait implemented for all [`Unit`]s with an integer scalar type.
+///
+/// Due to implied associated type bounds, this can be used in trait bounds to enable all integer operations in generic
+/// code.
 pub trait IntUnit: Unit<Scalar: IntScalar> {}
-pub trait SignedUnit: Unit<Scalar: SignedScalar> {}
-pub trait FloatUnit: Unit<Scalar: FloatScalar> {}
-
 impl<T> IntUnit for T where T: Unit<Scalar: IntScalar> {}
+
+/// Convenience trait implemented for all [`Unit`]s with a signed scalar type.
+///
+/// Due to implied associated type bounds, this can be used in trait bounds to enable all signed operations in generic
+/// code.
+pub trait SignedUnit: Unit<Scalar: SignedScalar> {}
 impl<T> SignedUnit for T where T: Unit<Scalar: SignedScalar> {}
+
+/// Convenience trait implemented for all [`Unit`]s with a floating-point scalar type.
+///
+/// Due to implied associated type bounds, this can be used in trait bounds to enable all floating-point operations in
+/// generic code.
+pub trait FloatUnit: Unit<Scalar: FloatScalar> {}
 impl<T> FloatUnit for T where T: Unit<Scalar: FloatScalar> {}
 
 impl Unit for f32 {

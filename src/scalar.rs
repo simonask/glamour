@@ -97,11 +97,11 @@ pub unsafe trait FloatScalar:
     const NEG_INFINITY: Self;
 
     /// The underlying 2x2 matrix type for this scalar ([`glam::Mat2`] or [`glam::DMat2`]).
-    type Mat2: bindings::Matrix2<Self>;
+    type Mat2: bindings::Matrix2<Scalar = Self>;
     /// The underlying 3x3 matrix type for this scalar ([`glam::Mat3`] or [`glam::DMat3`]).
-    type Mat3: bindings::Matrix3<Self>;
+    type Mat3: bindings::Matrix3<Scalar = Self>;
     /// The underlying 4x4 matrix type for this scalar ([`glam::Mat4`] or [`glam::DMat4`]).
-    type Mat4: bindings::Matrix4<Self>;
+    type Mat4: bindings::Matrix4<Scalar = Self>;
     /// The underlying quaternion type for this scalar ([`glam::Quat`] or [`glam::DQuat`]).
     type Quat: bindings::Quat<Self>;
 }
@@ -158,6 +158,8 @@ unsafe impl Scalar for i16 {
     type Vec4 = glam::I16Vec4;
 }
 
+impl IntScalar for i16 {}
+
 impl SignedScalar for i16 {
     const NEG_ONE: Self = -1;
 }
@@ -167,6 +169,8 @@ unsafe impl Scalar for i32 {
     type Vec3 = glam::IVec3;
     type Vec4 = glam::IVec4;
 }
+
+impl IntScalar for i32 {}
 
 impl SignedScalar for i32 {
     const NEG_ONE: Self = -1;
@@ -178,6 +182,8 @@ unsafe impl Scalar for i64 {
     type Vec4 = glam::I64Vec4;
 }
 
+impl IntScalar for i64 {}
+
 impl SignedScalar for i64 {
     const NEG_ONE: Self = -1;
 }
@@ -188,17 +194,23 @@ unsafe impl Scalar for u16 {
     type Vec4 = glam::U16Vec4;
 }
 
+impl IntScalar for u16 {}
+
 unsafe impl Scalar for u32 {
     type Vec2 = glam::UVec2;
     type Vec3 = glam::UVec3;
     type Vec4 = glam::UVec4;
 }
 
+impl IntScalar for u32 {}
+
 unsafe impl Scalar for u64 {
     type Vec2 = glam::U64Vec2;
     type Vec3 = glam::U64Vec3;
     type Vec4 = glam::U64Vec4;
 }
+
+impl IntScalar for u64 {}
 
 #[cfg(test)]
 mod tests {

@@ -42,11 +42,18 @@ pub use rect::Rect;
 pub use scalar::{FloatScalar, Scalar, SignedScalar};
 pub use size::{Size2, Size3};
 pub use transform::{Transform2, Transform3, TransformMap};
-pub use unit::Unit;
+pub use unit::{FloatUnit, IntUnit, SignedUnit, Unit};
 pub use vector::{Swizzle, Vector2, Vector3, Vector4};
 
 mod macros;
-use macros::*;
+
+mod forward;
+use forward::*;
+
+mod impl_matrixlike;
+mod impl_traits;
+mod impl_vectorlike;
+mod interfaces;
 
 #[doc(no_inline)]
 pub use traits::{
@@ -352,7 +359,7 @@ mod tests {
         let v1 = <Vector2>::new(123.0, 456.0);
         let v2 = Vector2 { x: 2.0, y: 3.0 };
         let v3 = v1 + v2;
-        assert_eq!(v3, (125.0, 459.0));
+        assert_eq!(v3, vec2!(125.0, 459.0));
     }
 
     #[test]

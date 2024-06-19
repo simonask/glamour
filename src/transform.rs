@@ -741,7 +741,7 @@ where
     #[inline]
     #[must_use]
     pub fn map_vector(&self, vector: Vector3<Src>) -> Vector3<Dst> {
-        cast(self.matrix.transform_vector(vector.to_untyped()))
+        cast(self.matrix.transform_vector3(vector.to_untyped()))
     }
 
     /// Map point from `Src` to `Dst`, including perspective correction.
@@ -751,7 +751,7 @@ where
     #[inline]
     #[must_use]
     pub fn map_point(&self, point: Point3<Src>) -> Point3<Dst> {
-        cast(self.matrix.project_point(point))
+        cast(self.matrix.project_point3(point.to_untyped()))
     }
 
     /// Invert the matrix.

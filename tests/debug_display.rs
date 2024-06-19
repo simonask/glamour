@@ -40,41 +40,41 @@ fn vector_debug() {
 
     assert_eq!(
         alloc::format!("{:?}", untyped_f32),
-        "Vector2<f32> { x: 123.0, y: 456.0 }"
+        "Vector2 { x: 123.0, y: 456.0 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_f64),
-        "Vector2<f64> { x: 123.0, y: 456.0 }"
+        "Vector2 { x: 123.0, y: 456.0 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_u16),
-        "Vector2<u16> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_i16),
-        "Vector2<i16> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_u32),
-        "Vector2<u32> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_i32),
-        "Vector2<i32> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_u64),
-        "Vector2<u64> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
     assert_eq!(
         alloc::format!("{:?}", untyped_i64),
-        "Vector2<i64> { x: 123, y: 456 }"
+        "Vector2 { x: 123, y: 456 }"
     );
 
     assert_eq!(
         alloc::format!("{:#?}", untyped_i32),
         r#"
-Vector2<i32> {
+Vector2 {
     x: 123,
     y: 456,
 }"#
@@ -110,14 +110,11 @@ Vector2 {
     }
 
     let custom: Vector2<CustomName> = Vector2 { x: 123, y: 456 };
-    assert_eq!(
-        alloc::format!("{:?}", custom),
-        "Vector2<Custom> { x: 123, y: 456 }"
-    );
+    assert_eq!(alloc::format!("{:?}", custom), "Vector2 { x: 123, y: 456 }");
     assert_eq!(
         alloc::format!("{:#?}", custom),
         r#"
-Vector2<Custom> {
+Vector2 {
     x: 123,
     y: 456,
 }"#

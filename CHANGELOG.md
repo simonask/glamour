@@ -13,15 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `as_()` method for vectorlike types, implementing casting between units using
   the `as` operator (through `num_traits::AsPrimitive`).
 - Added `rotate_towards()` for 2D float vector types.
+- Added `Rect::from_origin_and_size()` which takes its arguments as `impl Into`.
 
 ### Breaking changes
 - Bumped MSRV to Rust 1.79.
 - Bumped `glam` to 0.28.0.
+- Many matrix methods were out of sync with the `glam` API. These interfaces now match exactly.
+- `Box2::new()`, `Box3::new()`, and `Rect::new()` no longer take their arguments as `impl Into`.
+- Vectorlike types can no longer be compared against raw tuples.
 - Removed the `ToRaw` and `AsRaw` traits. Use a custom `Transparent` instead, similar to
   `bytemuck::TransparentWrapper`.
 - Removed `ZERO` and `ONE` associated consts, in favor of `num_traits::{ConstZero, ConstOne}`.
 - Added `<T: Scalar>` bound to `Angle<T>`.
 - `angle_between()` was renamed to `angle_to()` in glam 0.28.0.
+
+### Internal changes
+- Major cleanup of codegen macros, which enables exact and robust mapping to `glam` APIs.
 
 ## [0.11.1] - 2024-03-26
 ### Fixed

@@ -15,9 +15,9 @@ use bytemuck::{Pod, Zeroable};
 use num_traits::identities::{ConstOne, ConstZero};
 
 use crate::scalar::{FloatScalar, SignedScalar};
-use crate::unit::{FloatUnit, IntUnit, SignedUnit};
+use crate::unit::{FloatUnit, SignedUnit};
 use crate::{bindings::prelude::*, Point2, Point3, Point4, Scalar, Size2, Size3, Unit};
-use crate::{peel, peel_ref, wrap, Angle, Transparent};
+use crate::{peel, peel_ref, wrap, Transparent};
 
 /// Vector swizzling by const generics.
 ///
@@ -123,20 +123,20 @@ unsafe impl<T: Unit> Transparent for Vector4<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec4;
 }
 
-macro_rules! vector_interface {
+macro_rules! vector_conversion_to_other_units {
     ($point_ty:ident $(, $size_ty:ident)?) => {
         #[doc = "Instantiate from point."]
         #[inline]
         #[must_use]
         pub fn from_point(point: $point_ty<T>) -> Self {
-            bytemuck::cast(point)
+            crate::rewrap(point)
         }
 
         #[doc = "Convert to point."]
         #[inline]
         #[must_use]
         pub fn to_point(self) -> $point_ty<T> {
-            bytemuck::cast(self)
+            crate::rewrap(self)
         }
 
         #[doc = "Reinterpret as point."]
@@ -158,14 +158,14 @@ macro_rules! vector_interface {
             #[inline]
             #[must_use]
             pub fn from_size(size: $size_ty<T>) -> Self {
-                bytemuck::cast(size)
+                crate::rewrap(size)
             }
 
             #[doc = "Convert to size."]
             #[inline]
             #[must_use]
             pub fn to_size(self) -> $size_ty<T> {
-                bytemuck::cast(self)
+                crate::rewrap(self)
             }
 
             #[doc = "Reinterpret as size."]
@@ -185,181 +185,67 @@ macro_rules! vector_interface {
     };
 }
 
-macro_rules! implement_swizzle {
-    ($base_type_name:ident) => {
-        impl<T: Unit> Swizzle<T> for $base_type_name<T> {
-            #[inline]
-            fn swizzle2<const X: usize, const Y: usize>(&self) -> Vector2<T> {
-                [self.const_get::<X>(), self.const_get::<Y>()].into()
-            }
+crate::macros::forward_op_to_raw!(Vector2, Add<Self>::add -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Add<Self>::add -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Add<Self>::add -> Self);
+crate::macros::forward_op_to_raw!(Vector2, Sub<Self>::sub -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Sub<Self>::sub -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Sub<Self>::sub -> Self);
+crate::macros::forward_op_to_raw!(Vector2, Mul<Self>::mul -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Mul<Self>::mul -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Mul<Self>::mul -> Self);
+crate::macros::forward_op_to_raw!(Vector2, Div<Self>::div -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Div<Self>::div -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Div<Self>::div -> Self);
+crate::macros::forward_op_to_raw!(Vector2, Rem<Self>::rem -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Rem<Self>::rem -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Rem<Self>::rem -> Self);
 
-            #[inline]
-            fn swizzle3<const X: usize, const Y: usize, const Z: usize>(&self) -> Vector3<T> {
-                [
-                    self.const_get::<X>(),
-                    self.const_get::<Y>(),
-                    self.const_get::<Z>(),
-                ]
-                .into()
-            }
+crate::macros::forward_neg_to_raw!(Vector2);
+crate::macros::forward_neg_to_raw!(Vector3);
+crate::macros::forward_neg_to_raw!(Vector4);
 
-            #[inline]
-            fn swizzle4<const X: usize, const Y: usize, const Z: usize, const W: usize>(
-                &self,
-            ) -> Vector4<T> {
-                [
-                    self.const_get::<X>(),
-                    self.const_get::<Y>(),
-                    self.const_get::<Z>(),
-                    self.const_get::<W>(),
-                ]
-                .into()
-            }
-        }
-    };
-}
+crate::macros::forward_op_to_raw!(Vector2, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Mul<[f32, f64, i32, u32]>::mul -> Self);
+crate::macros::forward_op_to_raw!(Vector2, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Div<[f32, f64, i32, u32]>::div -> Self);
+crate::macros::forward_op_to_raw!(Vector2, Rem<[f32, f64, i32, u32]>::rem -> Self);
+crate::macros::forward_op_to_raw!(Vector3, Rem<[f32, f64, i32, u32]>::rem -> Self);
+crate::macros::forward_op_to_raw!(Vector4, Rem<[f32, f64, i32, u32]>::rem -> Self);
 
-crate::forward_op_to_raw!(Vector2, Add<Self>::add -> Self);
-crate::forward_op_to_raw!(Vector3, Add<Self>::add -> Self);
-crate::forward_op_to_raw!(Vector4, Add<Self>::add -> Self);
-crate::forward_op_to_raw!(Vector2, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Vector3, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Vector4, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Vector2, Mul<Self>::mul -> Self);
-crate::forward_op_to_raw!(Vector3, Mul<Self>::mul -> Self);
-crate::forward_op_to_raw!(Vector4, Mul<Self>::mul -> Self);
-crate::forward_op_to_raw!(Vector2, Div<Self>::div -> Self);
-crate::forward_op_to_raw!(Vector3, Div<Self>::div -> Self);
-crate::forward_op_to_raw!(Vector4, Div<Self>::div -> Self);
-crate::forward_op_to_raw!(Vector2, Rem<Self>::rem -> Self);
-crate::forward_op_to_raw!(Vector3, Rem<Self>::rem -> Self);
-crate::forward_op_to_raw!(Vector4, Rem<Self>::rem -> Self);
+crate::macros::forward_op_assign_to_raw!(Vector2, AddAssign<Self>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, AddAssign<Self>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, AddAssign<Self>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, SubAssign<Self>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, SubAssign<Self>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, SubAssign<Self>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, MulAssign<Self>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, MulAssign<Self>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, MulAssign<Self>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, DivAssign<Self>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, DivAssign<Self>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, DivAssign<Self>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, RemAssign<Self>::rem_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, RemAssign<Self>::rem_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, RemAssign<Self>::rem_assign);
 
-crate::forward_neg_to_raw!(Vector2);
-crate::forward_neg_to_raw!(Vector3);
-crate::forward_neg_to_raw!(Vector4);
-
-crate::forward_op_to_raw!(Vector2, Mul<[f32, f64, i32, u32]>::mul -> Self);
-crate::forward_op_to_raw!(Vector3, Mul<[f32, f64, i32, u32]>::mul -> Self);
-crate::forward_op_to_raw!(Vector4, Mul<[f32, f64, i32, u32]>::mul -> Self);
-crate::forward_op_to_raw!(Vector2, Div<[f32, f64, i32, u32]>::div -> Self);
-crate::forward_op_to_raw!(Vector3, Div<[f32, f64, i32, u32]>::div -> Self);
-crate::forward_op_to_raw!(Vector4, Div<[f32, f64, i32, u32]>::div -> Self);
-crate::forward_op_to_raw!(Vector2, Rem<[f32, f64, i32, u32]>::rem -> Self);
-crate::forward_op_to_raw!(Vector3, Rem<[f32, f64, i32, u32]>::rem -> Self);
-crate::forward_op_to_raw!(Vector4, Rem<[f32, f64, i32, u32]>::rem -> Self);
-
-crate::forward_op_assign_to_raw!(Vector2, AddAssign<Self>::add_assign);
-crate::forward_op_assign_to_raw!(Vector3, AddAssign<Self>::add_assign);
-crate::forward_op_assign_to_raw!(Vector4, AddAssign<Self>::add_assign);
-crate::forward_op_assign_to_raw!(Vector2, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Vector3, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Vector4, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Vector2, MulAssign<Self>::mul_assign);
-crate::forward_op_assign_to_raw!(Vector3, MulAssign<Self>::mul_assign);
-crate::forward_op_assign_to_raw!(Vector4, MulAssign<Self>::mul_assign);
-crate::forward_op_assign_to_raw!(Vector2, DivAssign<Self>::div_assign);
-crate::forward_op_assign_to_raw!(Vector3, DivAssign<Self>::div_assign);
-crate::forward_op_assign_to_raw!(Vector4, DivAssign<Self>::div_assign);
-crate::forward_op_assign_to_raw!(Vector2, RemAssign<Self>::rem_assign);
-crate::forward_op_assign_to_raw!(Vector3, RemAssign<Self>::rem_assign);
-crate::forward_op_assign_to_raw!(Vector4, RemAssign<Self>::rem_assign);
-
-crate::forward_op_assign_to_raw!(Vector2, AddAssign<[f32, f64, i32, u32]>::add_assign);
-crate::forward_op_assign_to_raw!(Vector3, AddAssign<[f32, f64, i32, u32]>::add_assign);
-crate::forward_op_assign_to_raw!(Vector4, AddAssign<[f32, f64, i32, u32]>::add_assign);
-crate::forward_op_assign_to_raw!(Vector2, SubAssign<[f32, f64, i32, u32]>::sub_assign);
-crate::forward_op_assign_to_raw!(Vector3, SubAssign<[f32, f64, i32, u32]>::sub_assign);
-crate::forward_op_assign_to_raw!(Vector4, SubAssign<[f32, f64, i32, u32]>::sub_assign);
-crate::forward_op_assign_to_raw!(Vector2, MulAssign<[f32, f64, i32, u32]>::mul_assign);
-crate::forward_op_assign_to_raw!(Vector3, MulAssign<[f32, f64, i32, u32]>::mul_assign);
-crate::forward_op_assign_to_raw!(Vector4, MulAssign<[f32, f64, i32, u32]>::mul_assign);
-crate::forward_op_assign_to_raw!(Vector2, DivAssign<[f32, f64, i32, u32]>::div_assign);
-crate::forward_op_assign_to_raw!(Vector3, DivAssign<[f32, f64, i32, u32]>::div_assign);
-crate::forward_op_assign_to_raw!(Vector4, DivAssign<[f32, f64, i32, u32]>::div_assign);
-crate::forward_op_assign_to_raw!(Vector2, RemAssign<[f32, f64, i32, u32]>::rem_assign);
-crate::forward_op_assign_to_raw!(Vector3, RemAssign<[f32, f64, i32, u32]>::rem_assign);
-crate::forward_op_assign_to_raw!(Vector4, RemAssign<[f32, f64, i32, u32]>::rem_assign);
-
-crate::derive_standard_traits!(Vector2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::derive_standard_traits!(Vector3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::derive_standard_traits!(Vector4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
-
-crate::derive_array_conversion_traits!(Vector2, 2);
-crate::derive_array_conversion_traits!(Vector3, 3);
-crate::derive_array_conversion_traits!(Vector4, 4);
-
-crate::derive_tuple_conversion_traits!(Vector2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::derive_tuple_conversion_traits!(Vector3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::derive_tuple_conversion_traits!(Vector4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
-
-crate::derive_glam_conversion_traits!(Vector2 {
-    x: T::Scalar,
-    y: T::Scalar
-});
-crate::derive_glam_conversion_traits!(Vector3 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar
-});
-crate::derive_glam_conversion_traits!(Vector4 {
-    x: T::Scalar,
-    y: T::Scalar,
-    z: T::Scalar,
-    w: T::Scalar
-});
-
-implement_swizzle!(Vector2);
-implement_swizzle!(Vector3);
-implement_swizzle!(Vector4);
-
-macro_rules! int_vector_interface {
-    ($see_also_doc_ty:ty) => {
-        crate::forward_to_raw!(
-            $see_also_doc_ty =>
-            #[doc = "Returns a vector containing the saturating addition of self and rhs."]
-            pub fn saturating_add(self, rhs: Self) -> Self;
-            #[doc = "Returns a vector containing the saturating subtraction of self and rhs."]
-            pub fn saturating_sub(self, rhs: Self) -> Self;
-            #[doc = "Returns a vector containing the saturating multiplication of self and rhs."]
-            pub fn saturating_mul(self, rhs: Self) -> Self;
-            #[doc = "Returns a vector containing the saturating division of self and rhs."]
-            pub fn saturating_div(self, rhs: Self) -> Self;
-            #[doc = "Returns a vector containing the wrapping addition of self and rhs."]
-            pub fn wrapping_add(self, rhs: Self) -> Self;
-            #[doc = "Returns a vector containing the wrapping subtraction of self and rhs."]
-            pub fn wrapping_sub(self, rhs: Self) -> Self;
-            #[doc = "Returns a vector containing the wrapping multiplication of self and rhs."]
-            pub fn wrapping_mul(self, rhs: Self) -> Self;
-            #[doc = "Returns a vector containing the wrapping division of self and rhs."]
-            pub fn wrapping_div(self, rhs: Self) -> Self;
-        );
-    };
-}
+crate::macros::forward_op_assign_to_raw!(Vector2, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, AddAssign<[f32, f64, i32, u32]>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, SubAssign<[f32, f64, i32, u32]>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, MulAssign<[f32, f64, i32, u32]>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, DivAssign<[f32, f64, i32, u32]>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Vector2, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+crate::macros::forward_op_assign_to_raw!(Vector3, RemAssign<[f32, f64, i32, u32]>::rem_assign);
+crate::macros::forward_op_assign_to_raw!(Vector4, RemAssign<[f32, f64, i32, u32]>::rem_assign);
 
 impl<T: Unit> Vector2<T> {
     /// All zeroes.
@@ -394,60 +280,10 @@ impl<T: Unit> Vector2<T> {
         Self { x, y }
     }
 
-    crate::forward_constructors!(2, Vec2);
-    crate::forward_comparison!(glam::BVec2, Vec2);
-
-    crate::casting_interface!(Vector2 {
-        x: T::Scalar,
-        y: T::Scalar
-    });
-    crate::tuple_interface!(Vector2 {
-        x: T::Scalar,
-        y: T::Scalar
-    });
-    crate::array_interface!(2);
-
-    #[doc = "Dot product"]
-    #[must_use]
-    pub fn dot(self, other: Self) -> T::Scalar {
-        peel(self).dot(peel(other))
-    }
-    #[doc = "Extend with z-component to [`Vector3`]."]
-    #[must_use]
-    pub fn extend(self, z: T::Scalar) -> Vector3<T> {
-        wrap(peel(self).extend(z))
-    }
-    #[doc = "Replace the x-component with a new value."]
-    #[must_use]
-    pub fn with_x(self, x: T::Scalar) -> Self {
-        Self { x, y: self.y }
-    }
-    #[doc = "Replace the y-component with a new value."]
-    #[must_use]
-    pub fn with_y(self, y: T::Scalar) -> Self {
-        Self { x: self.x, y }
-    }
-    #[doc = "Returns the sum of all elements of self."]
-    #[must_use]
-    pub fn element_sum(self) -> T::Scalar {
-        self.x + self.y
-    }
-    #[doc = "Returns the product of all elements of self."]
-    #[must_use]
-    pub fn element_product(self) -> T::Scalar {
-        self.x * self.y
-    }
-
-    /// Select components of this vector and return a new vector containing
-    /// those components.
-    #[inline]
-    #[must_use]
-    pub fn swizzle<const X: usize, const Y: usize>(&self) -> Self {
-        self.swizzle2::<X, Y>()
-    }
-
-    vector_interface!(Point2, Size2);
+    vector_conversion_to_other_units!(Point2, Size2);
 }
+
+crate::impl_vectorlike::vectorlike!(Vector2, 2);
 
 impl<T: FloatUnit> Vector2<T> {
     /// All NaN.
@@ -465,39 +301,6 @@ impl<T: FloatUnit> Vector2<T> {
         x: T::Scalar::NEG_INFINITY,
         y: T::Scalar::NEG_INFINITY,
     };
-
-    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
-    crate::forward_float_vector_ops!(glam::Vec2);
-
-    #[doc = "Return `(sin(angle), cos(angle)`."]
-    #[must_use]
-    pub fn from_angle(angle: Angle<T::Scalar>) -> Vector2<T::Scalar> {
-        wrap(<<T::Scalar as Scalar>::Vec2>::from_angle(peel(angle)))
-    }
-    #[doc = "Rotate by a vector containing `(sin(angle), cos(angle))`"]
-    #[must_use]
-    pub fn rotate(self, rotation: Vector2<T::Scalar>) -> Self {
-        wrap(peel(self).rotate(peel(rotation)))
-    }
-    #[doc = "Returns the angle (in radians) of this vector in the range [-π, +π]."]
-    #[must_use]
-    pub fn to_angle(self) -> Angle<T::Scalar> {
-        wrap(peel(self).to_angle())
-    }
-    #[doc = "Angle between this and another vector."]
-    #[must_use]
-    pub fn angle_to(self, other: Self) -> Angle<T::Scalar> {
-        wrap(peel(self).angle_to(peel(other)))
-    }
-    #[doc = "Rotate towards `rhs` up to `max_angle`."]
-    #[must_use]
-    pub fn rotate_towards(&self, rhs: Self, max_angle: Angle<T::Scalar>) -> Self {
-        wrap(peel_ref(self).rotate_towards(peel(rhs), peel(max_angle)))
-    }
-}
-
-impl<T: IntUnit> Vector2<T> {
-    int_vector_interface!(glam::IVec2);
 }
 
 impl<T: SignedUnit> Vector2<T> {
@@ -517,24 +320,6 @@ impl<T: SignedUnit> Vector2<T> {
         x: T::Scalar::ZERO,
         y: T::Scalar::NEG_ONE,
     };
-
-    crate::forward_to_raw!(
-        glam::Vec2 =>
-        #[doc = "Turn all components positive."]
-        pub fn abs(self) -> Self;
-        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
-        pub fn signum(self) -> Self;
-        #[doc = "Get the perpendicular vector."]
-        pub fn perp(self) -> Self;
-    );
-
-    #[doc(alias = "wedge")]
-    #[doc(alias = "cross")]
-    #[doc(alias = "determinant")]
-    #[doc = "Perpendicular dot product"]
-    pub fn perp_dot(self, other: Self) -> T::Scalar {
-        peel(self).perp_dot(peel(other))
-    }
 }
 
 impl<T: Unit> Vector3<T> {
@@ -579,83 +364,9 @@ impl<T: Unit> Vector3<T> {
         Self { x, y, z }
     }
 
-    crate::forward_constructors!(3, Vec3);
-    crate::forward_comparison!(glam::BVec3, Vec3);
-
-    crate::casting_interface!(Vector3 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar
-    });
-    crate::tuple_interface!(Vector3 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar
-    });
-    crate::array_interface!(3);
-
-    crate::forward_to_raw!(
-        glam::Vec3 =>
-        #[doc = "Truncate to [`Vector2`]."]
-        pub fn truncate(self) -> Vector2<T>;
-    );
-
-    #[doc = "Dot product"]
-    #[must_use]
-    pub fn dot(self, other: Self) -> T::Scalar {
-        peel(self).dot(peel(other))
-    }
-    #[doc = "Extend with w-component to [`Vector4`]."]
-    #[must_use]
-    pub fn extend(self, w: T::Scalar) -> Vector4<T> {
-        wrap(peel(self).extend(w))
-    }
-    #[doc = "Replace the x-component with a new value."]
-    #[must_use]
-    pub fn with_x(self, x: T::Scalar) -> Self {
-        Self {
-            x,
-            y: self.y,
-            z: self.z,
-        }
-    }
-    #[doc = "Replace the y-component with a new value."]
-    #[must_use]
-    pub fn with_y(self, y: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y,
-            z: self.z,
-        }
-    }
-    #[doc = "Replace the z-component with a new value."]
-    #[must_use]
-    pub fn with_z(self, z: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z,
-        }
-    }
-    #[doc = "Returns the sum of all elements of self."]
-    pub fn element_sum(self) -> T::Scalar {
-        self.x + self.y + self.z
-    }
-    #[doc = "Returns the product of all elements of self."]
-    pub fn element_product(self) -> T::Scalar {
-        self.x * self.y * self.z
-    }
-
-    /// Select components of this vector and return a new vector containing
-    /// those components.
-    #[inline]
-    #[must_use]
-    pub fn swizzle<const X: usize, const Y: usize, const Z: usize>(&self) -> Self {
-        self.swizzle3::<X, Y, Z>()
-    }
-
-    vector_interface!(Point3, Size3);
+    vector_conversion_to_other_units!(Point3, Size3);
 }
+crate::impl_vectorlike::vectorlike!(Vector3, 3);
 
 impl<T: FloatUnit> Vector3<T> {
     /// All NaN.
@@ -676,29 +387,6 @@ impl<T: FloatUnit> Vector3<T> {
         y: T::Scalar::NEG_INFINITY,
         z: T::Scalar::NEG_INFINITY,
     };
-
-    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
-    crate::forward_float_vector_ops!(glam::Vec3);
-
-    crate::forward_to_raw!(
-        glam::Vec3 =>
-        #[doc = "See (e.g.) [`glam::Vec3::any_orthogonal_vector()`]."]
-        pub fn any_orthogonal_vector(&self) -> Self;
-        #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_vector()`]."]
-        pub fn any_orthonormal_vector(&self) -> Self;
-        #[doc = "Cross product"]
-        pub fn cross(self, other: Self) -> Self;
-    );
-
-    #[doc = "See (e.g.) [`glam::Vec3::any_orthonormal_pair()`]."]
-    pub fn any_orthonormal_pair(&self) -> (Self, Self) {
-        let (a, b) = peel_ref(self).any_orthonormal_pair();
-        (wrap(a), wrap(b))
-    }
-}
-
-impl<T: IntUnit> Vector3<T> {
-    int_vector_interface!(glam::IVec3);
 }
 
 impl<T: SignedUnit> Vector3<T> {
@@ -727,14 +415,6 @@ impl<T: SignedUnit> Vector3<T> {
         y: T::Scalar::ZERO,
         z: T::Scalar::NEG_ONE,
     };
-
-    crate::forward_to_raw!(
-        glam::Vec3 =>
-        #[doc = "Turn all components positive."]
-        pub fn abs(self) -> Self;
-        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
-        pub fn signum(self) -> Self;
-    );
 }
 
 impl<T: Unit<Scalar = f32>> Vector3<T> {
@@ -813,96 +493,10 @@ impl<T: Unit> Vector4<T> {
         Self { x, y, z, w }
     }
 
-    crate::forward_constructors!(4, Vec4);
-    crate::forward_comparison!(glam::BVec4, Vec4);
-
-    crate::casting_interface!(Vector4 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar,
-        w: T::Scalar
-    });
-    crate::tuple_interface!(Vector4 {
-        x: T::Scalar,
-        y: T::Scalar,
-        z: T::Scalar,
-        w: T::Scalar
-    });
-    crate::array_interface!(4);
-
-    crate::forward_to_raw!(
-        glam::Vec4 =>
-        #[doc = "Truncate to [`Vector3`]."]
-        pub fn truncate(self) -> Vector3<T>;
-    );
-
-    #[doc = "Dot product"]
-    #[must_use]
-    pub fn dot(self, other: Self) -> T::Scalar {
-        peel(self).dot(peel(other))
-    }
-
-    #[doc = "Replace the x-component with a new value."]
-    #[must_use]
-    pub fn with_x(self, x: T::Scalar) -> Self {
-        Self {
-            x,
-            y: self.y,
-            z: self.z,
-            w: self.w,
-        }
-    }
-    #[doc = "Replace the y-component with a new value."]
-    #[must_use]
-    pub fn with_y(self, y: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y,
-            z: self.z,
-            w: self.w,
-        }
-    }
-    #[doc = "Replace the z-component with a new value."]
-    #[must_use]
-    pub fn with_z(self, z: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z,
-            w: self.w,
-        }
-    }
-    #[doc = "Replace the w-component with a new value."]
-    #[must_use]
-    pub fn with_w(self, w: T::Scalar) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z: self.z,
-            w,
-        }
-    }
-    #[doc = "Returns the sum of all elements of self."]
-    #[must_use]
-    pub fn element_sum(self) -> T::Scalar {
-        peel(self).element_sum()
-    }
-    #[doc = "Returns the product of all elements of self."]
-    #[must_use]
-    pub fn element_product(self) -> T::Scalar {
-        peel(self).element_product()
-    }
-
-    /// Select components of this vector and return a new vector containing
-    /// those components.
-    #[inline]
-    #[must_use]
-    pub fn swizzle<const X: usize, const Y: usize, const Z: usize, const W: usize>(&self) -> Self {
-        self.swizzle4::<X, Y, Z, W>()
-    }
-
-    vector_interface!(Point4);
+    vector_conversion_to_other_units!(Point4);
 }
+
+crate::impl_vectorlike::vectorlike!(Vector4, 4);
 
 impl<T: FloatUnit> Vector4<T> {
     /// All NaN.
@@ -926,13 +520,6 @@ impl<T: FloatUnit> Vector4<T> {
         z: T::Scalar::NEG_INFINITY,
         w: T::Scalar::NEG_INFINITY,
     };
-
-    crate::forward_float_ops!(glam::BVec4, glam::Vec4);
-    crate::forward_float_vector_ops!(glam::Vec4);
-}
-
-impl<T: IntUnit> Vector4<T> {
-    int_vector_interface!(glam::IVec4);
 }
 
 impl<T: SignedUnit> Vector4<T> {
@@ -972,54 +559,26 @@ impl<T: SignedUnit> Vector4<T> {
         z: T::Scalar::ZERO,
         w: T::Scalar::NEG_ONE,
     };
-
-    crate::forward_to_raw!(
-        glam::Vec4 =>
-        #[doc = "Turn all components positive."]
-        pub fn abs(self) -> Self;
-        #[doc = "Return a vector where each component is 1 or -1 depending on the sign of the input."]
-        pub fn signum(self) -> Self;
-    );
-}
-
-impl<T> From<glam::Vec3A> for Vector3<T>
-where
-    T: Unit<Scalar = f32>,
-{
-    #[inline]
-    fn from(v: glam::Vec3A) -> Self {
-        wrap(v.into())
-    }
-}
-
-impl<T> From<Vector3<T>> for glam::Vec3A
-where
-    T: Unit<Scalar = f32>,
-{
-    #[inline]
-    fn from(v: Vector3<T>) -> Self {
-        peel(v).into()
-    }
 }
 
 impl<T: Unit> From<glam::BVec2> for Vector2<T> {
     #[inline(always)]
     fn from(v: glam::BVec2) -> Self {
-        wrap(<<T::Scalar as Scalar>::Vec2>::from_bools(v))
+        wrap(<<T::Scalar as Scalar>::Vec2>::from(v))
     }
 }
 
 impl<T: Unit> From<glam::BVec3> for Vector3<T> {
     #[inline(always)]
     fn from(v: glam::BVec3) -> Self {
-        wrap(<<T::Scalar as Scalar>::Vec3>::from_bools(v))
+        wrap(<<T::Scalar as Scalar>::Vec3>::from(v))
     }
 }
 
 impl<T: Unit> From<glam::BVec4> for Vector4<T> {
     #[inline(always)]
     fn from(v: glam::BVec4) -> Self {
-        wrap(<<T::Scalar as Scalar>::Vec4>::from_bools(v))
+        wrap(<<T::Scalar as Scalar>::Vec4>::from(v))
     }
 }
 
@@ -1107,11 +666,39 @@ impl<'a, T: Unit> Product<&'a Vector4<T>> for Vector4<T> {
     }
 }
 
+impl<T: Unit> core::fmt::Debug for Vector2<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Vector2")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .finish()
+    }
+}
+impl<T: Unit> core::fmt::Debug for Vector3<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Vector3")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .field("z", &self.z)
+            .finish()
+    }
+}
+impl<T: Unit> core::fmt::Debug for Vector4<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Vector4")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .field("z", &self.z)
+            .field("w", &self.w)
+            .finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::{vector, AngleConsts};
+    use crate::{vec2, vec3, vec4, vector, Angle, AngleConsts};
 
     use super::*;
 
@@ -1257,15 +844,15 @@ mod tests {
 
         let mut v: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         v *= Vector4::splat(2.0);
-        assert_eq!(v, (2.0, 4.0, 6.0, 8.0));
+        assert_eq!(v, vec4!(2.0, 4.0, 6.0, 8.0));
         v /= Vector4::splat(2.0);
-        assert_eq!(v, (1.0, 2.0, 3.0, 4.0));
+        assert_eq!(v, vec4!(1.0, 2.0, 3.0, 4.0));
         v += Vector4::splat(1.0);
-        assert_eq!(v, (2.0, 3.0, 4.0, 5.0));
+        assert_eq!(v, vec4!(2.0, 3.0, 4.0, 5.0));
         v -= Vector4::splat(2.0);
-        assert_eq!(v, (0.0, 1.0, 2.0, 3.0));
+        assert_eq!(v, vec4!(0.0, 1.0, 2.0, 3.0));
         v %= Vector4::splat(2.0);
-        assert_eq!(v, (0.0, 1.0, 0.0, 1.0));
+        assert_eq!(v, vec4!(0.0, 1.0, 0.0, 1.0));
     }
 
     #[test]
@@ -1285,7 +872,7 @@ mod tests {
         let c: Vector3<f32> = vector!(1.0, 2.0, 3.0);
         let d: Vector3<f32> = vector!(1.0, 2.0, 3.0);
         let sum: Vector3<f32> = [a, b, c, d].iter().sum();
-        assert_eq!(sum, (4.0, 8.0, 12.0));
+        assert_eq!(sum, vec3!(4.0, 8.0, 12.0));
     }
 
     #[test]
@@ -1295,7 +882,7 @@ mod tests {
         let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let d: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let sum: Vector4<f32> = [a, b, c, d].iter().sum();
-        assert_eq!(sum, (4.0, 8.0, 12.0, 16.0));
+        assert_eq!(sum, vec4!(4.0, 8.0, 12.0, 16.0));
     }
 
     #[test]
@@ -1305,7 +892,7 @@ mod tests {
         let c: Vector2<f32> = vector!(1.0, 2.0);
         let d: Vector2<f32> = vector!(1.0, 2.0);
         let product: Vector2<f32> = [a, b, c, d].iter().product();
-        assert_eq!(product, (1.0, 16.0));
+        assert_eq!(product, vec2!(1.0, 16.0));
     }
 
     #[test]
@@ -1315,7 +902,7 @@ mod tests {
         let c: Vector3<f32> = vector!(1.0, 2.0, 3.0);
         let d: Vector3<f32> = vector!(1.0, 2.0, 3.0);
         let product: Vector3<f32> = [a, b, c, d].iter().product();
-        assert_eq!(product, (1.0, 16.0, 81.0));
+        assert_eq!(product, vec3!(1.0, 16.0, 81.0));
     }
 
     #[test]
@@ -1325,7 +912,7 @@ mod tests {
         let c: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let d: Vector4<f32> = vector!(1.0, 2.0, 3.0, 4.0);
         let product: Vector4<f32> = [a, b, c, d].iter().product();
-        assert_eq!(product, (1.0, 16.0, 81.0, 256.0));
+        assert_eq!(product, vec4!(1.0, 16.0, 81.0, 256.0));
     }
 
     #[test]
@@ -1387,7 +974,7 @@ mod tests {
 
         // Replace NaNs with zeroes.
         let v = Vec4::select(v4.is_nan_mask(), Vec4::ZERO, v4);
-        assert_eq!(v, (1.0, 2.0, 0.0, 4.0));
+        assert_eq!(v, vec4!(1.0, 2.0, 0.0, 4.0));
     }
 
     #[test]
@@ -1403,7 +990,7 @@ mod tests {
     fn swizzle3() {
         assert_eq!(
             Vec3::new(1.0, 2.0, 3.0).swizzle::<2, 1, 0>(),
-            (3.0, 2.0, 1.0)
+            vec3!(3.0, 2.0, 1.0)
         );
         assert_eq!(Vec2::X.swizzle3::<1, 0, 1>(), Vec3::new(0.0, 1.0, 0.0));
         assert_eq!(
@@ -1416,7 +1003,7 @@ mod tests {
     fn swizzle4() {
         assert_eq!(
             Vec4::new(0.0, 1.0, 2.0, 3.0).swizzle::<3, 2, 1, 0>(),
-            (3.0, 2.0, 1.0, 0.0)
+            vec4!(3.0, 2.0, 1.0, 0.0)
         );
 
         assert_eq!(
@@ -1455,7 +1042,7 @@ mod tests {
         // work when the concrete vector type is known to the compiler.
 
         {
-            let x: Vec4 = (1.0, 2.0, 3.0, 4.0).into();
+            let x: Vec4 = vec4!(1.0, 2.0, 3.0, 4.0);
 
             let mut a = x;
             let mut b = x;
@@ -1463,36 +1050,36 @@ mod tests {
             a *= 2.0;
             b /= 2.0;
             c %= 2.0;
-            assert_eq!(a, (2.0, 4.0, 6.0, 8.0));
-            assert_eq!(b, (0.5, 1.0, 1.5, 2.0));
-            assert_eq!(c, (1.0, 0.0, 1.0, 0.0));
+            assert_eq!(a, vec4!(2.0, 4.0, 6.0, 8.0));
+            assert_eq!(b, vec4!(0.5, 1.0, 1.5, 2.0));
+            assert_eq!(c, vec4!(1.0, 0.0, 1.0, 0.0));
         }
         {
-            let x: DVec4 = (1.0, 2.0, 3.0, 4.0).into();
+            let x: DVec4 = vec4!(1.0, 2.0, 3.0, 4.0);
 
             let a = x * 2.0;
             let b = x / 2.0;
 
-            assert_eq!(a, (2.0, 4.0, 6.0, 8.0));
-            assert_eq!(b, (0.5, 1.0, 1.5, 2.0));
+            assert_eq!(a, vec4!(2.0, 4.0, 6.0, 8.0));
+            assert_eq!(b, vec4!(0.5, 1.0, 1.5, 2.0));
         }
         {
-            let x: IVec4 = (1, 2, 3, 4).into();
+            let x: IVec4 = vec4!(1, 2, 3, 4);
 
             let a = x * 2;
             let b = x / 2;
 
-            assert_eq!(a, (2, 4, 6, 8));
-            assert_eq!(b, (0, 1, 1, 2));
+            assert_eq!(a, vec4!(2, 4, 6, 8));
+            assert_eq!(b, vec4!(0, 1, 1, 2));
         }
         {
-            let x: UVec4 = (1, 2, 3, 4).into();
+            let x: UVec4 = vec4!(1, 2, 3, 4);
 
             let a = x * 2;
             let b = x / 2;
 
-            assert_eq!(a, (2, 4, 6, 8));
-            assert_eq!(b, (0, 1, 1, 2));
+            assert_eq!(a, vec4!(2, 4, 6, 8));
+            assert_eq!(b, vec4!(0, 1, 1, 2));
         }
     }
 
@@ -1515,8 +1102,8 @@ mod tests {
         assert_eq!(gt, glam::BVec4::new(false, false, true, true));
         assert_eq!(ge, glam::BVec4::new(false, true, true, true));
 
-        assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
-        assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
+        assert_eq!(a.min(b), vec4![1.0, 2.0, 1.0, 3.0]);
+        assert_eq!(a.max(b), vec4![4.0, 2.0, 3.0, 4.0]);
         assert_eq!(a.min_element(), 1.0);
         assert_eq!(a.max_element(), 4.0);
     }
@@ -1540,8 +1127,8 @@ mod tests {
         assert_eq!(gt, glam::BVec4::new(false, false, true, true));
         assert_eq!(ge, glam::BVec4::new(false, true, true, true));
 
-        assert_eq!(a.min(b), [1.0, 2.0, 1.0, 3.0]);
-        assert_eq!(a.max(b), [4.0, 2.0, 3.0, 4.0]);
+        assert_eq!(a.min(b), vec4![1.0, 2.0, 1.0, 3.0]);
+        assert_eq!(a.max(b), vec4![4.0, 2.0, 3.0, 4.0]);
         assert_eq!(a.min_element(), 1.0);
         assert_eq!(a.max_element(), 4.0);
     }
@@ -1555,7 +1142,7 @@ mod tests {
         );
 
         let b = IVec4::new(1, 2, 3, 5);
-        assert_eq!(b.clamp(IVec4::splat(2), IVec4::splat(4)), (2, 2, 3, 4));
+        assert_eq!(b.clamp(IVec4::splat(2), IVec4::splat(4)), vec4!(2, 2, 3, 4));
     }
 
     #[test]
@@ -1621,13 +1208,13 @@ mod tests {
     #[test]
     fn abs() {
         let a = Vec3::new(1.0, -2.0, -3.0);
-        assert_eq!(a.abs(), (1.0, 2.0, 3.0));
+        assert_eq!(a.abs(), vec3!(1.0, 2.0, 3.0));
     }
 
     #[test]
     fn signum() {
         let a = Vec3::new(1.0, -2.0, -3.0);
-        assert_eq!(a.signum(), (1.0, -1.0, -1.0));
+        assert_eq!(a.signum(), vec3!(1.0, -1.0, -1.0));
     }
 
     #[test]
@@ -1664,7 +1251,7 @@ mod tests {
         let mat = Matrix3::<f32>::IDENTITY;
         let a: Vector3<F32> = vec3!(20.0, 30.0, 1.0);
         let b: Vector3<F32> = mat * a;
-        assert_eq!(b, (20.0, 30.0, 1.0));
+        assert_eq!(b, vec3!(20.0, 30.0, 1.0));
     }
 
     #[test]
@@ -1693,30 +1280,30 @@ mod tests {
         let mut vec = Vector4::<I32>::new(1, 2, 3, 4);
         let vec2: &mut Vector4<i32> = vec.as_untyped_mut();
         vec2.y = 100;
-        assert_eq!(vec, [1, 100, 3, 4]);
+        assert_eq!(vec, vec4![1, 100, 3, 4]);
 
         let vec3: &mut Vector4<i32> = vec.cast_mut();
         vec3.z = 100;
-        assert_eq!(vec, [1, 100, 100, 4]);
+        assert_eq!(vec, vec4![1, 100, 100, 4]);
     }
 
     #[test]
     fn from_bools() {
         assert_eq!(
             Vector2::<f32>::from(glam::BVec2::new(true, false)),
-            (1.0, 0.0)
+            vec2!(1.0, 0.0)
         );
         assert_eq!(
             Vector3::<f32>::from(glam::BVec3::new(true, false, true)),
-            (1.0, 0.0, 1.0)
+            vec3!(1.0, 0.0, 1.0)
         );
         assert_eq!(
             Vector4::<f32>::from(glam::BVec4::new(true, false, true, false)),
-            (1.0, 0.0, 1.0, 0.0)
+            vec4!(1.0, 0.0, 1.0, 0.0)
         );
         assert_eq!(
             Vector4::<i32>::from(glam::BVec4::new(true, false, true, false)),
-            (1, 0, 1, 0)
+            vec4!(1, 0, 1, 0)
         );
     }
 
@@ -1731,20 +1318,14 @@ mod tests {
 
         let vec2: &mut glam::IVec4 = vec.as_mut();
         vec2.y = 100;
-        assert_eq!(vec, [1, 100, 3, 4]);
+        assert_eq!(vec, vec4![1, 100, 3, 4]);
 
         let vec3: &glam::IVec4 = vec.borrow();
         assert_eq!(*vec3, glam::IVec4::new(1, 100, 3, 4));
 
-        let vec3a: &Vector4<I32> = vec3.borrow();
-        assert_eq!(*vec3a, [1, 100, 3, 4]);
-
         let vec4: &mut glam::IVec4 = vec.borrow_mut();
         vec4.z = 100;
         assert_eq!(*vec4, glam::IVec4::new(1, 100, 100, 4));
-
-        let vec4a: &mut Vector4<I32> = vec4.borrow_mut();
-        assert_eq!(*vec4a, [1, 100, 100, 4]);
     }
 
     fn hash_one<T: core::hash::Hash, H: core::hash::BuildHasher>(
@@ -1778,13 +1359,6 @@ mod tests {
         let h1 = hash_one(&hasher, Vector2::<i32> { x: 123, y: 456 });
         let h2 = hash_one(&hasher, glam::IVec2::new(123, 456));
         assert_eq!(h1, h2);
-    }
-
-    #[test]
-    fn hash_map() {
-        let mut map = hashbrown::HashMap::<glam::IVec4, &'static str>::default();
-        map.insert(glam::IVec4::new(1, 2, 3, 4), "hello");
-        assert_eq!(map.get(&Vector4::<I32>::new(1, 2, 3, 4)), Some(&"hello"));
     }
 }
 

@@ -45,41 +45,8 @@ unsafe impl<T: Unit> Transparent for Size3<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec3;
 }
 
-crate::derive_standard_traits!(Size2 {
-    width: T::Scalar,
-    height: T::Scalar
-});
-crate::derive_standard_traits!(Size3 {
-    width: T::Scalar,
-    height: T::Scalar,
-    depth: T::Scalar
-});
-
-crate::derive_array_conversion_traits!(Size2, 2);
-crate::derive_array_conversion_traits!(Size3, 3);
-
-crate::derive_tuple_conversion_traits!(Size2 {
-    width: T::Scalar,
-    height: T::Scalar
-});
-crate::derive_tuple_conversion_traits!(Size3 {
-    width: T::Scalar,
-    height: T::Scalar,
-    depth: T::Scalar
-});
-
-crate::derive_glam_conversion_traits!(Size2 {
-    width: T::Scalar,
-    height: T::Scalar
-});
-crate::derive_glam_conversion_traits!(Size3 {
-    width: T::Scalar,
-    height: T::Scalar,
-    depth: T::Scalar
-});
-
 macro_rules! impl_size {
-    ($base_type_name:ident [ $dimensions:literal ] => $vec_ty:ident, $vector_type:ident) => {
+    ($base_type_name:ident [ $dimensions:tt ] => $vec_ty:ident, $vector_type:ident) => {
         impl<T: Unit> From<$vector_type<T>> for $base_type_name<T> {
             #[inline]
             fn from(vec: $vector_type<T>) -> Self {
@@ -145,27 +112,30 @@ macro_rules! impl_size {
 impl_size!(Size2 [2] => Vec2, Vector2);
 impl_size!(Size3 [3] => Vec3, Vector3);
 
-crate::forward_op_to_raw!(Size2, Add<Self>::add -> Self);
-crate::forward_op_to_raw!(Size3, Add<Self>::add -> Self);
-crate::forward_op_to_raw!(Size2, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Size3, Sub<Self>::sub -> Self);
-crate::forward_op_to_raw!(Size2, Mul<@T::Scalar>::mul -> Self);
-crate::forward_op_to_raw!(Size3, Mul<@T::Scalar>::mul -> Self);
-crate::forward_op_to_raw!(Size2, Div<@T::Scalar>::div -> Self);
-crate::forward_op_to_raw!(Size3, Div<@T::Scalar>::div -> Self);
-crate::forward_op_to_raw!(Size2, Rem<@T::Scalar>::rem -> Self);
-crate::forward_op_to_raw!(Size3, Rem<@T::Scalar>::rem -> Self);
+crate::impl_vectorlike::vectorlike!(Size2, 2);
+crate::impl_vectorlike::vectorlike!(Size3, 3);
 
-crate::forward_op_assign_to_raw!(Size2, AddAssign<Self>::add_assign);
-crate::forward_op_assign_to_raw!(Size3, AddAssign<Self>::add_assign);
-crate::forward_op_assign_to_raw!(Size2, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Size3, SubAssign<Self>::sub_assign);
-crate::forward_op_assign_to_raw!(Size2, MulAssign<@T::Scalar>::mul_assign);
-crate::forward_op_assign_to_raw!(Size3, MulAssign<@T::Scalar>::mul_assign);
-crate::forward_op_assign_to_raw!(Size2, DivAssign<@T::Scalar>::div_assign);
-crate::forward_op_assign_to_raw!(Size3, DivAssign<@T::Scalar>::div_assign);
-crate::forward_op_assign_to_raw!(Size2, RemAssign<@T::Scalar>::rem_assign);
-crate::forward_op_assign_to_raw!(Size3, RemAssign<@T::Scalar>::rem_assign);
+crate::macros::forward_op_to_raw!(Size2, Add<Self>::add -> Self);
+crate::macros::forward_op_to_raw!(Size3, Add<Self>::add -> Self);
+crate::macros::forward_op_to_raw!(Size2, Sub<Self>::sub -> Self);
+crate::macros::forward_op_to_raw!(Size3, Sub<Self>::sub -> Self);
+crate::macros::forward_op_to_raw!(Size2, Mul<@T::Scalar>::mul -> Self);
+crate::macros::forward_op_to_raw!(Size3, Mul<@T::Scalar>::mul -> Self);
+crate::macros::forward_op_to_raw!(Size2, Div<@T::Scalar>::div -> Self);
+crate::macros::forward_op_to_raw!(Size3, Div<@T::Scalar>::div -> Self);
+crate::macros::forward_op_to_raw!(Size2, Rem<@T::Scalar>::rem -> Self);
+crate::macros::forward_op_to_raw!(Size3, Rem<@T::Scalar>::rem -> Self);
+
+crate::macros::forward_op_assign_to_raw!(Size2, AddAssign<Self>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Size3, AddAssign<Self>::add_assign);
+crate::macros::forward_op_assign_to_raw!(Size2, SubAssign<Self>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Size3, SubAssign<Self>::sub_assign);
+crate::macros::forward_op_assign_to_raw!(Size2, MulAssign<@T::Scalar>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Size3, MulAssign<@T::Scalar>::mul_assign);
+crate::macros::forward_op_assign_to_raw!(Size2, DivAssign<@T::Scalar>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Size3, DivAssign<@T::Scalar>::div_assign);
+crate::macros::forward_op_assign_to_raw!(Size2, RemAssign<@T::Scalar>::rem_assign);
+crate::macros::forward_op_assign_to_raw!(Size3, RemAssign<@T::Scalar>::rem_assign);
 
 impl<T: Unit> Size2<T> {
     /// All zeroes.
@@ -183,28 +153,6 @@ impl<T: Unit> Size2<T> {
     /// New size.
     pub fn new(width: T::Scalar, height: T::Scalar) -> Self {
         Self { width, height }
-    }
-
-    crate::forward_constructors!(2, Vec2);
-    crate::forward_comparison!(glam::BVec2, Vec2);
-
-    crate::casting_interface!(Size2 {
-        width: T::Scalar,
-        height: T::Scalar
-    });
-    crate::tuple_interface!(Size2 {
-        width: T::Scalar,
-        height: T::Scalar
-    });
-    crate::array_interface!(2);
-
-    #[doc = "Extend with depth component to [`Size3`]."]
-    pub fn extend(self, depth: T::Scalar) -> Size3<T> {
-        Size3 {
-            width: self.width,
-            height: self.height,
-            depth,
-        }
     }
 
     /// Calculate the area.
@@ -231,8 +179,6 @@ impl<T: FloatUnit> Size2<T> {
         width: T::Scalar::NEG_INFINITY,
         height: T::Scalar::NEG_INFINITY,
     };
-
-    crate::forward_float_ops!(glam::BVec2, glam::Vec2);
 }
 
 impl<T: Unit> Size3<T> {
@@ -258,27 +204,6 @@ impl<T: Unit> Size3<T> {
             depth,
         }
     }
-
-    crate::forward_constructors!(3, Vec3);
-    crate::forward_comparison!(glam::BVec3, Vec3);
-
-    crate::casting_interface!(Size3 {
-        width: T::Scalar,
-        height: T::Scalar,
-        depth: T::Scalar
-    });
-    crate::tuple_interface!(Size3 {
-        width: T::Scalar,
-        height: T::Scalar,
-        depth: T::Scalar
-    });
-    crate::array_interface!(3);
-
-    crate::forward_to_raw!(
-        glam::Vec3 =>
-        #[doc = "Truncate to [`Size2`]."]
-        pub fn truncate(self) -> Size2<T>;
-    );
 
     /// Calculate the volume.
     #[inline]
@@ -314,8 +239,24 @@ impl<T: FloatUnit> Size3<T> {
         height: T::Scalar::NEG_INFINITY,
         depth: T::Scalar::NEG_INFINITY,
     };
+}
 
-    crate::forward_float_ops!(glam::BVec3, glam::Vec3);
+impl<T: Unit> core::fmt::Debug for Size2<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Size2")
+            .field("width", &self.width)
+            .field("height", &self.height)
+            .finish()
+    }
+}
+impl<T: Unit> core::fmt::Debug for Size3<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Size3")
+            .field("width", &self.width)
+            .field("height", &self.height)
+            .field("depth", &self.depth)
+            .finish()
+    }
 }
 
 #[cfg(test)]
@@ -328,10 +269,10 @@ mod tests {
     fn arithmetic() {
         let mut a: Size2<f32> = size!(100.0, 200.0);
         let b: Size2<f32> = a - size!(50.0, 100.0);
-        assert_eq!(b, (50.0, 100.0));
+        assert_eq!(b, size!(50.0, 100.0));
         a -= size!(50.0, 100.0);
-        assert_eq!(a, (50.0, 100.0));
-        assert_eq!(a + size!(2.0, 3.0), (52.0, 103.0));
+        assert_eq!(a, size!(50.0, 100.0));
+        assert_eq!(a + size!(2.0, 3.0), size!(52.0, 103.0));
         a += size!(100.0, 200.0);
         assert_eq!(a, size!(150.0, 300.0));
     }
