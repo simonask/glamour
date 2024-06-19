@@ -369,9 +369,35 @@ mod tests {
 
     #[test]
     fn try_cast() {
-        let v = Vector4::<f32>::new(f32::MAX, 0.0, 1.0, 2.0);
-        let t: Option<Vector4<i32>> = v.try_cast();
-        assert!(t.is_none());
+        assert!(Vector4::<f32>::new(f32::MAX, 0.0, 1.0, 2.0)
+            .try_cast::<i32>()
+            .is_none());
+        assert!(Vector4::<f32>::new(0.0, f32::MAX, 1.0, 2.0)
+            .try_cast::<i32>()
+            .is_none());
+        assert!(Vector4::<f32>::new(0.0, 0.0, f32::MAX, 0.0)
+            .try_cast::<i32>()
+            .is_none());
+        assert!(Vector4::<f32>::new(0.0, 0.0, 0.0, f32::MAX)
+            .try_cast::<i32>()
+            .is_none());
+
+        assert!(Vector3::<f32>::new(f32::MAX, 0.0, 1.0)
+            .try_cast::<i32>()
+            .is_none());
+        assert!(Vector3::<f32>::new(0.0, f32::MAX, 1.0)
+            .try_cast::<i32>()
+            .is_none());
+        assert!(Vector3::<f32>::new(0.0, 0.0, f32::MAX)
+            .try_cast::<i32>()
+            .is_none());
+
+        assert!(Vector2::<f32>::new(f32::MAX, 0.0)
+            .try_cast::<i32>()
+            .is_none());
+        assert!(Vector2::<f32>::new(0.0, f32::MAX)
+            .try_cast::<i32>()
+            .is_none());
 
         let v = Vector4::<f32>::new(3.0, 0.0, 1.0, 2.0);
         let t: Option<Vector4<i32>> = v.try_cast();

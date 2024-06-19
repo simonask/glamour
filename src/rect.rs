@@ -239,6 +239,54 @@ impl<T: Unit> Rect<T> {
     pub fn from_tuple((origin, size): (Point2<T>, Size2<T>)) -> Self {
         Self::new(origin, size)
     }
+
+    /// Bitcast an untyped instance to self.
+    #[inline]
+    #[must_use]
+    pub fn from_untyped(untyped: Rect<T::Scalar>) -> Self {
+        Rect {
+            origin: Point2::from_untyped(untyped.origin),
+            size: Size2::from_untyped(untyped.size),
+        }
+    }
+
+    /// Bitcast to an untyped scalar unit.
+    #[inline]
+    #[must_use]
+    pub fn to_untyped(self) -> Rect<T::Scalar> {
+        Rect {
+            origin: self.origin.to_untyped(),
+            size: self.size.to_untyped(),
+        }
+    }
+
+    /// Cast to a different coordinate space with scalar type conversion. Returns `None` if any component could not be
+    /// converted to the target scalar type.
+    #[inline]
+    #[must_use]
+    pub fn try_cast<T2>(self) -> Option<Rect<T2>>
+    where
+        T2: Unit,
+    {
+        Some(Rect {
+            origin: self.origin.try_cast()?,
+            size: self.size.try_cast()?,
+        })
+    }
+
+    /// Cast to a different coordinate space with scalar type conversion through the `as` operator (potentially
+    /// narrowing or losing precision).
+    #[must_use]
+    pub fn as_<T2>(self) -> Rect<T2>
+    where
+        T: Unit<Scalar: num_traits::AsPrimitive<T2::Scalar>>,
+        T2: Unit,
+    {
+        Rect {
+            origin: self.origin.as_(),
+            size: self.size.as_(),
+        }
+    }
 }
 
 impl<T: FloatUnit> Rect<T> {
@@ -812,6 +860,21 @@ mod tests {
         let rect = RectF::from_origin_and_size((0.1, 0.1), (0.3, 0.3)).round_out();
         assert_eq!(rect.origin, (0.0, 0.0));
         assert_eq!(rect.size, (1.0, 1.0));
+    }
+
+    #[test]
+    fn casting() {
+        let r = RectF::from_origin_and_size((0.1, 0.2), (0.3, 0.4));
+        let r2 = r.try_cast::<i32>().unwrap();
+        assert_eq!(r2.origin, (0, 0));
+        assert_eq!(r2.size, (0, 0));
+
+        let r2 = r.as_::<i32>();
+        assert_eq!(r2.origin, (0, 0));
+        assert_eq!(r2.size, (0, 0));
+
+        assert_eq!(r.to_untyped(), r);
+        assert_eq!(RectF::from_untyped(r), r);
     }
 
     #[test]
