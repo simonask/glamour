@@ -798,6 +798,12 @@ mod tests {
     type DVec4 = Vector4<f64>;
 
     #[test]
+    fn from_rows() {
+        let from_rows = Mat2::from_rows(vec2!(1.0, 2.0), vec2!(3.0, 4.0));
+        assert_eq!(from_rows, Mat2::from_cols(vec2!(1.0, 3.0), vec2!(2.0, 4.0)));
+    }
+
+    #[test]
     fn from_scale() {
         let m3 = Mat3::from_scale(Vec2::new(2.0, 3.0));
         let m4 = Mat4::from_scale(Vec3::new(2.0, 3.0, 4.0));
