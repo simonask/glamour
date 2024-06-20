@@ -88,7 +88,6 @@ unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
-#[repr(C)]
 pub struct Matrix4<U: Scalar> {
     pub x_axis: Vector4<U>,
     pub y_axis: Vector4<U>,
