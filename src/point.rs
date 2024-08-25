@@ -67,10 +67,7 @@ unsafe impl<T: Unit> Transparent for Point3<T> {
 /// which means that reference-casting from those glam types to `Point4` type
 /// will fail (but not the other way around).
 #[cfg_attr(
-    any(
-        not(any(feature = "scalar-math", target_arch = "spirv")),
-        feature = "cuda"
-    ),
+    not(any(feature = "scalar-math", target_arch = "spirv")),
     repr(C, align(16))
 )]
 pub struct Point4<T: Unit = f32> {

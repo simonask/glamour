@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Internal changes
 
 - Major cleanup of codegen macros, which enables exact and robust mapping to `glam` APIs.
+- Removed cfg attributes for a `cuda` feature that was never really supported.
+- Added `[lints]` section to Cargo.toml to prevent warnings about coverage
+  attributes and `spirv` on Rust 1.80+.
 
 ## [0.11.1] - 2024-03-26
 

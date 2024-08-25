@@ -97,10 +97,7 @@ unsafe impl<T: Unit> Transparent for Vector3<T> {
 ///
 /// This also means that smaller integer types (i16 etc.) will be over-aligned, consuming much more memory.
 #[cfg_attr(
-    any(
-        not(any(feature = "scalar-math", target_arch = "spirv")),
-        feature = "cuda"
-    ),
+    not(any(feature = "scalar-math", target_arch = "spirv")),
     repr(C, align(16))
 )]
 pub struct Vector4<T: Unit = f32> {

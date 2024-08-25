@@ -8,11 +8,28 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/simonask/glamour"
 homepage = "https://docs.rs/glamour/latest/glamour/"
-keywords = ["gamedev", "math", "matrix", "vector", "quaternion"]
-categories = ["game-development", "mathematics", "graphics", "no-std"]
+keywords = [
+    "gamedev",
+    "math",
+    "matrix",
+    "vector",
+    "quaternion",
+]
+categories = [
+    "game-development",
+    "mathematics",
+    "graphics",
+    "no-std",
+]
 
 [badges]
 maintenance = { status = "actively-developed" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(coverage,coverage_nightly)',
+    'cfg(target_arch, values("spirv"))',
+] }
 
 [dependencies]
 glam = { version = "0.28.0", default-features = false, features = [
@@ -62,7 +79,9 @@ serde_test = { version = "^1.0" }
 hashbrown = "=0.13.2"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-criterion = { version = "0.5.1", features = ["html_reports"] }
+criterion = { version = "0.5.1", features = [
+    "html_reports",
+] }
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 wasm-bindgen-test = "0.3.0"
