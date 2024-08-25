@@ -121,10 +121,7 @@ unsafe impl<T: Unit> Transparent for Vector3<T> {
 ///
 /// This also means that smaller integer types (i16 etc.) will be over-aligned, consuming much more memory.
 #[cfg_attr(
-    any(
-        not(any(feature = "scalar-math", target_arch = "spirv")),
-        feature = "cuda"
-    ),
+    not(any(feature = "scalar-math", target_arch = "spirv")),
     repr(C, align(16))
 )]
 #[cfg_attr(
@@ -672,18 +669,24 @@ mod tests {
         assert!(v2.is_nan());
         assert!(!v2.is_finite());
         assert_eq!(v2.is_nan_mask(), glam::BVec2::new(false, true));
+        assert_eq!(v2.is_finite_mask(), glam::BVec2::new(true, false));
 
-        let v3 = Vec3::new(1.0, f32::NAN, 3.0);
+        let v3 = Vec3::new(1.0, f32::NAN, f32::INFINITY);
         assert!(v3.is_nan());
         assert!(!v3.is_finite());
         assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
+        assert_eq!(v3.is_finite_mask(), glam::BVec3::new(true, false, false));
 
-        let v4 = Vec4::new(1.0, 2.0, f32::NAN, 4.0);
+        let v4 = Vec4::new(1.0, 2.0, f32::NAN, f32::INFINITY);
         assert!(v4.is_nan());
         assert!(!v4.is_finite());
         assert_eq!(
             v4.is_nan_mask(),
             glam::BVec4::new(false, false, true, false)
+        );
+        assert_eq!(
+            v4.is_finite_mask(),
+            glam::BVec4::new(true, true, false, false)
         );
 
         assert!(Vec2::NAN.is_nan());
@@ -692,7 +695,7 @@ mod tests {
 
         // Replace NaNs with zeroes.
         let v = Vec4::select(v4.is_nan_mask(), Vec4::ZERO, v4);
-        assert_eq!(v, vec4!(1.0, 2.0, 0.0, 4.0));
+        assert_eq!(v, vec4!(1.0, 2.0, 0.0, f32::INFINITY));
     }
 
     #[test]
@@ -799,6 +802,85 @@ mod tests {
             assert_eq!(a, vec4!(2, 4, 6, 8));
             assert_eq!(b, vec4!(0, 1, 1, 2));
         }
+    }
+
+    #[test]
+    fn ops_by_vector_ref() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let added = a + b;
+        let subtracted = a - b;
+        let multiplied = a * b;
+        let divided = a / b;
+
+        assert_eq!(a + &b, added);
+        assert_eq!(&a + b, added);
+        assert_eq!(&a + &b, added);
+        assert_eq!(a - &b, subtracted);
+        assert_eq!(&a - b, subtracted);
+        assert_eq!(&a - &b, subtracted);
+        assert_eq!(a * &b, multiplied);
+        assert_eq!(&a * b, multiplied);
+        assert_eq!(&a * &b, multiplied);
+        assert_eq!(a / &b, divided);
+        assert_eq!(&a / b, divided);
+        assert_eq!(&a / &b, divided);
+
+        let mut a2 = a;
+        a2 += &b;
+        assert_eq!(a2, added);
+        let mut a2 = a;
+        a2 -= &b;
+        assert_eq!(a2, subtracted);
+        let mut a2 = a;
+        a2 *= &b;
+        assert_eq!(a2, multiplied);
+        let mut a2 = a;
+        a2 /= &b;
+        assert_eq!(a2, divided);
+    }
+
+    #[test]
+    fn ops_by_scalar_ref() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = 2.0;
+        let added = a + b;
+        let subtracted = a - b;
+        let multiplied = a * b;
+        let divided = a / b;
+
+        assert_eq!(a + &b, added);
+        assert_eq!(&a + b, added);
+        assert_eq!(&a + &b, added);
+        assert_eq!(a - &b, subtracted);
+        assert_eq!(&a - b, subtracted);
+        assert_eq!(&a - &b, subtracted);
+        assert_eq!(a * &b, multiplied);
+        assert_eq!(&a * b, multiplied);
+        assert_eq!(&a * &b, multiplied);
+        assert_eq!(a / &b, divided);
+        assert_eq!(&a / b, divided);
+        assert_eq!(&a / &b, divided);
+
+        let mut a2 = a;
+        a2 += &b;
+        assert_eq!(a2, added);
+        let mut a2 = a;
+        a2 -= &b;
+        assert_eq!(a2, subtracted);
+        let mut a2 = a;
+        a2 *= &b;
+        assert_eq!(a2, multiplied);
+        let mut a2 = a;
+        a2 /= &b;
+        assert_eq!(a2, divided);
+    }
+
+    #[test]
+    fn map() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = a.map(|x| x * 2.0);
+        assert_eq!(b, vec4![2.0, 4.0, 6.0, 8.0]);
     }
 
     #[test]

@@ -1,6 +1,6 @@
 [package]
 name = "glamour"
-version = "0.12.0"
+version = "0.13.0"
 edition = "2021"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
@@ -25,8 +25,14 @@ categories = [
 [badges]
 maintenance = { status = "actively-developed" }
 
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(coverage,coverage_nightly)',
+    'cfg(target_arch, values("spirv"))',
+] }
+
 [dependencies]
-glam = { version = "0.28.0", default-features = false, features = [
+glam = { version = "0.29.0", default-features = false, features = [
     "bytemuck",
     "approx",
 ] }
