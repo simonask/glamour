@@ -691,6 +691,7 @@ macro_rules! arraylike_interface {
         }
 
         /// Returns a vector containing each element of `self` modified by a mapping function `f`.
+        #[must_use]
         pub fn map<F: Fn(T::Scalar) -> T::Scalar>(self, f: F) -> Self {
             Self::from_array(self.to_array().map(f))
         }
