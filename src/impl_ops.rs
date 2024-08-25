@@ -110,6 +110,24 @@ macro_rules! impl_ops {
                     crate::wrap(core::ops::$op_trait::$op_name(crate::peel(self), crate::peel(rhs)))
                 }
             }
+            impl<T: crate::Unit> core::ops::$op_trait<&$rhs_ty<T>> for $lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: &$rhs_ty<T>) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(self), crate::peel(*rhs)))
+                }
+            }
+            impl<T: crate::Unit> core::ops::$op_trait<$rhs_ty<T>> for &$lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: $rhs_ty<T>) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(*self), crate::peel(rhs)))
+                }
+            }
+            impl<T: crate::Unit> core::ops::$op_trait<&$rhs_ty<T>> for &$lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: &$rhs_ty<T>) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(*self), crate::peel(*rhs)))
+                }
+            }
         )*
     };
 }
@@ -127,6 +145,24 @@ macro_rules! impl_scalar_ops {
                 type Output = $out_ty<T>;
                 fn $op_name(self, rhs: $rhs_ty) -> $out_ty<T> {
                     crate::wrap(core::ops::$op_trait::$op_name(crate::peel(self), rhs))
+                }
+            }
+            impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<&$rhs_ty> for $lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: &$rhs_ty) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(self), *rhs))
+                }
+            }
+            impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<$rhs_ty> for &$lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: $rhs_ty) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(*self), rhs))
+                }
+            }
+            impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<&$rhs_ty> for &$lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: &$rhs_ty) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(*self), *rhs))
                 }
             }
         )*
@@ -147,6 +183,11 @@ macro_rules! impl_assign_ops {
                     core::ops::$op_trait::$op_name(crate::peel_mut(self), crate::peel(rhs))
                 }
             }
+            impl<T: crate::Unit> core::ops::$op_trait<&$rhs_ty<T>> for $lhs_ty<T> {
+                fn $op_name(&mut self, rhs: &$rhs_ty<T>) {
+                    core::ops::$op_trait::$op_name(crate::peel_mut(self), crate::peel(*rhs))
+                }
+            }
         )*
     }
 }
@@ -163,6 +204,11 @@ macro_rules! impl_scalar_assign_ops {
             impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<$rhs_ty> for $lhs_ty<T> {
                 fn $op_name(&mut self, rhs: $rhs_ty) {
                     core::ops::$op_trait::$op_name(crate::peel_mut(self), rhs);
+                }
+            }
+            impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<&$rhs_ty> for $lhs_ty<T> {
+                fn $op_name(&mut self, rhs: &$rhs_ty) {
+                    core::ops::$op_trait::$op_name(crate::peel_mut(self), *rhs);
                 }
             }
         )*

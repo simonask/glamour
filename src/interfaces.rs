@@ -165,6 +165,17 @@ macro_rules! vector_float_interface {
             fn reject_from_normalized(self, other: Self) -> Self;
             /// See (e.g.) [`glam::Vec2::reject_from()`]
             fn reject_from(self, other: Self) -> Self;
+            /// Returns the reflection vector for a given incident vector `self` and surface normal `normal`.
+            ///
+            /// `normal` must be normalized.
+            fn reflect(self, normal: Self) -> Self;
+            /// Returns the refraction direction for a given incident vector
+            /// `self`, surface normal `normal` and ratio of indices of refraction,
+            /// `eta`. When total internal reflection occurs, a zero vector will
+            /// be returned.
+            ///
+            /// `self` and `normal` must be normalized.
+            fn refract(self, normal: Self, eta: scalar) -> Self;
         }
     };
 }
@@ -331,6 +342,8 @@ macro_rules! simd2_float_interface {
             $mode =>
             /// Return a mask where each bit is set if the corresponding component is NaN.
             fn is_nan_mask(self) -> bvec2;
+            /// Performs `is_finite` on each element of `self`, returning a vector mask of the results.
+            fn is_finite_mask(self) -> bvec2;
         }
     };
 }
@@ -361,6 +374,8 @@ macro_rules! simd3_float_interface {
             $mode =>
             /// Return a mask where each bit is set if the corresponding component is NaN.
             fn is_nan_mask(self) -> bvec3;
+            /// Performs `is_finite` on each element of `self`, returning a vector mask of the results.
+            fn is_finite_mask(self) -> bvec3;
         }
     };
 }
@@ -387,6 +402,8 @@ macro_rules! simd4_float_interface {
             $mode =>
             /// Return a mask where each bit is set if the corresponding component is NaN.
             fn is_nan_mask(self) -> bvec4;
+            /// Performs `is_finite` on each element of `self`, returning a vector mask of the results.
+            fn is_finite_mask(self) -> bvec4;
         }
     };
 }
@@ -443,6 +460,12 @@ macro_rules! matrix2_base_interface {
             $mode =>
             /// Creates a 2x2 matrix from a 3x3 matrix, discarding the 2nd row and column.
             fn from_mat3(mat3: mat3) -> Self;
+            /// Creates a 2x2 matrix from the minor of the given 3x3 matrix, discarding the `i`th column and `j`th row.
+            ///
+            /// ### Panics
+            ///
+            /// Panics if `i`` or `j` is greater than 2.
+            fn from_mat3_minor(mat3: mat3, i: usize, j: usize) -> Self;
             /// Creates a 2x2 matrix with its diagonal set to `diagonal` and all other entries set to 0.
             fn from_diagonal(diagonal: vec2) -> Self;
             /// Multiplies two 2x2 matrices.
@@ -534,6 +557,12 @@ macro_rules! matrix3_base_interface {
             fn from_mat2(mat2: mat2) -> Self;
             /// Creates a 3x3 matrix from a 4x4 matrix, discarding the 4th row and column.
             fn from_mat4(mat4: mat4) -> Self;
+            /// Creates a 3x3 matrix from the minor of the given 4x4 matrix, discarding the `i`th column and `j`th row.
+            ///
+            /// ### Panics
+            ///
+            /// Panics if `i`` or `j` is greater than 3.
+            fn from_mat4_minor(mat4: mat4, i: usize, j: usize) -> Self;
             /// Multiplies two 3x3 matrices.
             fn mul_mat3(&self, other: ref_self) -> Self;
             /// Adds two 3x3 matrices.

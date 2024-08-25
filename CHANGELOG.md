@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Added `Matrix3::from_mat4_minor()` and `Matrix2::from_mat3_minor()` (glam 0.29).
+- Added `is_finite_mask()` to vectorlike types (glam 0.29).
+- Added `reflect()` and `refract()` for vector types (glam 0.29).
+- Added `map()` to all vectorlike types (glam 0.29).
+- Vector arithmetic ops are now implemented on references (mirroring glam 0.29).
+
+### Breaking changes
+
+- Bumped `glam` to 0.29.0.
+
 ## [0.12.0] - 2024-08-25
 
 ### Added
