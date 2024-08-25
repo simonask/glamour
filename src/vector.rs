@@ -633,18 +633,24 @@ mod tests {
         assert!(v2.is_nan());
         assert!(!v2.is_finite());
         assert_eq!(v2.is_nan_mask(), glam::BVec2::new(false, true));
+        assert_eq!(v2.is_finite_mask(), glam::BVec2::new(true, false));
 
-        let v3 = Vec3::new(1.0, f32::NAN, 3.0);
+        let v3 = Vec3::new(1.0, f32::NAN, f32::INFINITY);
         assert!(v3.is_nan());
         assert!(!v3.is_finite());
         assert_eq!(v3.is_nan_mask(), glam::BVec3::new(false, true, false));
+        assert_eq!(v3.is_finite_mask(), glam::BVec3::new(true, false, false));
 
-        let v4 = Vec4::new(1.0, 2.0, f32::NAN, 4.0);
+        let v4 = Vec4::new(1.0, 2.0, f32::NAN, f32::INFINITY);
         assert!(v4.is_nan());
         assert!(!v4.is_finite());
         assert_eq!(
             v4.is_nan_mask(),
             glam::BVec4::new(false, false, true, false)
+        );
+        assert_eq!(
+            v4.is_finite_mask(),
+            glam::BVec4::new(true, true, false, false)
         );
 
         assert!(Vec2::NAN.is_nan());
@@ -653,7 +659,7 @@ mod tests {
 
         // Replace NaNs with zeroes.
         let v = Vec4::select(v4.is_nan_mask(), Vec4::ZERO, v4);
-        assert_eq!(v, vec4!(1.0, 2.0, 0.0, 4.0));
+        assert_eq!(v, vec4!(1.0, 2.0, 0.0, f32::INFINITY));
     }
 
     #[test]
