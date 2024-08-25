@@ -769,6 +769,13 @@ mod tests {
     }
 
     #[test]
+    fn map() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = a.map(|x| x * 2.0);
+        assert_eq!(b, vec4![2.0, 4.0, 6.0, 8.0]);
+    }
+
+    #[test]
     fn cmp() {
         let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
         let b = Vec4::new(4.0, 2.0, 1.0, 3.0);
