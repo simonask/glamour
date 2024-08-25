@@ -153,6 +153,18 @@ macro_rules! impl_scalar_ops {
                     crate::wrap(core::ops::$op_trait::$op_name(crate::peel(self), *rhs))
                 }
             }
+            impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<$rhs_ty> for &$lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: $rhs_ty) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(*self), rhs))
+                }
+            }
+            impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<&$rhs_ty> for &$lhs_ty<T> {
+                type Output = $out_ty<T>;
+                fn $op_name(self, rhs: &$rhs_ty) -> $out_ty<T> {
+                    crate::wrap(core::ops::$op_trait::$op_name(crate::peel(*self), *rhs))
+                }
+            }
         )*
     };
 }
