@@ -689,6 +689,11 @@ macro_rules! arraylike_interface {
         pub fn const_set<const N: usize>(&mut self, value: T::Scalar) {
             self.as_array_mut()[N] = value;
         }
+
+        /// Returns a vector containing each element of `self` modified by a mapping function `f`.
+        pub fn map<F: Fn(T::Scalar) -> T::Scalar>(self, f: F) -> Self {
+            Self::from_array(self.to_array().map(f))
+        }
     };
 }
 pub(crate) use arraylike_interface;

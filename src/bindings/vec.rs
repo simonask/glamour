@@ -308,6 +308,10 @@ impl FloatVector4 for glam::Vec4 {
     fn is_nan_mask(self) -> glam::BVec4 {
         bvec4a_to_bvec4(glam::Vec4::is_nan_mask(self))
     }
+
+    fn is_finite_mask(self) -> glam::BVec4 {
+        bvec4a_to_bvec4(glam::Vec4::is_finite_mask(self))
+    }
 }
 impl FloatVector4 for glam::DVec4 {
     crate::interfaces::simd4_float_interface!(trait_impl);
