@@ -769,6 +769,78 @@ mod tests {
     }
 
     #[test]
+    fn ops_by_vector_ref() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let added = a + b;
+        let subtracted = a - b;
+        let multiplied = a * b;
+        let divided = a / b;
+
+        assert_eq!(a + &b, added);
+        assert_eq!(&a + b, added);
+        assert_eq!(&a + &b, added);
+        assert_eq!(a - &b, subtracted);
+        assert_eq!(&a - b, subtracted);
+        assert_eq!(&a - &b, subtracted);
+        assert_eq!(a * &b, multiplied);
+        assert_eq!(&a * b, multiplied);
+        assert_eq!(&a * &b, multiplied);
+        assert_eq!(a / &b, divided);
+        assert_eq!(&a / b, divided);
+        assert_eq!(&a / &b, divided);
+
+        let mut a2 = a;
+        a2 += &b;
+        assert_eq!(a2, added);
+        let mut a2 = a;
+        a2 -= &b;
+        assert_eq!(a2, subtracted);
+        let mut a2 = a;
+        a2 *= &b;
+        assert_eq!(a2, multiplied);
+        let mut a2 = a;
+        a2 /= &b;
+        assert_eq!(a2, divided);
+    }
+
+    #[test]
+    fn ops_by_scalar_ref() {
+        let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
+        let b = 2.0;
+        let added = a + b;
+        let subtracted = a - b;
+        let multiplied = a * b;
+        let divided = a / b;
+
+        assert_eq!(a + &b, added);
+        assert_eq!(&a + b, added);
+        assert_eq!(&a + &b, added);
+        assert_eq!(a - &b, subtracted);
+        assert_eq!(&a - b, subtracted);
+        assert_eq!(&a - &b, subtracted);
+        assert_eq!(a * &b, multiplied);
+        assert_eq!(&a * b, multiplied);
+        assert_eq!(&a * &b, multiplied);
+        assert_eq!(a / &b, divided);
+        assert_eq!(&a / b, divided);
+        assert_eq!(&a / &b, divided);
+
+        let mut a2 = a;
+        a2 += &b;
+        assert_eq!(a2, added);
+        let mut a2 = a;
+        a2 -= &b;
+        assert_eq!(a2, subtracted);
+        let mut a2 = a;
+        a2 *= &b;
+        assert_eq!(a2, multiplied);
+        let mut a2 = a;
+        a2 /= &b;
+        assert_eq!(a2, divided);
+    }
+
+    #[test]
     fn map() {
         let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
         let b = a.map(|x| x * 2.0);
