@@ -1,5 +1,5 @@
 [bans]
-multiple-versions = "allow"
+multiple-versions = "deny"
 deny = []
 skip-tree = [
     # ignore criterion dev-dependency that often have duplicate dependencies internally
@@ -7,15 +7,12 @@ skip-tree = [
 ]
 
 [licenses]
-unlicensed = "deny"
 allow = [
     "Apache-2.0",
-    "BSD-2-Clause",
+    "Apache-2.0 WITH LLVM-exception",
     "BSD-3-Clause",
-    "ISC",
     "MIT",
     "MIT-0",
-    "MPL-2.0",
     "Unicode-DFS-2016",
     "Zlib",
 ]
