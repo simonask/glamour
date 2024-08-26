@@ -21,12 +21,24 @@ use core::ops::Mul;
 /// 2D point.
 ///
 /// Alignment: Same as the scalar.
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Point2<T: Unit = f32> {
+pub struct Point2<U: Unit = f32> {
     /// X coordinate
-    pub x: T::Scalar,
+    pub x: U::Scalar,
     /// Y coordinate
-    pub y: T::Scalar,
+    pub y: U::Scalar,
 }
 
 // SAFETY: `T::Scalar` is `Zeroable`, and `Point2` is `#[repr(C)]`.
@@ -42,14 +54,26 @@ unsafe impl<T: Unit> Transparent for Point2<T> {
 ///
 /// Alignment: Same as the scalar (so not 16 bytes). If you really need 16-byte
 /// alignment, use [`Point4`].
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Point3<T: Unit = f32> {
+pub struct Point3<U: Unit = f32> {
     /// X coordinate
-    pub x: T::Scalar,
+    pub x: U::Scalar,
     /// Y coordinate
-    pub y: T::Scalar,
+    pub y: U::Scalar,
     /// Z coordinate
-    pub z: T::Scalar,
+    pub z: U::Scalar,
 }
 
 /// SAFETY: `T::Scalar` is `Zeroable`, and `Point3` is `#[repr(C)]`.
@@ -70,15 +94,27 @@ unsafe impl<T: Unit> Transparent for Point3<T> {
     not(any(feature = "scalar-math", target_arch = "spirv")),
     repr(C, align(16))
 )]
-pub struct Point4<T: Unit = f32> {
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
+pub struct Point4<U: Unit = f32> {
     /// X coordinate
-    pub x: T::Scalar,
+    pub x: U::Scalar,
     /// Y coordinate
-    pub y: T::Scalar,
+    pub y: U::Scalar,
     /// Z coordinate
-    pub z: T::Scalar,
+    pub z: U::Scalar,
     /// W coordinate
-    pub w: T::Scalar,
+    pub w: U::Scalar,
 }
 
 /// SAFETY: `T::Scalar` is `Zeroable`, and `Point4` is `#[repr(C)]`.

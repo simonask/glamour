@@ -65,6 +65,11 @@ let vector_raw: &glam::Vec4 = glamour::Transparent::peel_ref(&vector);
 - `scalar-math`: Don't use SIMD vector instructions, even if they are supported by the target architecture. Note that
   this flag is required to run tests under Miri, due to vector instructions not being supported. Transitively enables
   the `glam/scalar-math` feature.
+- `wasmtime`: **(Experimental)** This enables implementations of `Lower`/`Lift`
+  on all types so they can be used when generating bindings for WIT components.
+  Glamour types can be used on both sides (host and guest), and can be passed
+  "toll-free" between the two sides given a compatible type declaration in a WIT
+  document.
 
 # Advantages
 

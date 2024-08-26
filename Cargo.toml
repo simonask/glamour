@@ -1,3 +1,6 @@
+[workspace]
+members = ["tests/wasmtime-guest"]
+
 [package]
 name = "glamour"
 version = "0.13.0"
@@ -45,6 +48,16 @@ version = "^1.0"
 default-features = false
 optional = true
 
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies.wasmtime]
+version = "24.0"
+optional = true
+default-features = false
+features = ["runtime", "component-model"]
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies.wasmtime]
+version = "24.0"
+default-features = false
+features = ["runtime", "component-model", "cranelift"]
+
 [dependencies.mint]
 version = "^0.5"
 package = "mint"
@@ -75,8 +88,6 @@ serde = { version = "^1.0" }
 # Used for testing serialization
 serde_json = "1.0.82"
 serde_test = { version = "^1.0" }
-# Used for testing hashing. Using an old version because of MSRV.
-hashbrown = "=0.13.2"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 criterion = { version = "0.5.1", features = [

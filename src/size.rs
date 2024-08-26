@@ -9,12 +9,24 @@ use bytemuck::{Pod, Zeroable};
 use num_traits::{ConstOne, ConstZero};
 
 /// 2D size.
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Size2<T: Unit = f32> {
+pub struct Size2<U: Unit = f32> {
     /// Width
-    pub width: T::Scalar,
+    pub width: U::Scalar,
     /// Height
-    pub height: T::Scalar,
+    pub height: U::Scalar,
 }
 
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
@@ -26,14 +38,26 @@ unsafe impl<T: Unit> Transparent for Size2<T> {
 }
 
 /// 3D size.
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Size3<T: Unit = f32> {
+pub struct Size3<U: Unit = f32> {
     /// Width
-    pub width: T::Scalar,
+    pub width: U::Scalar,
     /// Height
-    pub height: T::Scalar,
+    pub height: U::Scalar,
     /// Depth
-    pub depth: T::Scalar,
+    pub depth: U::Scalar,
 }
 
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.

@@ -10,12 +10,24 @@ use crate::{
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Rect<T: Unit = f32> {
+pub struct Rect<U: Unit = f32> {
     /// Lower bound of the rect.
-    pub origin: Point2<T>,
+    pub origin: Point2<U>,
     /// Size of the rect.
-    pub size: Size2<T>,
+    pub size: Size2<U>,
 }
 
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`

@@ -48,11 +48,23 @@ pub trait Swizzle<T: Unit> {
 ///
 /// Alignment: Same as the scalar.
 #[repr(C)]
-pub struct Vector2<T: Unit = f32> {
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
+pub struct Vector2<U: Unit = f32> {
     /// X coordinate
-    pub x: T::Scalar,
+    pub x: U::Scalar,
     /// Y coordinate
-    pub y: T::Scalar,
+    pub y: U::Scalar,
 }
 
 /// SAFETY: `T::Scalar` is `Zeroable`, and `Vector2` is `#[repr(C)]`.
@@ -68,14 +80,26 @@ unsafe impl<T: Unit> Transparent for Vector2<T> {
 ///
 /// Alignment: Same as the scalar (so not 16 bytes). If you really need 16-byte
 /// alignment, use [`Vector4`].
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Vector3<T: Unit = f32> {
+pub struct Vector3<U: Unit = f32> {
     /// X coordinate
-    pub x: T::Scalar,
+    pub x: U::Scalar,
     /// Y coordinate
-    pub y: T::Scalar,
+    pub y: U::Scalar,
     /// Z coordinate
-    pub z: T::Scalar,
+    pub z: U::Scalar,
 }
 
 /// SAFETY: `T::Scalar` is `Zeroable`, and `Vector3` is `#[repr(C)]`.
@@ -100,15 +124,27 @@ unsafe impl<T: Unit> Transparent for Vector3<T> {
     not(any(feature = "scalar-math", target_arch = "spirv")),
     repr(C, align(16))
 )]
-pub struct Vector4<T: Unit = f32> {
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
+pub struct Vector4<U: Unit = f32> {
     /// X coordinate
-    pub x: T::Scalar,
+    pub x: U::Scalar,
     /// Y coordinate
-    pub y: T::Scalar,
+    pub y: U::Scalar,
     /// Z coordinate
-    pub z: T::Scalar,
+    pub z: U::Scalar,
     /// W coordinate
-    pub w: T::Scalar,
+    pub w: U::Scalar,
 }
 
 /// SAFETY: `T::Scalar` is `Zeroable`, and `Vector4` is `#[repr(C)]`.

@@ -1,0 +1,77 @@
+package glamour:wasmtime-guest@0.1.0;
+
+interface glamour {
+    record vector2 { x: f32, y: f32 }
+    record vector3 { x: f32, y: f32, z: f32 }
+    record vector4 { x: f32, y: f32, z: f32, w: f32 }
+    record point2 { x: f32, y: f32 }
+    record point3 { x: f32, y: f32, z: f32 }
+    record point4 { x: f32, y: f32, z: f32, w: f32 }
+    record size2 { width: f32, height: f32 }
+    record size3 { width: f32, height: f32, depth: f32 }
+
+    record ivector2 { x: s32, y: s32 }
+    record ivector3 { x: s32, y: s32, z: s32 }
+    record ivector4 { x: s32, y: s32, z: s32, w: s32 }
+    record ipoint2 { x: s32, y: s32 }
+    record ipoint3 { x: s32, y: s32, z: s32 }
+    record ipoint4 { x: s32, y: s32, z: s32, w: s32 }
+    record isize2 { width: s32, height: s32 }
+    record isize3 { width: s32, height: s32, depth: s32 }
+
+    record angle { radians: f32 }
+    record rect { origin: point2, size: size2 }
+    record box2 { min: point2, max: point2 }
+    record box3 { min: point3, max: point3 }
+
+    record mat3 { x-axis: vector3, y-axis: vector3, z-axis: vector3 }
+    record mat4 { x-axis: vector4, y-axis: vector4, z-axis: vector4, w-axis: vector4 }
+}
+
+interface client {
+    use glamour.{
+        vector2, vector3, vector4,
+        point2, point3, point4,
+        size2, size3,
+        ivector2, ivector3, ivector4,
+        ipoint2, ipoint3, ipoint4,
+        isize2, isize3,
+        angle, rect, box2, box3,
+        mat3, mat4,
+    };
+
+    record all {
+        vector2: vector2,
+        vector3: vector3,
+        vector4: vector4,
+        point2: point2,
+        point3: point3,
+        point4: point4,
+        size2: size2,
+        size3: size3,
+
+        ivector2: ivector2,
+        ivector3: ivector3,
+        ivector4: ivector4,
+        ipoint2: ipoint2,
+        ipoint3: ipoint3,
+        ipoint4: ipoint4,
+        isize2: isize2,
+        isize3: isize3,
+
+        angle: angle,
+        rect: rect,
+        box2: box2,
+        box3: box3,
+
+        mat3: mat3,
+        mat4: mat4,
+    }
+
+    roundtrip: func(all: all) -> all;
+}
+
+world default {
+    import glamour;
+    export client;
+}

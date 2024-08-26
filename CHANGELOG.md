@@ -53,6 +53,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `[lints]` section to Cargo.toml to prevent warnings about coverage
   attributes and `spirv` on Rust 1.80+.
 
+### Experimental
+
+- Experimental feature `wasmtime` derives `wasmtime::component::ComponentType`
+  for all types, such that they can be used verbatim in wasmtime hosts when
+  communicating with components. Both host and guest can map interface types
+  directly to glamour types, as long as the WIT record matches the layout of the
+  glamour types.
+
 ## [0.11.1] - 2024-03-26
 
 ### Fixed
