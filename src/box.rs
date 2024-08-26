@@ -10,12 +10,24 @@ use crate::{
 };
 
 /// 2D axis-aligned box represented as "min" and "max" points.
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Box2<T: Unit = f32> {
+pub struct Box2<U: Unit = f32> {
     /// Lower bound of the box.
-    pub min: Point2<T>,
+    pub min: Point2<U>,
     /// Upper bound of the box.
-    pub max: Point2<T>,
+    pub max: Point2<U>,
 }
 
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
@@ -24,12 +36,24 @@ unsafe impl<T: Unit> bytemuck::Pod for Box2<T> {}
 unsafe impl<T: Unit> bytemuck::Zeroable for Box2<T> {}
 
 /// 3D axis-aligned box.
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    derive(
+        wasmtime::component::ComponentType,
+        wasmtime::component::Lower,
+        wasmtime::component::Lift
+    )
+)]
+#[cfg_attr(
+    all(not(target_arch = "wasm32"), feature = "wasmtime"),
+    component(record)
+)]
 #[repr(C)]
-pub struct Box3<T: Unit = f32> {
+pub struct Box3<U: Unit = f32> {
     /// Lower bound of the box.
-    pub min: Point3<T>,
+    pub min: Point3<U>,
     /// Upper bound of the box.
-    pub max: Point3<T>,
+    pub max: Point3<U>,
 }
 
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
