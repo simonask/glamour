@@ -6,7 +6,7 @@ all: tests/wasmtime_guest.wasm
 wasi_snapshot_preview1.proxy.wasm:
 	curl -OLsS http://github.com/bytecodealliance/wasmtime/releases/download/v24.0.0/wasi_snapshot_preview1.proxy.wasm
 
-target/wasm32-wasip1/release/wasmtime_guest.wasm: tests/wasmtime-guest/src/lib.rs
+target/wasm32-wasip1/release/wasmtime_guest.wasm: tests/wasmtime-guest/src/lib.rs tests/wasmtime-guest/wit/world.wit
 	cargo build --release --target=wasm32-wasip1 -p wasmtime-guest
 
 tests/wasmtime_guest.wasm: target/wasm32-wasip1/release/wasmtime_guest.wasm wasi_snapshot_preview1.proxy.wasm
