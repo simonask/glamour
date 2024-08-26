@@ -1,3 +1,6 @@
+[workspace]
+members = ["tests/wasmtime-guest"]
+
 [package]
 name = "glamour"
 version = "0.13.0"
@@ -50,6 +53,10 @@ version = "24.0"
 optional = true
 default-features = false
 features = ["runtime", "component-model"]
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies.wasmtime]
+version = "24.0"
+default-features = false
+features = ["runtime", "component-model", "cranelift"]
 
 [dependencies.mint]
 version = "^0.5"

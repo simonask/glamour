@@ -56,8 +56,20 @@ unsafe impl<T: FloatScalar> Transparent for Matrix2<T> {
     component(record)
 )]
 pub struct Matrix3<U: Scalar> {
+    #[cfg_attr(
+        all(not(target_arch = "wasm32"), feature = "wasmtime"),
+        component(name = "x-axis")
+    )]
     pub x_axis: Vector3<U>,
+    #[cfg_attr(
+        all(not(target_arch = "wasm32"), feature = "wasmtime"),
+        component(name = "y-axis")
+    )]
     pub y_axis: Vector3<U>,
+    #[cfg_attr(
+        all(not(target_arch = "wasm32"), feature = "wasmtime"),
+        component(name = "z-axis")
+    )]
     pub z_axis: Vector3<U>,
 }
 
@@ -89,9 +101,25 @@ unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
     component(record)
 )]
 pub struct Matrix4<U: Scalar> {
+    #[cfg_attr(
+        all(not(target_arch = "wasm32"), feature = "wasmtime"),
+        component(name = "x-axis")
+    )]
     pub x_axis: Vector4<U>,
+    #[cfg_attr(
+        all(not(target_arch = "wasm32"), feature = "wasmtime"),
+        component(name = "y-axis")
+    )]
     pub y_axis: Vector4<U>,
+    #[cfg_attr(
+        all(not(target_arch = "wasm32"), feature = "wasmtime"),
+        component(name = "z-axis")
+    )]
     pub z_axis: Vector4<U>,
+    #[cfg_attr(
+        all(not(target_arch = "wasm32"), feature = "wasmtime"),
+        component(name = "w-axis")
+    )]
     pub w_axis: Vector4<U>,
 }
 
