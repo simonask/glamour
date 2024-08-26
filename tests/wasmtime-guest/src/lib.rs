@@ -17,6 +17,11 @@ pub mod types {
     pub type Isize2 = glamour::Size2<i32>;
     pub type Isize3 = glamour::Size3<i32>;
 
+    pub type Angle = glamour::Angle<f32>;
+    pub type Rect = glamour::Rect<f32>;
+    pub type Box2 = glamour::Box2<f32>;
+    pub type Box3 = glamour::Box3<f32>;
+
     pub type Mat2 = glamour::Matrix2<f32>;
     pub type Mat3 = glamour::Matrix3<f32>;
     pub type Mat4 = glamour::Matrix4<f32>;

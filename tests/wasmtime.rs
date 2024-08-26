@@ -23,6 +23,11 @@ pub mod types {
     pub type Isize2 = glamour::Size2<i32>;
     pub type Isize3 = glamour::Size3<i32>;
 
+    pub type Angle = glamour::Angle<f32>;
+    pub type Rect = glamour::Rect<f32>;
+    pub type Box2 = glamour::Box2<f32>;
+    pub type Box3 = glamour::Box3<f32>;
+
     pub type Mat2 = glamour::Matrix2<f32>;
     pub type Mat3 = glamour::Matrix3<f32>;
     pub type Mat4 = glamour::Matrix4<f32>;
@@ -78,6 +83,10 @@ fn roundtrip() {
         ipoint4: point![1, 2, 3, 4],
         isize2: size![1, 2],
         isize3: size![1, 2, 3],
+        angle: Angle::HALF_CIRCLE,
+        rect: Rect::new(point![1.0, 2.0], size![3.0, 4.0]),
+        box2: Box2::new(point![1.0, 2.0], point![3.0, 4.0]),
+        box3: Box3::new(point![1.0, 2.0, 3.0], point![4.0, 5.0, 6.0]),
         mat3: Matrix3::from_scale(vector![2.0, 3.0]),
         mat4: Matrix4::from_scale(vector![2.0, 3.0, 4.0]),
     };
@@ -102,6 +111,10 @@ fn roundtrip() {
     assert_eq!(all.ipoint4, ret.ipoint4);
     assert_eq!(all.isize2, ret.isize2);
     assert_eq!(all.isize3, ret.isize3);
+    assert_eq!(all.angle, ret.angle);
+    assert_eq!(all.rect, ret.rect);
+    assert_eq!(all.box2, ret.box2);
+    assert_eq!(all.box3, ret.box3);
     assert_eq!(all.mat3, ret.mat3);
     assert_eq!(all.mat4, ret.mat4);
 }

@@ -19,6 +19,11 @@ interface glamour {
     record isize2 { width: s32, height: s32 }
     record isize3 { width: s32, height: s32, depth: s32 }
 
+    record angle { radians: f32 }
+    record rect { origin: point2, size: size2 }
+    record box2 { min: point2, max: point2 }
+    record box3 { min: point3, max: point3 }
+
     record mat3 { x-axis: vector3, y-axis: vector3, z-axis: vector3 }
     record mat4 { x-axis: vector4, y-axis: vector4, z-axis: vector4, w-axis: vector4 }
 }
@@ -31,6 +36,7 @@ interface client {
         ivector2, ivector3, ivector4,
         ipoint2, ipoint3, ipoint4,
         isize2, isize3,
+        angle, rect, box2, box3,
         mat3, mat4,
     };
 
@@ -52,6 +58,11 @@ interface client {
         ipoint4: ipoint4,
         isize2: isize2,
         isize3: isize3,
+
+        angle: angle,
+        rect: rect,
+        box2: box2,
+        box3: box3,
 
         mat3: mat3,
         mat4: mat4,
