@@ -24,6 +24,7 @@ mod point;
 mod rect;
 mod scalar;
 mod size;
+mod swizzles;
 pub mod traits;
 
 mod compat;
@@ -35,6 +36,7 @@ mod vector;
 mod serialization;
 
 pub use angle::{Angle, AngleConsts, FloatAngleExt};
+pub use glam::{Vec2Swizzles, Vec3Swizzles, Vec4Swizzles};
 pub use matrix::{Matrix2, Matrix3, Matrix4};
 pub use point::{Point2, Point3, Point4};
 pub use r#box::{Box2, Box3};
@@ -66,8 +68,8 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use super::{
         Angle, AngleConsts as _, Box2, Box3, FloatAngleExt as _, Matrix2, Matrix3, Matrix4, Point2,
-        Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, Unit, Vector2, Vector3,
-        Vector4,
+        Point3, Point4, Rect, Scalar as _, Size2, Size3, Swizzle as _, Unit, Vec2Swizzles as _,
+        Vec3Swizzles as _, Vec4Swizzles as _, Vector2, Vector3, Vector4,
     };
     #[doc(no_inline)]
     pub use super::{Transform2, Transform3, TransformMap as _};
