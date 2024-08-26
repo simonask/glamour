@@ -4,6 +4,8 @@ deny = []
 skip-tree = [
     # ignore criterion dev-dependency that often have duplicate dependencies internally
     { name = "criterion" },
+    # wasmtime includes multiple versions of hashbrown via cranelift-codegen
+    { name = "hashbrown" },
 ]
 
 [licenses]
