@@ -3,7 +3,7 @@ members = ["tests/wasmtime-guest"]
 
 [package]
 name = "glamour"
-version = "0.13.0"
+version = "0.14.0"
 edition = "2021"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
