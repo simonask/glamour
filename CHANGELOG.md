@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `glamour` types can be used in bindings generated for a compatible WIT
   interface by both `wasmtime::component::bindgen!()` and
   `wit_bindgen::generate!()`, using the `with` configuration key.
+- Implemented `glam::Vec2Swizzles`, `glam::Vec3Swizzles`, and
+  `glam::Vec4Swizzles` for all vectorlike types. 4-component swizzles of `Size2`
+  and `Size3` map to `Vector4`.
 
 ## [0.13.0] - 2024-08-25
 
