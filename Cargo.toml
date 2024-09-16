@@ -3,7 +3,7 @@ members = ["tests/wasmtime-guest"]
 
 [package]
 name = "glamour"
-version = "0.14.0"
+version = "0.14.1"
 edition = "2021"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
@@ -11,19 +11,8 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/simonask/glamour"
 homepage = "https://docs.rs/glamour/latest/glamour/"
-keywords = [
-    "gamedev",
-    "math",
-    "matrix",
-    "vector",
-    "quaternion",
-]
-categories = [
-    "game-development",
-    "mathematics",
-    "graphics",
-    "no-std",
-]
+keywords = ["gamedev", "math", "matrix", "vector", "quaternion"]
+categories = ["game-development", "mathematics", "graphics", "no-std"]
 
 [badges]
 maintenance = { status = "actively-developed" }
@@ -90,9 +79,7 @@ serde_json = "1.0.82"
 serde_test = { version = "^1.0" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-criterion = { version = "0.5.1", features = [
-    "html_reports",
-] }
+criterion = { version = "0.5.1", features = ["html_reports"] }
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 wasm-bindgen-test = "0.3.0"
