@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- (Re-)added missing glam methods:
+  - `Vector3::cross()`
+  - `VectorN::dot_into_vec()`
+  - `VectorN::div_euclid()`
+  - `copysign()`
+  - `rem_euclid()`
+  - `MatrixN::mul_scalar()`, `div_scalar()`.
+  - `Matrix3::from_quat()`, `from_axis_angle()`, `from_rotation_x()`,
+    `from_rotation_y()`, `from_rotation_z()`.
+  - `Matrix4::look_to_lh()`, `look_to_rh()`.
+- Re-added convenience methods `as_raw()`, `to_raw()`, `from_raw()` for SIMD types that map
+  to glam `VecN` types.
+
+### Internal changes
+
+- Added some `#[expect(lint)]` annotations.
+
 ## [0.14.0] - 2024-08-27
 
 ### Added

@@ -805,6 +805,7 @@ mod tests {
     }
 
     #[test]
+    #[expect(clippy::op_ref)]
     fn ops_by_vector_ref() {
         let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
         let b = Vec4::new(1.0, 2.0, 3.0, 4.0);
@@ -841,6 +842,7 @@ mod tests {
     }
 
     #[test]
+    #[expect(clippy::op_ref)]
     fn ops_by_scalar_ref() {
         let a = Vec4::new(1.0, 2.0, 3.0, 4.0);
         let b = 2.0;
@@ -1042,7 +1044,7 @@ mod tests {
         let x = glam::Vec2::X;
         let rotate_by = glam::Vec2::from_angle(f32::FRAG_PI_2);
         let y = x.rotate(rotate_by);
-        assert_abs_diff_eq!(peel(rotated), y);
+        assert_abs_diff_eq!(rotated.to_raw(), y);
     }
 
     #[test]
@@ -1114,6 +1116,9 @@ mod tests {
         let mut vec = Vector4::<I32>::new(1, 2, 3, 4);
 
         let vec1: &glam::IVec4 = vec.as_ref();
+        assert_eq!(*vec1, glam::IVec4::new(1, 2, 3, 4));
+
+        let vec1: &glam::IVec4 = vec.as_raw();
         assert_eq!(*vec1, glam::IVec4::new(1, 2, 3, 4));
 
         let vec2: &mut glam::IVec4 = vec.as_mut();

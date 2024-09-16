@@ -47,12 +47,14 @@ macro_rules! impl_vector {
 
 pub trait SignedVector: Vector + Neg<Output = Self> {
     crate::interfaces::simd_signed_interface!(trait_decl);
+    crate::interfaces::vector_signed_interface!(trait_decl);
 }
 
 macro_rules! impl_signed_vector {
     ($glam_ty:ty) => {
         impl SignedVector for $glam_ty {
             crate::interfaces::simd_signed_interface!(trait_impl);
+            crate::interfaces::vector_signed_interface!(trait_impl);
         }
     };
 }

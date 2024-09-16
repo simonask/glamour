@@ -47,6 +47,22 @@ macro_rules! simdlike {
 
             /// The unit axes.
             pub const AXES: [Self; 2] = [Self::X, Self::Y];
+
+            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
+            #[inline(always)]
+            pub fn as_raw(&self) -> &<T::Scalar as crate::Scalar>::Vec2 {
+                crate::Transparent::peel_ref(self)
+            }
+            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
+            #[inline(always)]
+            pub fn to_raw(self) -> <T::Scalar as crate::Scalar>::Vec2 {
+                crate::Transparent::peel(self)
+            }
+            /// Convert a raw glam vector to this type. This is a zero-overhead cast.
+            #[inline(always)]
+            pub fn from_raw(vec: <T::Scalar as crate::Scalar>::Vec2) -> Self {
+                crate::Transparent::wrap(vec)
+            }
         }
         impl<T: crate::FloatUnit> $base_type_name<T> {
             /// All NaN.
@@ -116,6 +132,22 @@ macro_rules! simdlike {
 
             /// The unit axes.
             pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
+
+            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
+            #[inline(always)]
+            pub fn as_raw(&self) -> &<T::Scalar as crate::Scalar>::Vec3 {
+                crate::Transparent::peel_ref(self)
+            }
+            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
+            #[inline(always)]
+            pub fn to_raw(self) -> <T::Scalar as crate::Scalar>::Vec3 {
+                crate::Transparent::peel(self)
+            }
+            /// Convert a raw glam vector to this type. This is a zero-overhead cast.
+            #[inline(always)]
+            pub fn from_raw(vec: <T::Scalar as crate::Scalar>::Vec3) -> Self {
+                crate::Transparent::wrap(vec)
+            }
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             /// All negative one.
@@ -209,6 +241,22 @@ macro_rules! simdlike {
 
             /// The unit axes.
             pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
+
+            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
+            #[inline(always)]
+            pub fn as_raw(&self) -> &<T::Scalar as crate::Scalar>::Vec4 {
+                crate::Transparent::peel_ref(self)
+            }
+            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
+            #[inline(always)]
+            pub fn to_raw(self) -> <T::Scalar as crate::Scalar>::Vec4 {
+                crate::Transparent::peel(self)
+            }
+            /// Convert a raw glam vector to this type. This is a zero-overhead cast.
+            #[inline(always)]
+            pub fn from_raw(vec: <T::Scalar as crate::Scalar>::Vec4) -> Self {
+                crate::Transparent::wrap(vec)
+            }
         }
         impl<T: crate::SignedUnit> $base_type_name<T> {
             /// All negative one.
@@ -287,7 +335,9 @@ macro_rules! vectorlike {
         impl<T: crate::Unit> $base_type_name<T> {
             crate::interfaces::vector_base_interface!(struct);
         }
-
+        impl<T: crate::SignedUnit> $base_type_name<T> {
+            crate::interfaces::vector_signed_interface!(struct);
+        }
         impl<T: crate::FloatUnit> $base_type_name<T> {
             crate::interfaces::vector_float_interface!(struct);
         }
@@ -306,6 +356,7 @@ macro_rules! vectorlike {
     (@for_size $base_type_name:ident, 3) => {
         impl<T: crate::Unit> $base_type_name<T> {
             crate::interfaces::simd3_base_interface!(struct, vec2, vec4);
+            crate::interfaces::vector3_interface!(struct);
         }
         impl<T: crate::FloatUnit> $base_type_name<T> {
             crate::interfaces::vector3_float_interface!(struct);

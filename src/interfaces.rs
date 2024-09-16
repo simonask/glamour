@@ -39,6 +39,8 @@ macro_rules! vector_base_interface {
             $mode =>
             /// Dot product.
             fn dot(self, other: Self) -> scalar;
+            /// Returns a vector where every component is the dot product of `self` and `rhs`.
+            fn dot_into_vec(self, other: Self) -> Self;
         }
     };
 }
@@ -53,10 +55,31 @@ macro_rules! simd_signed_interface {
             fn signum(self) -> Self;
             /// Returns a vector containing the absolute value of each element of `self`.
             fn abs(self) -> Self;
+            /// Returns the element-wise remainder of Euclidean division of `self`` by `rhs`.
+            ///
+            /// ### Panics
+            ///
+            /// This function will panic if any `rhs` element is 0 or the division results in overflow.
+            fn rem_euclid(self, rhs: Self) -> Self;
         }
     };
 }
 pub(crate) use simd_signed_interface;
+
+macro_rules! vector_signed_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Returns the element-wise quotient of Euclidean division of `self`` by `rhs`.
+            ///
+            /// ### Panics
+            ///
+            /// This function will panic if any `rhs` element is 0 or the division results in overflow.
+            fn div_euclid(self, rhs: Self) -> Self;
+        }
+    };
+}
+pub(crate) use vector_signed_interface;
 
 /// Interface for all vectorlike things with integer components.
 macro_rules! vector_integer_interface {
@@ -119,6 +142,8 @@ macro_rules! simd_float_base_interface {
             fn recip(self) -> Self;
             #[doc = "Round all components."]
             fn round(self) -> Self;
+            /// Returns a vector with signs of `rhs` and the magnitudes of `self`.
+            fn copysign(self, rhs: Self) -> Self;
         }
     };
 }
@@ -425,6 +450,10 @@ macro_rules! matrix_base_interface {
             fn determinant(&self) -> scalar;
             /// Takes the absolute value of each element in `self`.
             fn abs(&self) -> Self;
+            /// Multiplies the matrix by a scalar.
+            fn mul_scalar(&self, rhs: scalar) -> Self;
+            /// Divides the matrix by a scalar.
+            fn div_scalar(&self, rhs: scalar) -> Self;
         }
     };
 }
@@ -539,6 +568,8 @@ macro_rules! matrix3_base_interface {
             ///
             /// See (e.g.) [`glam::Mat3::from_angle()`].
             fn from_angle(angle: angle) -> Self;
+            /// Creates a 3D rotation matrix from a normalized rotation `axis` and `angle`.
+            fn from_axis_angle(axis: vec3, angle: angle) -> Self;
             /// Creates an affine transformation matrix from the given 2D `translation`.
             ///
             /// See (e.g.) [`glam::Mat3::from_translation()`].
@@ -549,6 +580,14 @@ macro_rules! matrix3_base_interface {
             fn from_scale_angle_translation(scale: vec2, angle: angle, translation: vec2) -> Self;
             /// Creates a 3x3 matrix with its diagonal set to `diagonal` and all other entries set to 0.
             fn from_diagonal(diagonal: vec3) -> Self;
+            /// Creates a 3D rotation matrix from the given quaternion.
+            fn from_quat(rotation: quat) -> Self;
+            /// Creates a 3D rotation matrix from `angle` around the x axis.
+            fn from_rotation_x(angle: angle) -> Self;
+            /// Creates a 3D rotation matrix from `angle` around the y axis.
+            fn from_rotation_y(angle: angle) -> Self;
+            /// Creates a 3D rotation matrix from `angle` around the z axis.
+            fn from_rotation_z(angle: angle) -> Self;
         }
         // Split for recursion limit.
         crate::interface! {
@@ -666,6 +705,10 @@ macro_rules! matrix4_base_interface {
             fn look_at_lh(eye: point3, center: point3, up: vec3) -> Self;
             /// See (e.g.) [`glam::Mat4::look_at_rh()`].
             fn look_at_rh(eye: point3, center: point3, up: vec3) -> Self;
+            /// See (e.g.) [`glam::Mat4::look_to_lh()`].
+            fn look_to_lh(eye: point3, dir: vec3, up: vec3) -> Self;
+            /// See (e.g.) [`glam::Mat4::look_to_rh()`].
+            fn look_to_rh(eye: point3, dir: vec3, up: vec3) -> Self;
             /// See (e.g.) [`glam::Mat4::perspective_rh_gl()`].
             fn perspective_rh_gl(fov_y_radians: angle, aspect_ratio: scalar, z_near: scalar, z_far: scalar) -> Self;
             /// See (e.g.) [`glam::Mat4::perspective_lh()`].
@@ -709,6 +752,16 @@ macro_rules! matrix4_base_interface {
             ///
             /// Will panic if `rotation` is not normalized when `glam_assert` is enabled.
             fn from_quat(quat: quat) -> Self;
+            /// Creates a 3D rotation matrix from `angle` around the x axis.
+            fn from_rotation_x(angle: angle) -> Self;
+            /// Creates a 3D rotation matrix from `angle` around the y axis.
+            fn from_rotation_y(angle: angle) -> Self;
+            /// Creates a 3D rotation matrix from `angle` around the z axis.
+            fn from_rotation_z(angle: angle) -> Self;
+        }
+        // Split for recursion limit
+        crate::interface! {
+            $mode =>
             /// Create an affine transformation matrix from the given 3x3 linear transformation matrix.
             ///
             /// See (e.g.) [`glam::Mat4::from_mat3()`].
