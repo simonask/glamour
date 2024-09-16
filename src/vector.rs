@@ -1133,6 +1133,25 @@ mod tests {
         assert_eq!(*vec4, glam::IVec4::new(1, 100, 100, 4));
     }
 
+    #[test]
+    fn glam_raw_conversion() {
+        let v2 = Vector2::<f32>::new(1.0, 2.0);
+        let v3 = Vector3::<f32>::new(1.0, 2.0, 3.0);
+        let v4 = Vector4::<f32>::new(1.0, 2.0, 3.0, 4.0);
+
+        assert_eq!(v2.as_raw() as *const _, peel_ref(&v2) as *const _);
+        assert_eq!(v2.to_raw(), glam::Vec2::new(1.0, 2.0));
+        assert_eq!(v2, Vector2::from_raw(glam::Vec2::new(1.0, 2.0)));
+
+        assert_eq!(v3.as_raw() as *const _, peel_ref(&v3) as *const _);
+        assert_eq!(v3.to_raw(), glam::Vec3::new(1.0, 2.0, 3.0));
+        assert_eq!(v3, Vector3::from_raw(glam::Vec3::new(1.0, 2.0, 3.0)));
+
+        assert_eq!(v4.as_raw() as *const _, peel_ref(&v4) as *const _);
+        assert_eq!(v4.to_raw(), glam::Vec4::new(1.0, 2.0, 3.0, 4.0));
+        assert_eq!(v4, Vector4::from_raw(glam::Vec4::new(1.0, 2.0, 3.0, 4.0)));
+    }
+
     fn hash_one<T: core::hash::Hash, H: core::hash::BuildHasher>(
         build_hasher: &H,
         value: T,
