@@ -52,6 +52,7 @@ macro_rules! impl_vector {
                     has_uniform_min_alignment: false,
                     min_size: size,
                     extra: (),
+                    is_pod: true,
                 }
             };
         }
