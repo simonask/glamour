@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## Breaking changes
+### Fixes
 
+- `Vector4::ONE.w` was accidentally zero.
+
+### Breaking changes
 - Bumped `wasmtime` dependency to 29.x.
 
 ## [0.15.0] - 2024-10-12
 
-## Breaking changes
+### Breaking changes
 
 - Bumped `wasmtime` dependency to 25.0.
 - Bumped `encase` dependency to 0.10.

@@ -205,7 +205,7 @@ macro_rules! simdlike {
             /// All zeroes.
             pub const ZERO: Self = Self::new(T::Scalar::ZERO, T::Scalar::ZERO, T::Scalar::ZERO, T::Scalar::ZERO);
             /// All ones.
-            pub const ONE: Self = Self::new(T::Scalar::ONE, T::Scalar::ONE, T::Scalar::ONE, T::Scalar::ZERO);
+            pub const ONE: Self = Self::new(T::Scalar::ONE, T::Scalar::ONE, T::Scalar::ONE, T::Scalar::ONE);
 
             /// Unit vector in the direction of the X axis.
             pub const X: Self = Self::new(
