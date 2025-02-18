@@ -5,7 +5,7 @@ struct BufWriter<'a> {
     pos: usize,
 }
 
-impl<'a> core::fmt::Write for BufWriter<'a> {
+impl core::fmt::Write for BufWriter<'_> {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         let bytes = s.as_bytes();
         if self.buffer.len() < bytes.len() + self.pos {
