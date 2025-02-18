@@ -416,6 +416,8 @@ macro_rules! vector3_float_interface {
             fn any_orthonormal_vector(&self) -> Self;
             /// See (e.g.) [`glam::Vec3::any_orthonormal_pair()`].
             fn any_orthonormal_pair(&self) -> (Self, Self);
+            /// Performs a spherical linear interpolation between `self` and `rhs` based on the value `s`.
+            fn slerp(self, rhs: Self, s: scalar) -> Self;
         }
     };
 }
