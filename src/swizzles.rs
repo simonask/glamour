@@ -33,12 +33,46 @@ macro_rules! swizzle {
     };
 }
 
+macro_rules! swizzle_with {
+    (
+        $vec2:ident, $vec3:ident, $vec4:ident =>
+        $f:ident [$x_dst:ident = $x_src:ident, $y_dst:ident = $y_src:ident]
+    ) => {
+        fn $f(mut self, rhs: $vec2<T>) -> Self {
+            self.$x_dst = rhs.$x_src;
+            self.$y_dst = rhs.$y_src;
+            self
+        }
+    };
+    (
+        $vec2:ident, $vec3:ident, $vec4:ident =>
+        $f:ident [$x_dst:ident = $x_src:ident, $y_dst:ident = $y_src:ident, $z_dst:ident = $z_src:ident]
+    ) => {
+        fn $f(mut self, rhs: $vec3<T>) -> Self {
+            self.$x_dst = rhs.$x_src;
+            self.$y_dst = rhs.$y_src;
+            self.$z_dst = rhs.$z_src;
+            self
+        }
+    };
+}
+
 macro_rules! swizzles {
     ($vec2:ident, $vec3:ident, $vec4:ident => $(
         $f:ident [$($swizzle:ident),*]
     ),*) => {
         $(
             swizzle!($vec2, $vec3, $vec4 => $f [$($swizzle),*]);
+        )*
+    };
+}
+
+macro_rules! swizzles_with {
+    ($vec2:ident, $vec3:ident, $vec4:ident => $(
+        $f:ident [$($src:ident = $dst:ident),*]
+    ),*) => {
+        $(
+            swizzle_with!($vec2, $vec3, $vec4 => $f [$($src = $dst),*]);
         )*
     };
 }
@@ -87,6 +121,16 @@ macro_rules! swizzles3 {
         swizzles3!($vec2, $vec3, $vec4, x, y, z);
     };
     ($vec2:ident, $vec3:ident, $vec4:ident, $x:ident, $y:ident, $z:ident) => {
+        swizzles_with!(
+            $vec2, $vec3, $vec4 =>
+            with_xy[$x = $x, $y = $y],
+            with_xz[$x = $x, $z = $y],
+            with_yx[$y = $x, $x = $y],
+            with_yz[$y = $x, $z = $y],
+            with_zx[$z = $x, $x = $y],
+            with_zy[$z = $x, $y = $y]
+        );
+
         swizzles! {
             $vec2, $vec3, $vec4 =>
             xz[$x, $z],
@@ -184,6 +228,50 @@ macro_rules! swizzles3 {
 
 macro_rules! swizzles4 {
     ($vec2:ident, $vec3:ident, $vec4:ident) => {
+        swizzles_with!(
+            $vec2, $vec3, $vec4 =>
+            with_wx[w = x, x = y],
+            with_wy[w = x, y = y],
+            with_wz[w = x, z = y],
+            with_xw[x = x, w = y],
+            // with_xy[x = x, y = y],
+            // with_xz[x = x, z = y],
+            with_yw[y = x, w = y],
+            // with_yx[y = x, x = y],
+            // with_yz[y = x, z = y],
+            with_zw[z = x, w = y],
+            // with_zx[z = x, x = y],
+            // with_zy[z = x, y = y],
+
+            with_wxy[w = x, x = y, y = z],
+            with_wxz[w = x, x = y, z = z],
+            with_wyx[w = x, y = y, x = z],
+            with_wyz[w = x, y = y, z = z],
+            with_wzx[w = x, z = y, x = z],
+            with_wzy[w = x, z = y, y = z],
+
+            with_xwy[x = x, w = y, y = z],
+            with_xwz[x = x, w = y, z = z],
+            with_xyw[x = x, y = y, w = z],
+            with_xyz[x = x, y = y, z = z],
+            with_xzw[x = x, z = y, w = z],
+            with_xzy[x = x, z = y, y = z],
+
+            with_ywx[y = x, w = y, x = z],
+            with_yxw[y = x, x = y, w = z],
+            with_yzx[y = x, z = y, x = z],
+            with_yzw[y = x, z = y, w = z],
+            with_yxz[y = x, x = y, z = z],
+            with_ywz[y = x, w = y, z = z],
+
+            with_zwx[z = x, w = y, x = z],
+            with_zxw[z = x, x = y, w = z],
+            with_zxy[z = x, x = y, y = z],
+            with_zyx[z = x, y = y, x = z],
+            with_zwy[z = x, w = y, y = z],
+            with_zyw[z = x, y = y, w = z]
+        );
+
         swizzles! {
             $vec2, $vec3, $vec4 =>
             xw[x, w],

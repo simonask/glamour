@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Vector4::ONE.w` was accidentally zero.
 
 ### Breaking changes
+
+- Bumped `glam` to 0.30. [Changelog](https://github.com/bitshifter/glam-rs/blob/main/CHANGELOG.md#0300---2025-02-18).
 - Bumped `wasmtime` dependency to 29.x.
 
 ## [0.15.0] - 2024-10-12
