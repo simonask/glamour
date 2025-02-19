@@ -71,7 +71,6 @@ libm = ["glam/libm", "num-traits/libm"]
 
 [dev-dependencies]
 euclid = "^0.22"
-derive_more = "^0.99"
 bytemuck = { version = "^1.8", features = ["derive"] }
 serde = { version = "^1.0" }
 # Used for testing serialization
