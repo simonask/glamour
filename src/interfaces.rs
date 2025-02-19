@@ -796,6 +796,9 @@ macro_rules! matrix4_base_interface {
             fn to_cols_array_2d(&self) -> [[scalar; 4]; 4];
             /// Creates a 4x4 matrix from a `[T; 16]` array stored in column major order.
             fn from_cols_array(array: ref_scalar_array_16) -> Self;
+            /// Creates an affine transformation matrics from a 3x3 matrix (expressing scale, shear and rotation) and a
+            /// translation vector.
+            fn from_mat3_translation(mat3: mat3, translation: vec3) -> Self;
         }
     }
 }
