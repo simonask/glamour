@@ -228,6 +228,22 @@ macro_rules! point_float_interface {
 }
 pub(crate) use point_float_interface;
 
+/// Interface for all geometric point-like things with integer components.
+macro_rules! point_int_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Computes the manhattan distance between two points
+            fn manhattan_distance(self, other: Self) -> uscalar;
+            /// Computes the manhattan distance between two points
+            fn checked_manhattan_distance(self, other: Self) -> Option<uscalar>;
+            /// Compute the chebyshev distance between two points.
+            fn chebyshev_distance(self, other: Self) -> uscalar;
+        }
+    };
+}
+pub(crate) use point_int_interface;
+
 macro_rules! simd2_base_interface {
     ($mode:tt, $larger:tt) => {
         crate::interface! {
@@ -416,6 +432,8 @@ macro_rules! vector3_float_interface {
             fn any_orthonormal_vector(&self) -> Self;
             /// See (e.g.) [`glam::Vec3::any_orthonormal_pair()`].
             fn any_orthonormal_pair(&self) -> (Self, Self);
+            /// Performs a spherical linear interpolation between `self` and `rhs` based on the value `s`.
+            fn slerp(self, rhs: Self, s: scalar) -> Self;
         }
     };
 }
@@ -778,6 +796,9 @@ macro_rules! matrix4_base_interface {
             fn to_cols_array_2d(&self) -> [[scalar; 4]; 4];
             /// Creates a 4x4 matrix from a `[T; 16]` array stored in column major order.
             fn from_cols_array(array: ref_scalar_array_16) -> Self;
+            /// Creates an affine transformation matrics from a 3x3 matrix (expressing scale, shear and rotation) and a
+            /// translation vector.
+            fn from_mat3_translation(mat3: mat3, translation: vec3) -> Self;
         }
     }
 }

@@ -24,7 +24,7 @@ unexpected_cfgs = { level = "warn", check-cfg = [
 ] }
 
 [dependencies]
-glam = { version = "0.29.0", default-features = false, features = [
+glam = { version = "0.30.0", default-features = false, features = [
     "bytemuck",
     "approx",
 ] }

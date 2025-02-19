@@ -109,9 +109,8 @@ pub unsafe trait FloatScalar:
 }
 
 /// Integer scalar types.
-pub trait IntScalar:
-    Scalar<Vec2: bindings::IntegerVector, Vec3: bindings::IntegerVector, Vec4: bindings::IntegerVector>
-{
+pub trait IntScalar: Scalar + num_traits::PrimInt {
+    type Unsigned: IntScalar + num_traits::Unsigned;
 }
 
 unsafe impl Scalar for f32 {
@@ -160,7 +159,9 @@ unsafe impl Scalar for i16 {
     type Vec4 = glam::I16Vec4;
 }
 
-impl IntScalar for i16 {}
+impl IntScalar for i16 {
+    type Unsigned = u16;
+}
 
 impl SignedScalar for i16 {
     const NEG_ONE: Self = -1;
@@ -172,7 +173,9 @@ unsafe impl Scalar for i32 {
     type Vec4 = glam::IVec4;
 }
 
-impl IntScalar for i32 {}
+impl IntScalar for i32 {
+    type Unsigned = u32;
+}
 
 impl SignedScalar for i32 {
     const NEG_ONE: Self = -1;
@@ -184,7 +187,9 @@ unsafe impl Scalar for i64 {
     type Vec4 = glam::I64Vec4;
 }
 
-impl IntScalar for i64 {}
+impl IntScalar for i64 {
+    type Unsigned = u64;
+}
 
 impl SignedScalar for i64 {
     const NEG_ONE: Self = -1;
@@ -196,7 +201,9 @@ unsafe impl Scalar for u16 {
     type Vec4 = glam::U16Vec4;
 }
 
-impl IntScalar for u16 {}
+impl IntScalar for u16 {
+    type Unsigned = u16;
+}
 
 unsafe impl Scalar for u32 {
     type Vec2 = glam::UVec2;
@@ -204,7 +211,9 @@ unsafe impl Scalar for u32 {
     type Vec4 = glam::UVec4;
 }
 
-impl IntScalar for u32 {}
+impl IntScalar for u32 {
+    type Unsigned = u32;
+}
 
 unsafe impl Scalar for u64 {
     type Vec2 = glam::U64Vec2;
@@ -212,7 +221,9 @@ unsafe impl Scalar for u64 {
     type Vec4 = glam::U64Vec4;
 }
 
-impl IntScalar for u64 {}
+impl IntScalar for u64 {
+    type Unsigned = u64;
+}
 
 #[cfg(test)]
 mod tests {

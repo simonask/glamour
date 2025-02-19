@@ -1,4 +1,4 @@
-use crate::{scalar::IntScalar, FloatScalar, SignedScalar};
+use crate::{bindings, scalar::IntScalar, FloatScalar, SignedScalar};
 
 use super::Scalar;
 
@@ -39,8 +39,26 @@ pub trait Unit: 'static {
 ///
 /// Due to implied associated type bounds, this can be used in trait bounds to enable all integer operations in generic
 /// code.
-pub trait IntUnit: Unit<Scalar: IntScalar> {}
-impl<T> IntUnit for T where T: Unit<Scalar: IntScalar> {}
+pub trait IntUnit:
+    Unit<
+    Scalar: IntScalar<
+        Vec2: bindings::IntegerVector,
+        Vec3: bindings::IntegerVector,
+        Vec4: bindings::IntegerVector,
+    >,
+>
+{
+}
+impl<T> IntUnit for T where
+    T: Unit<
+        Scalar: IntScalar<
+            Vec2: bindings::IntegerVector,
+            Vec3: bindings::IntegerVector,
+            Vec4: bindings::IntegerVector,
+        >,
+    >
+{
+}
 
 /// Convenience trait implemented for all [`Unit`]s with a signed scalar type.
 ///

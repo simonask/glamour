@@ -2,7 +2,7 @@
 
 use core::ops::Neg;
 
-use crate::Scalar;
+use crate::{scalar::IntScalar, Scalar};
 
 use super::*;
 
@@ -59,14 +59,16 @@ macro_rules! impl_signed_vector {
     };
 }
 
-pub trait IntegerVector: Vector + core::hash::Hash {
+pub trait IntegerVector: Vector<Scalar: IntScalar> + core::hash::Hash {
     crate::interfaces::vector_integer_interface!(trait_decl);
+    crate::interfaces::point_int_interface!(trait_decl);
 }
 
 macro_rules! impl_integer_vector {
     ($glam_ty:ty) => {
         impl IntegerVector for $glam_ty {
             crate::interfaces::vector_integer_interface!(trait_impl);
+            crate::interfaces::point_int_interface!(trait_impl);
         }
     };
 }

@@ -415,6 +415,27 @@ mod tests {
     }
 
     #[test]
+    fn manhattan_distance() {
+        let a: Point3<i16> = point![1, 1, 1];
+        let b: Point3<i16> = point![2, 2, 2];
+        let d: u16 = a.manhattan_distance(b);
+        assert_eq!(d, 3);
+
+        let a: Point3<i16> = point![0, 0, 0];
+        let b: Point3<i16> = point![i16::MAX, i16::MAX, 2];
+        let d: Option<u16> = a.checked_manhattan_distance(b);
+        assert_eq!(d, None);
+    }
+
+    #[test]
+    fn chebyshev_distance() {
+        let a: Point3<i16> = point![1, 1, 1];
+        let b: Point3<i16> = point![2, 2, 3];
+        let d: u16 = a.chebyshev_distance(b);
+        assert_eq!(d, 2);
+    }
+
+    #[test]
     fn gaslight_coverage() {
         extern crate alloc;
         _ = alloc::format!("{:?}", Point2::<f32>::default());
