@@ -234,14 +234,8 @@ macro_rules! swizzles4 {
             with_wy[w = x, y = y],
             with_wz[w = x, z = y],
             with_xw[x = x, w = y],
-            // with_xy[x = x, y = y],
-            // with_xz[x = x, z = y],
             with_yw[y = x, w = y],
-            // with_yx[y = x, x = y],
-            // with_yz[y = x, z = y],
             with_zw[z = x, w = y],
-            // with_zx[z = x, x = y],
-            // with_zy[z = x, y = y],
 
             with_wxy[w = x, x = y, y = z],
             with_wxz[w = x, x = y, z = z],
@@ -574,5 +568,16 @@ mod tests {
         assert_eq!(s3.yx(), size2!(2.0, 1.0));
         assert_eq!(s3.zyx(), size3!(3.0, 2.0, 1.0));
         assert_eq!(s3.zyxy(), vec4![3.0, 2.0, 1.0, 2.0]);
+    }
+
+    #[test]
+    fn swizzle_with() {
+        let v3: Vector3<f32> = vec3![1.0, 2.0, 3.0];
+        let v3 = v3.with_xy(vec2![4.0, 5.0]);
+        assert_eq!(v3, vec3![4.0, 5.0, 3.0]);
+
+        let v4: Vector4<f32> = vec4![1.0, 2.0, 3.0, 4.0];
+        let v4 = v4.with_xyz(vec3![4.0, 5.0, 6.0]);
+        assert_eq!(v4, vec4![4.0, 5.0, 6.0, 4.0]);
     }
 }
