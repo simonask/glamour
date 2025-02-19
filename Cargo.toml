@@ -3,7 +3,7 @@ members = ["tests/wasmtime-guest"]
 
 [package]
 name = "glamour"
-version = "0.15.0"
+version = "0.16.0"
 edition = "2021"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
@@ -71,7 +71,6 @@ libm = ["glam/libm", "num-traits/libm"]
 
 [dev-dependencies]
 euclid = "^0.22"
-derive_more = "^0.99"
 bytemuck = { version = "^1.8", features = ["derive"] }
 serde = { version = "^1.0" }
 # Used for testing serialization
