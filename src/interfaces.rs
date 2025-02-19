@@ -228,6 +228,22 @@ macro_rules! point_float_interface {
 }
 pub(crate) use point_float_interface;
 
+/// Interface for all geometric point-like things with integer components.
+macro_rules! point_int_interface {
+    ($mode:tt) => {
+        crate::interface! {
+            $mode =>
+            /// Computes the manhattan distance between two points
+            fn manhattan_distance(self, other: Self) -> uscalar;
+            /// Computes the manhattan distance between two points
+            fn checked_manhattan_distance(self, other: Self) -> Option<uscalar>;
+            /// Compute the chebyshev distance between two points.
+            fn chebyshev_distance(self, other: Self) -> uscalar;
+        }
+    };
+}
+pub(crate) use point_int_interface;
+
 macro_rules! simd2_base_interface {
     ($mode:tt, $larger:tt) => {
         crate::interface! {

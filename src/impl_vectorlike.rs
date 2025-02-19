@@ -376,6 +376,9 @@ macro_rules! pointlike {
         impl<T: crate::FloatUnit> $base_type_name<T> {
             crate::interfaces::point_float_interface!(struct);
         }
+        impl<T: crate::IntUnit<Scalar: crate::scalar::IntScalar>> $base_type_name<T> {
+            crate::interfaces::point_int_interface!(struct);
+        }
     };
     (@for_size $base_type_name:ident, 2) => {
         impl<T: crate::Unit> $base_type_name<T> {
@@ -397,6 +400,7 @@ macro_rules! pointlike {
     };
 }
 pub(crate) use pointlike;
+
 macro_rules! sizelike {
     ($base_type_name:ident, $n:tt) => {
         crate::impl_vectorlike::simdlike!($base_type_name, $n);

@@ -250,11 +250,20 @@ macro_rules! forward_fn_assoc {
 ///
 /// The `struct` context is the public API of `glamour`.
 macro_rules! forward_ty {
+    ($mode:tt Option<$thing:tt>) => {
+        Option<crate::forward_ty!($mode $thing)>
+    };
     (trait scalar) => {
         Self::Scalar
     };
     (struct scalar) => {
         T::Scalar
+    };
+    (trait uscalar) => {
+        <Self::Scalar as crate::scalar::IntScalar>::Unsigned
+    };
+    (struct uscalar) => {
+        <T::Scalar as crate::scalar::IntScalar>::Unsigned
     };
     (trait angle) => {
         Self::Scalar
@@ -456,10 +465,16 @@ macro_rules! forward_arg {
 }
 
 macro_rules! wrap_ret_val {
+    (Option<$thing:tt> => $arg:expr) => {
+        $arg
+    };
     ($arg:expr) => {
         $arg
     };
     ( scalar => $arg:expr) => {
+        $arg
+    };
+    ( uscalar => $arg:expr) => {
         $arg
     };
     ( angle => $arg:expr) => {
