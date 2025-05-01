@@ -324,21 +324,50 @@ mod tests {
     type Point = super::Point3<f32>;
 
     #[test]
+    #[expect(clippy::op_ref)]
+    fn ops_by_scalar_ref() {
+        let a = Point::new(1.0, 2.0, 3.0);
+        let b = 2.0;
+        let added = a + b;
+        let subtracted = a - b;
+        let multiplied = a * b;
+
+        assert_eq!(a + &b, added);
+        assert_eq!(&a + b, added);
+        assert_eq!(&a + &b, added);
+        assert_eq!(b + &a, added);
+        assert_eq!(&b + a, added);
+        assert_eq!(&b + &a, added);
+        assert_eq!(a - &b, subtracted);
+        assert_eq!(&a - b, subtracted);
+        assert_eq!(&a - &b, subtracted);
+        assert_eq!(b - &a, subtracted);
+        assert_eq!(&b - a, subtracted);
+        assert_eq!(&b - &a, subtracted);
+        assert_eq!(a * &b, multiplied);
+        assert_eq!(&a * b, multiplied);
+        assert_eq!(&a * &b, multiplied);
+        assert_eq!(b * &a, multiplied);
+        assert_eq!(&b * a, multiplied);
+        assert_eq!(&b * &a, multiplied);
+
+        let mut a2 = a;
+        a2 += &b;
+        assert_eq!(a2, added);
+        let mut a2 = a;
+        a2 -= &b;
+        assert_eq!(a2, subtracted);
+        let mut a2 = a;
+        a2 *= &b;
+        assert_eq!(a2, multiplied);
+    }
+
+    #[test]
     fn subtraction_yields_vector() {
         let p = Point::ONE;
         let q = Point::ONE;
         let v: Vector3<f32> = q - p;
         assert_eq!(v, Vector3::<f32>::ZERO);
-    }
-
-    #[test]
-    fn not_scalable() {
-        let p = Point::default();
-
-        // This should not compile:
-        // let q = p * 2.0;
-
-        let _ = p;
     }
 
     #[test]
