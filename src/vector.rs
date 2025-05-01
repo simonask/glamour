@@ -779,28 +779,36 @@ mod tests {
             let x: DVec4 = vec4!(1.0, 2.0, 3.0, 4.0);
 
             let a = x * 2.0;
-            let b = x / 2.0;
+            let b = 2.0 * x;
+            let c = x / 2.0;
+            let d = 0.5 * x;
 
             assert_eq!(a, vec4!(2.0, 4.0, 6.0, 8.0));
-            assert_eq!(b, vec4!(0.5, 1.0, 1.5, 2.0));
+            assert_eq!(b, vec4!(2.0, 4.0, 6.0, 8.0));
+            assert_eq!(c, vec4!(0.5, 1.0, 1.5, 2.0));
+            assert_eq!(d, vec4!(0.5, 1.0, 1.5, 2.0));
         }
         {
             let x: IVec4 = vec4!(1, 2, 3, 4);
 
             let a = x * 2;
-            let b = x / 2;
+            let b = 2 * x;
+            let c = x / 2;
 
             assert_eq!(a, vec4!(2, 4, 6, 8));
-            assert_eq!(b, vec4!(0, 1, 1, 2));
+            assert_eq!(b, vec4!(2, 4, 6, 8));
+            assert_eq!(c, vec4!(0, 1, 1, 2));
         }
         {
             let x: UVec4 = vec4!(1, 2, 3, 4);
 
             let a = x * 2;
-            let b = x / 2;
+            let b = 2 * x;
+            let c = x / 2;
 
             assert_eq!(a, vec4!(2, 4, 6, 8));
-            assert_eq!(b, vec4!(0, 1, 1, 2));
+            assert_eq!(b, vec4!(2, 4, 6, 8));
+            assert_eq!(c, vec4!(0, 1, 1, 2));
         }
     }
 
@@ -854,12 +862,21 @@ mod tests {
         assert_eq!(a + &b, added);
         assert_eq!(&a + b, added);
         assert_eq!(&a + &b, added);
+        assert_eq!(b + &a, added);
+        assert_eq!(&b + a, added);
+        assert_eq!(&b + &a, added);
         assert_eq!(a - &b, subtracted);
         assert_eq!(&a - b, subtracted);
         assert_eq!(&a - &b, subtracted);
+        assert_eq!(b - &a, subtracted);
+        assert_eq!(&b - a, subtracted);
+        assert_eq!(&b - &a, subtracted);
         assert_eq!(a * &b, multiplied);
         assert_eq!(&a * b, multiplied);
         assert_eq!(&a * &b, multiplied);
+        assert_eq!(b * &a, multiplied);
+        assert_eq!(&b * a, multiplied);
+        assert_eq!(&b * &a, multiplied);
         assert_eq!(a / &b, divided);
         assert_eq!(&a / b, divided);
         assert_eq!(&a / &b, divided);
