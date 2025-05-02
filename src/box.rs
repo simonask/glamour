@@ -3,10 +3,9 @@
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{
-    rewrap,
+    IntUnit, Point2, Point3, Rect, Size2, Union, Unit, Vector2, rewrap,
     traits::{Contains, Intersection},
     unit::FloatUnit,
-    IntUnit, Point2, Point3, Rect, Size2, Union, Unit, Vector2,
 };
 
 /// 2D axis-aligned box represented as "min" and "max" points.

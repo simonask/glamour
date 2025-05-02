@@ -2,7 +2,7 @@
 
 use core::ops::Neg;
 
-use crate::{scalar::IntScalar, Scalar};
+use crate::{Scalar, scalar::IntScalar};
 
 use super::*;
 

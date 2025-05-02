@@ -4,9 +4,9 @@ use approx::AbsDiffEq;
 use num_traits::ConstZero;
 
 use crate::{
+    Box2, IntUnit, Point2, Size2, Unit, Vector2,
     traits::{Contains, Intersection, Union},
     unit::FloatUnit,
-    Box2, IntUnit, Point2, Size2, Unit, Vector2,
 };
 
 /// 2D axis-aligned rectangle represented as "origin" and "size".

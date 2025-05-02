@@ -16,8 +16,8 @@ use num_traits::identities::{ConstOne, ConstZero};
 
 use crate::scalar::FloatScalar;
 use crate::unit::FloatUnit;
-use crate::{bindings::prelude::*, Point2, Point3, Point4, Scalar, Size2, Size3, Unit};
-use crate::{peel, peel_ref, wrap, Transparent};
+use crate::{Point2, Point3, Point4, Scalar, Size2, Size3, Unit, bindings::prelude::*};
+use crate::{Transparent, peel, peel_ref, wrap};
 
 /// Vector swizzling by const generics.
 ///
@@ -411,9 +411,9 @@ impl<T: Unit> core::fmt::Debug for Vector4<T> {
 
 #[cfg(test)]
 mod tests {
-    use approx::{assert_abs_diff_eq, RelativeEq, UlpsEq};
+    use approx::{RelativeEq, UlpsEq, assert_abs_diff_eq};
 
-    use crate::{vec2, vec3, vec4, vector, Angle, AngleConsts};
+    use crate::{Angle, AngleConsts, vec2, vec3, vec4, vector};
 
     use super::*;
 
@@ -1049,7 +1049,7 @@ mod tests {
 
     #[test]
     fn matrix_mul_custom_unit() {
-        use crate::{vec3, Matrix3};
+        use crate::{Matrix3, vec3};
         let mat = Matrix3::<f32>::IDENTITY;
         let a: Vector3<F32> = vec3!(20.0, 30.0, 1.0);
         let b: Vector3<F32> = mat * a;

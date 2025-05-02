@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Breaking changes
+
+- Migrate to Edition 2024. This also bumps MSRV to Rust 1.85.0.
+- Updated `wasmtime` dependency to 32.0.
+- Bumped `encase` dependency to 0.11.
+
 ## [0.16.0] - 2025-02-19
 
 ### Fixes

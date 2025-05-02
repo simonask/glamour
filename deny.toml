@@ -2,10 +2,8 @@
 multiple-versions = "deny"
 deny = []
 skip-tree = [
-    # ignore criterion dev-dependency that often have duplicate dependencies internally
-    { name = "criterion" },
-    # wasmtime includes multiple versions of hashbrown via cranelift-codegen
-    { name = "hashbrown" },
+    # wasmtime includes multiple versions of rustix via memfd
+    { name = "rustix" },
 ]
 
 [licenses]

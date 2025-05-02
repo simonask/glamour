@@ -7,12 +7,13 @@
 use core::ops::{Div, DivAssign, Mul, MulAssign};
 
 use crate::{
+    Point2, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
     bindings::{Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4},
     peel, peel_ref,
     prelude::*,
     scalar::FloatScalar,
     unit::FloatUnit,
-    wrap, Point2, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
+    wrap,
 };
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use bytemuck::{Pod, Zeroable};
@@ -1122,7 +1123,9 @@ mod tests {
         );
         assert_eq!(
             DMat4::IDENTITY.to_rows_array(),
-            [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+            [
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0
+            ]
         );
     }
 
@@ -1296,29 +1299,35 @@ mod tests {
         assert!(!DMat3::NAN.is_finite());
         assert!(!DMat4::NAN.is_finite());
 
-        assert!(!DMat4::from_rows(
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, f64::NAN).into(),
-        )
-        .is_finite());
+        assert!(
+            !DMat4::from_rows(
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, f64::NAN).into(),
+            )
+            .is_finite()
+        );
 
-        assert!(!DMat4::from_rows(
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, f64::INFINITY).into(),
-        )
-        .is_finite());
+        assert!(
+            !DMat4::from_rows(
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, f64::INFINITY).into(),
+            )
+            .is_finite()
+        );
 
-        assert!(!DMat4::from_rows(
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, 1.0).into(),
-            (1.0, 1.0, 1.0, f64::NEG_INFINITY).into(),
-        )
-        .is_finite());
+        assert!(
+            !DMat4::from_rows(
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, 1.0).into(),
+                (1.0, 1.0, 1.0, f64::NEG_INFINITY).into(),
+            )
+            .is_finite()
+        );
     }
 
     #[test]
@@ -1542,7 +1551,10 @@ mod tests {
         let m4 = Mat4::IDENTITY;
 
         let s = alloc::format!("{m4:?}");
-        assert_eq!(s, "[(1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)]");
+        assert_eq!(
+            s,
+            "[(1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)]"
+        );
     }
 
     #[test]
