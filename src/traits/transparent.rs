@@ -44,7 +44,7 @@ pub unsafe trait Transparent: Pod {
             assert!(align_of::<Self::Wrapped>() <= align_of::<Self>());
         }
 
-        unsafe { &*(x as *const Self).cast() }
+        unsafe { &*core::ptr::from_ref::<Self>(x).cast() }
     }
 
     /// Convert a mutable reference to the inner type.
@@ -56,7 +56,7 @@ pub unsafe trait Transparent: Pod {
             assert!(align_of::<Self::Wrapped>() <= align_of::<Self>());
         }
 
-        unsafe { &mut *(x as *mut Self).cast() }
+        unsafe { &mut *core::ptr::from_mut::<Self>(x).cast() }
     }
 }
 
