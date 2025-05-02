@@ -4,7 +4,7 @@ members = ["tests/wasmtime-guest"]
 [package]
 name = "glamour"
 version = "0.16.0"
-edition = "2021"
+edition = "2024"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
 readme = "README.md"

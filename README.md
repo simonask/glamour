@@ -2,7 +2,7 @@
 
 [![Build Status]][github-ci] [![codecov-badge]][codecov]
 [![Latest Version]][crates.io] [![docs]][docs.rs]
-[![Minimum Supported Rust Version]][Rust 1.79.0]
+[![Minimum Supported Rust Version]][Rust 1.85.0]
 
 This crate uses [bytemuck][] to implement a zero-cost[^1] strongly typed
 interface on top of [glam][].
@@ -146,11 +146,7 @@ let vector_raw: &glam::Vec4 = glamour::Transparent::peel_ref(&vector);
   performant) to drop down to `glam` types when needed.
 - Hiding the `glam` API. It's OK to use `glam` types in public APIs.
 - The "`AoSoA`" pattern ("extra wide" vector types). Use [ultraviolet][uv]
-  instead`[^use_`uv].
-
-    library are actually compatible with the non-wide vector types in
-    Ultraviolet, so it may actually just work (using `bytemuck::cast()` and
-    friends), but no guarantees.
+  instead.
 
 [uv]: https://docs.rs/ultraviolet/latest/ultraviolet/
 [nalgebra]: https://docs.rs/nalgebra/latest/nalgebra/
@@ -178,4 +174,4 @@ builds.
 [docs]: https://docs.rs/glamour/badge.svg
 [docs.rs]: https://docs.rs/glamour/
 [Minimum Supported Rust Version]: https://img.shields.io/badge/Rust-1.79.0-blue?color=fc8d62&logo=rust
-[Rust 1.79.0]: https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1790-2024-06-13
+[Rust 1.85.0]: https://releases.rs/docs/1.85.0/
