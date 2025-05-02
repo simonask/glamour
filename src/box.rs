@@ -1586,6 +1586,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::many_single_char_names)]
     fn intersection_box3() {
         type Box3 = super::Box3<f32>;
         let x = Box3::new((10.0, 10.0, 10.0).into(), (20.0, 20.0, 20.0).into());
