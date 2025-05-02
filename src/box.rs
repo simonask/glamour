@@ -3,7 +3,9 @@
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::{
-    rewrap, traits::{Contains, Intersection}, unit::FloatUnit, IntUnit, Point2, Point3, Rect, Size2, Size3, Union, Unit, Vector2, Vector3
+    IntUnit, Point2, Point3, Rect, Size2, Size3, Union, Unit, Vector2, Vector3, rewrap,
+    traits::{Contains, Intersection},
+    unit::FloatUnit,
 };
 
 /// 2D axis-aligned box represented as "min" and "max" points.
@@ -357,10 +359,7 @@ impl<T: Unit> Box3<T> {
 
     ///  Create from origin and size.
     #[must_use]
-    pub fn from_origin_and_size(
-        origin: Point3<T>,
-        size: Size3<T>,
-    ) -> Self {
+    pub fn from_origin_and_size(origin: Point3<T>, size: Size3<T>) -> Self {
         Box3 {
             min: origin,
             max: origin + size.to_vector(),
