@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Support for `u8` and `i8` scalars, mapping to `glam::U8Vec{N}` and `glam::I8Vec{N}`.
+
 ### Breaking changes
 
 - Migrate to Edition 2024. This also bumps MSRV to Rust 1.85.0.

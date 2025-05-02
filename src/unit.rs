@@ -82,12 +82,20 @@ impl Unit for f64 {
     type Scalar = f64;
 }
 
+impl Unit for i8 {
+    type Scalar = i8;
+}
+
 impl Unit for i16 {
     type Scalar = i16;
 }
 
 impl Unit for i32 {
     type Scalar = i32;
+}
+
+impl Unit for u8 {
+    type Scalar = u8;
 }
 
 impl Unit for u16 {
