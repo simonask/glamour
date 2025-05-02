@@ -173,5 +173,5 @@ builds.
 [crates.io]: https://crates.io/crates/glamour/
 [docs]: https://docs.rs/glamour/badge.svg
 [docs.rs]: https://docs.rs/glamour/
-[Minimum Supported Rust Version]: https://img.shields.io/badge/Rust-1.79.0-blue?color=fc8d62&logo=rust
+[Minimum Supported Rust Version]: https://img.shields.io/badge/Rust-1.85.0-blue?color=fc8d62&logo=rust
 [Rust 1.85.0]: https://releases.rs/docs/1.85.0/
