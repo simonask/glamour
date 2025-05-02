@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support for `u8` and `i8` scalars, mapping to `glam::U8Vec{N}` and `glam::I8Vec{N}`.
+- Implement right-hand side scalar `Add`, `Sub`, and `Mul` (#69).
 
 ### Breaking changes
 
