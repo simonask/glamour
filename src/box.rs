@@ -1188,6 +1188,28 @@ mod tests {
     }
 
     #[test]
+    fn from_min_max_box3() {
+        let b = Box3::from_min_max(Point3::ZERO, Point3::new(1.0, 2.0, 3.0));
+        assert_eq!(b.min, Point3::ZERO);
+        assert_eq!(b.max, Point3::new(1.0, 2.0, 3.0));
+
+        let b = Box3::from_min_max(Point3::new(1.0, 2.0, 3.0), Point3::ZERO);
+        assert_eq!(b.min, Point3::ZERO);
+        assert_eq!(b.max, Point3::new(1.0, 2.0, 3.0));
+    }
+
+    #[test]
+    fn from_origin_and_size_box3() {
+        let b = Box3::from_origin_and_size(Point3::ZERO, Size3::new(1.0, 2.0, 3.0));
+        assert_eq!(b.min, Point3::ZERO);
+        assert_eq!(b.max, Point3::new(1.0, 2.0, 3.0));
+
+        let b = Box3::from_size(Size3::new(1.0, 2.0, 3.0));
+        assert_eq!(b.min, Point3::ZERO);
+        assert_eq!(b.max, Point3::new(1.0, 2.0, 3.0));
+    }
+
+    #[test]
     fn from_array() {
         let array = [Point2::ZERO, Point2::ONE];
         let b = Box2::from_array(array);
