@@ -2,16 +2,17 @@
 multiple-versions = "deny"
 deny = []
 skip-tree = [
-    # ignore criterion dev-dependency that often have duplicate dependencies internally
-    { name = "criterion" },
-    # wasmtime includes multiple versions of hashbrown via cranelift-codegen
-    { name = "hashbrown" },
+    # wasmtime includes multiple versions of rustix via memfd
+    { name = "rustix" },
 ]
 
 [licenses]
 allow = [
     "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-3-Clause",
     "MIT",
+    "MIT-0",
     "Unicode-3.0",
     "Zlib",
 ]
