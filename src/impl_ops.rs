@@ -57,12 +57,14 @@ pub(crate) use vector_ops;
 macro_rules! point_ops {
     ($point_type_name:ident, $vector_type_name:ident) => {
         crate::impl_ops::impl_ops! {
+            Add<$point_type_name>::add for $point_type_name -> $point_type_name;
             Add<$vector_type_name>::add for $point_type_name -> $point_type_name;
             Sub<$point_type_name>::sub for $point_type_name -> $vector_type_name;
             Sub<$vector_type_name>::sub for $point_type_name -> $point_type_name;
             Rem<$point_type_name>::rem for $point_type_name -> $vector_type_name;
         }
         crate::impl_ops::impl_assign_ops! {
+            AddAssign<$point_type_name>::add_assign for $point_type_name;
             AddAssign<$vector_type_name>::add_assign for $point_type_name;
             SubAssign<$vector_type_name>::sub_assign for $point_type_name;
             RemAssign<$vector_type_name>::rem_assign for $point_type_name;
@@ -74,7 +76,35 @@ macro_rules! point_ops {
                 crate::wrap(core::ops::Neg::neg(crate::peel(self)))
             }
         }
+
+        // Need specific impls for each scalar types because the scalar is an associated type,
+        // so the compiler would think that the trait impls could overlap.
+        crate::impl_ops::point_ops!(@scalar $point_type_name, [f32, f64, i32, u32, i64, u64, i16, u16]);
     };
+
+    (@scalar $base_type_name:ident, [$($scalar:ident),*]) => {
+        $(
+            crate::impl_ops::impl_scalar_ops! {
+                Add<$scalar>::add for $base_type_name -> $base_type_name;
+                Sub<$scalar>::sub for $base_type_name -> $base_type_name;
+                Mul<$scalar>::mul for $base_type_name -> $base_type_name;
+                Div<$scalar>::div for $base_type_name -> $base_type_name;
+                Rem<$scalar>::rem for $base_type_name -> $base_type_name;
+            }
+            crate::impl_ops::impl_scalar_ops_rhs! {
+                Add<$scalar>::add for $base_type_name -> $base_type_name;
+                Sub<$scalar>::sub for $base_type_name -> $base_type_name;
+                Mul<$scalar>::mul for $base_type_name -> $base_type_name;
+            }
+            crate::impl_ops::impl_scalar_assign_ops! {
+                AddAssign<$scalar>::add_assign for $base_type_name;
+                SubAssign<$scalar>::sub_assign for $base_type_name;
+                MulAssign<$scalar>::mul_assign for $base_type_name;
+                DivAssign<$scalar>::div_assign for $base_type_name;
+                RemAssign<$scalar>::rem_assign for $base_type_name;
+            }
+        )*
+    }
 }
 pub(crate) use point_ops;
 

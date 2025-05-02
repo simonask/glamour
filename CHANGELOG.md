@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for `u8` and `i8` scalars, mapping to `glam::U8Vec{N}` and `glam::I8Vec{N}`.
 - Implement right-hand side scalar `Add`, `Sub`, and `Mul` (#69).
+- Implement scalar `Point` operations (#71).
 - Implement `Mul<Vector{2,3}>` and `Mul<Point{2,3}>` for `Matrix{3,4}`.
 
 ### Breaking changes
