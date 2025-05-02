@@ -1,8 +1,8 @@
 //! Size vectors
 
 use crate::{
-    bindings::prelude::*, rewrap, scalar::FloatScalar, unit::FloatUnit, Scalar, Transparent, Unit,
-    Vector2, Vector3,
+    Scalar, Transparent, Unit, Vector2, Vector3, bindings::prelude::*, rewrap, scalar::FloatScalar,
+    unit::FloatUnit,
 };
 
 use bytemuck::{Pod, Zeroable};
@@ -255,17 +255,21 @@ mod tests {
         assert!(!Size2::<f32>::ONE.is_empty());
         assert!(!Size3::<f32>::ONE.is_empty());
 
-        assert!(Size2::<f32> {
-            width: 0.0,
-            height: 1.0
-        }
-        .is_empty());
-        assert!(Size3::<f32> {
-            width: 0.0,
-            height: 1.0,
-            depth: 1.0
-        }
-        .is_empty());
+        assert!(
+            Size2::<f32> {
+                width: 0.0,
+                height: 1.0
+            }
+            .is_empty()
+        );
+        assert!(
+            Size3::<f32> {
+                width: 0.0,
+                height: 1.0,
+                depth: 1.0
+            }
+            .is_empty()
+        );
     }
 
     #[test]

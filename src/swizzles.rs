@@ -539,7 +539,7 @@ impl<T: Unit> glam::Vec3Swizzles for Size3<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{size2, size3, vec2, vec3, vec4, Vec2Swizzles, Vec3Swizzles, Vec4Swizzles};
+    use crate::{Vec2Swizzles, Vec3Swizzles, Vec4Swizzles, size2, size3, vec2, vec3, vec4};
 
     use super::*;
 

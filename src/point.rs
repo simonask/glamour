@@ -13,8 +13,8 @@ use bytemuck::{Pod, Zeroable};
 use num_traits::{ConstOne, ConstZero};
 
 use crate::{
-    bindings::prelude::*, peel, rewrap, scalar::FloatScalar, unit::FloatUnit, wrap, Scalar,
-    Transparent, Unit, Vector2, Vector3, Vector4,
+    Scalar, Transparent, Unit, Vector2, Vector3, Vector4, bindings::prelude::*, peel, rewrap,
+    scalar::FloatScalar, unit::FloatUnit, wrap,
 };
 use core::ops::Mul;
 

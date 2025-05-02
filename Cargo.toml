@@ -4,7 +4,7 @@ members = ["tests/wasmtime-guest"]
 [package]
 name = "glamour"
 version = "0.16.0"
-edition = "2021"
+edition = "2024"
 description = "Strongly typed linear algebra with glam"
 authors = ["Simon Ask Ulsnes <simon@ulsnes.dk>"]
 readme = "README.md"
@@ -38,12 +38,12 @@ default-features = false
 optional = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.wasmtime]
-version = "29.0"
+version = "32.0"
 optional = true
 default-features = false
 features = ["runtime", "component-model"]
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies.wasmtime]
-version = "29.0"
+version = "32.0"
 default-features = false
 features = ["runtime", "component-model", "cranelift"]
 
@@ -53,7 +53,7 @@ package = "mint"
 optional = true
 
 [dependencies.encase]
-version = "0.10.0"
+version = "0.11.0"
 optional = true
 
 [features]

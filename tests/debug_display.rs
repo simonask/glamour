@@ -1,4 +1,4 @@
-use glamour::{prelude::*, Unit};
+use glamour::{Unit, prelude::*};
 
 struct BufWriter<'a> {
     buffer: &'a mut [u8],

@@ -5,8 +5,8 @@ use bytemuck::{Pod, Zeroable};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
 use crate::{
-    bindings::Quat, peel, scalar::FloatScalar, traits::marker::PodValue, Scalar, Transparent, Unit,
-    Vector3,
+    Scalar, Transparent, Unit, Vector3, bindings::Quat, peel, scalar::FloatScalar,
+    traits::marker::PodValue,
 };
 
 /// Angle in radians.

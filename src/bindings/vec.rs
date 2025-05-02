@@ -2,7 +2,7 @@
 
 use core::ops::Neg;
 
-use crate::{scalar::IntScalar, Scalar};
+use crate::{Scalar, scalar::IntScalar};
 
 use super::*;
 
@@ -156,6 +156,12 @@ impl_vector!(glam::Vec4, f32, BVec4);
 impl_vector!(glam::DVec2, f64, BVec2);
 impl_vector!(glam::DVec3, f64, BVec3);
 impl_vector!(glam::DVec4, f64, BVec4);
+impl_vector!(glam::I8Vec2, i8, BVec2);
+impl_vector!(glam::I8Vec3, i8, BVec3);
+impl_vector!(glam::I8Vec4, i8, BVec4);
+impl_vector!(glam::U8Vec2, u8, BVec2);
+impl_vector!(glam::U8Vec3, u8, BVec3);
+impl_vector!(glam::U8Vec4, u8, BVec4);
 impl_vector!(glam::I16Vec2, i16, BVec2);
 impl_vector!(glam::I16Vec3, i16, BVec3);
 impl_vector!(glam::I16Vec4, i16, BVec4);
@@ -177,6 +183,8 @@ impl_vector!(glam::U64Vec4, u64, BVec4);
 
 impl_vector2!(glam::Vec2, glam::Vec3);
 impl_vector2!(glam::DVec2, glam::DVec3);
+impl_vector2!(glam::I8Vec2, glam::I8Vec3);
+impl_vector2!(glam::U8Vec2, glam::U8Vec3);
 impl_vector2!(glam::I16Vec2, glam::I16Vec3);
 impl_vector2!(glam::U16Vec2, glam::U16Vec3);
 impl_vector2!(glam::IVec2, glam::IVec3);
@@ -186,6 +194,8 @@ impl_vector2!(glam::U64Vec2, glam::U64Vec3);
 
 impl_vector3!(glam::Vec3, glam::Vec2, glam::Vec4);
 impl_vector3!(glam::DVec3, glam::DVec2, glam::DVec4);
+impl_vector3!(glam::I8Vec3, glam::I8Vec2, glam::I8Vec4);
+impl_vector3!(glam::U8Vec3, glam::U8Vec2, glam::U8Vec4);
 impl_vector3!(glam::I16Vec3, glam::I16Vec2, glam::I16Vec4);
 impl_vector3!(glam::U16Vec3, glam::U16Vec2, glam::U16Vec4);
 impl_vector3!(glam::IVec3, glam::IVec2, glam::IVec4);
@@ -194,6 +204,8 @@ impl_vector3!(glam::I64Vec3, glam::I64Vec2, glam::I64Vec4);
 impl_vector3!(glam::U64Vec3, glam::U64Vec2, glam::U64Vec4);
 
 impl_vector4!(glam::DVec4, glam::DVec3);
+impl_vector4!(glam::I8Vec4, glam::I8Vec3);
+impl_vector4!(glam::U8Vec4, glam::U8Vec3);
 impl_vector4!(glam::I16Vec4, glam::I16Vec3);
 impl_vector4!(glam::U16Vec4, glam::U16Vec3);
 impl_vector4!(glam::IVec4, glam::IVec3);
@@ -207,6 +219,9 @@ impl_signed_vector!(glam::Vec4);
 impl_signed_vector!(glam::DVec2);
 impl_signed_vector!(glam::DVec3);
 impl_signed_vector!(glam::DVec4);
+impl_signed_vector!(glam::I8Vec2);
+impl_signed_vector!(glam::I8Vec3);
+impl_signed_vector!(glam::I8Vec4);
 impl_signed_vector!(glam::I16Vec2);
 impl_signed_vector!(glam::I16Vec3);
 impl_signed_vector!(glam::I16Vec4);
@@ -226,6 +241,9 @@ impl_integer_vector!(glam::UVec4);
 impl_integer_vector!(glam::U64Vec2);
 impl_integer_vector!(glam::U64Vec3);
 impl_integer_vector!(glam::U64Vec4);
+impl_integer_vector!(glam::I8Vec2);
+impl_integer_vector!(glam::I8Vec3);
+impl_integer_vector!(glam::I8Vec4);
 impl_integer_vector!(glam::I16Vec2);
 impl_integer_vector!(glam::I16Vec3);
 impl_integer_vector!(glam::I16Vec4);
@@ -278,6 +296,9 @@ impl SignedVector2 for glam::Vec2 {
     crate::interfaces::vector2_signed_interface!(trait_impl);
 }
 impl SignedVector2 for glam::DVec2 {
+    crate::interfaces::vector2_signed_interface!(trait_impl);
+}
+impl SignedVector2 for glam::I8Vec2 {
     crate::interfaces::vector2_signed_interface!(trait_impl);
 }
 impl SignedVector2 for glam::I16Vec2 {
