@@ -1217,7 +1217,6 @@ mod tests {
         let _: &[f32; 6] = b.as_scalar_array();
         let _: &mut [f32; 6] = b.as_scalar_array_mut();
         let _: [f32; 6] = b.to_scalar_array();
-
     }
 
     #[test]
@@ -1244,13 +1243,15 @@ mod tests {
         let b = Box3::from_points(empty);
         assert_eq!(b, Box3::ZERO);
 
-        let b = Box3::from_points([
-            (0.1, 1.0, 2.0),
-            (1.0, 2.0, 3.0),
-            (0.0, 2.0, 4.0),
-            (0.5, 0.5, 5.0),
-        ]
-        .map(Point3::from));
+        let b = Box3::from_points(
+            [
+                (0.1, 1.0, 2.0),
+                (1.0, 2.0, 3.0),
+                (0.0, 2.0, 4.0),
+                (0.5, 0.5, 5.0),
+            ]
+            .map(Point3::from),
+        );
 
         assert_abs_diff_eq!(
             b,
@@ -1650,7 +1651,6 @@ mod tests {
             let s = Box3::new((11.0, 19.0, 19.0).into(), (19.0, 30.0, 30.0).into());
             let sw = Box3::new((0.0, 19.0, 19.0).into(), (11.0, 30.0, 30.0).into());
             let w = Box3::new((0.0, 11.0, 11.0).into(), (11.0, 19.0, 19.0).into());
-
 
             assert!(nw.intersects(&x));
             assert!(n.intersects(&x));
