@@ -611,7 +611,10 @@ where
     }
 }
 
-impl<T> Mul<Vector3<T>> for Matrix4<T::Scalar> where T: FloatUnit {
+impl<T> Mul<Vector3<T>> for Matrix4<T::Scalar>
+where
+    T: FloatUnit,
+{
     type Output = Vector3<T>;
 
     #[inline]
@@ -621,7 +624,10 @@ impl<T> Mul<Vector3<T>> for Matrix4<T::Scalar> where T: FloatUnit {
     }
 }
 
-impl<T> Mul<Point3<T>> for Matrix4<T::Scalar> where T: FloatUnit {
+impl<T> Mul<Point3<T>> for Matrix4<T::Scalar>
+where
+    T: FloatUnit,
+{
     type Output = Point3<T>;
 
     #[inline]
