@@ -153,6 +153,20 @@ unsafe impl FloatScalar for f64 {
     const NEG_INFINITY: Self = f64::NEG_INFINITY;
 }
 
+unsafe impl Scalar for i8 {
+    type Vec2 = glam::I8Vec2;
+    type Vec3 = glam::I8Vec3;
+    type Vec4 = glam::I8Vec4;
+}
+
+impl IntScalar for i8 {
+    type Unsigned = u8;
+}
+
+impl SignedScalar for i8 {
+    const NEG_ONE: Self = -1;
+}
+
 unsafe impl Scalar for i16 {
     type Vec2 = glam::I16Vec2;
     type Vec3 = glam::I16Vec3;
@@ -193,6 +207,16 @@ impl IntScalar for i64 {
 
 impl SignedScalar for i64 {
     const NEG_ONE: Self = -1;
+}
+
+unsafe impl Scalar for u8 {
+    type Vec2 = glam::U8Vec2;
+    type Vec3 = glam::U8Vec3;
+    type Vec4 = glam::U8Vec4;
+}
+
+impl IntScalar for u8 {
+    type Unsigned = u8;
 }
 
 unsafe impl Scalar for u16 {
