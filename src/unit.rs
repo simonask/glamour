@@ -1,4 +1,4 @@
-use crate::{bindings, scalar::IntScalar, FloatScalar, SignedScalar};
+use crate::{FloatScalar, SignedScalar, bindings, scalar::IntScalar};
 
 use super::Scalar;
 

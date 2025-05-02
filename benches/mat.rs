@@ -1,7 +1,7 @@
 use glam::*;
 use glamour::prelude::*;
 
-use criterion::{black_box, criterion_group, criterion_main, Bencher, Criterion};
+use criterion::{Bencher, Criterion, black_box, criterion_group, criterion_main};
 
 struct MyUnit;
 impl Unit for MyUnit {

@@ -36,10 +36,10 @@ mod vector;
 mod serialization;
 
 pub use angle::{Angle, AngleConsts, FloatAngleExt};
+pub use r#box::{Box2, Box3};
 pub use glam::{Vec2Swizzles, Vec3Swizzles, Vec4Swizzles};
 pub use matrix::{Matrix2, Matrix3, Matrix4};
 pub use point::{Point2, Point3, Point4};
-pub use r#box::{Box2, Box3};
 pub use rect::Rect;
 pub use scalar::{FloatScalar, Scalar, SignedScalar};
 pub use size::{Size2, Size3};
@@ -56,10 +56,10 @@ mod impl_traits;
 mod impl_vectorlike;
 mod interfaces;
 
-#[doc(hidden)]
-pub use traits::{peel, peel_mut, peel_ref, rewrap, wrap};
 #[doc(no_inline)]
 pub use traits::{Contains, Intersection, Transparent, Union};
+#[doc(hidden)]
+pub use traits::{peel, peel_mut, peel_ref, rewrap, wrap};
 
 /// Convenience glob import.
 ///
@@ -371,35 +371,53 @@ mod tests {
 
     #[test]
     fn try_cast() {
-        assert!(Vector4::<f32>::new(f32::MAX, 0.0, 1.0, 2.0)
-            .try_cast::<i32>()
-            .is_none());
-        assert!(Vector4::<f32>::new(0.0, f32::MAX, 1.0, 2.0)
-            .try_cast::<i32>()
-            .is_none());
-        assert!(Vector4::<f32>::new(0.0, 0.0, f32::MAX, 0.0)
-            .try_cast::<i32>()
-            .is_none());
-        assert!(Vector4::<f32>::new(0.0, 0.0, 0.0, f32::MAX)
-            .try_cast::<i32>()
-            .is_none());
+        assert!(
+            Vector4::<f32>::new(f32::MAX, 0.0, 1.0, 2.0)
+                .try_cast::<i32>()
+                .is_none()
+        );
+        assert!(
+            Vector4::<f32>::new(0.0, f32::MAX, 1.0, 2.0)
+                .try_cast::<i32>()
+                .is_none()
+        );
+        assert!(
+            Vector4::<f32>::new(0.0, 0.0, f32::MAX, 0.0)
+                .try_cast::<i32>()
+                .is_none()
+        );
+        assert!(
+            Vector4::<f32>::new(0.0, 0.0, 0.0, f32::MAX)
+                .try_cast::<i32>()
+                .is_none()
+        );
 
-        assert!(Vector3::<f32>::new(f32::MAX, 0.0, 1.0)
-            .try_cast::<i32>()
-            .is_none());
-        assert!(Vector3::<f32>::new(0.0, f32::MAX, 1.0)
-            .try_cast::<i32>()
-            .is_none());
-        assert!(Vector3::<f32>::new(0.0, 0.0, f32::MAX)
-            .try_cast::<i32>()
-            .is_none());
+        assert!(
+            Vector3::<f32>::new(f32::MAX, 0.0, 1.0)
+                .try_cast::<i32>()
+                .is_none()
+        );
+        assert!(
+            Vector3::<f32>::new(0.0, f32::MAX, 1.0)
+                .try_cast::<i32>()
+                .is_none()
+        );
+        assert!(
+            Vector3::<f32>::new(0.0, 0.0, f32::MAX)
+                .try_cast::<i32>()
+                .is_none()
+        );
 
-        assert!(Vector2::<f32>::new(f32::MAX, 0.0)
-            .try_cast::<i32>()
-            .is_none());
-        assert!(Vector2::<f32>::new(0.0, f32::MAX)
-            .try_cast::<i32>()
-            .is_none());
+        assert!(
+            Vector2::<f32>::new(f32::MAX, 0.0)
+                .try_cast::<i32>()
+                .is_none()
+        );
+        assert!(
+            Vector2::<f32>::new(0.0, f32::MAX)
+                .try_cast::<i32>()
+                .is_none()
+        );
 
         let v = Vector4::<f32>::new(3.0, 0.0, 1.0, 2.0);
         let t: Option<Vector4<i32>> = v.try_cast();

@@ -2,7 +2,7 @@
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
-use glamour::{prelude::*, traits::marker::PodValue, Unit};
+use glamour::{Unit, prelude::*, traits::marker::PodValue};
 
 //
 // A whole bunch of traits that exist to check if a type implements its

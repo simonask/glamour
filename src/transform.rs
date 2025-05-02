@@ -8,12 +8,12 @@ use core::ops::Mul;
 use core::{fmt::Debug, marker::PhantomData};
 
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
-use bytemuck::{cast, Pod, Zeroable};
+use bytemuck::{Pod, Zeroable, cast};
 
 use crate::peel;
 use crate::{
-    bindings::prelude::*, scalar::FloatScalar, Angle, Matrix3, Matrix4, Point2, Point3,
-    Transparent, Unit, Vector2, Vector3,
+    Angle, Matrix3, Matrix4, Point2, Point3, Transparent, Unit, Vector2, Vector3,
+    bindings::prelude::*, scalar::FloatScalar,
 };
 
 /// 2D transform represented as a 3x3 column-major matrix.
