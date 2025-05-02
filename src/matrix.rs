@@ -493,6 +493,32 @@ where
     }
 }
 
+impl<T> Mul<Vector2<T>> for Matrix3<T::Scalar>
+where
+    T: FloatUnit,
+{
+    type Output = Vector2<T>;
+
+    #[inline]
+    #[must_use]
+    fn mul(self, rhs: Vector2<T>) -> Self::Output {
+        self.transform_vector2(rhs.to_untyped()).cast()
+    }
+}
+
+impl<T> Mul<Point2<T>> for Matrix3<T::Scalar>
+where
+    T: FloatUnit,
+{
+    type Output = Point2<T>;
+
+    #[inline]
+    #[must_use]
+    fn mul(self, rhs: Point2<T>) -> Self::Output {
+        self.transform_point2(rhs.to_untyped()).cast()
+    }
+}
+
 impl<T> Mul<Vector3<T>> for Matrix3<T::Scalar>
 where
     T: FloatUnit,
@@ -582,6 +608,32 @@ where
     #[must_use]
     fn mul(self, rhs: Vector4<T>) -> Self::Output {
         wrap(peel(self).mul_vec4(peel(rhs)))
+    }
+}
+
+impl<T> Mul<Vector3<T>> for Matrix4<T::Scalar>
+where
+    T: FloatUnit,
+{
+    type Output = Vector3<T>;
+
+    #[inline]
+    #[must_use]
+    fn mul(self, rhs: Vector3<T>) -> Self::Output {
+        self.transform_vector3(rhs.to_untyped()).cast()
+    }
+}
+
+impl<T> Mul<Point3<T>> for Matrix4<T::Scalar>
+where
+    T: FloatUnit,
+{
+    type Output = Point3<T>;
+
+    #[inline]
+    #[must_use]
+    fn mul(self, rhs: Point3<T>) -> Self::Output {
+        self.transform_point3(rhs.to_untyped()).cast()
     }
 }
 
@@ -1739,5 +1791,42 @@ mod tests {
         assert_eq!(m3, Mat3::IDENTITY);
         let m4 = Mat4::from_diagonal(vec4!(1.0, 1.0, -1.0, -1.0)).abs();
         assert_eq!(m4, Mat4::IDENTITY);
+    }
+
+    enum F32 {}
+    impl Unit for F32 {
+        type Scalar = f32;
+    }
+
+    #[test]
+    fn transform_point3() {
+        let m = Matrix4::from_translation(vec3![1.0, 1.0, 1.0]);
+        let p: Point3<F32> = point3!(1.0, 2.0, 3.0);
+        let p2 = m * p;
+        assert_eq!(p2, Point3::new(2.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn transform_vector3() {
+        let m = Matrix4::from_translation(vec3![1.0, 1.0, 1.0]);
+        let p: Vector3<F32> = vec3!(1.0, 2.0, 3.0);
+        let p2 = m * p;
+        assert_eq!(p2, p);
+    }
+
+    #[test]
+    fn transform_point2() {
+        let m = Matrix3::from_translation(vec2![1.0, 1.0]);
+        let p: Point2<F32> = point2!(1.0, 2.0);
+        let p2 = m * p;
+        assert_eq!(p2, Point2::new(2.0, 3.0));
+    }
+
+    #[test]
+    fn transform_vector2() {
+        let m = Matrix3::from_translation(vec2![1.0, 1.0]);
+        let p: Vector2<F32> = vec2!(1.0, 2.0);
+        let p2 = m * p;
+        assert_eq!(p2, p);
     }
 }
