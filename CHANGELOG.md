@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrate to Edition 2024. This also bumps MSRV to Rust 1.85.0.
 - Updated `wasmtime` dependency to 32.0.
 - Bumped `encase` dependency to 0.11.
+- `Box2::center()` is now only implemented for floating-point units. In return,
+  it is now implemented in terms of `glam::Vec2::midpoint()`, which yields
+  better codegen.
 
 ## [0.16.0] - 2025-02-19
 

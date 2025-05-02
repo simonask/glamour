@@ -269,14 +269,6 @@ impl<T: Unit> Box2<T> {
         self + by
     }
 
-    /// Get the center of the box.
-    #[inline]
-    #[must_use]
-    pub fn center(&self) -> Point2<T> {
-        let v = (self.max - self.min) / (Vector2::ONE + Vector2::ONE);
-        self.min + v
-    }
-
     /// Get the size of the box (`max - min`).
     #[inline]
     #[must_use]
@@ -433,6 +425,18 @@ impl<T: Unit> Union<Box2<T>> for Box2<T> {
 }
 
 impl<T: FloatUnit> Box2<T> {
+    /// Get the center of the box.
+    ///
+    /// This is equivalent to `min.midpoint(max)`.
+    #[must_use]
+    pub fn center(self) -> Point2<T> {
+        // let v = (self.max - self.min) / (Vector2::ONE + Vector2::ONE);
+        // self.min + v
+        // let half = Vector2::ONE / (Vector2::ONE + Vector2::ONE);
+        // ((self.min + self.max).to_vector() * half).to_point()
+        self.min.midpoint(self.max)
+    }
+
     /// Round coordinates to the nearest integer.
     ///
     /// Note: This function makes no attempt to avoid creating "degenerate"
