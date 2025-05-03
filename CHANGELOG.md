@@ -13,12 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement right-hand side scalar `Add`, `Sub`, and `Mul` (#69).
 - Implement scalar `Point` operations (#71).
 - Implement `Mul<Vector{2,3}>` and `Mul<Point{2,3}>` for `Matrix{3,4}`.
+- Implemented all the methods that exist on `Box2` for `Box3` as well.
 
 ### Breaking changes
 
 - Migrate to Edition 2024. This also bumps MSRV to Rust 1.85.0.
 - Updated `wasmtime` dependency to 32.0.
 - Bumped `encase` dependency to 0.11.
+- `Box2::center()` is now only implemented for floating-point units. In return,
+  it is now implemented in terms of `glam::Vec2::midpoint()`, which yields
+  better codegen.
 
 ## [0.16.0] - 2025-02-19
 
