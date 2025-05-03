@@ -21,6 +21,7 @@ use crate::{
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 #[repr(C)]
 pub struct Box2<U: Unit = f32> {
     /// Lower bound of the box.
@@ -47,6 +48,7 @@ unsafe impl<T: Unit> bytemuck::Zeroable for Box2<T> {}
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 #[repr(C)]
 pub struct Box3<U: Unit = f32> {
     /// Lower bound of the box.

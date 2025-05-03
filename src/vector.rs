@@ -60,6 +60,7 @@ pub trait Swizzle<T: Unit> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Vector2<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,
@@ -92,6 +93,7 @@ unsafe impl<T: Unit> Transparent for Vector2<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 #[repr(C)]
 pub struct Vector3<U: Unit = f32> {
     /// X coordinate
@@ -136,6 +138,7 @@ unsafe impl<T: Unit> Transparent for Vector3<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Vector4<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,

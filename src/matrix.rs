@@ -25,6 +25,7 @@ use bytemuck::{Pod, Zeroable};
 /// Alignment: Always 16-byte aligned.
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 // #[cfg_attr(feature = "wasmtime", derive(wasmtime::component::ComponentType))]
 // #[cfg_attr(feature = "wasmtime", component(record))]
 pub struct Matrix2<T: Scalar>(Vector4<T>);
@@ -56,6 +57,7 @@ unsafe impl<T: FloatScalar> Transparent for Matrix2<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Matrix3<U: Scalar> {
     #[cfg_attr(
         all(not(target_arch = "wasm32"), feature = "wasmtime"),
@@ -101,6 +103,7 @@ unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Matrix4<U: Scalar> {
     #[cfg_attr(
         all(not(target_arch = "wasm32"), feature = "wasmtime"),

@@ -72,6 +72,10 @@ let vector_raw: &glam::Vec4 = glamour::Transparent::peel_ref(&vector);
   compatible type declaration in a WIT world, but limitations apply: Due to the
   way the `wasmtime` derive macros work, only plain scalar units can be used (so
   `Vector4<f32>` is supported, but not `Vector4<MyFloatUnit>`).
+- `facet`: **(Experimental)** Adds support for
+  [`facet`](https://docs.rs/facet/latest/facet/) to all types.
+
+[`wasmtime::component::bindgen!()`]: https://docs.rs/wasmtime/latest/wasmtime/component/macro.bindgen.html
 
 # Advantages
 

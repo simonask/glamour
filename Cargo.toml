@@ -31,6 +31,8 @@ glam = { version = "0.30.0", default-features = false, features = [
 bytemuck = { version = "^1.8", default-features = false }
 num-traits = { version = "^0.2.19", default-features = false }
 approx = "^0.5"
+facet = { version = "0.18.4", optional = true, default-features = false }
+facet-derive = { version = "0.18.4", optional = true }
 
 [dependencies.serde]
 version = "^1.0"
@@ -62,6 +64,7 @@ std = ["glam/std", "num-traits/std"]
 scalar-math = ["glam/scalar-math"]
 serde = ["dep:serde", "glam/serde"]
 core-simd = ["glam/core-simd"]
+facet = ["dep:facet", "dep:facet-derive"]
 
 # Enable conversions to `mint` types
 mint = ["dep:mint", "glam/mint"]

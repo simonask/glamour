@@ -24,6 +24,7 @@ use crate::{
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Angle<U: Scalar = f32> {
     /// Angle in radians.
     pub radians: U,
@@ -152,7 +153,7 @@ impl<T: Scalar + AngleConsts> core::fmt::Debug for Angle<T> {
 
 impl<T> Unit for Angle<T>
 where
-    T: Scalar + AngleConsts,
+    T: Scalar + AngleConsts + crate::traits::marker::Facet<'static>,
 {
     type Scalar = T;
 }
