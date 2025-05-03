@@ -60,6 +60,7 @@ pub trait Swizzle<T: Unit> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Vector2<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,
@@ -92,6 +93,7 @@ unsafe impl<T: Unit> Transparent for Vector2<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 #[repr(C)]
 pub struct Vector3<U: Unit = f32> {
     /// X coordinate
@@ -136,6 +138,7 @@ unsafe impl<T: Unit> Transparent for Vector3<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Vector4<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,
@@ -412,6 +415,7 @@ impl<T: Unit> core::fmt::Debug for Vector4<T> {
 #[cfg(test)]
 mod tests {
     use approx::{RelativeEq, UlpsEq, assert_abs_diff_eq};
+    use core::ptr;
 
     use crate::{Angle, AngleConsts, vec2, vec3, vec4, vector};
 
@@ -757,6 +761,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::many_single_char_names)]
     fn scaling_by_scalar() {
         // Test that vector types can be multiplied/divided by their
         // (unsplatted) scalar. This doesn't work in generic code, but it should
@@ -1156,27 +1161,17 @@ mod tests {
         let v3 = Vector3::<f32>::new(1.0, 2.0, 3.0);
         let v4 = Vector4::<f32>::new(1.0, 2.0, 3.0, 4.0);
 
-        assert_eq!(v2.as_raw() as *const _, peel_ref(&v2) as *const _);
+        assert!(ptr::eq(v2.as_raw(), peel_ref(&v2)));
         assert_eq!(v2.to_raw(), glam::Vec2::new(1.0, 2.0));
         assert_eq!(v2, Vector2::from_raw(glam::Vec2::new(1.0, 2.0)));
 
-        assert_eq!(v3.as_raw() as *const _, peel_ref(&v3) as *const _);
+        assert!(ptr::eq(v3.as_raw(), peel_ref(&v3)));
         assert_eq!(v3.to_raw(), glam::Vec3::new(1.0, 2.0, 3.0));
         assert_eq!(v3, Vector3::from_raw(glam::Vec3::new(1.0, 2.0, 3.0)));
 
-        assert_eq!(v4.as_raw() as *const _, peel_ref(&v4) as *const _);
+        assert!(ptr::eq(v4.as_raw(), peel_ref(&v4)));
         assert_eq!(v4.to_raw(), glam::Vec4::new(1.0, 2.0, 3.0, 4.0));
         assert_eq!(v4, Vector4::from_raw(glam::Vec4::new(1.0, 2.0, 3.0, 4.0)));
-    }
-
-    fn hash_one<T: core::hash::Hash, H: core::hash::BuildHasher>(
-        build_hasher: &H,
-        value: T,
-    ) -> u64 {
-        use core::hash::Hasher;
-        let mut h = build_hasher.build_hasher();
-        value.hash(&mut h);
-        h.finish()
     }
 
     #[derive(Default)]
@@ -1196,9 +1191,10 @@ mod tests {
 
     #[test]
     fn hash_equality() {
+        use core::hash::BuildHasher;
         let hasher = core::hash::BuildHasherDefault::<PoorHasher>::default();
-        let h1 = hash_one(&hasher, Vector2::<i32> { x: 123, y: 456 });
-        let h2 = hash_one(&hasher, glam::IVec2::new(123, 456));
+        let h1 = hasher.hash_one(Vector2::<i32> { x: 123, y: 456 });
+        let h2 = hasher.hash_one(glam::IVec2::new(123, 456));
         assert_eq!(h1, h2);
     }
 

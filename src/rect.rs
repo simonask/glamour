@@ -22,6 +22,7 @@ use crate::{
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 #[repr(C)]
 pub struct Rect<U: Unit = f32> {
     /// Lower bound of the rect.

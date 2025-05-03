@@ -34,6 +34,7 @@ use core::ops::Mul;
     component(record)
 )]
 #[repr(C)]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Point2<U: Unit = f32> {
     /// X coordinate
     pub x: U::Scalar,
@@ -66,6 +67,7 @@ unsafe impl<T: Unit> Transparent for Point2<T> {
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 #[repr(C)]
 pub struct Point3<U: Unit = f32> {
     /// X coordinate

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement scalar `Point` operations (#71).
 - Implement `Mul<Vector{2,3}>` and `Mul<Point{2,3}>` for `Matrix{3,4}`.
 - Implemented all the methods that exist on `Box2` for `Box3` as well.
+- Experimental support for [`facet`](https://docs.rs/facet/latest/facet/).
 
 ### Breaking changes
 

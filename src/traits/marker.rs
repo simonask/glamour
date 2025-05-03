@@ -61,3 +61,13 @@ impl<T> WasmComponentType for T where
 }
 #[cfg(any(target_arch = "wasm32", not(feature = "wasmtime")))]
 impl<T> WasmComponentType for T {}
+
+#[cfg(feature = "facet")]
+#[doc(no_inline)]
+pub use facet::Facet;
+
+/// Marker trait for when `#[cfg(feature = "facet")]` is not enabled.
+#[cfg(not(feature = "facet"))]
+pub trait Facet<'a> {}
+#[cfg(not(feature = "facet"))]
+impl<'a, T: 'a> Facet<'a> for T {}

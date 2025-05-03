@@ -21,6 +21,7 @@ use num_traits::{ConstOne, ConstZero};
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     component(record)
 )]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 #[repr(C)]
 pub struct Size2<U: Unit = f32> {
     /// Width
@@ -51,6 +52,7 @@ unsafe impl<T: Unit> Transparent for Size2<T> {
     component(record)
 )]
 #[repr(C)]
+#[cfg_attr(feature = "facet", derive(facet_derive::Facet))]
 pub struct Size3<U: Unit = f32> {
     /// Width
     pub width: U::Scalar,

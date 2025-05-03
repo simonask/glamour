@@ -32,7 +32,7 @@ use super::Scalar;
 pub trait Unit: 'static {
     /// One of the vector component types of glam: `f32`, `f64`, `i32`, or
     /// `u32`.
-    type Scalar: Scalar;
+    type Scalar: Scalar + crate::traits::marker::Facet<'static>;
 }
 
 /// Convenience trait implemented for all [`Unit`]s with an integer scalar type.
