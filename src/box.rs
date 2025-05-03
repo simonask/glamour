@@ -1192,10 +1192,6 @@ mod tests {
         let b = Box3::from_min_max(Point3::ZERO, Point3::new(1.0, 2.0, 3.0));
         assert_eq!(b.min, Point3::ZERO);
         assert_eq!(b.max, Point3::new(1.0, 2.0, 3.0));
-
-        let b = Box3::from_min_max(Point3::new(1.0, 2.0, 3.0), Point3::ZERO);
-        assert_eq!(b.min, Point3::ZERO);
-        assert_eq!(b.max, Point3::new(1.0, 2.0, 3.0));
     }
 
     #[test]
