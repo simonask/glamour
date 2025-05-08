@@ -9,3 +9,8 @@ path = "lib.rs"
 
 [dependencies]
 glamour.path = ".."
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(coverage,coverage_nightly)',
+] }

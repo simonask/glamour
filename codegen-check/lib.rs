@@ -10,6 +10,8 @@
 //! Note that the `#[inline(never)]` is required to force the compiler to
 //! generate the symbol.
 
+#![cfg_attr(coverage, coverage(off))]
+
 use glamour::Vector4;
 
 #[inline(never)]
