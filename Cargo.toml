@@ -1,5 +1,5 @@
 [workspace]
-members = ["tests/wasmtime-guest"]
+members = [ "codegen-check","tests/wasmtime-guest"]
 
 [package]
 name = "glamour"

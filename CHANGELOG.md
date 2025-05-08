@@ -20,7 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `glam::U8Vec4` has alignment 1. In general, it is brittle to rely on the
   specific alignment of `glam` vector types, because they are highly
   architecture dependent, and it is unlikely that it gains anything, because
-  unaligned vector register loads are no longer slow.
+  unaligned vector register loads are no longer slow (with AVX, the `vaddps`
+  instruction supports unaligned loads natively).
 
 ## [0.17.0] - 2025-05-03
 
