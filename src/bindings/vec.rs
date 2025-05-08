@@ -26,6 +26,8 @@ pub trait Vector:
     + DivAssign<Self>
     + Rem<Self, Output = Self>
     + RemAssign<Self>
+    + core::iter::Sum
+    + core::iter::Product
     + for<'a> core::iter::Sum<&'a Self>
     + for<'a> core::iter::Product<&'a Self>
 {

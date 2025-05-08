@@ -252,12 +252,16 @@ macro_rules! impl_assign_ops {
         $(
             impl<T: crate::Unit> core::ops::$op_trait<$rhs_ty<T>> for $lhs_ty<T> {
                 fn $op_name(&mut self, rhs: $rhs_ty<T>) {
-                    core::ops::$op_trait::$op_name(crate::peel_mut(self), crate::peel(rhs))
+                    let mut value = crate::peel_copy(self);
+                    core::ops::$op_trait::$op_name(&mut value, crate::peel(rhs));
+                    *self = crate::wrap(value);
                 }
             }
             impl<T: crate::Unit> core::ops::$op_trait<&$rhs_ty<T>> for $lhs_ty<T> {
                 fn $op_name(&mut self, rhs: &$rhs_ty<T>) {
-                    core::ops::$op_trait::$op_name(crate::peel_mut(self), crate::peel(*rhs))
+                    let mut value = crate::peel_copy(self);
+                    core::ops::$op_trait::$op_name(&mut value, crate::peel(*rhs));
+                    *self = crate::wrap(value);
                 }
             }
         )*
@@ -275,12 +279,16 @@ macro_rules! impl_scalar_assign_ops {
         $(
             impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<$rhs_ty> for $lhs_ty<T> {
                 fn $op_name(&mut self, rhs: $rhs_ty) {
-                    core::ops::$op_trait::$op_name(crate::peel_mut(self), rhs);
+                    let mut value = crate::peel_copy(self);
+                    core::ops::$op_trait::$op_name(&mut value, rhs);
+                    *self = crate::wrap(value);
                 }
             }
             impl<T: crate::Unit<Scalar = $rhs_ty>> core::ops::$op_trait<&$rhs_ty> for $lhs_ty<T> {
                 fn $op_name(&mut self, rhs: &$rhs_ty) {
-                    core::ops::$op_trait::$op_name(crate::peel_mut(self), *rhs);
+                    let mut value = crate::peel_copy(self);
+                    core::ops::$op_trait::$op_name(&mut value, *rhs);
+                    *self = crate::wrap(value);
                 }
             }
         )*

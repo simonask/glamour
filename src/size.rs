@@ -34,7 +34,7 @@ pub struct Size2<U: Unit = f32> {
 unsafe impl<T: Unit> Pod for Size2<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> Zeroable for Size2<T> {}
-unsafe impl<T: Unit> Transparent for Size2<T> {
+impl<T: Unit> Transparent for Size2<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec2;
 }
 
@@ -67,7 +67,7 @@ unsafe impl<T: Unit> Pod for Size3<T> {}
 /// SAFETY: All members are `Pod`, and we are `#[repr(C)]`.
 unsafe impl<T: Unit> Zeroable for Size3<T> {}
 // SAFETY: This is the guarantee of this crate.
-unsafe impl<T: Unit> Transparent for Size3<T> {
+impl<T: Unit> Transparent for Size3<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec3;
 }
 

@@ -31,7 +31,7 @@ pub struct Angle<U: Scalar = f32> {
 }
 unsafe impl<T: Scalar> Zeroable for Angle<T> {}
 unsafe impl<T: Scalar> Pod for Angle<T> {}
-unsafe impl<T: Scalar> Transparent for Angle<T> {
+impl<T: Scalar> Transparent for Angle<T> {
     type Wrapped = T;
 }
 
@@ -432,8 +432,6 @@ mod tests {
         assert_ulps_eq, assert_ulps_ne,
     };
 
-    use crate::{peel_mut, peel_ref};
-
     use super::*;
 
     type Angle = super::Angle<f32>;
@@ -517,9 +515,7 @@ mod tests {
 
     #[test]
     fn angle_cast() {
-        let mut a = Angle::CIRCLE;
-        let _: &f32 = peel_ref(&a);
-        let _: &mut f32 = peel_mut(&mut a);
+        let a = Angle::CIRCLE;
         let _: f32 = peel(a);
         let _: f32 = a.to_radians();
         let _: Angle = 1.0.into();
