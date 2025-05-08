@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixes
+
+- Fixed a soundness hole in `Vector4` when using smaller scalar types.
+
+### Breaking changes
+
+- Vector types and references can no longer be converted to and from `glam`
+  types by reference. This fixes a soundness hole, because it relaxes the
+  alignment requirement of `Vector4`, which would otherwise result in a size
+  mismatch between `Vector4` and `glam` vectors for smaller scalar types. I.e.
+  `glam::U8Vec4` has alignment 1. In general, it is brittle to rely on the
+  specific alignment of `glam` vector types, because they are highly
+  architecture dependent, and it is unlikely that it gains anything, because
+  unaligned vector register loads are no longer slow (with AVX, the `vaddps`
+  instruction supports unaligned loads natively).
+
 ## [0.17.0] - 2025-05-03
 
 ### Added

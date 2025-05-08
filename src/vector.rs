@@ -17,7 +17,7 @@ use num_traits::identities::{ConstOne, ConstZero};
 use crate::scalar::FloatScalar;
 use crate::unit::FloatUnit;
 use crate::{Point2, Point3, Point4, Scalar, Size2, Size3, Unit, bindings::prelude::*};
-use crate::{Transparent, peel, peel_ref, wrap};
+use crate::{Transparent, peel, peel_copy, wrap};
 
 /// Vector swizzling by const generics.
 ///
@@ -73,14 +73,13 @@ unsafe impl<T: Unit> Zeroable for Vector2<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector2<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> Transparent for Vector2<T> {
+impl<T: Unit> Transparent for Vector2<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec2;
 }
 
 /// 3D vector.
 ///
-/// Alignment: Same as the scalar (so not 16 bytes). If you really need 16-byte
-/// alignment, use [`Vector4`].
+/// Alignment: Same as the scalar (so not 16 bytes).
 #[cfg_attr(
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
@@ -109,7 +108,7 @@ unsafe impl<T: Unit> Zeroable for Vector3<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector3<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> Transparent for Vector3<T> {
+impl<T: Unit> Transparent for Vector3<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec3;
 }
 
@@ -117,15 +116,10 @@ unsafe impl<T: Unit> Transparent for Vector3<T> {
 ///
 /// # Alignment
 ///
-/// This is always 16-byte aligned. [`glam::DVec4`] is only 8-byte aligned (for some reason), and integer vectors are
-/// only 4-byte aligned, which means that reference-casting from those glam types to `Vector4` type will fail (but not
-/// the other way around - see [`Vector4::as_raw()`]).
-///
-/// This also means that smaller integer types (i16 etc.) will be over-aligned, consuming much more memory.
-#[cfg_attr(
-    not(any(feature = "scalar-math", target_arch = "spirv")),
-    repr(C, align(16))
-)]
+/// This is always has the same alignment as the scalar component type, and
+/// _not_ the "normal" 128-bit alignment. This is due to limitations in the
+/// `#[repr(align(...))]` attribute when combined with generics.
+#[cfg_attr(not(target_arch = "spirv"), repr(C))]
 #[cfg_attr(
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
@@ -155,7 +149,7 @@ unsafe impl<T: Unit> Zeroable for Vector4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Vector4<T> {}
 /// SAFETY: These are guaranteed to have the same representation.
-unsafe impl<T: Unit> Transparent for Vector4<T> {
+impl<T: Unit> Transparent for Vector4<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec4;
 }
 
@@ -324,13 +318,33 @@ where
     }
 }
 
+impl<T: Unit> Sum for Vector2<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = Self>,
+    {
+        wrap(iter.map(peel).sum())
+    }
+}
+
 impl<'a, T: Unit> Sum<&'a Vector2<T>> for Vector2<T> {
     #[inline]
     fn sum<I>(iter: I) -> Self
     where
         I: Iterator<Item = &'a Self>,
     {
-        wrap(iter.map(peel_ref).sum())
+        iter.copied().sum()
+    }
+}
+
+impl<T: Unit> Sum<Vector3<T>> for Vector3<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = Self>,
+    {
+        wrap(iter.map(peel).sum())
     }
 }
 
@@ -340,7 +354,17 @@ impl<'a, T: Unit> Sum<&'a Vector3<T>> for Vector3<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        wrap(iter.map(peel_ref).sum())
+        iter.copied().sum()
+    }
+}
+
+impl<T: Unit> Sum for Vector4<T> {
+    #[inline]
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = Self>,
+    {
+        wrap(iter.map(peel).sum())
     }
 }
 
@@ -350,7 +374,7 @@ impl<'a, T: Unit> Sum<&'a Vector4<T>> for Vector4<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        wrap(iter.map(peel_ref).sum())
+        iter.copied().sum()
     }
 }
 
@@ -360,7 +384,7 @@ impl<'a, T: Unit> Product<&'a Vector2<T>> for Vector2<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        wrap(iter.map(peel_ref).product())
+        wrap(iter.map(peel_copy).product())
     }
 }
 
@@ -370,7 +394,7 @@ impl<'a, T: Unit> Product<&'a Vector3<T>> for Vector3<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        wrap(iter.map(peel_ref).product())
+        wrap(iter.map(peel_copy).product())
     }
 }
 
@@ -380,7 +404,7 @@ impl<'a, T: Unit> Product<&'a Vector4<T>> for Vector4<T> {
     where
         I: Iterator<Item = &'a Self>,
     {
-        wrap(iter.map(peel_ref).product())
+        wrap(iter.map(peel_copy).product())
     }
 }
 
@@ -415,7 +439,6 @@ impl<T: Unit> core::fmt::Debug for Vector4<T> {
 #[cfg(test)]
 mod tests {
     use approx::{RelativeEq, UlpsEq, assert_abs_diff_eq};
-    use core::ptr;
 
     use crate::{Angle, AngleConsts, vec2, vec3, vec4, vector};
 
@@ -1132,44 +1155,17 @@ mod tests {
     }
 
     #[test]
-    fn glam_reference_conversion() {
-        use core::borrow::{Borrow, BorrowMut};
-
-        let mut vec = Vector4::<I32>::new(1, 2, 3, 4);
-
-        let vec1: &glam::IVec4 = vec.as_ref();
-        assert_eq!(*vec1, glam::IVec4::new(1, 2, 3, 4));
-
-        let vec1: &glam::IVec4 = vec.as_raw();
-        assert_eq!(*vec1, glam::IVec4::new(1, 2, 3, 4));
-
-        let vec2: &mut glam::IVec4 = vec.as_mut();
-        vec2.y = 100;
-        assert_eq!(vec, vec4![1, 100, 3, 4]);
-
-        let vec3: &glam::IVec4 = vec.borrow();
-        assert_eq!(*vec3, glam::IVec4::new(1, 100, 3, 4));
-
-        let vec4: &mut glam::IVec4 = vec.borrow_mut();
-        vec4.z = 100;
-        assert_eq!(*vec4, glam::IVec4::new(1, 100, 100, 4));
-    }
-
-    #[test]
     fn glam_raw_conversion() {
         let v2 = Vector2::<f32>::new(1.0, 2.0);
         let v3 = Vector3::<f32>::new(1.0, 2.0, 3.0);
         let v4 = Vector4::<f32>::new(1.0, 2.0, 3.0, 4.0);
 
-        assert!(ptr::eq(v2.as_raw(), peel_ref(&v2)));
         assert_eq!(v2.to_raw(), glam::Vec2::new(1.0, 2.0));
         assert_eq!(v2, Vector2::from_raw(glam::Vec2::new(1.0, 2.0)));
 
-        assert!(ptr::eq(v3.as_raw(), peel_ref(&v3)));
         assert_eq!(v3.to_raw(), glam::Vec3::new(1.0, 2.0, 3.0));
         assert_eq!(v3, Vector3::from_raw(glam::Vec3::new(1.0, 2.0, 3.0)));
 
-        assert!(ptr::eq(v4.as_raw(), peel_ref(&v4)));
         assert_eq!(v4.to_raw(), glam::Vec4::new(1.0, 2.0, 3.0, 4.0));
         assert_eq!(v4, Vector4::from_raw(glam::Vec4::new(1.0, 2.0, 3.0, 4.0)));
     }
@@ -1196,6 +1192,12 @@ mod tests {
         let h1 = hasher.hash_one(Vector2::<i32> { x: 123, y: 456 });
         let h2 = hasher.hash_one(glam::IVec2::new(123, 456));
         assert_eq!(h1, h2);
+    }
+
+    #[test]
+    fn odd_size() {
+        let v: Vector4<u8> = Vector4::new(1, 2, 3, 4);
+        assert_eq!(size_of_val(&v), 4);
     }
 
     #[test]

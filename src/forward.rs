@@ -179,7 +179,7 @@ macro_rules! forward_fn_self_ref {
         {
             crate::wrap_ret_val!(
                 $($($ret)* => )*
-                crate::peel_ref(self).$fn_name(
+                crate::peel_copy(self).$fn_name(
                     $(crate::forward_arg!($arg_name: $arg_ty)),*
                 )
             )
@@ -436,7 +436,7 @@ macro_rules! forward_arg {
         crate::peel($arg)
     };
     ($arg:ident: ref_self) => {
-        crate::peel_ref($arg)
+        &crate::peel_copy($arg)
     };
     ($arg:ident: ref_scalar_array_4) => {
         $arg

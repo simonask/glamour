@@ -9,7 +9,7 @@ use core::ops::{Div, DivAssign, Mul, MulAssign};
 use crate::{
     Point2, Scalar, Transparent, Unit, Vector2, Vector3, Vector4,
     bindings::{Matrix, Matrix2 as SimdMatrix2, Matrix3 as SimdMatrix3, Matrix4 as SimdMatrix4},
-    peel, peel_ref,
+    peel, peel_copy,
     prelude::*,
     scalar::FloatScalar,
     unit::FloatUnit,
@@ -33,7 +33,7 @@ pub struct Matrix2<T: Scalar>(Vector4<T>);
 unsafe impl<T: Scalar> Zeroable for Matrix2<T> {}
 unsafe impl<T: Scalar> Pod for Matrix2<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> Transparent for Matrix2<T> {
+impl<T: FloatScalar> Transparent for Matrix2<T> {
     type Wrapped = T::Mat2;
 }
 
@@ -79,7 +79,7 @@ pub struct Matrix3<U: Scalar> {
 unsafe impl<T: Scalar> Zeroable for Matrix3<T> {}
 unsafe impl<T: Scalar> Pod for Matrix3<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> Transparent for Matrix3<T> {
+impl<T: FloatScalar> Transparent for Matrix3<T> {
     type Wrapped = T::Mat3;
 }
 
@@ -130,7 +130,7 @@ pub struct Matrix4<U: Scalar> {
 unsafe impl<T: Scalar> Zeroable for Matrix4<T> {}
 unsafe impl<T: Scalar> Pod for Matrix4<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: FloatScalar> Transparent for Matrix4<T> {
+impl<T: FloatScalar> Transparent for Matrix4<T> {
     type Wrapped = T::Mat4;
 }
 
@@ -708,11 +708,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_eq(peel_ref(other), epsilon)
+        peel_copy(self).abs_diff_eq(&peel_copy(other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_ne(peel_ref(other), epsilon)
+        peel_copy(self).abs_diff_ne(&peel_copy(other), epsilon)
     }
 }
 
@@ -731,7 +731,7 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        peel_ref(self).relative_eq(peel_ref(other), epsilon, max_relative)
+        peel_copy(self).relative_eq(&peel_copy(other), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -740,7 +740,7 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        peel_ref(self).relative_ne(peel_ref(other), epsilon, max_relative)
+        peel_copy(self).relative_ne(&peel_copy(other), epsilon, max_relative)
     }
 }
 
@@ -750,11 +750,11 @@ impl<T: FloatScalar> UlpsEq for Matrix2<T> {
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        peel_ref(self).ulps_eq(peel_ref(other), epsilon, max_ulps)
+        peel_copy(self).ulps_eq(&peel_copy(other), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        peel_ref(self).ulps_ne(peel_ref(other), epsilon, max_ulps)
+        peel_copy(self).ulps_ne(&peel_copy(other), epsilon, max_ulps)
     }
 }
 
@@ -793,7 +793,7 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        peel_ref(self).relative_eq(peel_ref(other), epsilon, max_relative)
+        peel_copy(self).relative_eq(&peel_copy(other), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -802,7 +802,7 @@ where
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        peel_ref(self).relative_ne(peel_ref(other), epsilon, max_relative)
+        peel_copy(self).relative_ne(&peel_copy(other), epsilon, max_relative)
     }
 }
 
@@ -812,11 +812,11 @@ impl<T: FloatScalar> UlpsEq for Matrix3<T> {
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        peel_ref(self).ulps_eq(peel_ref(other), epsilon, max_ulps)
+        peel_copy(self).ulps_eq(&peel_copy(other), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        peel_ref(self).ulps_ne(peel_ref(other), epsilon, max_ulps)
+        peel_copy(self).ulps_ne(&peel_copy(other), epsilon, max_ulps)
     }
 }
 
@@ -832,11 +832,11 @@ where
     }
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_eq(peel_ref(other), epsilon)
+        peel_copy(self).abs_diff_eq(&peel_copy(other), epsilon)
     }
 
     fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        peel_ref(self).abs_diff_ne(peel_ref(other), epsilon)
+        peel_copy(self).abs_diff_ne(&peel_copy(other), epsilon)
     }
 }
 
@@ -851,7 +851,7 @@ impl<T: FloatScalar> RelativeEq for Matrix4<T> {
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        peel_ref(self).relative_eq(peel_ref(other), epsilon, max_relative)
+        peel_copy(self).relative_eq(&peel_copy(other), epsilon, max_relative)
     }
 
     fn relative_ne(
@@ -860,7 +860,7 @@ impl<T: FloatScalar> RelativeEq for Matrix4<T> {
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        peel_ref(self).relative_ne(peel_ref(other), epsilon, max_relative)
+        peel_copy(self).relative_ne(&peel_copy(other), epsilon, max_relative)
     }
 }
 
@@ -874,11 +874,11 @@ where
     }
 
     fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        peel_ref(self).ulps_eq(peel_ref(other), epsilon, max_ulps)
+        peel_copy(self).ulps_eq(&peel_copy(other), epsilon, max_ulps)
     }
 
     fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-        peel_ref(self).ulps_ne(peel_ref(other), epsilon, max_ulps)
+        peel_copy(self).ulps_ne(&peel_copy(other), epsilon, max_ulps)
     }
 }
 

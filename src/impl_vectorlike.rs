@@ -50,11 +50,6 @@ macro_rules! simdlike {
 
             /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
             #[inline(always)]
-            pub fn as_raw(&self) -> &<T::Scalar as crate::Scalar>::Vec2 {
-                crate::Transparent::peel_ref(self)
-            }
-            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
-            #[inline(always)]
             pub fn to_raw(self) -> <T::Scalar as crate::Scalar>::Vec2 {
                 crate::Transparent::peel(self)
             }
@@ -133,11 +128,6 @@ macro_rules! simdlike {
             /// The unit axes.
             pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
 
-            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
-            #[inline(always)]
-            pub fn as_raw(&self) -> &<T::Scalar as crate::Scalar>::Vec3 {
-                crate::Transparent::peel_ref(self)
-            }
             /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
             #[inline(always)]
             pub fn to_raw(self) -> <T::Scalar as crate::Scalar>::Vec3 {
@@ -242,11 +232,6 @@ macro_rules! simdlike {
             /// The unit axes.
             pub const AXES: [Self; 4] = [Self::X, Self::Y, Self::Z, Self::W];
 
-            /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
-            #[inline(always)]
-            pub fn as_raw(&self) -> &<T::Scalar as crate::Scalar>::Vec4 {
-                crate::Transparent::peel_ref(self)
-            }
             /// Transparently cast this type to its underlying, bitwise compatible `glam` type.
             #[inline(always)]
             pub fn to_raw(self) -> <T::Scalar as crate::Scalar>::Vec4 {

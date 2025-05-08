@@ -13,7 +13,7 @@ macro_rules! impl_basic_traits {
 
         impl<T: Unit> PartialEq for $base_type_name<T> {
             fn eq(&self, other: &Self) -> bool {
-                *crate::peel_ref(self) == *crate::peel_ref(other)
+                crate::peel_copy(self) == crate::peel_copy(other)
             }
         }
 
@@ -76,7 +76,7 @@ macro_rules! impl_basic_traits_vectorlike {
             where
                 H: core::hash::Hasher,
             {
-                core::hash::Hash::hash(crate::peel_ref(self), state)
+                core::hash::Hash::hash(&crate::peel_copy(self), state)
             }
         }
 
@@ -132,12 +132,12 @@ macro_rules! impl_basic_traits_vectorlike {
 
             #[must_use]
             fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-                crate::peel_ref(self).abs_diff_eq(crate::peel_ref(other), epsilon)
+                crate::peel_copy(self).abs_diff_eq(&crate::peel_copy(other), epsilon)
             }
 
             #[must_use]
             fn abs_diff_ne(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-                crate::peel_ref(self).abs_diff_ne(crate::peel_ref(other), epsilon)
+                crate::peel_copy(self).abs_diff_ne(&crate::peel_copy(other), epsilon)
             }
         }
 
@@ -154,7 +154,7 @@ macro_rules! impl_basic_traits_vectorlike {
                 epsilon: Self::Epsilon,
                 max_relative: Self::Epsilon,
             ) -> bool {
-                crate::peel_ref(self).relative_eq(crate::peel_ref(other), epsilon, max_relative)
+                crate::peel_copy(self).relative_eq(&crate::peel_copy(other), epsilon, max_relative)
             }
 
             #[must_use]
@@ -164,7 +164,7 @@ macro_rules! impl_basic_traits_vectorlike {
                 epsilon: Self::Epsilon,
                 max_relative: Self::Epsilon,
             ) -> bool {
-                crate::peel_ref(self).relative_ne(crate::peel_ref(other), epsilon, max_relative)
+                crate::peel_copy(self).relative_ne(&crate::peel_copy(other), epsilon, max_relative)
             }
         }
 
@@ -176,12 +176,12 @@ macro_rules! impl_basic_traits_vectorlike {
 
             #[must_use]
             fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                crate::peel_ref(self).ulps_eq(crate::peel_ref(other), epsilon, max_ulps)
+                crate::peel_copy(self).ulps_eq(&crate::peel_copy(other), epsilon, max_ulps)
             }
 
             #[must_use]
             fn ulps_ne(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                crate::peel_ref(self).ulps_ne(crate::peel_ref(other), epsilon, max_ulps)
+                crate::peel_copy(self).ulps_ne(&crate::peel_copy(other), epsilon, max_ulps)
             }
         }
 
@@ -281,29 +281,6 @@ macro_rules! impl_basic_traits_vectorlike {
             impl<T: Unit<Scalar = $scalar>> From<$base_type_name<T>> for $glam_ty {
                 fn from(value: $base_type_name<T>) -> Self {
                     crate::peel(value)
-                }
-            }
-            impl<T: Unit<Scalar = $scalar>> core::borrow::Borrow<$glam_ty> for $base_type_name<T>
-            {
-                fn borrow(&self) -> &$glam_ty {
-                    crate::peel_ref(self)
-                }
-            }
-            impl<T: Unit<Scalar = $scalar>> core::borrow::BorrowMut<$glam_ty>
-                for $base_type_name<T>
-            {
-                fn borrow_mut(&mut self) -> &mut $glam_ty {
-                    crate::peel_mut(self)
-                }
-            }
-            impl<T: Unit<Scalar = $scalar>> AsRef<$glam_ty> for $base_type_name<T> {
-                fn as_ref(&self) -> &$glam_ty {
-                    crate::peel_ref(self)
-                }
-            }
-            impl<T: Unit<Scalar = $scalar>> AsMut<$glam_ty> for $base_type_name<T> {
-                fn as_mut(&mut self) -> &mut $glam_ty {
-                    crate::peel_mut(self)
                 }
             }
         )*

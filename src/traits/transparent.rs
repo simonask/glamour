@@ -1,5 +1,3 @@
-use core::mem::{align_of, size_of, transmute_copy};
-
 use bytemuck::Pod;
 
 /// One-way `TransparentWrapper`.
@@ -9,54 +7,30 @@ use bytemuck::Pod;
 /// This is similar to `bytemuck::TransparentWrapper`, except that it only requires that references can be converted
 /// **to** `T`, and not the other way around. In other words, the alignment of `Self` and `T` do not need to be equal,
 /// but rather `align_of::<Self>() >= align_of::<T>()`.
-pub unsafe trait Transparent: Pod {
+pub trait Transparent: Pod {
     /// The inner type that shares a compatible representation with `Self`.
     type Wrapped: Pod;
 
     /// Wrap the inner type by copy.
     ///
     /// This is a no-op in most cases, except it may re-align the object if the alignment of `T` is higher.
+    #[inline(always)]
     fn wrap(x: Self::Wrapped) -> Self {
-        const {
-            assert!(size_of::<Self::Wrapped>() == size_of::<Self>());
-        }
-
-        unsafe { transmute_copy(&x) }
+        bytemuck::must_cast(x)
     }
 
     /// Unwrap the inner type by copy.
     ///
     /// This is a no-op in most cases, except it may re-align the object if the alignment of `T` is higher.
     fn peel(x: Self) -> Self::Wrapped {
-        const {
-            assert!(size_of::<Self::Wrapped>() == size_of::<Self>());
-        }
-
-        unsafe { transmute_copy(&x) }
+        bytemuck::must_cast(x)
     }
 
     /// Convert a reference to the inner type.
     ///
     /// This asserts at compile time that the alignmen of `T` is less than or equal to the alignment of `Self`.
-    fn peel_ref(x: &Self) -> &Self::Wrapped {
-        const {
-            assert!(size_of::<Self::Wrapped>() == size_of::<Self>());
-            assert!(align_of::<Self::Wrapped>() <= align_of::<Self>());
-        }
-
-        unsafe { &*core::ptr::from_ref::<Self>(x).cast() }
-    }
-
-    /// Convert a mutable reference to the inner type.
-    ///
-    /// This asserts at compile time that the alignmen of `T` is less than or equal to the alignment of `Self`.
-    fn peel_mut(x: &mut Self) -> &mut Self::Wrapped {
-        const {
-            assert!(size_of::<Self::Wrapped>() == size_of::<Self>());
-            assert!(align_of::<Self::Wrapped>() <= align_of::<Self>());
-        }
-
-        unsafe { &mut *core::ptr::from_mut::<Self>(x).cast() }
+    fn peel_copy(x: &Self) -> Self::Wrapped {
+        bytemuck::must_cast(*x)
     }
 }
 
@@ -69,12 +43,8 @@ pub fn peel<T: Transparent>(a: T) -> T::Wrapped {
     Transparent::peel(a)
 }
 /// Convenience function for calling [`Transparent::peel_ref()`].
-pub fn peel_ref<T: Transparent>(a: &T) -> &T::Wrapped {
-    Transparent::peel_ref(a)
-}
-/// Convenience function for calling [`Transparent::peel_mut()`].
-pub fn peel_mut<T: Transparent>(a: &mut T) -> &mut T::Wrapped {
-    Transparent::peel_mut(a)
+pub fn peel_copy<T: Transparent>(a: &T) -> T::Wrapped {
+    Transparent::peel_copy(a)
 }
 /// Convenience function for calling [`Transparent::peel()`] and [`Transparent::wrap()`].
 pub fn rewrap<A: Transparent, B: Transparent<Wrapped = A::Wrapped>>(a: A) -> B {
@@ -96,7 +66,7 @@ mod tests {
     }
     unsafe impl Zeroable for Bigger {}
     unsafe impl Pod for Bigger {}
-    unsafe impl Transparent for Bigger {
+    impl Transparent for Bigger {
         type Wrapped = Overaligned;
     }
 
@@ -110,7 +80,7 @@ mod tests {
     }
     unsafe impl Zeroable for Overaligned {}
     unsafe impl Pod for Overaligned {}
-    unsafe impl Transparent for Overaligned {
+    impl Transparent for Overaligned {
         type Wrapped = Bigger;
     }
 
@@ -127,8 +97,6 @@ mod tests {
         let overaligned: Overaligned = Transparent::peel(bigger);
         assert_eq!(bigger.a, 1);
         assert_eq!(overaligned.a, 1);
-        let _bigger: &Bigger = Transparent::peel_ref(&overaligned);
-        // This should fail to compile:
-        // let overaligned: &Overaligned = Transparent::peel_ref(bigger);
+        let _bigger: Bigger = Transparent::peel_copy(&overaligned);
     }
 }

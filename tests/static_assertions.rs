@@ -227,37 +227,6 @@ impl AssertScalable<u32> for Vector4<UnitU32> {}
 impl AssertScalable<u32> for Size2<UnitU32> {}
 impl AssertScalable<u32> for Size3<UnitU32> {}
 
-impl AssertRefConversion<glam::DVec2> for Point2<UnitF64> {}
-impl AssertRefConversion<glam::DVec2> for Size2<UnitF64> {}
-impl AssertRefConversion<glam::DVec2> for Vector2<UnitF64> {}
-impl AssertRefConversion<glam::DVec3> for Point3<UnitF64> {}
-impl AssertRefConversion<glam::DVec3> for Size3<UnitF64> {}
-impl AssertRefConversion<glam::DVec3> for Vector3<UnitF64> {}
-impl AssertRefConversion<glam::DVec4> for Point4<UnitF64> {}
-impl AssertRefConversion<glam::DVec4> for Vector4<UnitF64> {}
-impl AssertRefConversion<glam::IVec2> for Point2<UnitI32> {}
-impl AssertRefConversion<glam::IVec2> for Vector2<UnitI32> {}
-impl AssertRefConversion<glam::IVec3> for Point3<UnitI32> {}
-impl AssertRefConversion<glam::IVec3> for Vector3<UnitI32> {}
-impl AssertRefConversion<glam::IVec4> for Point4<UnitI32> {}
-impl AssertRefConversion<glam::IVec4> for Vector4<UnitI32> {}
-impl AssertRefConversion<glam::UVec2> for Point2<UnitU32> {}
-impl AssertRefConversion<glam::UVec2> for Size2<UnitU32> {}
-impl AssertRefConversion<glam::UVec2> for Vector2<UnitU32> {}
-impl AssertRefConversion<glam::UVec3> for Point3<UnitU32> {}
-impl AssertRefConversion<glam::UVec3> for Size3<UnitU32> {}
-impl AssertRefConversion<glam::UVec3> for Vector3<UnitU32> {}
-impl AssertRefConversion<glam::UVec4> for Point4<UnitU32> {}
-impl AssertRefConversion<glam::UVec4> for Vector4<UnitU32> {}
-impl AssertRefConversion<glam::Vec2> for Point2<UnitF32> {}
-impl AssertRefConversion<glam::Vec2> for Size2<UnitF32> {}
-impl AssertRefConversion<glam::Vec2> for Vector2<UnitF32> {}
-impl AssertRefConversion<glam::Vec3> for Point3<UnitF32> {}
-impl AssertRefConversion<glam::Vec3> for Size3<UnitF32> {}
-impl AssertRefConversion<glam::Vec3> for Vector3<UnitF32> {}
-impl AssertRefConversion<glam::Vec4> for Point4<UnitF32> {}
-impl AssertRefConversion<glam::Vec4> for Vector4<UnitF32> {}
-
 impl AssertRefConversion<[f64; 2]> for Point2<UnitF64> {}
 impl AssertRefConversion<[f64; 2]> for Size2<UnitF64> {}
 impl AssertRefConversion<[f64; 2]> for Vector2<UnitF64> {}

@@ -47,7 +47,7 @@ unsafe impl<T: Unit> Zeroable for Point2<T> {}
 // SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point2<T> {}
 // SAFETY: This is the fundamental guarantee of this crate.
-unsafe impl<T: Unit> Transparent for Point2<T> {
+impl<T: Unit> Transparent for Point2<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec2;
 }
 
@@ -82,7 +82,7 @@ pub struct Point3<U: Unit = f32> {
 unsafe impl<T: Unit> Zeroable for Point3<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point3<T> {}
-unsafe impl<T: Unit> Transparent for Point3<T> {
+impl<T: Unit> Transparent for Point3<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec3;
 }
 
@@ -92,10 +92,7 @@ unsafe impl<T: Unit> Transparent for Point3<T> {
 /// aligned (for some reason), and integer vectors are only 4-byte aligned,
 /// which means that reference-casting from those glam types to `Point4` type
 /// will fail (but not the other way around).
-#[cfg_attr(
-    not(any(feature = "scalar-math", target_arch = "spirv")),
-    repr(C, align(16))
-)]
+#[cfg_attr(not(target_arch = "spirv"), repr(C))]
 #[cfg_attr(
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
@@ -123,7 +120,7 @@ pub struct Point4<U: Unit = f32> {
 unsafe impl<T: Unit> Zeroable for Point4<T> {}
 /// SAFETY: `T::Scalar` is `Pod`.
 unsafe impl<T: Unit> Pod for Point4<T> {}
-unsafe impl<T: Unit> Transparent for Point4<T> {
+impl<T: Unit> Transparent for Point4<T> {
     type Wrapped = <T::Scalar as Scalar>::Vec4;
 }
 

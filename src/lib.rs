@@ -59,7 +59,7 @@ mod interfaces;
 #[doc(no_inline)]
 pub use traits::{Contains, Intersection, Transparent, Union};
 #[doc(hidden)]
-pub use traits::{peel, peel_mut, peel_ref, rewrap, wrap};
+pub use traits::{peel, peel_copy, rewrap, wrap};
 
 /// Convenience glob import.
 ///
