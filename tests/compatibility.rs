@@ -1,4 +1,4 @@
-use glamour::{prelude::*};
+use glamour::prelude::*;
 
 #[test]
 fn into_iter() {
@@ -61,7 +61,6 @@ fn size() {
     assert_eq!(size_of::<glam::DMat3>(), size_of::<Transform2<f64, f64>>());
     assert_eq!(size_of::<glam::DMat4>(), size_of::<Transform3<f64, f64>>());
 }
-
 
 #[test]
 fn from_into_glam() {

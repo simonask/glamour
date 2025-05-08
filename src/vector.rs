@@ -119,10 +119,7 @@ impl<T: Unit> Transparent for Vector3<T> {
 /// This is always has the same alignment as the scalar component type, and
 /// _not_ the "normal" 128-bit alignment. This is due to limitations in the
 /// `#[repr(align(...))]` attribute when combined with generics.
-#[cfg_attr(
-    not(target_arch = "spirv"),
-    repr(C)
-)]
+#[cfg_attr(not(target_arch = "spirv"), repr(C))]
 #[cfg_attr(
     all(not(target_arch = "wasm32"), feature = "wasmtime"),
     derive(
